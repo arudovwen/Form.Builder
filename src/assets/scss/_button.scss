@@ -1,0 +1,159 @@
+.btn {
+  @apply font-medium  text-base leading-6 md:px-6 md:py-3 px-4 py-2 rounded-lg capitalize  transition-all duration-150 md:whitespace-nowrap whitespace-normal shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] disabled:opacity-80 disabled:bg-[#F2F4F7] disabled:border-[#E4E7EC] disabled:text-[#98A2B3] disabled:cursor-not-allowed relative active:scale-95;
+}
+.btn.btn-xl {
+  @apply text-[16px] md:px-10 px-7 md:py-4 py-3;
+}
+.btn.btn-sm {
+  @apply text-xs md:px-4 py-2 px-3;
+}
+.btn.block-btn {
+  @apply block w-full text-center;
+  span {
+    @apply justify-center;
+  }
+}
+.btn-dark {
+  @apply bg-[#101828]   text-white   ring-black-900   ;
+}
+.btn-primary {
+  @apply bg-primary-500   text-white  ;
+}
+.btn-secondary {
+  @apply bg-secondary-500  text-white  ring-secondary-500  ;
+}
+.btn-green {
+  @apply bg-green-500  text-white  ring-green-500 ;
+}
+.btn-info {
+  @apply bg-[#0CE7FA]  text-white  ring-[#0CE7FA]  ;
+}
+.btn-warning {
+  @apply bg-[#FA916B]  text-white  ring-[#FA916B]  ;
+}
+.btn-red {
+  @apply bg-red-500  text-white  ring-red-500  ;
+}
+.btn-light {
+  @apply bg-slate-100  text-[#182230]  ring-[#E0EAFF]  ;
+}
+
+// btn outline
+.btn-outline-dark {
+  @apply bg-transparent text-[#182230]  border border-black-500  hover:border-black-500   hover:bg-[#101828] hover:bg-opacity-5;
+  &.active {
+    @apply bg-[#101828] text-white ;
+  }
+}
+[aria-expanded="true"] > .btn-outline-dark {
+  @apply bg-[#101828] text-white;
+}
+.btn-outline-primary {
+  @apply bg-transparent text-primary-500 border border-primary-500 hover:border-primary-500  hover:bg-primary-500  hover:bg-opacity-5;
+  &.active {
+    @apply bg-primary-500  text-white;
+  }
+}
+[aria-expanded="true"] > .btn-outline-primary {
+  @apply bg-primary-500  text-white;
+}
+.btn-outline-secondary {
+  @apply bg-transparent text-secondary-500 border border-secondary-500 hover:border-secondary-500  hover:bg-secondary-500 hover:bg-opacity-5;
+  &.active {
+    @apply bg-secondary-500 text-white;
+  }
+}
+[aria-expanded="true"] > .btn-outline-secondary {
+  @apply bg-secondary-500 text-white;
+}
+.btn-outline-green {
+  @apply bg-transparent text-green-500 border border-green-500 hover:border-green-500  hover:bg-green-500 hover:bg-opacity-5;
+  &.active {
+    @apply bg-green-500 text-white;
+  }
+}
+[aria-expanded="true"] > .btn-outline-green {
+  @apply bg-green-500 text-white;
+}
+.btn-outline-info {
+  @apply bg-transparent text-[#0CE7FA] border border-[#0CE7FA] hover:border-[#0CE7FA]  hover:bg-[#0CE7FA] hover:bg-opacity-5;
+  &.active {
+    @apply bg-[#0CE7FA] text-white;
+  }
+}
+[aria-expanded="true"] > .btn-outline-info {
+  @apply bg-info-500 text-white;
+}
+.btn-outline-warning {
+  @apply bg-transparent text-[#FA916B] border border-[#FA916B] hover:border-[#FA916B]  hover:bg-[#FA916B] hover:bg-opacity-5;
+  &.active {
+    @apply bg-[#FA916B] text-white;
+  }
+}
+[aria-expanded="true"] > .btn-outline-warning {
+  @apply bg-warning-500 text-white;
+}
+
+.btn-outline-red {
+  @apply bg-transparent text-red-500 border border-red-500 hover:border-red-500  hover:bg-red-500 hover:bg-opacity-5;
+  &.active {
+    @apply bg-red-500 text-white;
+  }
+}
+[aria-expanded="true"] > .btn-outline-red {
+  @apply bg-red-500 text-white;
+}
+.btn-outline-light {
+  @apply bg-transparent  border border-[#E0EAFF]  hover:border-[#E0EAFF] text-[#182230] hover:bg-[#E0EAFF] hover:bg-opacity-5;
+  &.active {
+    @apply bg-[#E0EAFF] text-[#182230];
+  }
+}
+[aria-expanded="true"] > .btn-outline-light {
+  @apply bg-[#E0EAFF] text-[#182230];
+}
+
+// light color
+.btn {
+  &.light {
+    @apply bg-opacity-[15%]  ring-opacity-30;
+  }
+}
+.btn-primary {
+  &.light {
+    @apply text-primary-500;
+  }
+}
+.btn-secondary {
+  &.light {
+    @apply text-secondary-500;
+  }
+}
+.btn-green {
+  &.light {
+    @apply text-green-500;
+  }
+}
+.btn-info {
+  &.light {
+    @apply text-[#0CE7FA];
+  }
+}
+.btn-warning {
+  &.light {
+    @apply text-[#FA916B];
+  }
+}
+.btn-red {
+  &.light {
+    @apply text-red-500;
+  }
+}
+.btn-light {
+  &.light {
+    @apply text-opacity-80 ;
+  }
+}
+
+$vt-color-green: white;
+$vt-text-color-green: #000;
