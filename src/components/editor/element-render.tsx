@@ -31,7 +31,7 @@ const elementMap: Record<string, React.ElementType> = {
   section: SectionInput,
 };
 
-export const renderElement = (element: { type: string; [key: string]: any }) => {
+export const renderElement = (element: any) => {
   const ElementComponent = elementMap[element.type];
   return ElementComponent ? <ElementComponent element={element} state="edit" /> : null;
 };

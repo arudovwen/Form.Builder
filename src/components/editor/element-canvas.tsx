@@ -1,80 +1,88 @@
-import { useContext, useState, useCallback } from "react";
-import EditorContext from "../../context/editor-context";
-import { renderElement } from "./element-render";
+import { useContext, useState, useCallback, DragEvent } from 'react';
+import EditorContext from '../../context/editor-context';
+import { renderElement } from './element-render';
 
-// Child: ElementCanvas
+interface FormElement {
+  id: string;
+  [key: string]: any;
+}
+
+interface EditorContextType {
+  formData: FormElement[];
+  updateElementPosition: (newData: FormElement[]) => void;
+}
+
 export default function ElementCanvas() {
-  const { formData, updateElementPosition }: any = useContext(EditorContext);
-  const [draggedElement, setDraggedElement] = useState<any>(null);
+  const { formData, updateElementPosition } = useContext(EditorContext) as unknown as EditorContextType;
+  const [draggedElement, setDraggedElement] = useState<string | null>(null);
 
-  // Handle the drag start event, storing the dragged element's ID
-  const handleDragStart = (
-    event: React.DragEvent<HTMLDivElement>,
-    elementId: string
-  ) => {
-    event.dataTransfer.setData("properties", elementId);
-    setDraggedElement(elementId); // Track the dragged element's ID
-  };
+  const handleDragStart = useCallback((event: DragEvent<HTMLDivElement>, elementId: string) => {
+    event.dataTransfer.setData('properties', elementId);
+    setDraggedElement(elementId);
+  }, []);
 
-  // Handle the drag over event to allow dropping
-  const onDragNestedOver = useCallback(
-    (event: React.DragEvent<HTMLDivElement>) => {
-      event.preventDefault(); // Allow the drop
-      event.stopPropagation(); // Prevent event from propagating to parent
-      event.dataTransfer.dropEffect = "move"; // Indicate move action
-    },
-    []
-  );
+  const handleDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
 
-  // Handle the drop event, switching the positions of elements
-  const onDropNested = useCallback(
-    (event: React.DragEvent<HTMLDivElement>) => {
-      event.preventDefault();
-      event.stopPropagation(); // Prevent the parent drop event from firing
-      const draggedElementId = event.dataTransfer.getData("properties"); // Get the dragged element ID
-      const targetElement = event.target as HTMLElement; // The element where it's dropped
-      const targetIndex = formData.findIndex(
-        (el: any) => el.id === targetElement.id
-      ); // Get the target index
+  const handleDrop = useCallback((event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
 
-      // Find the dragged element in the formData
-      const draggedIndex = formData.findIndex(
-        (el: any) => el.id === draggedElementId
-      );
-      console.log("🚀 ~ ElementCanvas ~ draggedIndex:", draggedIndex)
-      console.log("🚀 ~ ElementCanvas ~ targetIndex:", targetIndex)
-      if (draggedIndex === targetIndex || draggedIndex === -1) return; // If it's the same element, no need to change
-
-      // Rearrange the elements by switching their positions
-      const updatedFormData = [...formData];
-      const [removed] = updatedFormData.splice(draggedIndex, 1); // Remove the dragged element
-      console.log("🚀 ~ ElementCanvas ~ removed:", removed)
+    const draggedElementId = event.dataTransfer.getData('properties');
+    const targetElement = event.currentTarget;
     
-      updatedFormData.splice(targetIndex, 0, removed); // Insert it at the target index
-      updateElementPosition(updatedFormData); // This function should update the state in your context
-    },
+    if (!targetElement.id || draggedElementId === targetElement.id) {
+      return;
+    }
+
+    const draggedIndex = formData.findIndex(el => el.id === draggedElementId);
+    const targetIndex = formData.findIndex(el => el.id === targetElement.id);
     
-    [formData, updateElementPosition]
-  );
+    if (draggedIndex === -1 || targetIndex === -1) {
+      return;
+    }
+
+    // Create a new array and swap the elements
+    const updatedFormData = [...formData];
+    [updatedFormData[draggedIndex], updatedFormData[targetIndex]] = 
+    [updatedFormData[targetIndex], updatedFormData[draggedIndex]];
+    
+    updateElementPosition(updatedFormData);
+    setDraggedElement(null);
+  }, [formData, updateElementPosition]);
+
+  const renderDraggableElement = useCallback((element: FormElement) => (
+    <div
+      key={element.id}
+      id={element.id}
+      className={`cursor-move border p-4 w-full transition-colors ${
+        draggedElement === element.id ? 'bg-gray-100' : ''
+      } ${
+        draggedElement && draggedElement !== element.id ? 'border-dashed border-blue-300' : ''
+      }`}
+      draggable
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+      onDragStart={(e) => handleDragStart(e, element.id)}
+    >
+      {renderElement(element)}
+    </div>
+  ), [draggedElement, handleDrop, handleDragOver, handleDragStart]);
+
+  if (!formData?.length) {
+    return (
+      <div className="w-full h-full flex items-center justify-center text-gray-500">
+        No elements to display
+      </div>
+    );
+  }
 
   return (
-    <div
-      className="w-full h-full flex flex-col gap-y-4 relative"
-     
-    >
-      {formData?.map((el: any) => (
-        <div
-          key={el.id}
-          id={el.id}
-          className="cursor-move border p-4 w-full"
-          draggable
-          onDrop={onDropNested}
-          onDragOver={onDragNestedOver}
-          onDragStart={(e) => handleDragStart(e, el.id)}
-        >
-          {renderElement(el)}
-        </div>
-      ))}
+    <div className="w-full h-full flex flex-col gap-y-4 relative">
+      {formData.map(renderDraggableElement)}
     </div>
   );
 }
