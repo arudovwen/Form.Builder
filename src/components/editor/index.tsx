@@ -11,16 +11,15 @@ const FormViewer = () => {
   const onDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
-    console.log("🚀 ~ onDragOver ~ event:", event.dataTransfer.getData("properties"))
-
   }, []);
- 
-  const onDrop = useCallback((event: DragEvent<HTMLDivElement>) => {
+
+  const onDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    // const targetElement = event?.currentTarget;
+    const targetElement = event?.currentTarget;
+    console.log("🚀 ~ onDrop ~ targetElement:", targetElement);
     console.log(
       "🚀 ~ onDrop ~ event.dataTransfer:",
-      event.dataTransfer
+      event.dataTransfer.getData("properties")
     );
     // const properties = JSON.parse(event.dataTransfer.getData("properties"));
 
@@ -31,11 +30,11 @@ const FormViewer = () => {
     // };
 
     // addElement(newElement, targetElement.id);
-  }, []);
+  };
 
   return (
     <div className="flex gap-x-4 mx-auto h-full relative px-6 py-5 flex-col">
-      <div className=" relative  !min-h-[600px] no-scrollbar w-full flex flex-col gap-y-6 flex-1">
+      <div className="relative  !min-h-[600px] no-scrollbar w-full flex flex-col gap-y-6 flex-1">
         {formData.map(
           (section: {
             id: string | undefined;
