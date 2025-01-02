@@ -12,6 +12,7 @@ export default function Layout() {
     (properties: any) => (event: DragEvent<HTMLDivElement>) => {
       event.dataTransfer.setData("properties", JSON.stringify(properties));
     };
+
   return (
     <EditorProvider>
       <div className="w-full h-screen bg-[#E4E7EC] flex flex-col">

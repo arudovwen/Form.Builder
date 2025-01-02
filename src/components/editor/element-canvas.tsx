@@ -25,6 +25,7 @@ export default function ElementCanvas({ elementData, sectionId }: any) {
       event.dataTransfer.setData("properties", elementId);
       setDraggedElement(elementId);
     },
+    
     []
   );
 
