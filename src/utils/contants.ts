@@ -232,9 +232,10 @@ export const Elements = [
     label: "Grid",
     icon: "cuida:grid-outline",
     inputLabel: "Grid Text Label",
+
     placeholder: "Type here",
     description: "",
-    grid: 3,
+    grid: 2,
     gridData: [],
   },
   {
@@ -267,3 +268,5 @@ export const AllowValidationPlaceholder = [
   "password",
 ];
 export const AllowValidationAmount = ["amount"];
+
+export const noAllowValidation = ["grid", "section"];

@@ -33,7 +33,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
     setFormData(updatedFormData);
   };
 
-  const addElement = (element: any) => {
+  const addElement = (element: any, sectionId) => {
     setFormData((prevFormData) => [...prevFormData, element]);
   };
   const updateElement = ( value: any) => {

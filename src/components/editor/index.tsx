@@ -28,7 +28,6 @@ const FormViewer = () => {
       const newElement = {
         id: uuidv4(),
         ...properties,
-        data: null,
       };
 
       addElement(newElement);
