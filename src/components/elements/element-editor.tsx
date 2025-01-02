@@ -78,7 +78,6 @@ const ElementEditorModal: React.FC<{
   return (
     <div
       className="fixed inset-0 bg-black/30 flex items-center justify-center z-[999] cursor-default no-drag select-none"
-      draggable="false"
     >
       <div className="min-w-[600px] bg-white rounded-xl shadow-xl relative flex flex-col items-center">
         {/* Header */}
