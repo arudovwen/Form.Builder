@@ -1,14 +1,14 @@
-import React from "react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 
 interface InputProps {
   label: string;
   name: string;
-  register: UseFormRegister<any>;
-  errors: FieldErrors;
+  register?: UseFormRegister<any>;
+  errors?: FieldErrors;
   element?: any;
   type?: "text" | "checkbox" | "number";
   placeholder?: string;
+  className?: string
 }
 
 export const DynamicInput = ({
@@ -18,21 +18,24 @@ export const DynamicInput = ({
   errors,
   type = "text",
   placeholder = "",
+  className=""
 }: InputProps) => {
+  const registerProps = register ? { ...register(name) } : {};
+
   if (type === "checkbox") {
     return (
       <div>
         <label className="flex items-center space-x-2">
           <input
-            {...register(name)}
+            {...registerProps}
             type="checkbox"
             className="h-4 w-4 rounded border-gray-300"
           />
-          <span className="text-sm font-medium text-[#344054] font-onest">
+          <span className="text-base font-medium text-[#344054] font-onest">
             {label}
           </span>
-        </label>{" "}
-        {errors[name] && (
+        </label>
+        {errors?.[name] && (
           <p className="ml-2 text-sm text-red-600">
             {errors[name]?.message as string}
           </p>
@@ -47,14 +50,14 @@ export const DynamicInput = ({
         {label}
       </label>
       <input
-        {...register(name)}
+        {...registerProps}
         type={type}
-        className={`input-control ${
-          errors[name] ? "border-red-300" : "border-[#D0D5DD]"
-        }`}
+        className={`input-control  ${
+          errors?.[name] ? "border-red-300" : "border-[#D0D5DD]"
+        } ${className}`}
         placeholder={placeholder}
       />
-      {errors[name] && (
+      {errors?.[name] && (
         <p className="mt-1 text-sm text-red-600">
           {errors[name]?.message as string}
         </p>

@@ -1,12 +1,9 @@
-import React from "react";
-
-export default function EmailInput({
-  element,
-  state,
-}: {
-  element: string;
-  state: string;
-}) {
-
-  return <div>EmailInput</div>;
+export default function EmailInput({ element }: { element: any }) {
+  return (
+    <input
+      placeholder={element.placeholder}
+      type={element.inputType}
+      className="input-control"
+    />
+  );
 }

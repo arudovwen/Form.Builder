@@ -1,12 +1,9 @@
-import React from "react";
-
-export default function PasswordInput({
-  element,
-  state,
-}: {
-  element: string;
-  state: string;
-}) {
-
-  return <div>PasswordInput</div>;
+export default function PasswordInput({ element }: { element: any }) {
+  return (
+    <input
+      placeholder={element.placeholder}
+      type={element.inputType}
+      className="input-control"
+    />
+  );
 }

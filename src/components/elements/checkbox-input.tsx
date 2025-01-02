@@ -1,11 +1,12 @@
-import React from "react";
+import { DynamicInput } from "../forms/dynamic-input";
 
-export default function CheckBoxInput({
-  element,
-  state,
-}: {
-  element: string;
-  state: string;
-}) {
-  return <div>CheckBoxInput</div>;
+export default function CheckBoxInput({ element }: { element: any }) {
+  return (
+    <DynamicInput
+      placeholder={element.placeholder}
+      type={element.inputType}
+      label={element.inputLabel}
+      name={""}
+    />
+  );
 }

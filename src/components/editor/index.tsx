@@ -4,7 +4,7 @@ import ElementCanvas from "./element-canvas";
 import { v4 as uuidv4 } from "uuid";
 
 const FormViewer = () => {
-  const { formData, addElement }: any = useContext(EditorContext);
+  const { addElement }: any = useContext(EditorContext);
 
   const onDragOver = useCallback(
     (event: {

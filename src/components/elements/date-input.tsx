@@ -1,12 +1,9 @@
-import React from "react";
-
-export default function DateInput({
-  element,
-  state,
-}: {
-  element: string;
-  state: string;
-}) {
-
-  return <div>DateInput</div>;
+export default function DateInput({ element }: { element: any }) {
+  return (
+    <input
+      placeholder={element.placeholder}
+      type={element.inputType}
+      className="input-control"
+    />
+  );
 }

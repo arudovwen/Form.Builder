@@ -17,12 +17,7 @@ interface ElementContainerProps {
 const ElementContainer = memo(
   ({ element, children }: ElementContainerProps) => {
     const [isOpen, setOpen] = useState(false);
-    const { updateElement, removeElement }: any =
-      React.useContext(EditorContext);
-
-    const handleEdit = useCallback(() => {
-      updateElement(element);
-    }, [element, updateElement]);
+    const { removeElement }: any = React.useContext(EditorContext);
 
     const handleRemove = useCallback(() => {
       removeElement(element.id);
@@ -35,8 +30,8 @@ const ElementContainer = memo(
           onClose={() => setOpen(false)}
           element={element}
         />
-        <div className="flex justify-between items-center mb-[6px]">
-          <label className="text-sm">{element.inputLabel}</label>
+        <div className="flex justify-between items-center mb-2">
+          <label className="text-sm font-medium">{element.inputLabel}</label>
           <span className="flex gap-x-3 items-center">
             <button
               type="button"

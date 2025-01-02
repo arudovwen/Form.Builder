@@ -6,7 +6,7 @@ export default function MainPage() {
   const { id } = useParams();
 
   return (
-    <div className="bg-white p-4 border norder-[#E4E7EC] rounded-lg">
+    <div className="bg-white p-4 border border-[#E4E7EC] rounded-lg h-full overflow-y-auto">
      
       <FormViewer />
     </div>

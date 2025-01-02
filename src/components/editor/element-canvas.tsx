@@ -75,7 +75,7 @@ export default function ElementCanvas() {
       <div
         key={element.id}
         id={element.id}
-        className={`cursor-move border p-4 w-full transition-colors ${
+        className={`cursor-move border p-4 w-full transition-colors rounded-lg ${
           draggedElement === element.id ? "bg-gray-100" : ""
         } ${
           draggedElement && draggedElement !== element.id
