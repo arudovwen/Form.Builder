@@ -36,6 +36,13 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
   const addElement = (element: any) => {
     setFormData((prevFormData) => [...prevFormData, element]);
   };
+  const updateElement = ( value: any) => {
+    setFormData((prevFormData) =>
+      prevFormData.map((ele) =>
+        ele.id === value.id ? { ...ele, ...value } : ele
+      )
+    );
+  };
 
   const value = useMemo(
     () => ({
@@ -47,6 +54,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       setElementData,
       updateElementPosition,
       addElement,
+      updateElement,
     }),
     [
       formData,
@@ -55,6 +63,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       elementData,
       updateElementPosition,
       addElement,
+      updateElement,
     ]
   );
 

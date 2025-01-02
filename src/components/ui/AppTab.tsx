@@ -43,7 +43,7 @@ const TabsComponent: FC<TabsComponentProps> = ({
 
         // Conditional classes based on whether the tab is active
         const activeClasses = clsx({
-          "border-primary darks:border-white !text-primary darks:!text-white": isActive,
+          "border-gray-400 darks:border-white !text-primary darks:!text-white": isActive,
           "border-transparent text-[#667085] darks:!text-white/60": !isActive,
         });
 

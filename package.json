@@ -10,8 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.0",
+    "@hookform/resolvers": "^3.9.1",
     "@iconify/react": "^5.1.0",
     "react": "^18.3.1",
+    "react-currency-input-field": "^3.9.0",
     "react-dom": "^18.3.1",
     "react-draggable": "^4.4.6",
     "react-hook-form": "^7.54.0",

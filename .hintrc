@@ -11,6 +11,7 @@
       {
         "label": "off"
       }
-    ]
+    ],
+    "axe/name-role-value": "off"
   }
 }
