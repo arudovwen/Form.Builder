@@ -20,7 +20,7 @@ const ElementContainer = memo(
     const { removeElement }: any = React.useContext(EditorContext);
 
     const handleRemove = useCallback(() => {
-      removeElement(element.id);
+      removeElement(element.id, element.sectionId);
     }, [element.id, removeElement]);
 
     return (

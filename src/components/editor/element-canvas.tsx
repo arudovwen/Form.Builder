@@ -9,12 +9,12 @@ interface FormElement {
 
 export interface EditorContextType {
   formData: FormElement[];
-  updateElementPosition: (newData: FormElement[]) => void;
+  updateElementPosition: (newData: FormElement[], sectionId: string) => void;
   updateElement: any;
-  removeElement: any
+  removeElement: any;
 }
 
-export default function ElementCanvas() {
+export default function ElementCanvas({ elementData, sectionId }: any) {
   const { formData, updateElementPosition } = useContext(
     EditorContext
   ) as unknown as EditorContextType;
@@ -38,38 +38,42 @@ export default function ElementCanvas() {
     (event: DragEvent<HTMLDivElement>) => {
       event.preventDefault();
       event.stopPropagation();
-
+      const questionData = formData.find(
+        (section) => section.id === sectionId
+      )?.questionData;
       const draggedElementId = event.dataTransfer.getData("properties");
       const targetElement = event.currentTarget;
 
       if (!targetElement.id || draggedElementId === targetElement.id) {
         return;
       }
-
-      const draggedIndex = formData.findIndex(
-        (el) => el.id === draggedElementId
+    
+      const draggedIndex = questionData.findIndex(
+        (el: { id: string; }) => el.id === draggedElementId
       );
-      const targetIndex = formData.findIndex(
-        (el) => el.id === targetElement.id
+      const targetIndex = questionData.findIndex(
+        (el: { id: string; }) => el.id === targetElement.id
       );
 
       if (draggedIndex === -1 || targetIndex === -1) {
         return;
       }
-
+     
       // Create a new array and swap the elements
-      const updatedFormData = [...formData];
-      [updatedFormData[draggedIndex], updatedFormData[targetIndex]] = [
-        updatedFormData[targetIndex],
-        updatedFormData[draggedIndex],
-      ];
+      if (questionData.length) {
+        const updatedFormData = [...questionData];
+        [updatedFormData[draggedIndex], updatedFormData[targetIndex]] = [
+          updatedFormData[targetIndex],
+          updatedFormData[draggedIndex],
+        ];
 
-      updateElementPosition(updatedFormData);
-      setDraggedElement(null);
+        updateElementPosition(updatedFormData, sectionId);
+        setDraggedElement(null);
+      }
     },
     [formData, updateElementPosition]
   );
-
+    
   const renderDraggableElement = useCallback(
     (element: FormElement) => (
       <div
@@ -93,17 +97,17 @@ export default function ElementCanvas() {
     [draggedElement, handleDrop, handleDragOver, handleDragStart]
   );
 
-  if (!formData?.length) {
+  if (!elementData?.length) {
     return (
       <div className="w-full h-full flex items-center justify-center text-gray-500">
-        No elements to display
+        No input to display
       </div>
     );
   }
 
   return (
     <div className="w-full h-full flex flex-col gap-y-4 relative">
-      {formData.map(renderDraggableElement)}
+      {elementData?.map(renderDraggableElement)}
     </div>
   );
 }

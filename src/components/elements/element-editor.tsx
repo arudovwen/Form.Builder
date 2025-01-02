@@ -71,7 +71,7 @@ const ElementEditorModal: React.FC<{
   if (!isOpen) return null;
 
   const onSubmit = (value: any) => {
-    updateElement(value);
+    updateElement(value, element.sectionId);
     onClose();
     console.log("🚀 ~ onSubmit ~ value:", value);
   };
