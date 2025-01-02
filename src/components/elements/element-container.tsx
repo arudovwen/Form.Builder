@@ -25,11 +25,13 @@ const ElementContainer = memo(
 
     return (
       <div>
-        <ElementEditorModal
-          isOpen={isOpen}
-          onClose={() => setOpen(false)}
-          element={element}
-        />
+        {isOpen && (
+          <ElementEditorModal
+            isOpen={isOpen}
+            onClose={() => setOpen(false)}
+            element={element}
+          />
+        )}
         <div className="flex justify-between items-center mb-2">
           <label className="text-sm font-medium">{element.inputLabel}</label>
           <span className="flex gap-x-3 items-center">

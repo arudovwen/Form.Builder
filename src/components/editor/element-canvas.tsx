@@ -1,6 +1,7 @@
 import { useContext, useState, useCallback, DragEvent } from "react";
 import EditorContext from "../../context/editor-context";
 import { renderElement } from "./element-render";
+import AppIcon from "../ui/AppIcon";
 
 interface FormElement {
   id: string;
@@ -12,10 +13,11 @@ export interface EditorContextType {
   updateElementPosition: (newData: FormElement[], sectionId: string) => void;
   updateElement: any;
   removeElement: any;
+  isDragging: boolean;
 }
 
 export default function ElementCanvas({ elementData, sectionId }: any) {
-  const { formData, updateElementPosition } = useContext(
+  const { formData, updateElementPosition, isDragging } = useContext(
     EditorContext
   ) as unknown as EditorContextType;
   const [draggedElement, setDraggedElement] = useState<string | null>(null);
@@ -25,7 +27,7 @@ export default function ElementCanvas({ elementData, sectionId }: any) {
       event.dataTransfer.setData("properties", elementId);
       setDraggedElement(elementId);
     },
-    
+
     []
   );
 
@@ -42,39 +44,43 @@ export default function ElementCanvas({ elementData, sectionId }: any) {
       const questionData = formData.find(
         (section) => section.id === sectionId
       )?.questionData;
-      const draggedElementId = event.dataTransfer.getData("properties");
-      const targetElement = event.currentTarget;
+      try {
+        const draggedElementId = event.dataTransfer.getData("properties");
+        const targetElement = event.currentTarget;
 
-      if (!targetElement.id || draggedElementId === targetElement.id) {
-        return;
-      }
-    
-      const draggedIndex = questionData.findIndex(
-        (el: { id: string; }) => el.id === draggedElementId
-      );
-      const targetIndex = questionData.findIndex(
-        (el: { id: string; }) => el.id === targetElement.id
-      );
+        if (!targetElement.id || draggedElementId === targetElement.id) {
+          return;
+        }
 
-      if (draggedIndex === -1 || targetIndex === -1) {
-        return;
-      }
-     
-      // Create a new array and swap the elements
-      if (questionData.length) {
-        const updatedFormData = [...questionData];
-        [updatedFormData[draggedIndex], updatedFormData[targetIndex]] = [
-          updatedFormData[targetIndex],
-          updatedFormData[draggedIndex],
-        ];
+        const draggedIndex = questionData.findIndex(
+          (el: { id: string }) => el.id === draggedElementId
+        );
+        const targetIndex = questionData.findIndex(
+          (el: { id: string }) => el.id === targetElement.id
+        );
 
-        updateElementPosition(updatedFormData, sectionId);
+        if (draggedIndex === -1 || targetIndex === -1) {
+          return;
+        }
+
+        // Create a new array and swap the elements
+        if (questionData.length) {
+          const updatedFormData = [...questionData];
+          [updatedFormData[draggedIndex], updatedFormData[targetIndex]] = [
+            updatedFormData[targetIndex],
+            updatedFormData[draggedIndex],
+          ];
+
+          updateElementPosition(updatedFormData, sectionId);
+          setDraggedElement(null);
+        }
+      } catch (error) {
         setDraggedElement(null);
       }
     },
     [formData, updateElementPosition]
   );
-    
+
   const renderDraggableElement = useCallback(
     (element: FormElement) => (
       <div
@@ -100,7 +106,7 @@ export default function ElementCanvas({ elementData, sectionId }: any) {
 
   if (!elementData?.length) {
     return (
-      <div className="w-full h-full flex items-center justify-center text-gray-500">
+      <div className="w-full h-full flex items-center justify-center text-gray-500 min-h-[250px]  p-10">
         No input to display
       </div>
     );
@@ -109,6 +115,11 @@ export default function ElementCanvas({ elementData, sectionId }: any) {
   return (
     <div className="w-full h-full flex flex-col gap-y-4 relative">
       {elementData?.map(renderDraggableElement)}
+      {isDragging && (
+        <div className="bg-gray-50 rounded p-6 h-[60px] border-2 border-dashed flex items-center justify-center text-gray-400 opacity-70">
+          <AppIcon icon="octicon:plus-16" />
+        </div>
+      )}
     </div>
   );
 }

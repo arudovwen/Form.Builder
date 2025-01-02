@@ -1,6 +1,6 @@
 import React from "react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
-import CurrencyInput from 'react-currency-input-field';
+import CurrencyInput from "react-currency-input-field";
 
 interface InputProps {
   label: string;
@@ -8,9 +8,9 @@ interface InputProps {
   register?: UseFormRegister<any>;
   errors?: FieldErrors;
   element?: any;
-  type?: "text" | "checkbox" | "number" | "amount";
+  type?: "text" | "checkbox" | "number" | "amount" | "textarea";
   placeholder?: string;
-  className?: string
+  className?: string;
 }
 
 export const DynamicInput = ({
@@ -69,6 +69,27 @@ export const DynamicInput = ({
     );
   }
 
+  if (type === "textarea") {
+    return (
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium text-[#344054] font-onest">
+          {label}
+        </label>
+        <textarea
+          {...registerProps}
+          className={`input-control ${
+            errors?.[name] ? "border-red-300" : "border-[#D0D5DD]"
+          } ${className}`}
+          placeholder={placeholder}
+        />
+        {errors?.[name] && (
+          <p className="mt-1 text-sm text-red-600">
+            {errors[name]?.message as string}
+          </p>
+        )}
+      </div>
+    );
+  }
   return (
     <div className="space-y-1.5">
       <label className="block text-sm font-medium text-[#344054] font-onest">

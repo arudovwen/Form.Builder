@@ -17,6 +17,8 @@ const EditorContext = createContext<
       ) => void;
       addElement: (element: any, sectionId: string) => void;
       updateElement: (value: any, sectionId: string) => void;
+      updateSection: (value: any, sectionId: string) => void;
+      setIsDragging: (value: boolean) => void;
     }
   | undefined
 >(undefined);
@@ -28,13 +30,14 @@ interface ElementType {
 }
 const newSection = {
   title: "Section name",
+  description: "",
   id: uuidv4(),
   questionData: [],
 };
 export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
   const [elementData, setElementData] = useState({});
   const [formData, setFormData] = useState<any[]>([newSection]);
-
+  const [isDragging, setIsDragging] = useState(false);
   const handleDragStop = (e: any, elementId: string) => {
     // Handle drag stop (implementation depends on requirements)
   };
@@ -100,6 +103,18 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       )
     );
   };
+  const updateSection = (value: any, sectionId: string) => {
+    setFormData((prevFormData) =>
+      prevFormData.map((section) =>
+        section.id === sectionId
+          ? {
+              ...section,
+              ...value,
+            }
+          : section
+      )
+    );
+  };
 
   const value = useMemo(
     () => ({
@@ -114,6 +129,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       updateElement,
       addSection,
       removeSection,
+      updateSection,
+      isDragging,
+      setIsDragging,
     }),
     [
       formData,
@@ -125,6 +143,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       updateElement,
       addSection,
       removeSection,
+      updateSection,
+      isDragging,
     ]
   );
 

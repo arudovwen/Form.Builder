@@ -1,6 +1,7 @@
-import { useCallback, DragEvent, memo } from "react";
+import { useCallback, DragEvent, memo, useContext } from "react";
 import { Elements } from "../../utils/contants";
 import AppIcon from "../ui/AppIcon";
+import EditorContext from "../../context/editor-context";
 
 interface ElementType {
   type: string;
@@ -11,10 +12,12 @@ interface ElementType {
 }
 
 const SideBar = () => {
+  const { setIsDragging }: any = useContext(EditorContext);
   const handleDragStart = useCallback(
     (event: DragEvent<HTMLLIElement>, element: ElementType) => {
       event.dataTransfer.setData("properties", JSON.stringify(element));
       event.dataTransfer.effectAllowed = "move";
+      setIsDragging(true);
     },
     []
   );
