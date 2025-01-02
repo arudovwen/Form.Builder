@@ -6,7 +6,6 @@ export default function CheckBoxInput({ element }: { element: any }) {
       placeholder={element.placeholder}
       type={element.inputType}
       label={element.inputLabel}
-      name={""}
-    />
+      name={""}   />
   );
 }

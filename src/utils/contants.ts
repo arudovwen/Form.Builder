@@ -43,7 +43,7 @@ export const Elements = [
     icon: "tabler:select",
     inputLabel: "Select Text Label",
     required: false,
-    inputType: "text",
+    inputType: "select",
     maxLength: null,
     minLength: null,
     placeholder: "Type here",
@@ -62,7 +62,7 @@ export const Elements = [
     icon: "fluent-mdl2:multi-select",
     inputLabel: "Select Text Label",
     required: false,
-    inputType: "text",
+    inputType: "select",
     maxLength: null,
     minLength: null,
     placeholder: "Type here",
@@ -101,16 +101,16 @@ export const Elements = [
     inputLabel: "Enter amount",
     required: false,
     inputType: "amount",
-    maxLength: null,
-    minLength: null,
+    maxAmount: null,
+    minAmount: null,
     placeholder: "Type here",
     description: "",
     isReadOnly: false,
     isDisabled: false,
     isRequired: false,
     requiredMessage: "Field is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
+    minAmountMessage: "",
+    maxAmountMessage: "",
     value: null,
   },
   {
@@ -257,3 +257,13 @@ export const Elements = [
     value: null,
   },
 ];
+
+export const AllowValidationMaxMin = ["text", "number"];
+export const AllowValidationPlaceholder = [
+  "text",
+  "number",
+  "amount",
+  "date",
+  "password",
+];
+export const AllowValidationAmount = ["amount"];

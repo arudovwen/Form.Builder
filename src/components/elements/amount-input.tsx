@@ -1,12 +1,12 @@
-import CurrencyInput from 'react-currency-input-field';
+import { DynamicInput } from "../forms/dynamic-input";
 
 export default function AmountInput({ element }: { element: any }) {
   return (
-    <CurrencyInput
+    <DynamicInput
       placeholder={element.placeholder}
       type={element.inputType}
-      className="input-control"
-      decimalsLimit={2}
+      label={""}
+      name={""}
     />
   );
 }

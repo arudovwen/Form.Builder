@@ -6,6 +6,11 @@ import AppIcon from "../ui/AppIcon";
 import TabsComponent from "../ui/AppTab";
 import { DynamicInput } from "../forms/dynamic-input";
 import EditorContext from "../../context/editor-context";
+import {
+  AllowValidationAmount,
+  AllowValidationMaxMin,
+  AllowValidationPlaceholder,
+} from "../../utils/contants";
 
 const schema = yup
   .object({
@@ -21,6 +26,8 @@ const schema = yup
     maxLength: yup.number().nullable(),
     minLength: yup.number().nullable(),
     inputType: yup.string().nullable(),
+    maxAmountMessage: yup.string().nullable(),
+    maxAmount: yup.string().nullable(),
   })
 
   .required();
@@ -106,13 +113,15 @@ const ElementEditorModal: React.FC<{
                 errors={errors}
                 element={element}
               />
-              <DynamicInput
-                label="Placeholder"
-                name="placeholder"
-                register={register}
-                errors={errors}
-                element={element}
-              />
+              {AllowValidationPlaceholder.includes(element.inputType) && (
+                <DynamicInput
+                  label="Placeholder"
+                  name="placeholder"
+                  register={register}
+                  errors={errors}
+                  element={element}
+                />
+              )}
 
               <DynamicInput
                 label="Short Description"
@@ -165,48 +174,98 @@ const ElementEditorModal: React.FC<{
                   />
                 </div>
               </div>
-              <div className="flex gap-x-6 items-center">
-                <div className="w-[150px]">
-                  <DynamicInput
-                    label="Max Length"
-                    name="maxLength"
-                    register={register}
-                    errors={errors}
-                    element={element}
-                    type="number"
-                  />
-                </div>{" "}
-                <div className="flex-1">
-                  <DynamicInput
-                    label="Error message text"
-                    name="maxLengthMessage"
-                    register={register}
-                    errors={errors}
-                    element={element}
-                  />
-                </div>
-              </div>
-              <div className="flex gap-x-6 items-center">
-                <div className="w-[150px]">
-                  <DynamicInput
-                    label="Min Length"
-                    name="minLength"
-                    register={register}
-                    errors={errors}
-                    element={element}
-                    type="number"
-                  />
-                </div>{" "}
-                <div className="flex-1">
-                  <DynamicInput
-                    label="Error message text"
-                    name="minLengthMessage"
-                    register={register}
-                    errors={errors}
-                    element={element}
-                  />
-                </div>
-              </div>
+              {AllowValidationMaxMin.includes(element.inputType) && (
+                <>
+                  <div className="flex gap-x-6 items-center">
+                    <div className="w-[150px]">
+                      <DynamicInput
+                        label="Min Length"
+                        name="minLength"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="number"
+                      />
+                    </div>{" "}
+                    <div className="flex-1">
+                      <DynamicInput
+                        label="Error message text"
+                        name="minLengthMessage"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-x-6 items-center">
+                    <div className="w-[150px]">
+                      <DynamicInput
+                        label="Max Length"
+                        name="maxLength"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="number"
+                      />
+                    </div>{" "}
+                    <div className="flex-1">
+                      <DynamicInput
+                        label="Error message text"
+                        name="maxLengthMessage"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+              {AllowValidationAmount.includes(element.inputType) && (
+                <>
+                  <div className="flex gap-x-6 items-center">
+                    <div className="w-[150px]">
+                      <DynamicInput
+                        label="Min Amount"
+                        name="minAmount"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="amount"
+                      />
+                    </div>{" "}
+                    <div className="flex-1">
+                      <DynamicInput
+                        label="Error message text"
+                        name="minAmountMessage"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-x-6 items-center">
+                    <div className="w-[150px]">
+                      <DynamicInput
+                        label="Max Amount"
+                        name="maxAmount"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="amount"
+                      />
+                    </div>{" "}
+                    <div className="flex-1">
+                      <DynamicInput
+                        label="Error message text"
+                        name="maxAmountMessage"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
           {/* Actions */}
