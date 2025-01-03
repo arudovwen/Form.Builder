@@ -1,12 +1,18 @@
-import React from "react";
+import { DynamicInput } from "../forms/dynamic-input";
 
-export default function RadioInput({
-  element,
-  state,
-}: {
-  element: string;
-  state: string;
-}) {
-
-  return <div>RadioInput</div>;
+export default function RadioInput({ element }: { element: any }) {
+  return (
+    <div className="flex flex-wrap gap-y-4 gap-x-6">
+      {element?.options.map((item: { id: string; label: string }) => (
+        <div key={item.id}>
+          <DynamicInput
+            placeholder={element.placeholder}
+            type={element.inputType}
+            label={item?.label}
+            name={""}
+          />
+        </div>
+      ))}
+    </div>
+  );
 }

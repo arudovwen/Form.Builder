@@ -29,7 +29,7 @@ interface ElementType {
   label: string;
 }
 const newSection = {
-  title: "Section name",
+  title: "Section title",
   description: "",
   id: uuidv4(),
   questionData: [],

@@ -2,10 +2,17 @@ import { DynamicInput } from "../forms/dynamic-input";
 
 export default function CheckBoxInput({ element }: { element: any }) {
   return (
-    <DynamicInput
-      placeholder={element.placeholder}
-      type={element.inputType}
-      label={element.inputLabel}
-      name={""}   />
+    <div className="flex flex-wrap gap-y-4 gap-x-6">
+      {element?.options.map((item: { id: string; label: string }) => (
+        <div key={item.id}>
+          <DynamicInput
+            placeholder={element.placeholder}
+            type={element.inputType}
+            label={item?.label}
+            name={""}
+          />
+        </div>
+      ))}
+    </div>
   );
 }

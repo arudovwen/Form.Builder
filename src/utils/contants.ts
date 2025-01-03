@@ -1,4 +1,32 @@
-export const Elements = [
+export interface ElementType {
+  type: string;
+  label: string;
+  icon: string;
+  inputLabel: string;
+  required?: boolean;
+  inputType: string;
+  maxLength?: number | null;
+  minLength?: number | null;
+  placeholder?: string;
+  description?: string;
+  isReadOnly?: boolean;
+  isDisabled?: boolean;
+  isRequired?: boolean;
+  requiredMessage?: string;
+  minLengthMessage?: string;
+  maxLengthMessage?: string;
+  value?: any;
+  options?: Array<{ label: string; value: any }>;
+  grid?: number;
+  gridData?: any[];
+  maxAmount?: number | null;
+  minAmount?: number | null;
+  minAmountMessage?: string;
+  maxAmountMessage?: string;
+}
+
+// The Elements array
+export const Elements: ElementType[] = [
   {
     type: "textField",
     label: "Short Text",
@@ -55,6 +83,7 @@ export const Elements = [
     minLengthMessage: "",
     maxLengthMessage: "",
     value: null,
+    options: [],
   },
   {
     type: "multiSelect",
@@ -74,6 +103,7 @@ export const Elements = [
     minLengthMessage: "",
     maxLengthMessage: "",
     value: null,
+    options: [],
   },
   {
     type: "numberField",
@@ -169,6 +199,7 @@ export const Elements = [
     minLengthMessage: "",
     maxLengthMessage: "",
     value: null,
+    options: [],
   },
   {
     type: "radio",
@@ -188,6 +219,7 @@ export const Elements = [
     minLengthMessage: "",
     maxLengthMessage: "",
     value: null,
+    options: [],
   },
   {
     type: "email",
@@ -239,15 +271,19 @@ export const Elements = [
     gridData: [],
   },
 ];
-
-export const AllowValidationMaxMin = ["text", "number"];
-export const AllowValidationPlaceholder = [
+export const AllowValidationMaxMin: string[] = ["text", "number"];
+export const AllowValidationPlaceholder: string[] = [
   "text",
   "number",
   "amount",
   "date",
   "password",
 ];
-export const AllowValidationAmount = ["amount"];
-
-export const noAllowValidation = ["grid", "section"];
+export const AllowValidationAmount: string[] = ["amount"];
+export const noAllowValidation: string[] = ["grid", "section"];
+export const AllowOptions: string[] = [
+  "radio",
+  "select",
+  "checkbox",
+  "multiselect",
+];

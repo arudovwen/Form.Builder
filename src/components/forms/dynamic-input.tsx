@@ -11,6 +11,7 @@ interface InputProps {
   type?: "text" | "checkbox" | "number" | "amount" | "textarea";
   placeholder?: string;
   className?: string;
+  isFloating?: boolean;
 }
 
 export const DynamicInput = ({
@@ -21,13 +22,20 @@ export const DynamicInput = ({
   className,
   type = "text",
   placeholder = "",
+  isFloating,
 }: InputProps) => {
   const registerProps = register ? { ...register(name) } : {};
 
   if (type === "amount") {
     return (
-      <div className="space-y-1.5">
-        <label className="block text-sm font-medium text-[#344054] font-onest">
+      <div className="space-y-1.5 relative">
+        <label
+          className={`block text-sm font-medium text-[#344054] font-onest ${
+            isFloating
+              ? "z-[40] absolute block text-[#667085] bg-white  py-[2px] px-1 -top-[10px] left-3 "
+              : "relative"
+          }`}
+        >
           {label}
         </label>
         <CurrencyInput
@@ -47,13 +55,13 @@ export const DynamicInput = ({
     );
   }
 
-  if (type === "checkbox") {
+  if (["checkbox","radio"].includes(type)) {
     return (
       <div>
         <label className="flex items-center space-x-2">
           <input
             {...registerProps}
-            type="checkbox"
+            type={type}
             className="h-4 w-4 rounded border-gray-300"
           />
           <span className="text-sm font-medium text-[#344054] font-onest">
@@ -71,8 +79,14 @@ export const DynamicInput = ({
 
   if (type === "textarea") {
     return (
-      <div className="space-y-1.5">
-        <label className="block text-sm font-medium text-[#344054] font-onest">
+      <div className="space-y-1.5 relative">
+        <label
+          className={`block text-sm font-medium text-[#344054] font-onest ${
+            isFloating
+              ? "z-[40] absolute block text-[#667085] bg-white  py-[2px] px-1 -top-[10px] left-3 "
+              : "relative"
+          }`}
+        >
           {label}
         </label>
         <textarea
@@ -91,8 +105,14 @@ export const DynamicInput = ({
     );
   }
   return (
-    <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-[#344054] font-onest">
+    <div className="space-y-1.5 relative">
+      <label
+        className={`block text-sm font-medium text-[#344054] font-onest ${
+          isFloating
+            ? "z-[40] absolute block text-[#667085] bg-white  py-[2px] px-1 -top-[10px] left-3"
+            : "relative"
+        }`}
+      >
         {label}
       </label>
       <input
@@ -101,7 +121,7 @@ export const DynamicInput = ({
         className={`input-control ${
           errors?.[name] ? "border-red-300" : "border-[#D0D5DD]"
         } ${className}`}
-        placeholder={placeholder}
+        placeholder={isFloating ? "" : placeholder}
       />
       {errors?.[name] && (
         <p className="mt-1 text-sm text-red-600">

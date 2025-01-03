@@ -1,84 +1,181 @@
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import React, { useState, useMemo, useEffect } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import AppIcon from "../ui/AppIcon";
 import TabsComponent from "../ui/AppTab";
 import { DynamicInput } from "../forms/dynamic-input";
 import EditorContext from "../../context/editor-context";
+import { v4 as uuidv4 } from "uuid";
 import {
+  AllowOptions,
   AllowValidationAmount,
   AllowValidationMaxMin,
   AllowValidationPlaceholder,
   noAllowValidation,
 } from "../../utils/contants";
 
-const schema = yup
-  .object({
-    inputLabel: yup.string().required("Label is required"),
-    placeholder: yup.string().nullable(),
-    description: yup.string().nullable(),
-    isReadOnly: yup.boolean(),
-    isDisabled: yup.boolean(),
-    isRequired: yup.boolean(),
-    requiredMessage: yup.string().nullable(),
-    minLengthMessage: yup.string().nullable(),
-    maxLengthMessage: yup.string().nullable(),
-    maxLength: yup.number().nullable(),
-    minLength: yup.number().nullable(),
-    inputType: yup.string().nullable(),
-    maxAmountMessage: yup.string().nullable(),
-    maxAmount: yup.string().nullable(),
-  })
+interface Option {
+  label: string;
+  value: string;
+  id?: string;
+}
 
-  .required();
+interface FormInputs {
+  inputLabel: string;
+  placeholder?: string;
+  description?: string;
+  isReadOnly?: boolean;
+  isDisabled?: boolean;
+  isRequired?: boolean;
+  requiredMessage?: string;
+  minLengthMessage?: string;
+  maxLengthMessage?: string;
+  maxLength?: number;
+  minLength?: number;
+  inputType?: string;
+  maxAmountMessage?: string;
+  maxAmount?: string;
+  options?: Option[];
+}
 
-type FormInputs = yup.InferType<typeof schema>;
+const schema = yup.object().shape({
+  inputLabel: yup.string().required("Label is required"),
+  placeholder: yup.string().nullable(),
+  description: yup.string().nullable(),
+  isReadOnly: yup.boolean(),
+  isDisabled: yup.boolean(),
+  isRequired: yup.boolean(),
+  requiredMessage: yup.string().nullable(),
+  minLengthMessage: yup.string().nullable(),
+  maxLengthMessage: yup.string().nullable(),
+  maxLength: yup.number().nullable(),
+  minLength: yup.number().nullable(),
+  inputType: yup.string().nullable(),
+  maxAmountMessage: yup.string().nullable(),
+  maxAmount: yup.string().nullable(),
+  options: yup
+    .array()
+    .of(
+      yup.object().shape({
+        label: yup.string().nullable(),
+        value: yup.string().when("label", {
+          is: (label: string) => label && label.length > 0,
+          then: (schema) =>
+            schema.required("Value is required when label is present"),
+          otherwise: (schema) => schema.nullable(),
+        }),
+      })
+    )
+    .nullable(),
+});
+
 const tabs = [
-  {
-    title: "Basics",
-    key: "basic",
-  },
-  {
-    title: "Validations",
-    key: "validation",
-  },
+  { title: "Basics", key: "basic" },
+  { title: "Validations", key: "validation" },
 ];
-const ElementEditorModal: React.FC<{
+
+interface ElementEditorModalProps {
   isOpen: boolean;
   onClose: () => void;
   element: any;
-}> = ({ isOpen, onClose, element }) => {
-  const { updateElement }: any = React.useContext(EditorContext);
+}
 
+const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
+  isOpen,
+  onClose,
+  element,
+}) => {
+  const { updateElement }: any = React.useContext(EditorContext);
   const [activeTab, setActiveTab] = useState("basic");
+
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting, isValid },
     reset,
-  } = useForm<FormInputs>({
+  } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: element,
+    defaultValues: {
+      ...element,
+      options: element.options || [],
+    },
   });
 
-  React.useEffect(() => {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "options",
+  });
+
+  useEffect(() => {
     if (!isOpen) {
       reset();
     }
   }, [isOpen, reset]);
 
-  if (!isOpen) return null;
-
-  const onSubmit = (value: any) => {
-    updateElement(value, element.sectionId);
+  const onSubmit = (values: FormInputs) => {
+    updateElement(values, element.sectionId);
     onClose();
-    console.log("🚀 ~ onSubmit ~ value:", value);
   };
+
+  // Options field rendering
+  const renderOptionsFields = () => (
+    <div className="flex flex-col gap-y-1 justify-start">
+      {fields.map((field, index) => (
+        <div key={field.id} className="flex gap-x-4 items-center ">
+          <div className="flex-1">
+            <DynamicInput
+              label="Label"
+              name={`options.${index}.label`}
+              register={register}
+              errors={errors}
+              element={element}
+              placeholder="Label"
+              isFloating
+            />
+          </div>
+          <div className="flex-1">
+            <DynamicInput
+              label="Value"
+              name={`options.${index}.value`}
+              register={register}
+              errors={errors}
+              element={element}
+              placeholder="Value"
+              isFloating
+            />
+          </div>
+      
+            {" "}
+            <button
+              type="button"
+              className="outline-none hover:opacity-80"
+              onClick={() => remove(index)}
+            >
+              <AppIcon icon="iconamoon:sign-times-fill" />
+            </button>
+         
+        </div>
+      ))}
+      <div>
+        {" "}
+        <button
+          type="button"
+          className="mt-2  text-gray-500 font-medium text-sm  flex gap-x-1 items-center"
+          onClick={() => append({ label: "", value: "", id: uuidv4() })}
+        >
+             <AppIcon icon="qlementine-icons:plus-16" /> Add Option
+        </button>
+      </div>
+    </div>
+  );
+
+  // Rest of your component remains the same
+  // ... (keeping the same JSX structure for the form)
+
   return (
-    <div
-      className="fixed inset-0 bg-black/30 flex items-center justify-center z-[999] cursor-default no-drag select-none"
-    >
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[999] cursor-default no-drag select-none">
       <div className="min-w-[600px] bg-white rounded-xl shadow-xl relative flex flex-col items-center">
         {/* Header */}
         <div className="w-full px-6 pt-6 pb-5 flex flex-col items-start gap-4 z-10 mb-6">
@@ -93,6 +190,7 @@ const ElementEditorModal: React.FC<{
           </button>
         </div>
 
+        {/* Tabs */}
         <div className="w-full">
           <TabsComponent
             tabs={tabs}
@@ -102,6 +200,7 @@ const ElementEditorModal: React.FC<{
             btnClass="!uppercase !text-left"
           />
         </div>
+
         {/* Form Content */}
         <form onSubmit={handleSubmit(onSubmit)} className="w-full">
           {activeTab === "basic" && (
@@ -122,7 +221,6 @@ const ElementEditorModal: React.FC<{
                   element={element}
                 />
               )}
-
               <DynamicInput
                 label="Short Description"
                 name="description"
@@ -130,39 +228,13 @@ const ElementEditorModal: React.FC<{
                 errors={errors}
                 element={element}
               />
-              {element.type === "grid" && (
-                <DynamicInput
-                  label="No of Grids"
-                  name="grid"
-                  register={register}
-                  errors={errors}
-                  element={element}
-                />
-              )}
-              {!noAllowValidation.includes(element.type.toLowerCase()) && (
-                <div className="flex gap-x-6 items-center">
-                  <DynamicInput
-                    label="Read Only"
-                    name="isReadOnly"
-                    register={register}
-                    errors={errors}
-                    element={element}
-                    type="checkbox"
-                  />
-                  <DynamicInput
-                    label="Disabled"
-                    name="isDisabled"
-                    register={register}
-                    errors={errors}
-                    element={element}
-                    type="checkbox"
-                  />
-                </div>
-              )}
+              {AllowOptions.includes(element.inputType) &&
+                renderOptionsFields()}
+              {/* Add other basic fields here */}
             </div>
           )}
 
-          {!noAllowValidation.includes(element.type.toLowerCase()) &&
+{!noAllowValidation.includes(element.type.toLowerCase()) &&
             activeTab === "validation" && (
               <div className="w-full px-6 flex flex-col gap-5 z-10">
                 <div className="flex gap-x-6 items-center">
@@ -280,6 +352,7 @@ const ElementEditorModal: React.FC<{
                 )}
               </div>
             )}
+
           {/* Actions */}
           <div className="w-full px-6 pt-8 pb-6 flex gap-3 mt-4">
             <button
