@@ -3,10 +3,10 @@ import { Listbox, Transition } from "@headlessui/react";
 import clsx from "clsx";
 import AppIcon from "./ui/AppIcon";
 
-interface Option {
-  label: string;
-  value: string | number | null;
-}
+// interface Option {
+//   label: string;
+//   value: string | number | null;
+// }
 
 interface CustomSelectProps {
   className?: string;

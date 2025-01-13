@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import AppButton from "../ui/AppButton";
 import EditorContext from "../../context/editor-context";
 import { EditorContextType } from "./element-canvas";

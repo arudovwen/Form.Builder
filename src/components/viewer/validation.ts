@@ -1,126 +1,130 @@
 import * as yup from "yup";
 
-export function generateDynamicSchema(data: any[]) {
-  const schemaFields = {};
+interface QuestionData {
+  id: string;
+  type: 'textField' | 'longText' | 'numberField' | 'amountField' | 'selectField' | 'checkbox' | 'email' | 'date';
+  isRequired?: boolean;
+  requiredMessage?: string;
+  minLength?: number;
+  maxLength?: number;
+  minAmount?: number;
+  maxAmount?: number;
+  minLengthMessage?: string;
+  maxLengthMessage?: string;
+  minAmountMessage?: string;
+  maxAmountMessage?: string;
+}
 
-  data.forEach((section: { questionData: any[]; }) => {
-    section.questionData.forEach((question: { id: any; type: any; isRequired: any; requiredMessage: any; minLength: any; maxLength: any; minAmount: any; maxAmount: any; minLengthMessage: any; maxLengthMessage: any; minAmountMessage: any; maxAmountMessage: any; }) => {
-      const {
-        id,
-        type,
-        isRequired,
-        requiredMessage,
-        minLength,
-        maxLength,
-        minAmount,
-        maxAmount,
-        minLengthMessage,
-        maxLengthMessage,
-        minAmountMessage,
-        maxAmountMessage,
-      } = question;
+interface Section {
+  questionData: QuestionData[];
+}
 
-      // Base validation schema for the field
-      let fieldSchema = yup.mixed();
+const DEFAULT_MESSAGES = {
+  required: "This field is required",
+  email: "Invalid email format",
+  minLength: (min: number) => `Minimum length is ${min}`,
+  maxLength: (max: number) => `Maximum length is ${max}`,
+  minAmount: (min: number) => `Minimum amount is ${min}`,
+  maxAmount: (max: number) => `Maximum amount is ${max}`,
+} as const;
 
-      switch (type) {
-        case "textField":
-        case "longText":
-          fieldSchema = yup.string();
-          if (isRequired) {
-            fieldSchema = fieldSchema.required(
-              requiredMessage || "This field is required"
-            );
-          }
-          if (minLength) {
-            fieldSchema = fieldSchema.min(
-              minLength,
-              minLengthMessage || `Minimum length is ${minLength}`
-            );
-          }
-          if (maxLength) {
-            fieldSchema = fieldSchema.max(
-              maxLength,
-              maxLengthMessage || `Maximum length is ${maxLength}`
-            );
-          }
-          break;
+const getBaseSchema = (type: QuestionData['type']) => {
+  const schemas = {
+    textField: yup.string().nullable(),
+    longText: yup.string().nullable(),
+    numberField: yup.number().nullable().transform((value) => 
+      isNaN(value) ? null : value
+    ),
+    amountField: yup.number().nullable().transform((value) => 
+      isNaN(value) ? null : value
+    ),
+    selectField: yup.string().nullable(),
+    checkbox: yup.boolean(),
+    email: yup.string().nullable().email(DEFAULT_MESSAGES.email),
+    date: yup.date().nullable(),
+  };
 
-        case "numberField":
-        case "amountField":
-          fieldSchema = yup.number();
-          if (isRequired) {
-            fieldSchema = fieldSchema.required(
-              requiredMessage || "This field is required"
-            );
-          }
-          if (minAmount) {
-            fieldSchema = fieldSchema.min(
-              parseFloat(minAmount),
-              minAmountMessage || `Minimum amount is ${minAmount}`
-            );
-          }
-          if (maxAmount) {
-            fieldSchema = fieldSchema.max(
-              parseFloat(maxAmount),
-              maxAmountMessage || `Maximum amount is ${maxAmount}`
-            );
-          }
-          break;
+  return schemas[type] || yup.string().nullable();
+};
 
-        case "selectField":
-          fieldSchema = yup.string();
-          if (isRequired) {
-            fieldSchema = fieldSchema.required(
-              requiredMessage || "This field is required"
-            );
-          }
-          break;
+const addRequiredValidation = (schema: yup.Schema<any>, isRequired?: boolean, message?: string) => {
+  if (!isRequired) return schema;
+  
+  if (schema.type === 'boolean') {
+    return schema.oneOf([true], message || DEFAULT_MESSAGES.required);
+  }
+  
+  return schema.required(message || DEFAULT_MESSAGES.required);
+};
 
-        case "checkbox":
-          fieldSchema = yup.boolean();
-          if (isRequired) {
-            fieldSchema = fieldSchema.oneOf(
-              [true],
-              requiredMessage || "This field is required"
-            );
-          }
-          break;
+const addTextValidations = (
+  schema: yup.StringSchema,
+  { minLength, maxLength, minLengthMessage, maxLengthMessage }: Partial<QuestionData>
+) => {
+  let updatedSchema = schema;
+  
+  if (minLength) {
+    updatedSchema = updatedSchema.min(
+      minLength,
+      minLengthMessage || DEFAULT_MESSAGES.minLength(minLength)
+    );
+  }
+  
+  if (maxLength) {
+    updatedSchema = updatedSchema.max(
+      maxLength,
+      maxLengthMessage || DEFAULT_MESSAGES.maxLength(maxLength)
+    );
+  }
+  
+  return updatedSchema;
+};
 
-        case "email":
-          fieldSchema = yup.string().email("Invalid email format");
-          if (isRequired) {
-            fieldSchema = fieldSchema.required(
-              requiredMessage || "This field is required"
-            );
-          }
-          break;
+const addNumberValidations = (
+  schema: yup.NumberSchema,
+  { minAmount, maxAmount, minAmountMessage, maxAmountMessage }: Partial<QuestionData>
+) => {
+  let updatedSchema = schema;
+  
+  if (minAmount) {
+    updatedSchema = updatedSchema.min(
+      parseFloat(String(minAmount)),
+      minAmountMessage || DEFAULT_MESSAGES.minAmount(minAmount)
+    );
+  }
+  
+  if (maxAmount) {
+    updatedSchema = updatedSchema.max(
+      parseFloat(String(maxAmount)),
+      maxAmountMessage || DEFAULT_MESSAGES.maxAmount(maxAmount)
+    );
+  }
+  
+  return updatedSchema;
+};
 
-        case "date":
-          fieldSchema = yup.date();
-          if (isRequired) {
-            fieldSchema = fieldSchema.required(
-              requiredMessage || "This field is required"
-            );
-          }
-          break;
+export function generateDynamicSchema(data: Section[]) {
+  const schemaFields: Record<string, yup.Schema<any>> = {};
 
-        default:
-          // Default to string validation for unsupported types
-          fieldSchema = yup.string();
-          if (isRequired) {
-            fieldSchema = fieldSchema.required(
-              requiredMessage || "This field is required"
-            );
-          }
-          break;
+  data.forEach(({ questionData }) => {
+    questionData.forEach((question) => {
+      const { id, type, isRequired, requiredMessage } = question;
+      
+      let fieldSchema = getBaseSchema(type);
+      
+      // Add required validation
+      fieldSchema = addRequiredValidation(fieldSchema, isRequired, requiredMessage);
+      
+      // Add specific validations based on type
+      if (type === 'textField' || type === 'longText' || type === 'email') {
+        fieldSchema = addTextValidations(fieldSchema as yup.StringSchema, question);
+      } else if (type === 'numberField' || type === 'amountField') {
+        fieldSchema = addNumberValidations(fieldSchema as yup.NumberSchema, question);
       }
 
-      // Add the field schema to the overall schema
       schemaFields[id] = fieldSchema;
     });
   });
 
   return yup.object().shape(schemaFields);
 }
-

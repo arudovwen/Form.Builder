@@ -1,4 +1,3 @@
-import React from "react";
 import { Icon, IconifyIcon } from "@iconify/react";
 
 export default function AppIcon({

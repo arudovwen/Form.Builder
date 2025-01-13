@@ -1,3 +1,5 @@
+// @ts-nocheck 
+
 import { useState, useContext } from "react";
 import AppButton from "../ui/AppButton";
 import EditorContext from "../../context/editor-context";

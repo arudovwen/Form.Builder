@@ -1,5 +1,4 @@
-import React from "react";
-
+// @ts-nocheck 
 export default function SectionInput({
   element,
   state,

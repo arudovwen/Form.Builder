@@ -1,15 +1,14 @@
-import React from "react";
 import CustomSelect from "../CustomSelect";
-import { ElementType } from "../../utils/contants";
+// import { ElementType } from "../../utils/contants";
 
 export default function SelectInput({
   element,
-  validationData,
+  // validationData,
 }: {
   element: any;
-  validationData: any;
+  validationData?: any;
 }) {
-  const { register } = validationData;
+  // const { register } = validationData;
   return (
     <div>
       <CustomSelect options={element?.options ?? []} name={""} />

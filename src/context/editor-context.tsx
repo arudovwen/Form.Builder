@@ -23,11 +23,11 @@ const EditorContext = createContext<
   | undefined
 >(undefined);
 
-interface ElementType {
-  id: string;
-  type: string;
-  label: string;
-}
+// interface ElementType {
+//   id: string;
+//   type: string;
+//   label: string;
+// }
 const newSection = {
   title: "Section title",
   description: "",
@@ -38,7 +38,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
   const [elementData, setElementData] = useState({});
   const [formData, setFormData] = useState<any[]>([newSection]);
   const [isDragging, setIsDragging] = useState(false);
-  const handleDragStop = (e: any, elementId: string) => {
+  const handleDragStop = () => {
     // Handle drag stop (implementation depends on requirements)
   };
 

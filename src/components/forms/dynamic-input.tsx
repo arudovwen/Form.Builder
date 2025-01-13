@@ -1,4 +1,3 @@
-import React from "react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import CurrencyInput from "react-currency-input-field";
 
@@ -12,7 +11,6 @@ interface InputProps {
   placeholder?: string;
   className?: string;
   isFloating?: boolean;
-  validationData? : any
 }
 
 export const DynamicInput = ({
@@ -24,7 +22,6 @@ export const DynamicInput = ({
   type = "text",
   placeholder = "",
   isFloating,
-  validationData
 }: InputProps) => {
   const registerProps = register ? { ...register(name) } : {};
 

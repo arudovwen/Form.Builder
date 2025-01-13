@@ -1,4 +1,3 @@
-import React from "react";
 import FormRenderer from "../../components/viewer";
 
 export default function Viewer() {

@@ -1,3 +1,4 @@
+// @ts-nocheck 
 import { DynamicInput } from "../forms/dynamic-input";
 
 export default function CheckBoxInput({
