@@ -1,6 +1,12 @@
 import { DynamicInput } from "../forms/dynamic-input";
 
-export default function FileInput({ element }: { element: any }) {
+export default function FileInput({
+  element,
+  validationData,
+}: {
+  element: any;
+  validationData: any;
+}) {
   return (
     <DynamicInput
       placeholder={element.placeholder}

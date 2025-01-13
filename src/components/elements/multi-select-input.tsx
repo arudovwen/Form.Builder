@@ -2,10 +2,10 @@ import React from "react";
 
 export default function MultiSelectInput({
   element,
-  state,
+  validationData,
 }: {
-  element: string;
-  state: string;
+  element: any;
+  validationData: any;
 }) {
   return <div>MultiSelectInput</div>;
 }
