@@ -8,7 +8,7 @@ export default function SelectInput({
   element: any;
   validationData?: any;
 }) {
-  // const { register } = validationData;
+  //   const { register = () => ({}) } = validationData || {};
   return (
     <div>
       <CustomSelect options={element?.options ?? []} name={""} />

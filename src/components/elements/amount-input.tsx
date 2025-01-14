@@ -7,7 +7,7 @@ export default function AmountInput({
   element: any;
   validationData: any;
 }) {
-  const {register} = validationData 
+  const { register = () => ({}) } = validationData || {};
   return (
     <DynamicInput
       placeholder={element.placeholder}

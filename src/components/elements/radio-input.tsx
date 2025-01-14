@@ -7,7 +7,7 @@ export default function RadioInput({
   element: any;
   validationData: any;
 }) {
-  const { register } = validationData;
+    const { register = () => ({}) } = validationData || {};
   return (
     <div className="flex flex-wrap gap-y-4 gap-x-6">
       {element?.options.map((item: { id: string; label: string }) => (

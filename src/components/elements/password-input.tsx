@@ -5,7 +5,7 @@ export default function PasswordInput({
   element: any;
   validationData: any;
 }) {
-  const { register } = validationData;
+    const { register = () => ({}) } = validationData || {};
   return (
     <input
       placeholder={element.placeholder}

@@ -5,7 +5,7 @@ export default function LongTextInput({
   element: any;
   validationData: any;
 }) {
-  const { register } = validationData;
+    const { register = () => ({}) } = validationData || {};
   return (
     <textarea
       placeholder={element.placeholder}

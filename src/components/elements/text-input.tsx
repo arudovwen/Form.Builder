@@ -6,15 +6,15 @@ export default function TextInput({
   validationData: any;
 }) {
 
-  const { register } = validationData;
+  const { register = () => ({}) } = validationData || {};
   return (
-   <div>
-     <input
-      placeholder={element.placeholder}
-      type={element.inputType}
-      className="input-control"
-      {...register(element.id)}
-    />
-   </div>
+    <div>
+      <input
+        placeholder={element?.placeholder || ""}
+        type={element?.inputType || "text"}
+        className="input-control"
+        {...register(element?.id)}
+      />
+    </div>
   );
 }
