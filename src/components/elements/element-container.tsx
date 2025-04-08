@@ -12,10 +12,11 @@ interface ElementType {
 interface ElementContainerProps {
   element: ElementType;
   children: ReactNode;
+  state?: string;
 }
 
 const ElementContainer = memo(
-  ({ element, children }: ElementContainerProps) => {
+  ({ state, element, children }: ElementContainerProps) => {
     const [isOpen, setOpen] = useState(false);
     const { removeElement }: any = React.useContext(EditorContext);
 
@@ -34,22 +35,24 @@ const ElementContainer = memo(
         )}
         <div className="flex justify-between items-center mb-2">
           <label className="text-sm font-medium">{element.inputLabel}</label>
-          <span className="flex gap-x-3 items-center">
-            <button
-              type="button"
-              className="outline-none hover:opacity-80"
-              onClick={() => setOpen(true)}
-            >
-              <AppIcon icon="circum:edit" />
-            </button>
-            <button
-              type="button"
-              className="outline-none hover:opacity-80"
-              onClick={handleRemove}
-            >
-              <AppIcon icon="iconamoon:sign-times-fill" />
-            </button>
-          </span>
+          {state === "edit" && (
+            <span className="flex gap-x-3 items-center">
+              <button
+                type="button"
+                className="outline-none hover:opacity-80"
+                onClick={() => setOpen(true)}
+              >
+                <AppIcon icon="circum:edit" />
+              </button>
+              <button
+                type="button"
+                className="outline-none hover:opacity-80"
+                onClick={handleRemove}
+              >
+                <AppIcon icon="iconamoon:sign-times-fill" />
+              </button>
+            </span>
+          )}
         </div>
         {children}
       </div>

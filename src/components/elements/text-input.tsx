@@ -5,7 +5,7 @@ export default function TextInput({
   element: any;
   validationData: any;
 }) {
-
+  console.log("element", element);
   const { register = () => ({}) } = validationData || {};
   return (
     <div>

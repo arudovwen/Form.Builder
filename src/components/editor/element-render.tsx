@@ -5,7 +5,7 @@ import MultiSelectInput from "../elements/multi-select-input";
 import EmailInput from "../elements/email-input";
 import FileInput from "../elements/file-input";
 import GridInput from "../elements/grid-input";
-import NumberInput from  "../elements/text-input";
+import NumberInput from "../elements/text-input";
 import PasswordInput from "../elements/password-input";
 import RadioInput from "../elements/radio-input";
 import SectionInput from "../elements/section-input";
@@ -31,12 +31,12 @@ const elementMap: Record<string, React.ElementType> = {
   grid: GridInput,
   section: SectionInput,
 };
-
+const state = "edit"; // This can be passed as a prop or context value
 export const renderElement = (element: any) => {
   const ElementComponent = elementMap[element.type];
   return ElementComponent ? (
-    <ElementContainer element={element}>
-      <ElementComponent element={element} state="edit" />
+    <ElementContainer element={element} state={state}>
+      <ElementComponent element={element} state={state} />
     </ElementContainer>
   ) : null;
 };

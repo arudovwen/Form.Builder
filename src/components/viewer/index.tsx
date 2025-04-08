@@ -6,7 +6,6 @@ import { generateDynamicSchema } from "./validation";
 
 const FormRenderer = ({ form_data }: any) => {
   const validationSchema = generateDynamicSchema(form_data);
-  console.log("🚀 ~ FormRenderer ~ validationSchema:", validationSchema);
   const methods = useForm({
     resolver: yupResolver(validationSchema),
     mode: "onSubmit",
