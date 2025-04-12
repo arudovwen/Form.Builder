@@ -39,12 +39,13 @@ const getBaseSchema = (type: QuestionData['type']) => {
       isNaN(value) ? null : value
     ),
     selectField: yup.string().nullable(),
-    checkbox: yup.boolean(),
+    checkbox: yup.mixed().nullable(),
+    radio: yup.mixed().nullable(),
     email: yup.string().nullable().email(DEFAULT_MESSAGES.email),
-    date: yup.date().nullable(),
+    date: yup.date().typeError('Invalid date').nullable(),
   };
 
-  return schemas[type] || yup.string().nullable();
+  return schemas[type] || yup.mixed().nullable();
 };
 
 const addRequiredValidation = (schema: yup.Schema<any>, isRequired?: boolean, message?: string) => {

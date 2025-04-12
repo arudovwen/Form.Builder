@@ -14,6 +14,8 @@ import SelectInput from "../elements/select-input";
 import LongTextInput from "../elements/long-text";
 import ElementContainer from "../elements/element-container";
 import AmountInput from "../elements/amount-input";
+import ValidateInput from "../elements/validate-input";
+import TableInput from "../elements/table-input";
 
 const elementMap: Record<string, React.ElementType> = {
   textField: TextInput,
@@ -30,13 +32,18 @@ const elementMap: Record<string, React.ElementType> = {
   file: FileInput,
   grid: GridInput,
   section: SectionInput,
+  validateInput: ValidateInput,
+  tableInput: TableInput,
 };
 const state = "edit"; // This can be passed as a prop or context value
 export const renderElement = (element: any) => {
   const ElementComponent = elementMap[element.type];
   return ElementComponent ? (
     <ElementContainer element={element} state={state}>
-      <ElementComponent element={element} state={state} />
+      <div className="relative">
+        <div className="absolute top-0 left-0 h-full w-full z-20" />
+        <ElementComponent element={element} state={state} />
+      </div>
     </ElementContainer>
   ) : null;
 };

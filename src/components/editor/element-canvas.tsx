@@ -3,13 +3,15 @@ import EditorContext from "../../context/editor-context";
 import { renderElement } from "./element-render";
 import AppIcon from "../ui/AppIcon";
 
-interface FormElement {
+export interface FormElement {
   id: string;
+  isReadOnly?: false;
   [key: string]: any;
 }
 
 export interface EditorContextType {
   formData: FormElement[];
+  setFormData: (data: FormElement[]) => void;
   updateElementPosition: (newData: FormElement[], sectionId: string) => void;
   updateElement: any;
   removeElement: any;
@@ -75,6 +77,7 @@ export default function ElementCanvas({ elementData, sectionId }: any) {
           setDraggedElement(null);
         }
       } catch (error) {
+        console.error("Error during drag and drop:", error);
         setDraggedElement(null);
       }
     },
@@ -86,7 +89,7 @@ export default function ElementCanvas({ elementData, sectionId }: any) {
       <div
         key={element.id}
         id={element.id}
-        className={`cursor-move border p-4 w-full transition-colors rounded-lg ${
+        className={`cursor-move border p-4 w-full transition-colors rounded-lg bg-white ${
           draggedElement === element.id ? "bg-gray-100" : ""
         } ${
           draggedElement && draggedElement !== element.id

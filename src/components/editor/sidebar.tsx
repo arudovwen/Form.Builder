@@ -2,6 +2,8 @@ import { useCallback, DragEvent, memo, useContext } from "react";
 import { Elements } from "../../utils/contants";
 import AppIcon from "../ui/AppIcon";
 import EditorContext from "../../context/editor-context";
+import { v4 as uuidv4 } from "uuid";
+import { toast } from "react-toastify";
 
 interface ElementType {
   type: string;
@@ -12,16 +14,28 @@ interface ElementType {
 }
 
 const SideBar = () => {
-  const { setIsDragging }: any = useContext(EditorContext);
+  const { setIsDragging, addElement,selectedSection }: any = useContext(EditorContext);
   const handleDragStart = useCallback(
     (event: DragEvent<HTMLLIElement>, element: ElementType) => {
       event.dataTransfer.setData("properties", JSON.stringify(element));
       event.dataTransfer.effectAllowed = "move";
       setIsDragging(true);
     },
-    []
+    [setIsDragging]
   );
+function handleElement(element:any) {
+  if(!selectedSection) {
+    toast.error("Please select a section to add an element to.");
+    return;
+  };
+  const newElement = {
+    id: uuidv4(),
+    sectionId: selectedSection,
+    ...element,
+  };
 
+  addElement(newElement, selectedSection);
+}
   return (
     <div className="w-full">
       <div className="pt-4 px-5 max-h-[70vh] overflow-y-auto">
@@ -31,6 +45,7 @@ const SideBar = () => {
               <li
                 key={element.type}
                 onDragStart={(e) => handleDragStart(e, element)}
+                onClick={() => handleElement(element)}
                 style={{
                   borderColor: element.color,
                   color: element.color,

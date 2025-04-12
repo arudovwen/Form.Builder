@@ -14,6 +14,8 @@ import SelectInput from "../elements/select-input";
 import LongTextInput from "../elements/long-text";
 
 import AmountInput from "../elements/amount-input";
+import ValidateInput from "../elements/validate-input";
+import TableInput from "../elements/table-input";
 
 const elementMap: Record<string, React.ElementType> = {
   textField: TextInput,
@@ -30,6 +32,8 @@ const elementMap: Record<string, React.ElementType> = {
   file: FileInput,
   grid: GridInput,
   section: SectionInput,
+  validateInput: ValidateInput,
+  tableInput: TableInput
 };
 
 export const renderElement = (element: any, validationData?: any) => {

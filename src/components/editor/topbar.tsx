@@ -1,19 +1,23 @@
-// @ts-nocheck 
-
 import { useState, useContext } from "react";
 import AppButton from "../ui/AppButton";
 import EditorContext from "../../context/editor-context";
+import PreviewModalModal from "./preview-modal";
 
 export default function TopBar() {
   const { addSection }: any = useContext(EditorContext);
 
-  const [open, setOpen] = useState(false);
+  const [isOpen, setOpen] = useState(false);
 
   return (
     <div className="px-[30px] py-[10px] flex justify-between items-center">
       <div className="flex gap-x-4  items-center"></div>
-
-      <div className="py-4 flex justify-end gap-x-6">
+      {isOpen && (
+        <PreviewModalModal
+          isOpen={isOpen}
+          onClose={() => setOpen(false)} element={undefined}        
+        />
+      )}
+      <div className="py-4 flex justify-end gap-x-6 text-sm">
         <AppButton
           onClick={() => addSection()}
           text="Add section"

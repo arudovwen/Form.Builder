@@ -11,6 +11,11 @@ interface InputProps {
   placeholder?: string;
   className?: string;
   isFloating?: boolean;
+  setValue?: any;
+  value?: any;
+  trigger?: any;
+  prefix?: string;
+  disabled?: boolean;
 }
 
 export const DynamicInput = ({
@@ -22,6 +27,11 @@ export const DynamicInput = ({
   type = "text",
   placeholder = "",
   isFloating,
+  setValue,
+  value,
+  trigger,
+  prefix,
+  disabled
 }: InputProps) => {
   const registerProps = register ? { ...register(name) } : {};
 
@@ -38,12 +48,23 @@ export const DynamicInput = ({
           {label}
         </label>
         <CurrencyInput
-          {...registerProps}
+          onValueChange={(value: any) => {
+            setValue(name, value);
+            if (register) {
+              register(name);
+            }
+            if (trigger) {
+              trigger(name);
+            }
+          }}
           placeholder={placeholder}
           className={`input-control ${
             errors?.[name] ? "border-red-300" : "border-[#D0D5DD]"
           }`}
           decimalsLimit={2}
+          value={value}
+          prefix={prefix}
+          disabled={disabled}
         />
         {errors?.[name] && (
           <p className="mt-1 text-sm text-red-600">
@@ -54,7 +75,7 @@ export const DynamicInput = ({
     );
   }
 
-  if (["checkbox","radio"].includes(type)) {
+  if (["checkbox", "radio"].includes(type)) {
     return (
       <div>
         <label className="flex items-center space-x-2">
@@ -62,6 +83,8 @@ export const DynamicInput = ({
             {...registerProps}
             type={type}
             className="h-4 w-4 rounded border-gray-300"
+            value={value}
+            disabled={disabled}
           />
           <span className="text-sm font-medium text-[#344054] font-onest">
             {label}
@@ -94,6 +117,7 @@ export const DynamicInput = ({
             errors?.[name] ? "border-red-300" : "border-[#D0D5DD]"
           } ${className}`}
           placeholder={placeholder}
+          disabled={disabled}
         />
         {errors?.[name] && (
           <p className="mt-1 text-sm text-red-600">
@@ -121,6 +145,7 @@ export const DynamicInput = ({
           errors?.[name] ? "border-red-300" : "border-[#D0D5DD]"
         } ${className}`}
         placeholder={isFloating ? "" : placeholder}
+        disabled={disabled}
       />
       {errors?.[name] && (
         <p className="mt-1 text-sm text-red-600">

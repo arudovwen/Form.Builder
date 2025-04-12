@@ -4,13 +4,18 @@ import EditorContext from "../../context/editor-context";
 import { EditorContextType } from "./element-canvas";
 import { toast } from "react-toastify";
 
-export default function BottomBar() {
+type Props = {
+  onSubmit: (e: any) => void;
+};
+
+export default function BottomBar({onSubmit}: Props) {
   const { formData } = useContext(
     EditorContext
   ) as unknown as EditorContextType;
+
   function handleSubmit() {
-    console.log("🚀 ~ BottomBar ~ formData:", formData);
     localStorage.setItem("formData", JSON.stringify(formData))
+    onSubmit(formData)
     toast.success("Saved successfully")
   }
   return (

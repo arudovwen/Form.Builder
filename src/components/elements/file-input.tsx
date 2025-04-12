@@ -1,5 +1,6 @@
-// @ts-nocheck 
-import { DynamicInput } from "../forms/dynamic-input";
+import { useEffect, useState } from "react";
+import FileUpload from "../forms/file-uploader";
+import UniversalFileViewer from "../UniversalFileViewer";
 
 export default function FileInput({
   element,
@@ -8,13 +9,27 @@ export default function FileInput({
   element: any;
   validationData: any;
 }) {
+  const [fileData, setFileData] = useState<any>(element?.value ?? null);
+  const { register = () => ({}), setValue, isReadOnly } = validationData || {};
+  useEffect(() => {
+    register(element.id);
+  }, [element.id, register]);
+
   return (
-    <DynamicInput
-      placeholder={element.placeholder}
-      type={element.inputType}
-      label={""}
-      name={""}
-      className="file:bg-gray-600 file:text-white file:rounded-[6px] file:py-[6px] file:border-gray-100 !py-1 file:px-[10px] !px-1"
-    />
+    <div>
+      <FileUpload
+        onFileLoaded={(data) => {
+          setValue(element.id, data);
+          setFileData(data);
+        }}
+        disabled={isReadOnly}
+      />
+      {fileData && (
+        <UniversalFileViewer
+          fileUrl={fileData.base64}
+          fileName={fileData.name}
+        />
+      )}
+    </div>
   );
 }

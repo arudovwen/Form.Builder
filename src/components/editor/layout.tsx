@@ -6,8 +6,13 @@ import SideBar from "./sidebar";
 import TopBar from "./topbar";
 import { EditorProvider } from "../../context/editor-context";
 
-export default function Layout() {
+export interface BuilderProps {
+  onSubmit: (e: any) => void; // Function to handle form submission
+  questionData?: any; // Data for the questions in the form
+  isReadOnly?: boolean; // Flag to indicate if the form is read-only
+}
 
+export default function Layout({ onSubmit, questionData }: BuilderProps) {
   return (
     <EditorProvider>
       <div className="w-full h-screen bg-[#E4E7EC] flex flex-col">
@@ -20,11 +25,11 @@ export default function Layout() {
             <SideBar />
           </div>
           <div className="flex-1 h-full max-h-full p-4 z-[1]">
-            <MainPage />
+            <MainPage questionData={questionData} />
           </div>
         </div>
         <div className="border-b  bg-white border-t border-[#E4E7EC]">
-          <BottomBar />
+          <BottomBar onSubmit={onSubmit} />
         </div>
       </div>
     </EditorProvider>

@@ -7,7 +7,17 @@ export default function AmountInput({
   element: any;
   validationData: any;
 }) {
-  const { register = () => ({}) } = validationData || {};
+  const {
+    register = () => ({}),
+    trigger,
+    setValue,
+    watch,isReadOnly
+  } = validationData || {};
+  let selectedValue;
+  if (watch) {
+    const values = watch();
+    selectedValue = values[element.id];
+  }
   return (
     <DynamicInput
       placeholder={element.placeholder}
@@ -15,6 +25,11 @@ export default function AmountInput({
       label={""}
       name={element.id}
       register={register}
+      trigger={trigger}
+      setValue={setValue}
+      value={selectedValue}
+      prefix={element.prefix}
+      disabled={isReadOnly}
     />
   );
 }

@@ -29,7 +29,7 @@ const EditorContext = createContext<
 //   label: string;
 // }
 const newSection = {
-  title: "Section title",
+  title: "",
   description: "",
   id: uuidv4(),
   questionData: [],
@@ -38,45 +38,53 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
   const [elementData, setElementData] = useState({});
   const [formData, setFormData] = useState<any[]>([newSection]);
   const [isDragging, setIsDragging] = useState(false);
-  const handleDragStop = () => {
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const handleDragStop = React.useCallback(() => {
     // Handle drag stop (implementation depends on requirements)
-  };
+  }, []);
 
-  const addSection = () => {
-    setFormData([...formData, { ...newSection, id: uuidv4() }]);
-  };
-  const removeSection = (sectionId: string) => {
-    setFormData(formData.filter((i) => i.id !== sectionId));
-  };
-  const removeElement = (elementId: any, sectionId: string) => {
+  const addSection = React.useCallback(() => {
+    const id = uuidv4();
+    setFormData((prevFormData) => [...prevFormData, { ...newSection, id }]);
+    setSelectedSection(id);
+  }, []);
+  const removeSection = React.useCallback((sectionId: string) => {
     setFormData((prevFormData) =>
-      prevFormData.map((section) =>
-        section.id === sectionId
-          ? {
-              ...section,
-              questionData: section.questionData.filter(
-                (element: any) => element.id !== elementId
-              ),
-            }
-          : section
-      )
+      prevFormData.filter((i) => i.id !== sectionId)
     );
-  };
+  }, []);
+  const removeElement = React.useCallback(
+    (elementId: any, sectionId: string) => {
+      setFormData((prevFormData) =>
+        prevFormData.map((section) =>
+          section.id === sectionId
+            ? {
+                ...section,
+                questionData: section.questionData.filter(
+                  (element: any) => element.id !== elementId
+                ),
+              }
+            : section
+        )
+      );
+    },
+    []
+  );
 
-  const updateElementPosition = (
-    updatedQuestionData: any[],
-    sectionId: string
-  ) => {
-    setFormData((prevFormData) =>
-      prevFormData.map((section) =>
-        section.id === sectionId
-          ? { ...section, questionData: updatedQuestionData }
-          : section
-      )
-    );
-  };
+  const updateElementPosition = React.useCallback(
+    (updatedQuestionData: any[], sectionId: string) => {
+      setFormData((prevFormData) =>
+        prevFormData.map((section) =>
+          section.id === sectionId
+            ? { ...section, questionData: updatedQuestionData }
+            : section
+        )
+      );
+    },
+    []
+  );
 
-  const addElement = (element: any, sectionId: string) => {
+  const addElement = React.useCallback((element: any, sectionId: string) => {
     setFormData((prevFormData) =>
       prevFormData.map((section) =>
         section.id === sectionId
@@ -87,9 +95,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
           : section
       )
     );
-  };
+  }, []);
 
-  const updateElement = (value: any, sectionId: string) => {
+  const updateElement = React.useCallback((value: any, sectionId: string) => {
     setFormData((prevFormData) =>
       prevFormData.map((section) =>
         section.id === sectionId
@@ -102,8 +110,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
           : section
       )
     );
-  };
-  const updateSection = (value: any, sectionId: string) => {
+  }, []);
+  const updateSection = React.useCallback((value: any, sectionId: string) => {
     setFormData((prevFormData) =>
       prevFormData.map((section) =>
         section.id === sectionId
@@ -114,7 +122,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
           : section
       )
     );
-  };
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -132,6 +140,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       updateSection,
       isDragging,
       setIsDragging,
+      selectedSection,
+      setSelectedSection,
     }),
     [
       formData,
@@ -145,6 +155,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       removeSection,
       updateSection,
       isDragging,
+      selectedSection,
     ]
   );
 

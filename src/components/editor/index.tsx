@@ -5,39 +5,49 @@ import { v4 as uuidv4 } from "uuid";
 import AppIcon from "../ui/AppIcon";
 import SectionEditorModal from "../elements/section-editor";
 
-const FormViewer = () => {
+const FormBuilder = () => {
   const [isOpen, setOpen] = useState(false);
   const tempSection = useRef(null);
   const [activeSections, setActiveSections] = useState<number[]>([0]);
-  const { removeSection, addElement, formData, setIsDragging }: any =
-    useContext(EditorContext);
+  const {
+    removeSection,
+    addElement,
+    formData,
+    setIsDragging,
+    setSelectedSection,
+    selectedSection,
+  }: any = useContext(EditorContext);
 
   const onDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
   }, []);
 
-  const onDrop = useCallback((event: DragEvent<HTMLDivElement>) => {
-    try {
-      event.preventDefault();
-      setIsDragging(false);
-      const targetElement = event?.currentTarget;
-      const data = event.dataTransfer.getData("properties");
-      if (data) {
-        const properties = JSON.parse(data);
+  const onDrop = useCallback(
+    (event: DragEvent<HTMLDivElement>) => {
+      try {
+        event.preventDefault();
+        setIsDragging(false);
+        const targetElement = event?.currentTarget;
+        const data = event.dataTransfer.getData("properties");
+        if (data) {
+          const properties = JSON.parse(data);
 
-        const newElement = {
-          id: uuidv4(),
-          sectionId: targetElement.id,
-          ...properties,
-        };
+          const newElement = {
+            id: uuidv4(),
+            sectionId: targetElement.id,
+            ...properties,
+          };
 
-        addElement(newElement, targetElement.id);
+          addElement(newElement, targetElement.id);
+        }
+      } catch (error) {
+        console.log(error);
+        setIsDragging(false);
       }
-    } catch (error) {
-      setIsDragging(false);
-    }
-  }, []);
+    },
+    [addElement, setIsDragging]
+  );
   function toggleSection(index: number) {
     if (activeSections.includes(index)) {
       setActiveSections((prevSections) =>
@@ -60,28 +70,37 @@ const FormViewer = () => {
           section={tempSection.current}
         />
       )}
-      <div className=" relative  w-full flex flex-col gap-y-6 flex-1 py-5">
+      <div className=" relative  w-full flex flex-col gap-y-6 flex-1 py-4">
         {formData.map(
           (
             section: {
               id: string | undefined;
               title: string;
+              description?: string;
               questionData: any;
             },
             index: number
           ) => (
-            <div key={section.id} className="group">
+            <div
+              key={section.id}
+              className={`group cursor-pointer  rounded`}
+              onClick={() => setSelectedSection(section.id)}
+            >
               <div
-                className={`border rounded-lg py-4 px-6   transition-colors duration-200 ${
+                className={`border border-gray-100 rounded py-4 px-4 shadow-[rgba(149,157,165,0.2)_0px_2px_4px]  transition-colors duration-200
+                  ${selectedSection === section.id ? "border-dashed border-blue-400 bg-[#f7f8fa]" : "border-transparent"} ${
                   activeSections.includes(index) ? "min-h-[300px]" : ""
                 }`}
               >
                 <div className="flex justify-between items-center">
-                  <h2>{section.title}</h2>
+                  <h2 className="font-medium">
+                    {section.title || "Section title"}
+                  </h2>
+
                   <div className="flex gap-x-4 items-center">
                     <button
                       type="button"
-                      className="p-1 border rounded-lg"
+                      className="p-1 border rounded-lg text-xs"
                       onClick={() => handleSectionEdit(section)}
                     >
                       <AppIcon icon="fluent:edit-28-regular" />
@@ -89,7 +108,7 @@ const FormViewer = () => {
                     {formData.length > 1 && (
                       <button
                         type="button"
-                        className="p-1 border rounded-lg"
+                        className="p-1 border rounded-lg text-xs"
                         onClick={() => removeSection(section.id)}
                       >
                         <AppIcon icon="lets-icons:trash-duotone-line" />
@@ -97,7 +116,7 @@ const FormViewer = () => {
                     )}
                     <button
                       type="button"
-                      className="p-1 rounded-lg"
+                      className="p-1 rounded-lg text-xs"
                       onClick={() => toggleSection(index)}
                     >
                       <AppIcon
@@ -110,6 +129,11 @@ const FormViewer = () => {
                     </button>
                   </div>
                 </div>
+                {section?.description && activeSections.includes(index) && (
+                  <p className="text-sm text-gray-60 mt-2 text-gray-600">
+                    {section?.description}
+                  </p>
+                )}
                 {activeSections.includes(index) && (
                   <div
                     className="mt-4 transition-all duration-200 h-full"
@@ -118,7 +142,7 @@ const FormViewer = () => {
                     onDragOver={onDragOver}
                   >
                     <hr />
-                    <div className=" gap-y-6 mt-4 h-full">
+                    <div className=" gap-y-6 mt-4 h-full ">
                       {
                         <ElementCanvas
                           elementData={section.questionData}
@@ -138,4 +162,4 @@ const FormViewer = () => {
   );
 };
 
-export default FormViewer;
+export default FormBuilder;

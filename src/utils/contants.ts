@@ -23,6 +23,12 @@ export interface ElementType {
   minAmount?: number | null;
   minAmountMessage?: string;
   maxAmountMessage?: string;
+  prefix?: string | null;
+  sectionId?: string;
+  url?: string;
+  method?: string;
+  denominators?: null;
+  responseType?: string;
 }
 
 // The Elements array
@@ -106,6 +112,29 @@ export const Elements: ElementType[] = [
     options: [],
   },
   {
+    type: "validateInput",
+    label: "Validate Input",
+    icon: "iconoir:www",
+    inputLabel: "Validate Input Label",
+    required: false,
+    inputType: "validateInput",
+    maxLength: null,
+    minLength: null,
+    placeholder: "Type here",
+    description: "",
+    isReadOnly: false,
+    isDisabled: false,
+    isRequired: false,
+    requiredMessage: "Value is required",
+    minLengthMessage: "",
+    maxLengthMessage: "",
+    value: null,
+    url: "https://api.example.com/validate?value={value}",
+    method: "GET",
+    responseType: "string",
+  },
+
+  {
     type: "numberField",
     label: "Number",
     icon: "octicon:number-16",
@@ -142,6 +171,7 @@ export const Elements: ElementType[] = [
     minAmountMessage: "",
     maxAmountMessage: "",
     value: null,
+    prefix: null,
   },
   {
     type: "date",
@@ -260,6 +290,26 @@ export const Elements: ElementType[] = [
     value: null,
   },
   {
+    type: "tableInput",
+    label: "Table Input",
+    icon: "iconoir:table",
+    inputLabel: "Table Input Label",
+    required: false,
+    inputType: "tableInput",
+    maxLength: null,
+    minLength: null,
+    placeholder: "Type here",
+    description: "",
+    isReadOnly: false,
+    isDisabled: false,
+    isRequired: false,
+    requiredMessage: "Value is required",
+    minLengthMessage: "",
+    maxLengthMessage: "",
+    value: [],
+    denominators: null,
+  },
+  {
     type: "grid",
     label: "Grid",
     icon: "cuida:grid-outline",
@@ -271,6 +321,7 @@ export const Elements: ElementType[] = [
     gridData: [],
   },
 ];
+export const AllowValidationPrefix: string[] = ["amount"];
 export const AllowValidationMaxMin: string[] = ["text", "number"];
 export const AllowValidationPlaceholder: string[] = [
   "text",
@@ -287,3 +338,5 @@ export const AllowOptions: string[] = [
   "checkbox",
   "multiselect",
 ];
+export const AllowApiOptions: string[] = ["validateInput"];
+export const AllowTableOptions: string[] = ["tableInput"];

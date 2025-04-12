@@ -1,13 +1,21 @@
 {
   "compilerOptions": {
-    "baseUrl": ".", // Set base directory for relative paths
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "declaration": true,
+    "declarationDir": "dist/types",
+    "emitDeclarationOnly": true,
+    "jsx": "react-jsx",
+    "outDir": "dist",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"] // Define the @ alias to point to the src directory
-    }
+      "@/": ["src/"]
+    },
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
   },
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "/.test.ts", "/.test.tsx"]
 }

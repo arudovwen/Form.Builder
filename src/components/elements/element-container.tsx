@@ -39,14 +39,14 @@ const ElementContainer = memo(
             <span className="flex gap-x-3 items-center">
               <button
                 type="button"
-                className="outline-none hover:opacity-80"
+                className="outline-none hover:opacity-80 text-sm"
                 onClick={() => setOpen(true)}
               >
                 <AppIcon icon="circum:edit" />
               </button>
               <button
                 type="button"
-                className="outline-none hover:opacity-80"
+                className="outline-none hover:opacity-80 text-sm"
                 onClick={handleRemove}
               >
                 <AppIcon icon="iconamoon:sign-times-fill" />

@@ -12,8 +12,14 @@ import {
   AllowValidationAmount,
   AllowValidationMaxMin,
   AllowValidationPlaceholder,
+  AllowValidationPrefix,
   noAllowValidation,
+  AllowApiOptions,
+  AllowTableOptions,
 } from "../../utils/contants";
+
+import CustomSelect from "../CustomSelect";
+import TableInputColumn from "../TableInputColumns";
 
 interface Option {
   label: string;
@@ -37,6 +43,12 @@ interface FormInputs {
   maxAmountMessage?: string;
   maxAmount?: string;
   options?: Option[];
+  prefix?: string;
+  url?: string;
+  method?: string;
+  minAmount?: string;
+  denominators?: any;
+  responseType?: string;
 }
 
 const schema = yup.object().shape({
@@ -68,6 +80,12 @@ const schema = yup.object().shape({
       })
     )
     .nullable(),
+  prefix: yup.string().nullable(),
+  url: yup.string().nullable(),
+  method: yup.string().nullable(),
+  denominators: yup.mixed().nullable(),
+  responseType: yup.string().nullable(),
+  minAmount: yup.string().nullable(),
 });
 
 const tabs = [
@@ -93,6 +111,9 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
     register,
     handleSubmit,
     control,
+    setValue,
+    watch,
+    trigger,
     formState: { errors, isSubmitting, isValid },
     reset,
   } = useForm({
@@ -145,27 +166,24 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               placeholder="Value"
               isFloating
             />
-          </div>
-      
-            {" "}
-            <button
-              type="button"
-              className="outline-none hover:opacity-80"
-              onClick={() => remove(index)}
-            >
-              <AppIcon icon="iconamoon:sign-times-fill" />
-            </button>
-         
+          </div>{" "}
+          <button
+            type="button"
+            className="outline-none hover:opacity-80"
+            onClick={() => remove(index)}
+          >
+            <AppIcon icon="iconamoon:sign-times-fill" />
+          </button>
         </div>
       ))}
       <div>
         {" "}
         <button
           type="button"
-          className="mt-2  text-gray-500 font-medium text-sm  flex gap-x-1 items-center"
+          className="mt-2  text-gray-700 font-medium text-sm  flex gap-x-1 items-center"
           onClick={() => append({ label: "", value: "", id: uuidv4() })}
         >
-             <AppIcon icon="qlementine-icons:plus-16" /> Add Option
+          <AppIcon icon="qlementine-icons:plus-16" /> Add Option
         </button>
       </div>
     </div>
@@ -221,6 +239,70 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   element={element}
                 />
               )}
+              {AllowValidationPrefix.includes(element.inputType) && (
+                <DynamicInput
+                  label="Prefix"
+                  name="prefix"
+                  register={register}
+                  errors={errors}
+                  element={element}
+                />
+              )}
+              {AllowApiOptions.includes(element.inputType) && (
+                <>
+                  <DynamicInput
+                    label="Api Url"
+                    name="url"
+                    register={register}
+                    errors={errors}
+                    element={element}
+                  />
+                  <CustomSelect
+                    label="Api Method"
+                    options={[
+                      {
+                        label: "GET",
+                        value: "GET",
+                      },
+                      {
+                        label: "POST",
+                        value: "POST",
+                      },
+                    ]}
+                    register={register}
+                    name={"method"}
+                    setValue={setValue}
+                    trigger={trigger}
+                    value={watch("method")}
+                  />
+                  <CustomSelect
+                    label="Api Response type"
+                    options={[
+                      {
+                        label: "String",
+                        value: "string",
+                      },
+                      {
+                        label: "Object",
+                        value: "object",
+                      },
+                    ]}
+                    register={register}
+                    name={"responseType"}
+                    setValue={setValue}
+                    trigger={trigger}
+                    value={watch("responseType")}
+                  />
+                </>
+              )}
+              {AllowTableOptions.includes(element.inputType) && (
+                <TableInputColumn
+                  onChange={(newValues) => {
+                    setValue("denominators", newValues);
+                  }}
+                  value={watch("denominators")}
+                />
+              )}
               <DynamicInput
                 label="Short Description"
                 name="description"
@@ -234,7 +316,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
             </div>
           )}
 
-{!noAllowValidation.includes(element.type.toLowerCase()) &&
+          {!noAllowValidation.includes(element.type.toLowerCase()) &&
             activeTab === "validation" && (
               <div className="w-full px-6 flex flex-col gap-5 z-10">
                 <div className="flex gap-x-6 items-center">

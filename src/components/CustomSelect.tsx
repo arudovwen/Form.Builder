@@ -49,10 +49,14 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   useEffect(() => {
     if (selected && setValue && register) {
       setValue(name, selected?.value);
-      register(name);
-      trigger(name);
+      if (register) {
+        register(name);
+      }
+      if (trigger) {
+        trigger(name);
+      }
     }
-  }, [name, register, selected, setValue]);
+  }, [name, register, selected, setValue, trigger]);
 
   useEffect(() => {
     const tempData = options?.find((option: any) => {
