@@ -1,6 +1,18 @@
+import { useEffect } from "react";
 import Layout, { BuilderProps } from "../../components/editor/layout";
+import { setItem } from "../../utils/localStorageControl";
 
-const HomePage = ({ onSubmit, questionData, isReadOnly }: BuilderProps) => {
+const HomePage = ({
+  onSubmit,
+  questionData,
+  isReadOnly,
+  config,
+}: BuilderProps) => {
+  useEffect(() => {
+    if (config) {
+    setItem("config", config);
+    }
+  }, [config]);
   return (
     <Layout
       onSubmit={onSubmit}

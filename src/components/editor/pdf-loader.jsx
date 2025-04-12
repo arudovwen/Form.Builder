@@ -12,7 +12,7 @@ export default function PdfLoader() {
         >
           <path
             fill="none"
-            stroke="#C6593C"
+            stroke="#2563EB"
             strokeWidth="15"
             strokeLinecap="round"
             strokeDasharray="300 385"

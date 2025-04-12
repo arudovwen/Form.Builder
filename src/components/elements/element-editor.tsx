@@ -20,6 +20,8 @@ import {
 
 import CustomSelect from "../CustomSelect";
 import TableInputColumn from "../TableInputColumns";
+import ApiExample from "../ApiExample";
+import { getItem } from "../../utils/localStorageControl";
 
 interface Option {
   label: string;
@@ -106,7 +108,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
 }) => {
   const { updateElement }: any = React.useContext(EditorContext);
   const [activeTab, setActiveTab] = useState("basic");
-
+  const config = getItem("config");
   const {
     register,
     handleSubmit,
@@ -250,6 +252,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               )}
               {AllowApiOptions.includes(element.inputType) && (
                 <>
+                <ApiExample />
                   <DynamicInput
                     label="Api Url"
                     name="url"
@@ -447,8 +450,9 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
             <button
               type="submit"
               disabled={!isValid || isSubmitting}
+              style={{ background: config.buttonColor }}
               className={`flex-1 px-4 py-2.5 ${
-                !isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#C6593C]"
+                !isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#2563EB]"
               } ${
                 !isValid || isSubmitting ? "text-[#98A2B3]" : "text-white"
               } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-50`}

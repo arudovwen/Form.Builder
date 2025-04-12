@@ -5,6 +5,7 @@ import AppButton from "../ui/AppButton";
 import { generateDynamicSchema } from "./validation";
 import { useEffect, useMemo, useState } from "react";
 import { mapIdToValue } from "../../utils/mapIdToValue";
+import { getItem } from "../../utils/localStorageControl";
 
 const FormRenderer = ({
   form_data,
@@ -33,7 +34,7 @@ const FormRenderer = ({
     trigger,
   }: any = methods;
 
-  console.table(errors);
+  const config = getItem("config");
   const onSubmit = (data: any) => {
     const tempData = form_data?.map((section: any) => {
       return {
@@ -131,6 +132,7 @@ const FormRenderer = ({
             <AppButton
               type="button"
               text="Continue"
+              style={{ background: config.buttonColor }}
               onClick={handleProceed}
               btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg"
             />
@@ -147,8 +149,9 @@ const FormRenderer = ({
                   isDisabled={isSubmitting}
                   isLoading={isSubmitting}
                   type="submit"
-                  text="Save Form"
-                  btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg"
+                  text="Submit"
+                  style={{ background: config.buttonColor }}
+                  btnClass={`text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg`}
                 />
               )}
             </>

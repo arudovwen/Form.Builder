@@ -21,12 +21,13 @@ export default function TopBar() {
         <AppButton
           onClick={() => addSection()}
           text="Add section"
-          btnClass="text-gray-700 border-[#98A2B3] !font-medium"
+          btnClass="text-gray-700 border-[#98A2B3] !font-medium bg-transparent"
         />
         <AppButton
           onClick={() => setOpen(true)}
           text="Preview"
           btnClass="text-gray-700 border-[#98A2B3] !font-medium"
+          
         />
       </div>
     </div>

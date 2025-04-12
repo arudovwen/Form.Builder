@@ -287,7 +287,9 @@ function App() {
     console.error("Error parsing formData from localStorage:", error);
     form_data = null;
   }
-
+const config ={
+  buttonColor : "black",
+}
   return (
     <Routes>
       <Route
@@ -298,6 +300,7 @@ function App() {
               console.log(e);
             }}
             questionData={data}
+            config={config}
           />
         }
       />
@@ -310,6 +313,7 @@ function App() {
             }}
             answerData={answerData}
             form_data={form_data}
+            config={config}
           />
         }
       />

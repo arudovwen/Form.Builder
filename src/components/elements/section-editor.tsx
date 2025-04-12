@@ -92,7 +92,7 @@ const SectionEditorModal: React.FC<{
               type="submit"
               disabled={!isValid || isSubmitting}
               className={`flex-1 px-4 py-2.5 ${
-                !isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#C6593C]"
+                !isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#2563EB]"
               } ${
                 !isValid || isSubmitting ? "text-[#98A2B3]" : "text-white"
               } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-50`}

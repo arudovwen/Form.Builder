@@ -10,6 +10,7 @@ export interface BuilderProps {
   onSubmit: (e: any) => void; // Function to handle form submission
   questionData?: any; // Data for the questions in the form
   isReadOnly?: boolean; // Flag to indicate if the form is read-only
+  config?: any; // Configuration for the form
 }
 
 export default function Layout({ onSubmit, questionData }: BuilderProps) {

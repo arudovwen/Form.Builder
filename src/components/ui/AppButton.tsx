@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import AppIcon from './AppIcon';
+import React from "react";
+import { Link } from "react-router-dom";
+import AppIcon from "./AppIcon";
 
 interface ButtonProps {
   text?: string;
@@ -8,33 +8,36 @@ interface ButtonProps {
   isLoading?: boolean;
   btnClass?: string;
   icon?: string;
-  iconPosition?: 'left' | 'right';
+  iconPosition?: "left" | "right";
   iconClass?: string;
   loadingClass?: string;
   link?: string;
   div?: boolean;
-  type?: 'button' | 'submit' | 'reset';
+  type?: "button" | "submit" | "reset";
   onClick?: () => void;
+  style?: React.CSSProperties;
 }
 
 const Button: React.FC<ButtonProps> = ({
-  text = '',
+  text = "",
   isDisabled = false,
   isLoading = false,
-  btnClass = 'bg-primary-500 text-white',
-  icon = '',
-  iconPosition = 'left',
-  iconClass = 'text-[20px]',
-  loadingClass = '',
-  link = '',
+  btnClass = "bg-primary-500 text-white",
+  icon = "",
+  iconPosition = "left",
+  iconClass = "text-[20px]",
+  loadingClass = "",
+  link = "",
   div = false,
-  type = 'button',
-  onClick
+  type = "button",
+  style,
+  onClick,
 }) => {
+ 
   const buttonClasses = `
     btn inline-flex justify-center
-    ${isLoading ? ' pointer-events-none' : ''}
-    ${isDisabled ? ' opacity-40 cursor-not-allowed' : ''}
+    ${isLoading ? " pointer-events-none" : ""}
+    ${isDisabled ? " opacity-40 cursor-not-allowed" : ""}
     ${btnClass}
   `;
 
@@ -69,13 +72,13 @@ const Button: React.FC<ButtonProps> = ({
 
     return (
       <span className="flex items-center">
-        {icon && iconPosition === 'left' && (
+        {icon && iconPosition === "left" && (
           <span className={`mr-2 ${iconClass}`}>
             <AppIcon icon={icon} />
           </span>
         )}
         {text && <span>{text}</span>}
-        {icon && iconPosition === 'right' && (
+        {icon && iconPosition === "right" && (
           <span className={`ml-2 ${iconClass}`}>
             <AppIcon icon={icon} />
           </span>
@@ -85,11 +88,7 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   if (div) {
-    return (
-      <div className={buttonClasses}>
-        {renderButtonContent()}
-      </div>
-    );
+    return <div className={buttonClasses}>{renderButtonContent()}</div>;
   }
 
   if (link) {
@@ -107,6 +106,7 @@ const Button: React.FC<ButtonProps> = ({
       className={buttonClasses}
       data-testid="btn"
       onClick={onClick}
+      style={style}
     >
       {renderButtonContent()}
     </button>

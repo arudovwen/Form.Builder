@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import Loader from "../../components/Loader";
 import FormRenderer from "../../components/viewer";
+import { setItem } from "../../utils/localStorageControl";
 
 export interface RenderProps {
   onSubmit?: (e: any) => void; // Function to handle form submission
@@ -8,6 +10,7 @@ export interface RenderProps {
   form_data?: any; // Data for the form structure
   ignoreValidation?: boolean; // Flag to ignore validation
   loading?: boolean; // Flag to indicate if the form is loading
+  config?: any; // Configuration for the form
 }
 
 export default function Viewer({
@@ -17,7 +20,13 @@ export default function Viewer({
   onSubmit,
   isReadOnly = false,
   loading = false,
+  config,
 }: RenderProps) {
+  useEffect(() => {
+    if (config) {
+    setItem("config", config);
+    }
+  }, [config]);
   if (loading) {
     return <Loader />;
   }
