@@ -21,7 +21,7 @@ function App() {
 
   setTimeout(() => {
     loading = false;
-  }, 2000);
+  }, 4000);
   return (
     <Routes>
       <Route
