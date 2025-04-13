@@ -278,7 +278,6 @@ const answerData = [
 function App() {
   let form_data;
 
-  // Safely parse formData from localStorage
   try {
     const storedData = localStorage.getItem("formData");
     form_data = storedData ? JSON.parse(storedData) : null;
