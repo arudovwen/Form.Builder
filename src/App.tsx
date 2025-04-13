@@ -288,7 +288,8 @@ function App() {
     form_data = null;
   }
 const config ={
-  buttonColor : "black",
+  buttonColor : "#333",
+  loaderColor: "#333",
 }
   return (
     <Routes>
@@ -314,6 +315,7 @@ const config ={
             answerData={answerData}
             form_data={form_data}
             config={config}
+            loading={false}
           />
         }
       />

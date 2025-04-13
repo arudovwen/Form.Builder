@@ -52,6 +52,7 @@ export default function Viewer({
         ignoreValidation={ignoreValidation}
         onSubmitData={onSubmit}
         isReadOnly={isReadOnly}
+ 
       />
     </div>
   );

@@ -15,7 +15,8 @@ function App() {
     form_data = null;
   }
   const config = {
-    buttonColor: "black",
+    buttonColor : "#333",
+    loaderColor: "#333",
   };
   return (
     <Routes>

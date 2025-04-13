@@ -1,9 +1,18 @@
-import React from "react";
+import { useEffect } from "react";
+import { getItem } from "../utils/localStorageControl";
 
-export default function Loader() {
+// Loader.tsx
+const Loader = () => {
+  useEffect(() => {
+    const config = getItem("config");
+    const savedColor = config?.loaderColor || "#333";
+    document.documentElement.style.setProperty("--loader-color", savedColor);
+  }, []);
   return (
-    <div className="flex justify-center items-center h-full">
-      <p>Loading...</p>
+    <div className="h-screen w-screen flex justify-center items-center">
+      <span className="loader"></span>
     </div>
   );
-}
+};
+
+export default Loader;
