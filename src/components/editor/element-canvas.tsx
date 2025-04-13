@@ -93,7 +93,7 @@ export default function ElementCanvas({ elementData, sectionId }: any) {
           draggedElement === element.id ? "bg-gray-100" : ""
         } ${
           draggedElement && draggedElement !== element.id
-            ? "border-dashed border-blue-300"
+            ? "border-dashed !border-blue-300"
             : ""
         }`}
         draggable
