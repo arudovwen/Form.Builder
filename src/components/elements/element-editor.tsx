@@ -450,7 +450,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
             <button
               type="submit"
               disabled={!isValid || isSubmitting}
-              style={{ background: config.buttonColor }}
+              style={{ background: config?.buttonColor || "#333" }}
               className={`flex-1 px-4 py-2.5 ${
                 !isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#2563EB]"
               } ${

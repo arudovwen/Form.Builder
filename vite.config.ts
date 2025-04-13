@@ -24,5 +24,7 @@ export default defineConfig({
         },
       },
     },
+    cssCodeSplit: true, // Split CSS into a separate file
+    assetsInlineLimit: 0, // Make sure assets are not inlined (can be omitted if you want inline assets)
   },
 });

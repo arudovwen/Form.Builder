@@ -20,11 +20,13 @@ export default function Viewer({
   onSubmit,
   isReadOnly = false,
   loading = false,
-  config,
+  config = {
+    buttonColor: "#333",
+  },
 }: RenderProps) {
   useEffect(() => {
     if (config) {
-    setItem("config", config);
+      setItem("config", config);
     }
   }, [config]);
   if (loading) {

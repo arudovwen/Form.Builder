@@ -6,11 +6,13 @@ const HomePage = ({
   onSubmit,
   questionData,
   isReadOnly,
-  config,
+  config = {
+    buttonColor: "#333",
+  },
 }: BuilderProps) => {
   useEffect(() => {
     if (config) {
-    setItem("config", config);
+      setItem("config", config);
     }
   }, [config]);
   return (

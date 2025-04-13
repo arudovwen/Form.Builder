@@ -24,7 +24,7 @@ export default function BottomBar({ onSubmit }: Props) {
       <AppButton
         onClick={() => handleSubmit()}
         text="Save Form"
-        style={{ background: config.buttonColor }}
+        style={{ background: config?.buttonColor || "#333" }}
         btnClass={`text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg`}
       />
     </div>
