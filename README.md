@@ -20,6 +20,10 @@ Install the package via npm:
 ```bash
 npm install @arudovwen/form-builder-react
 ```
+## Demo
+
+Check out the live demo of the Form Builder Package: [Form Builder Demo](https://form-builder-inky-nine.vercel.app/)
+To view after saving : [Form Viewer ](https://form-builder-inky-nine.vercel.app/viewer)
 
 ## Usage
 
