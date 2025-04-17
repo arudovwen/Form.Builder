@@ -8,19 +8,24 @@ import SectionEditorModal from "../elements/section-editor";
 const FormBuilder = () => {
   const [isOpen, setOpen] = useState(false);
   const tempSection = useRef(null);
-  const [activeSections, setActiveSections] = useState<number[]>([0]);
+  const containerRef = useRef<HTMLDivElement>(null); // Ref for the container
   const {
     removeSection,
     addElement,
     formData,
     setIsDragging,
     setSelectedSection,
-    selectedSection,
+    selectedSection,activeSections,setActiveSections
   }: any = useContext(EditorContext);
 
   const onDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
+
+    // Scroll to the bottom of the container
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
   }, []);
 
   const onDrop = useCallback(
@@ -48,6 +53,7 @@ const FormBuilder = () => {
     },
     [addElement, setIsDragging]
   );
+
   function toggleSection(index: number) {
     if (activeSections.includes(index)) {
       setActiveSections((prevSections) =>
@@ -57,12 +63,17 @@ const FormBuilder = () => {
       setActiveSections((prevSections) => [...prevSections, index]);
     }
   }
+
   function handleSectionEdit(section: any) {
     tempSection.current = section;
     setOpen(true);
   }
+
   return (
-    <div className="flex gap-x-4 mx-auto h-full relative px-6 pb-5 flex-col  no-scrollbar overflow-y-auto max-h-[86vh]">
+    <div
+      ref={containerRef} // Attach the ref to the container
+      className="flex gap-x-4 mx-auto h-full relative px-6 pb-5 flex-col no-scrollbar overflow-y-auto max-h-[86vh]"
+    >
       {isOpen && (
         <SectionEditorModal
           isOpen={isOpen}
@@ -70,7 +81,7 @@ const FormBuilder = () => {
           section={tempSection.current}
         />
       )}
-      <div className=" relative  w-full flex flex-col gap-y-6 flex-1 py-4">
+      <div className="relative w-full flex flex-col gap-y-6 flex-1 py-4">
         {formData.map(
           (
             section: {
@@ -83,12 +94,16 @@ const FormBuilder = () => {
           ) => (
             <div
               key={section.id}
-              className={`group cursor-pointer  rounded`}
+              className={`group cursor-pointer rounded`}
               onClick={() => setSelectedSection(section.id)}
             >
               <div
-                className={`border border-gray-100 rounded py-4 px-4 shadow-[rgba(149,157,165,0.2)_0px_2px_4px]  transition-colors duration-200
-                  ${selectedSection === section.id ? "border-dashed border-blue-400 bg-[#f7f8fa]" : "border-transparent"} ${
+                className={`border border-gray-100 rounded py-4 px-4 shadow-[rgba(149,157,165,0.2)_0px_2px_4px] transition-colors duration-200
+                  ${
+                    selectedSection === section.id
+                      ? "border-dashed border-blue-400 bg-[#f7f8fa]"
+                      : "border-transparent"
+                  } ${
                   activeSections.includes(index) ? "min-h-[300px]" : ""
                 }`}
               >
@@ -97,7 +112,7 @@ const FormBuilder = () => {
                     {section.title || "Section title"}
                   </h2>
 
-                  <div className="flex gap-x-4 items-center">
+                  <div className="flex gap-x-2 items-center">
                     <button
                       type="button"
                       className="p-1 border rounded-lg text-xs"
@@ -142,7 +157,7 @@ const FormBuilder = () => {
                     onDragOver={onDragOver}
                   >
                     <hr />
-                    <div className=" gap-y-6 mt-4 h-full ">
+                    <div className="gap-y-6 mt-4 h-full">
                       {
                         <ElementCanvas
                           elementData={section.questionData}

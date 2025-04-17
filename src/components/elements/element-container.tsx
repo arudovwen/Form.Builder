@@ -2,6 +2,7 @@ import React, { ReactNode, useCallback, memo, useState } from "react";
 import AppIcon from "../ui/AppIcon";
 import EditorContext from "../../context/editor-context";
 import ElementEditorModal from "./element-editor";
+import { noAllowEdit } from "../../utils/contants";
 
 interface ElementType {
   id: string;
@@ -22,10 +23,10 @@ const ElementContainer = memo(
 
     const handleRemove = useCallback(() => {
       removeElement(element.id, element.sectionId);
-    }, [element.id, removeElement]);
+    }, [element.id, element.sectionId, removeElement]);
 
     return (
-      <div>
+      <div className="w-full">
         {isOpen && (
           <ElementEditorModal
             isOpen={isOpen}
@@ -34,16 +35,25 @@ const ElementContainer = memo(
           />
         )}
         <div className="flex justify-between items-center mb-2">
-          <label className="text-sm font-medium">{element.inputLabel}</label>
+          <span>
+            {" "}
+            {element.inputLabel && (
+              <label className="text-sm font-medium">
+                {element.inputLabel}
+              </label>
+            )}
+          </span>
           {state === "edit" && (
             <span className="flex gap-x-3 items-center">
-              <button
-                type="button"
-                className="outline-none hover:opacity-80 text-sm"
-                onClick={() => setOpen(true)}
-              >
-                <AppIcon icon="circum:edit" />
-              </button>
+              {!noAllowEdit?.includes(element.type.toLowerCase()) && (
+                <button
+                  type="button"
+                  className="outline-none hover:opacity-80 text-sm"
+                  onClick={() => setOpen(true)}
+                >
+                  <AppIcon icon="circum:edit" />
+                </button>
+              )}
               <button
                 type="button"
                 className="outline-none hover:opacity-80 text-sm"

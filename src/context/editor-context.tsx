@@ -1,4 +1,4 @@
-import React, { createContext, useState, useMemo } from "react";
+import React, { createContext, useState, useMemo, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 interface EditorProviderProps {
@@ -39,6 +39,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
   const [formData, setFormData] = useState<any[]>([newSection]);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [activeSections, setActiveSections] = useState<Array<string | number>>([
+    0,
+  ]);
   const handleDragStop = React.useCallback(() => {
     // Handle drag stop (implementation depends on requirements)
   }, []);
@@ -47,7 +50,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
     const id = uuidv4();
     setFormData((prevFormData) => [...prevFormData, { ...newSection, id }]);
     setSelectedSection(id);
-  }, []);
+    setActiveSections([formData.length]);
+  }, [formData]);
   const removeSection = React.useCallback((sectionId: string) => {
     setFormData((prevFormData) =>
       prevFormData.filter((i) => i.id !== sectionId)
@@ -97,6 +101,40 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
     );
   }, []);
 
+  const updateGridElement = React.useCallback(
+    (gridIndex: number, element: any, sectionId: string) => {
+      setFormData((prevFormData) =>
+        prevFormData.map((section) =>
+          section.id === sectionId
+            ? {
+                ...section,
+                questionData: section.questionData.map((question: any) =>
+                  question.type === "grid" && question.gridData
+                    ? {
+                        ...question,
+                        gridData: question.gridData.map(
+                          (grid: any, index: number) =>
+                            index === gridIndex
+                              ? {
+                                  ...grid,
+                                  ...element,
+                                }
+                              : grid
+                        ).concat(
+                          gridIndex >= question.gridData.length
+                            ? { ...element }
+                            : []
+                        ),
+                      }
+                    : question
+                ),
+              }
+            : section
+        )
+      );
+    },
+    []
+  );
   const updateElement = React.useCallback((value: any, sectionId: string) => {
     setFormData((prevFormData) =>
       prevFormData.map((section) =>
@@ -124,6 +162,10 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
     );
   }, []);
 
+  useEffect(() => {
+    console.log("Form Data Updated:", formData);
+  }, [formData]);
+
   const value = useMemo(
     () => ({
       formData,
@@ -142,6 +184,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       setIsDragging,
       selectedSection,
       setSelectedSection,
+      activeSections,
+      setActiveSections,
+      updateGridElement,
     }),
     [
       formData,
@@ -156,6 +201,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       updateSection,
       isDragging,
       selectedSection,
+      activeSections,
+      updateGridElement,
     ]
   );
 

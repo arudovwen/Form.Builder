@@ -29,6 +29,7 @@ export interface ElementType {
   method?: string;
   denominators?: null;
   responseType?: string;
+  headerClass?: string;
 }
 
 // The Elements array
@@ -309,6 +310,21 @@ export const Elements: ElementType[] = [
     value: [],
     denominators: null,
   },
+
+  {
+    type: "divider",
+    label: "Divider",
+    icon: "pixel:divider",
+    inputLabel: "",
+    inputType: "",
+  },
+  {
+    type: "spacer",
+    label: "Spacer",
+    icon: "fluent-mdl2:spacer",
+    inputLabel: "",
+    inputType: "",
+  },
   {
     type: "grid",
     label: "Grid",
@@ -321,6 +337,7 @@ export const Elements: ElementType[] = [
     gridData: [],
   },
 ];
+
 export const AllowValidationPrefix: string[] = ["amount"];
 export const AllowValidationMaxMin: string[] = ["text", "number"];
 export const AllowValidationPlaceholder: string[] = [
@@ -331,7 +348,12 @@ export const AllowValidationPlaceholder: string[] = [
   "password",
 ];
 export const AllowValidationAmount: string[] = ["amount"];
-export const noAllowValidation: string[] = ["grid", "section"];
+export const noAllowValidation: string[] = [
+  "grid",
+  "section",
+  "divider",
+  "spacer",
+];
 export const AllowOptions: string[] = [
   "radio",
   "select",
@@ -340,3 +362,5 @@ export const AllowOptions: string[] = [
 ];
 export const AllowApiOptions: string[] = ["validateInput"];
 export const AllowTableOptions: string[] = ["tableInput"];
+export const AllowTextOptions: string[] = ["text"];
+export const noAllowEdit: string[] = ["divider", "spacer"];

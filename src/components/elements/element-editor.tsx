@@ -51,6 +51,9 @@ interface FormInputs {
   minAmount?: string;
   denominators?: any;
   responseType?: string;
+  heading?: string;
+  grid?: number;
+  minAmountMessage?: string;
 }
 
 const schema = yup.object().shape({
@@ -88,6 +91,9 @@ const schema = yup.object().shape({
   denominators: yup.mixed().nullable(),
   responseType: yup.string().nullable(),
   minAmount: yup.string().nullable(),
+  heading: yup.string().nullable(),
+  minAmountMessage: yup.string().nullable(),
+  grid: yup.number().nullable(),
 });
 
 const tabs = [
@@ -252,7 +258,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               )}
               {AllowApiOptions.includes(element.inputType) && (
                 <>
-                <ApiExample />
+                  <ApiExample />
                   <DynamicInput
                     label="Api Url"
                     name="url"
@@ -313,6 +319,15 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 errors={errors}
                 element={element}
               />
+              {element.type.toLowerCase() === "grid" && (
+                <DynamicInput
+                  label="Number of Grids"
+                  name="grid"
+                  register={register}
+                  errors={errors}
+                  element={element}
+                />
+              )}
               {AllowOptions.includes(element.inputType) &&
                 renderOptionsFields()}
               {/* Add other basic fields here */}

@@ -16,8 +16,11 @@ import ElementContainer from "../elements/element-container";
 import AmountInput from "../elements/amount-input";
 import ValidateInput from "../elements/validate-input";
 import TableInput from "../elements/table-input";
+import Spacer from "../elements/spacer";
+import Divider from "../elements/divider";
+import Header from "../elements/header";
 
-const elementMap: Record<string, React.ElementType> = {
+export const elementMap: Record<string, React.ElementType> = {
   textField: TextInput,
   longText: LongTextInput, // You may want to use a specific component for long text
   selectField: SelectInput,
@@ -34,15 +37,20 @@ const elementMap: Record<string, React.ElementType> = {
   section: SectionInput,
   validateInput: ValidateInput,
   tableInput: TableInput,
+  spacer: Spacer,
+  divider: Divider,
+  header: Header,
 };
 const state = "edit"; // This can be passed as a prop or context value
-export const renderElement = (element: any) => {
+export const renderElement = (element: any, sectionId: string) => {
   const ElementComponent = elementMap[element.type];
   return ElementComponent ? (
     <ElementContainer element={element} state={state}>
-      <div className="relative">
-        <div className="absolute top-0 left-0 h-full w-full z-20" />
-        <ElementComponent element={element} state={state} />
+      <div className="relative w-full">
+        {element.type.toLowerCase() !== "grid" && (
+          <div className="absolute top-0 left-0 h-full w-full z-20" />
+        )}
+        <ElementComponent element={element} state={state} sectionId={sectionId} />
       </div>
     </ElementContainer>
   ) : null;

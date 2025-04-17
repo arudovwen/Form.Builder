@@ -1,5 +1,3 @@
-import "./App.css";
-
 import { Routes, Route } from "react-router";
 import BulderPage from "./pages/builder";
 import ViewerPage from "./pages/viewer";
@@ -300,7 +298,7 @@ const config ={
             onSubmit={function (e: any): void {
               console.log(e);
             }}
-            questionData={data}
+            // questionData={data}
             config={config}
           />
         }

@@ -81,7 +81,7 @@ export default function ElementCanvas({ elementData, sectionId }: any) {
         setDraggedElement(null);
       }
     },
-    [formData, updateElementPosition]
+    [formData, sectionId, updateElementPosition]
   );
 
   const renderDraggableElement = useCallback(
@@ -101,7 +101,7 @@ export default function ElementCanvas({ elementData, sectionId }: any) {
         onDragOver={handleDragOver}
         onDragStart={(e) => handleDragStart(e, element.id)}
       >
-        {renderElement(element)}
+        {renderElement(element, sectionId)}
       </div>
     ),
     [draggedElement, handleDrop, handleDragOver, handleDragStart]
@@ -109,8 +109,8 @@ export default function ElementCanvas({ elementData, sectionId }: any) {
 
   if (!elementData?.length) {
     return (
-      <div className="w-full h-full flex items-center justify-center text-gray-500 min-h-[250px]  p-10">
-        No input to display
+      <div className="w-full h-full flex items-center justify-center text-gray-400 min-h-[250px]  p-10">
+        Drag or click an element to display
       </div>
     );
   }
@@ -119,7 +119,7 @@ export default function ElementCanvas({ elementData, sectionId }: any) {
     <div className="w-full h-full flex flex-col gap-y-4 relative">
       {elementData?.map(renderDraggableElement)}
       {isDragging && (
-        <div className="bg-gray-50 rounded p-6 h-[60px] border-2 border-dashed flex items-center justify-center text-gray-400 opacity-70">
+        <div className="bg-gray-50 rounded p-6 h-[120px] border-2 border-dashed flex items-center justify-center text-gray-400 opacity-70">
           <AppIcon icon="octicon:plus-16" />
         </div>
       )}

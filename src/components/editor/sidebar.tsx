@@ -14,7 +14,8 @@ interface ElementType {
 }
 
 const SideBar = () => {
-  const { setIsDragging, addElement,selectedSection }: any = useContext(EditorContext);
+  const { setIsDragging, addElement, selectedSection }: any =
+    useContext(EditorContext);
   const handleDragStart = useCallback(
     (event: DragEvent<HTMLLIElement>, element: ElementType) => {
       event.dataTransfer.setData("properties", JSON.stringify(element));
@@ -23,19 +24,19 @@ const SideBar = () => {
     },
     [setIsDragging]
   );
-function handleElement(element:any) {
-  if(!selectedSection) {
-    toast.error("Please select a section to add an element to.");
-    return;
-  };
-  const newElement = {
-    id: uuidv4(),
-    sectionId: selectedSection,
-    ...element,
-  };
+  function handleElement(element: any) {
+    if (!selectedSection) {
+      toast.error("Please select a section to add an element to.");
+      return;
+    }
+    const newElement = {
+      id: uuidv4(),
+      sectionId: selectedSection,
+      ...element,
+    };
 
-  addElement(newElement, selectedSection);
-}
+    addElement(newElement, selectedSection);
+  }
   return (
     <div className="w-full">
       <div className="pt-4 px-5 max-h-[70vh] overflow-y-auto">
@@ -57,15 +58,16 @@ function handleElement(element:any) {
                 draggable
               >
                 <span className="flex gap-x-2 items-center">
-                  <span style={{ color: element.color }}>
-                    <AppIcon icon={element.icon} iconClass="w-5 h-5" />
+                  <span className="text-gray-400">
+                    <AppIcon icon="akar-icons:drag-vertical" />
                   </span>
+
                   <span className="text-sm font-medium leading-[0]">
                     {element.label}
                   </span>
                 </span>
-                <span className="text-gray-400">
-                  <AppIcon icon="akar-icons:drag-horizontal" />
+                <span style={{ color: element.color }}>
+                  <AppIcon icon={element.icon} iconClass="w-4 h-4" />
                 </span>
               </li>
             ))}
