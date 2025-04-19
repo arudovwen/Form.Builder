@@ -20,7 +20,7 @@ export default function BottomBar({ onSubmit }: Props) {
     toast.success("Saved successfully");
   }
   return (
-    <div className="px-[30px] py-8 flex justify-end items-center">
+    <div className="px-[30px] py-4 flex justify-end items-center">
       <AppButton
         onClick={() => handleSubmit()}
         text="Save Form"

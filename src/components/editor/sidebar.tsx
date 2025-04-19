@@ -39,7 +39,7 @@ const SideBar = () => {
   }
   return (
     <div className="w-full">
-      <div className="pt-4 px-5 max-h-[70vh] overflow-y-auto">
+      <div className="pt-4 px-5 max-h-[80vh] overflow-y-auto">
         <div>
           <ul className="grid gap-y-[8px] mt-3">
             {Elements.map((element: ElementType) => (
