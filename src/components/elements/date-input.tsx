@@ -1,3 +1,5 @@
+import clsx from "clsx";
+
 export default function DateInput({
   element,
   validationData,
@@ -10,7 +12,7 @@ export default function DateInput({
     <input
       placeholder={element.placeholder}
       type={element.inputType}
-      className="input-control"
+      className={clsx("input-control", element?.customClass)}
       {...register(element.id)}
     />
   );

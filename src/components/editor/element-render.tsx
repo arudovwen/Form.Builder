@@ -19,6 +19,7 @@ import TableInput from "../elements/table-input";
 import Spacer from "../elements/spacer";
 import Divider from "../elements/divider";
 import Header from "../elements/header";
+import BasicText from "../elements/basic-text";
 
 export const elementMap: Record<string, React.ElementType> = {
   textField: TextInput,
@@ -40,6 +41,7 @@ export const elementMap: Record<string, React.ElementType> = {
   spacer: Spacer,
   divider: Divider,
   header: Header,
+  basicText: BasicText,
 };
 const state = "edit"; // This can be passed as a prop or context value
 export const renderElement = (element: any, sectionId: string) => {
@@ -50,7 +52,11 @@ export const renderElement = (element: any, sectionId: string) => {
         {element.type.toLowerCase() !== "grid" && (
           <div className="absolute top-0 left-0 h-full w-full z-20" />
         )}
-        <ElementComponent element={element} state={state} sectionId={sectionId} />
+        <ElementComponent
+          element={element}
+          state={state}
+          sectionId={sectionId}
+        />
       </div>
     </ElementContainer>
   ) : null;

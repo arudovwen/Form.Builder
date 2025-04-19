@@ -16,6 +16,7 @@ import {
   noAllowValidation,
   AllowApiOptions,
   AllowTableOptions,
+  allowValue,
 } from "../../utils/contants";
 
 import CustomSelect from "../CustomSelect";
@@ -54,10 +55,12 @@ interface FormInputs {
   heading?: string;
   grid?: number;
   minAmountMessage?: string;
+  value?: any;
+  customClass?: string;
 }
 
 const schema = yup.object().shape({
-  inputLabel: yup.string().required("Label is required"),
+  inputLabel: yup.string().nullable(),
   placeholder: yup.string().nullable(),
   description: yup.string().nullable(),
   isReadOnly: yup.boolean(),
@@ -94,6 +97,8 @@ const schema = yup.object().shape({
   heading: yup.string().nullable(),
   minAmountMessage: yup.string().nullable(),
   grid: yup.number().nullable(),
+  value: yup.mixed().nullable(),
+  customClass: yup.string().nullable(),
 });
 
 const tabs = [
@@ -112,6 +117,10 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   onClose,
   element,
 }) => {
+  const filteredTabs = tabs.filter(
+    (tab) =>
+      !noAllowValidation.includes(element.inputType) || tab.key !== "validation"
+  );
   const { updateElement }: any = React.useContext(EditorContext);
   const [activeTab, setActiveTab] = useState("basic");
   const config = getItem("config");
@@ -219,7 +228,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         {/* Tabs */}
         <div className="w-full">
           <TabsComponent
-            tabs={tabs}
+            tabs={filteredTabs}
             setActiveTab={setActiveTab}
             activeTab={activeTab}
             className="justify-start !text-left"
@@ -231,13 +240,34 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         <form onSubmit={handleSubmit(onSubmit)} className="w-full">
           {activeTab === "basic" && (
             <div className="w-full px-6 flex flex-col gap-5 z-10">
+              {allowValue.includes(element.inputType) && (
+                <>
+                  <DynamicInput
+                    label="Value"
+                    name="value"
+                    register={register}
+                    errors={errors}
+                    element={element}
+                  />
+                </>
+              )}
               <DynamicInput
-                label="Label"
-                name="inputLabel"
+                label="Custom Class"
+                name="customClass"
                 register={register}
                 errors={errors}
                 element={element}
               />
+              {(!allowValue.includes(element.inputType) &&
+                !noAllowValidation.includes(element.inputType)) && (
+                <DynamicInput
+                  label="Label"
+                  name="inputLabel"
+                  register={register}
+                  errors={errors}
+                  element={element}
+                />
+              )}
               {AllowValidationPlaceholder.includes(element.inputType) && (
                 <DynamicInput
                   label="Placeholder"
@@ -312,13 +342,16 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   value={watch("denominators")}
                 />
               )}
-              <DynamicInput
-                label="Short Description"
-                name="description"
-                register={register}
-                errors={errors}
-                element={element}
-              />
+              {(!allowValue.includes(element.inputType) &&
+                !noAllowValidation.includes(element.inputType)) && (
+                <DynamicInput
+                  label="Short Description"
+                  name="description"
+                  register={register}
+                  errors={errors}
+                  element={element}
+                />
+              )}
               {element.type.toLowerCase() === "grid" && (
                 <DynamicInput
                   label="Number of Grids"
@@ -330,7 +363,6 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               )}
               {AllowOptions.includes(element.inputType) &&
                 renderOptionsFields()}
-              {/* Add other basic fields here */}
             </div>
           )}
 

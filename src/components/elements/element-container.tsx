@@ -2,7 +2,6 @@ import React, { ReactNode, useCallback, memo, useState } from "react";
 import AppIcon from "../ui/AppIcon";
 import EditorContext from "../../context/editor-context";
 import ElementEditorModal from "./element-editor";
-import { noAllowEdit } from "../../utils/contants";
 
 interface ElementType {
   id: string;
@@ -45,7 +44,7 @@ const ElementContainer = memo(
           </span>
           {state === "edit" && (
             <span className="flex gap-x-3 items-center">
-              {!noAllowEdit?.includes(element.type.toLowerCase()) && (
+           
                 <button
                   type="button"
                   className="outline-none hover:opacity-80 text-sm"
@@ -53,7 +52,7 @@ const ElementContainer = memo(
                 >
                   <AppIcon icon="circum:edit" />
                 </button>
-              )}
+             
               <button
                 type="button"
                 className="outline-none hover:opacity-80 text-sm"

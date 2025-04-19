@@ -33,6 +33,7 @@ export interface ElementType {
     denominators?: null;
     responseType?: string;
     headerClass?: string;
+    customClass?: string | null;
 }
 export declare const Elements: ElementType[];
 export declare const AllowValidationPrefix: string[];
@@ -45,3 +46,4 @@ export declare const AllowApiOptions: string[];
 export declare const AllowTableOptions: string[];
 export declare const AllowTextOptions: string[];
 export declare const noAllowEdit: string[];
+export declare const allowValue: string[];

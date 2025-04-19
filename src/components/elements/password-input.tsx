@@ -1,3 +1,5 @@
+import clsx from "clsx";
+
 export default function PasswordInput({
   element,
   validationData,
@@ -10,7 +12,7 @@ export default function PasswordInput({
     <input
       placeholder={element.placeholder}
       type={element.inputType}
-      className="input-control"
+      className={clsx("input-control", element?.customClass)}
       {...register(element.id)}
     />
   );
