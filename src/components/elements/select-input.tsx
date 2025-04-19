@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import CustomSelect from "../CustomSelect";
+import clsx from "clsx";
 // import { ElementType } from "../../utils/contants";
 
 export default function SelectInput({
@@ -33,6 +34,7 @@ export default function SelectInput({
         setValue={setValue}
         trigger={trigger}
         value={selectedValue}
+        className={clsx("input-control", element?.customClass)}
       />
     </div>
   );

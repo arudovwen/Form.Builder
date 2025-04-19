@@ -104,7 +104,7 @@ export default function ElementCanvas({ elementData, sectionId }: any) {
         {renderElement(element, sectionId)}
       </div>
     ),
-    [draggedElement, handleDrop, handleDragOver, handleDragStart]
+    [draggedElement, handleDrop, handleDragOver, sectionId, handleDragStart]
   );
 
   if (!elementData?.length) {

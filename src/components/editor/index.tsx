@@ -1,4 +1,4 @@
-import { useContext, useCallback, DragEvent, useState, useRef } from "react";
+import { useContext, useCallback, DragEvent, useState, useRef, useEffect } from "react";
 import EditorContext from "../../context/editor-context";
 import ElementCanvas from "./element-canvas";
 import { v4 as uuidv4 } from "uuid";
@@ -18,6 +18,10 @@ const FormBuilder = () => {
     selectedSection,activeSections,setActiveSections
   }: any = useContext(EditorContext);
 
+  useEffect(() => {
+    setSelectedSection(formData[0]?.id || null);
+  }, [])
+  
   const onDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";

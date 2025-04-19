@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import AppIcon from "../ui/AppIcon";
 import { isValidImage } from "../../utils/isValidImage";
 import ImageViewer from "../ImageViewer";
+import clsx from "clsx";
 
 export default function ValidateInput({
   element,
@@ -89,7 +90,7 @@ export default function ValidateInput({
         <input
           placeholder={element?.placeholder || ""}
           type={element?.inputType || "text"}
-          className="input-control"
+          className={clsx("input-control", element?.customClass)}
           {...register(element?.id)}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setValueState(e.target.value);

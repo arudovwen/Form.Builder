@@ -1,7 +1,10 @@
-export default function Divider() {
+import clsx from "clsx";
+
+export default function Divider({element}) {
+  const staticClass = "border-gray-200 my-4";
   return (
     <div>
-      <hr className="border-gray-200 my-4" />
+      <hr className={clsx(staticClass, element?.customClass)} />
     </div>
   );
 }

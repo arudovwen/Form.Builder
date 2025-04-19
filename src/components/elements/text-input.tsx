@@ -1,9 +1,11 @@
+import clsx from "clsx";
 export default function TextInput({
   element,
-  validationData,
+  validationData
 }: {
   element: any;
   validationData: any;
+  state?: string
 }) {
 
   const { register = () => ({}) } = validationData || {};
@@ -12,7 +14,7 @@ export default function TextInput({
       <input
         placeholder={element?.placeholder || ""}
         type={element?.inputType || "text"}
-        className="input-control"
+        className={clsx("input-control", element?.customClass)}
         {...register(element?.id)}
       />
     </div>

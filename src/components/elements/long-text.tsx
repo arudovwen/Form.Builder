@@ -1,3 +1,5 @@
+import clsx from "clsx";
+
 export default function LongTextInput({
   element,
   validationData,
@@ -10,7 +12,7 @@ export default function LongTextInput({
     <textarea
       placeholder={element.placeholder}
       rows={4}
-      className="input-control resize-none"
+      className={clsx("input-control resize-none", element?.customClass)}
       {...register(element.id)}
     ></textarea>
   );

@@ -46,6 +46,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
     // Handle drag stop (implementation depends on requirements)
   }, []);
 
+  
   const addSection = React.useCallback(() => {
     const id = uuidv4();
     setFormData((prevFormData) => [...prevFormData, { ...newSection, id }]);

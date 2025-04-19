@@ -30,13 +30,34 @@ export interface ElementType {
   denominators?: null;
   responseType?: string;
   headerClass?: string;
+  customClass?: string | null;
 }
 
 // The Elements array
 export const Elements: ElementType[] = [
   {
+    type: "basicText",
+    label: "Basic Text",
+    icon: "fluent:text-16-filled",
+    inputLabel: "",
+    required: false,
+    inputType: "basicText",
+    maxLength: null,
+    minLength: null,
+    placeholder: "Type here",
+    description: "",
+    isReadOnly: false,
+    isDisabled: false,
+    isRequired: false,
+    requiredMessage: "Field is required",
+    minLengthMessage: "",
+    maxLengthMessage: "",
+    value: null,
+    customClass: "",
+  },
+  {
     type: "textField",
-    label: "Short Text",
+    label: "Short Text Field",
     icon: "fluent:text-16-filled",
     inputLabel: "Short Text Label",
     required: false,
@@ -52,10 +73,11 @@ export const Elements: ElementType[] = [
     minLengthMessage: "",
     maxLengthMessage: "",
     value: null,
+    customClass: "",
   },
   {
     type: "longText",
-    label: "Long Text",
+    label: "Long Text Field",
     icon: "dashicons:text",
     inputLabel: "Long Text Label",
     required: false,
@@ -71,6 +93,7 @@ export const Elements: ElementType[] = [
     minLengthMessage: "",
     maxLengthMessage: "",
     value: null,
+    customClass: "",
   },
   {
     type: "selectField",
@@ -91,6 +114,7 @@ export const Elements: ElementType[] = [
     maxLengthMessage: "",
     value: null,
     options: [],
+    customClass: "",
   },
   {
     type: "multiSelect",
@@ -111,6 +135,7 @@ export const Elements: ElementType[] = [
     maxLengthMessage: "",
     value: null,
     options: [],
+    customClass: "",
   },
   {
     type: "validateInput",
@@ -133,6 +158,7 @@ export const Elements: ElementType[] = [
     url: "https://api.example.com/validate?value={value}",
     method: "GET",
     responseType: "string",
+    customClass: "",
   },
 
   {
@@ -153,6 +179,7 @@ export const Elements: ElementType[] = [
     minLengthMessage: "",
     maxLengthMessage: "",
     value: null,
+    customClass: "",
   },
   {
     type: "amountField",
@@ -173,6 +200,7 @@ export const Elements: ElementType[] = [
     maxAmountMessage: "",
     value: null,
     prefix: null,
+    customClass: "",
   },
   {
     type: "date",
@@ -192,6 +220,7 @@ export const Elements: ElementType[] = [
     minLengthMessage: "",
     maxLengthMessage: "",
     value: null,
+    customClass: "",
   },
   {
     type: "password",
@@ -211,6 +240,7 @@ export const Elements: ElementType[] = [
     minLengthMessage: "",
     maxLengthMessage: "",
     value: null,
+    customClass: "",
   },
   {
     type: "checkbox",
@@ -231,6 +261,7 @@ export const Elements: ElementType[] = [
     maxLengthMessage: "",
     value: null,
     options: [],
+    customClass: "",
   },
   {
     type: "radio",
@@ -251,6 +282,7 @@ export const Elements: ElementType[] = [
     maxLengthMessage: "",
     value: null,
     options: [],
+    customClass: "",
   },
   {
     type: "email",
@@ -270,6 +302,7 @@ export const Elements: ElementType[] = [
     minLengthMessage: "",
     maxLengthMessage: "",
     value: null,
+    customClass: "",
   },
   {
     type: "file",
@@ -289,6 +322,7 @@ export const Elements: ElementType[] = [
     minLengthMessage: "",
     maxLengthMessage: "",
     value: null,
+    customClass: "",
   },
   {
     type: "tableInput",
@@ -309,6 +343,7 @@ export const Elements: ElementType[] = [
     maxLengthMessage: "",
     value: [],
     denominators: null,
+    customClass: "",
   },
 
   {
@@ -316,14 +351,16 @@ export const Elements: ElementType[] = [
     label: "Divider",
     icon: "pixel:divider",
     inputLabel: "",
-    inputType: "",
+    inputType: "divider",
+    customClass: "",
   },
   {
     type: "spacer",
     label: "Spacer",
     icon: "fluent-mdl2:spacer",
     inputLabel: "",
-    inputType: "",
+    inputType: "spacer",
+    customClass: "",
   },
   {
     type: "grid",
@@ -353,6 +390,7 @@ export const noAllowValidation: string[] = [
   "section",
   "divider",
   "spacer",
+  "basicText",
 ];
 export const AllowOptions: string[] = [
   "radio",
@@ -364,3 +402,4 @@ export const AllowApiOptions: string[] = ["validateInput"];
 export const AllowTableOptions: string[] = ["tableInput"];
 export const AllowTextOptions: string[] = ["text"];
 export const noAllowEdit: string[] = ["divider", "spacer"];
+export const allowValue: string[] = ["basicText"];
