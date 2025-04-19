@@ -3,7 +3,7 @@
 
 The **Form Builder Package** is a reusable library designed to simplify the creation and management of dynamic forms in web applications. It provides a robust API and customizable components to streamline form-building workflows.
 
- **This package is still in development**
+**This package is still in development**
 
 ## Features
 
@@ -20,10 +20,15 @@ Install the package via npm:
 ```bash
 npm install @arudovwen/form-builder-react
 ```
+
 ## Demo
 
-Check out the live demo of the Form Builder Package: [Form Builder Demo](https://form-builder-inky-nine.vercel.app/), 
-To view after saving : [Form Viewer ](https://form-builder-inky-nine.vercel.app/viewer)
+Check out the live demo of the Form Builder Package: [Form Builder Demo](https://form-builder-inky-nine.vercel.app/),  
+To view after saving: [Form Viewer](https://form-builder-inky-nine.vercel.app/viewer)
+
+## GitHub Repository
+
+Find the source code and contribute to the project on GitHub: [Form Builder GitHub Repository](https://github.com/arudovwen/Form.Builder)
 
 ## Usage
 
@@ -33,7 +38,6 @@ Here’s a quick example of how to use the Form Builder Package:
 import React, { useState, useEffect } from "react";
 import { FormBuilder, FormViewer } from "@arudovwen/form-builder-react";
 import "@arudovwen/form-builder-react/dist/index.css";
-
 
 function App() {
   const [formData, setFormData] = useState(null);
@@ -61,28 +65,23 @@ function App() {
   };
 
   return (
-   
-     <>
-          <FormBuilder
-            onSubmit={(form_data: any) => console.log(form_data)}
-            config={config}
-          />
-      
-     
-          <FormViewer
-            onSubmit={(e: any) => console.log(e)}
-            form_data={formData}
-            anwserData={answerData}
-            config={config}
-            loading={loading}
-          />
-          </>
-      
+    <>
+      <FormBuilder
+        onSubmit={(form_data: any) => console.log(form_data)}
+        config={config}
+      />
+      <FormViewer
+        onSubmit={(e: any) => console.log(e)}
+        form_data={formData}
+        anwserData={answerData}
+        config={config}
+        loading={loading}
+      />
+    </>
   );
 }
 
 export default App;
-
 ```
 
 ### Props for `FormBuilder`
@@ -160,4 +159,4 @@ Contributions are welcome! Please fork the repository, create a feature branch, 
 ---
 
 Happy form building!
-```
+
