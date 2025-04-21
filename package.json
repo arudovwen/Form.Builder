@@ -59,9 +59,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/arudovwen/Form.Builder"
+    "url": "https://github.com/arudovwen/Form.Builder.git"
   },
-  "homepage": "https://github.com/arudovwen/Form.Builder",
+  "homepage": "https://github.com/arudovwen/Form.Builder#readme",
   "author": {
     "name": "Success Ahon",
     "email": "successahoon@gmail.com"
