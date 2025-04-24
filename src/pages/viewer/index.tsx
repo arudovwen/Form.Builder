@@ -11,6 +11,7 @@ export interface RenderProps {
   ignoreValidation?: boolean; // Flag to ignore validation
   loading?: boolean; // Flag to indicate if the form is loading
   config?: any; // Configuration for the form
+  renderType: "multi" | "single";
 }
 
 export default function Viewer({
@@ -23,6 +24,7 @@ export default function Viewer({
   config = {
     buttonColor: "#333",
   },
+  renderType
 }: RenderProps) {
   useEffect(() => {
     if (config) {
@@ -52,7 +54,7 @@ export default function Viewer({
         ignoreValidation={ignoreValidation}
         onSubmitData={onSubmit}
         isReadOnly={isReadOnly}
- 
+        renderType={renderType}
       />
     </div>
   );

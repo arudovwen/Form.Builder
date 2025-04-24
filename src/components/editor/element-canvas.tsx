@@ -1,128 +1,186 @@
-import { useContext, useState, useCallback, DragEvent } from "react";
+import {
+  useContext,
+  useState,
+  useCallback,
+  DragEvent,
+  memo,
+  useMemo,
+} from "react";
+import clsx from "clsx";
+import { v4 as uuidv4 } from "uuid";
+
 import EditorContext from "../../context/editor-context";
 import { renderElement } from "./element-render";
 import AppIcon from "../ui/AppIcon";
+import GridInput, { GridItem } from "../elements/grid-input";
+import ElementContainer from "../elements/element-container";
 
-export interface FormElement {
-  id: string;
-  isReadOnly?: false;
-  [key: string]: any;
-}
+const STATE = 'edit'
+function ElementCanvas({ elementData, sectionId }: any) {
+  const {
+    formData,
+    updateElementPosition,
+    isDragging,
+    setIsDragging,
+    addElementInPosition,
+  } = useContext(EditorContext);
 
-export interface EditorContextType {
-  formData: FormElement[];
-  setFormData: (data: FormElement[]) => void;
-  updateElementPosition: (newData: FormElement[], sectionId: string) => void;
-  updateElement: any;
-  removeElement: any;
-  isDragging: boolean;
-}
+  const [draggedElementId, setDraggedElementId] = useState<string | null>(null);
+  const [dragOverTargetId, setDragOverTargetId] = useState<string | null>(null);
 
-export default function ElementCanvas({ elementData, sectionId }: any) {
-  const { formData, updateElementPosition, isDragging } = useContext(
-    EditorContext
-  ) as unknown as EditorContextType;
-  const [draggedElement, setDraggedElement] = useState<string | null>(null);
-
-  const handleDragStart = useCallback(
-    (event: DragEvent<HTMLDivElement>, elementId: string) => {
-      event.dataTransfer.setData("properties", elementId);
-      setDraggedElement(elementId);
-    },
-
-    []
+  const questionData = useMemo(
+    () => formData.find((s) => s.id === sectionId)?.questionData || [],
+    [formData, sectionId]
   );
 
-  const handleDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    event.dataTransfer.dropEffect = "move";
+  const handleDragStart = useCallback((e: DragEvent<HTMLDivElement>, id: string) => {
+    e.dataTransfer.setData("properties", id);
+    setDraggedElementId(id);
   }, []);
 
-  const handleDrop = useCallback(
-    (event: DragEvent<HTMLDivElement>) => {
-      event.preventDefault();
-      event.stopPropagation();
-      const questionData = formData.find(
-        (section) => section.id === sectionId
-      )?.questionData;
-      try {
-        const draggedElementId = event.dataTransfer.getData("properties");
-        const targetElement = event.currentTarget;
+  const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverTargetId(id);
+  }, []);
 
-        if (!targetElement.id || draggedElementId === targetElement.id) {
-          return;
-        }
+  const handleDrop = useCallback((e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-        const draggedIndex = questionData.findIndex(
-          (el: { id: string }) => el.id === draggedElementId
-        );
-        const targetIndex = questionData.findIndex(
-          (el: { id: string }) => el.id === targetElement.id
-        );
+    const draggedId = e.dataTransfer.getData("properties");
+    const targetId = e.currentTarget.id;
 
-        if (draggedIndex === -1 || targetIndex === -1) {
-          return;
-        }
+    if (!targetId || draggedId === targetId) return;
 
-        // Create a new array and swap the elements
-        if (questionData.length) {
-          const updatedFormData = [...questionData];
-          [updatedFormData[draggedIndex], updatedFormData[targetIndex]] = [
-            updatedFormData[targetIndex],
-            updatedFormData[draggedIndex],
-          ];
+    const fromIndex = questionData.findIndex((el) => el.id === draggedId);
+    const toIndex = questionData.findIndex((el) => el.id === targetId);
+    if (fromIndex === -1 || toIndex === -1) return;
 
-          updateElementPosition(updatedFormData, sectionId);
-          setDraggedElement(null);
-        }
-      } catch (error) {
-        console.error("Error during drag and drop:", error);
-        setDraggedElement(null);
-      }
-    },
-    [formData, sectionId, updateElementPosition]
-  );
+    const updated = [...questionData];
+    const [moved] = updated.splice(fromIndex, 1);
+    updated.splice(toIndex, 0, moved);
 
-  const renderDraggableElement = useCallback(
-    (element: FormElement) => (
-      <div
-        key={element.id}
-        id={element.id}
-        className={`cursor-move border p-4 w-full transition-colors rounded-lg bg-white ${
-          draggedElement === element.id ? "bg-gray-100" : ""
-        } ${
-          draggedElement && draggedElement !== element.id
-            ? "border-dashed !border-blue-300"
-            : ""
-        }`}
-        draggable
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragStart={(e) => handleDragStart(e, element.id)}
-      >
-        {renderElement(element, sectionId)}
+    updateElementPosition(updated, sectionId);
+    setDraggedElementId(null);
+  }, [questionData, sectionId, updateElementPosition]);
+
+  const handleMainDrop = useCallback((e: DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    try {
+      const data = JSON.parse(e.dataTransfer.getData("properties"));
+      const newElement = { ...data, id: uuidv4(), sectionId };
+      addElementInPosition(newElement, sectionId, index);
+    } catch (err) {
+      console.error("Drop error:", err);
+    }
+  }, [addElementInPosition, sectionId, setIsDragging]);
+
+  const renderDropZone = useCallback((index: number) => (
+    <div
+      key={`drop-${index}`}
+      className="hover:bg-blue-300 transition rounded"
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => handleMainDrop(e, index)}
+      onDragEnd={() => setIsDragging(false)}
+    >
+      <div className="bg-blue-50 rounded p-6 h-[60px] border-2 border-blue-300 border-dashed flex items-center justify-center text-gray-400 opacity-70">
+        <AppIcon icon="octicon:plus-16" />
       </div>
-    ),
-    [draggedElement, handleDrop, handleDragOver, sectionId, handleDragStart]
-  );
+    </div>
+  ), [handleMainDrop, setIsDragging]);
+
+  const renderDraggableElement = useCallback((element: any) => (
+    <div
+      key={element.id}
+      id={element.id}
+      className={clsx(
+        "cursor-move border p-4 w-full rounded-lg transition-colors bg-white",
+        {
+          "bg-gray-100": draggedElementId === element.id,
+          "border-dashed border-blue-300":
+            draggedElementId && draggedElementId !== element.id,
+        }
+      )}
+      draggable
+      onDragStart={(e) => handleDragStart(e, element.id)}
+      onDragOver={(e) => handleDragOver(e, element.id)}
+      onDrop={handleDrop}
+      onDragEnd={() => setDraggedElementId(null)}
+    >
+      {renderElement(element, sectionId)}
+    </div>
+  ), [draggedElementId, handleDrop, handleDragOver, sectionId, handleDragStart]);
+
+  const gridChildrenMap = useMemo(() => {
+    return elementData?.reduce((acc: Record<string, any[]>, el: any) => {
+      if (el.gridId) {
+        acc[el.gridId] = acc[el.gridId] || [];
+        acc[el.gridId].push(el);
+      }
+      return acc;
+    }, {}) || {};
+  }, [elementData]);
 
   if (!elementData?.length) {
     return (
-      <div className="w-full h-full flex items-center justify-center text-gray-400 min-h-[250px]  p-10">
+      <div className="w-full h-full flex items-center justify-center text-gray-400 min-h-[250px] p-10 col-span-2">
         Drag or click an element to display
       </div>
     );
   }
 
   return (
-    <div className="w-full h-full flex flex-col gap-y-4 relative">
-      {elementData?.map(renderDraggableElement)}
-      {isDragging && (
-        <div className="bg-gray-50 rounded p-6 h-[120px] border-2 border-dashed flex items-center justify-center text-gray-400 opacity-70">
-          <AppIcon icon="octicon:plus-16" />
-        </div>
-      )}
+    <div className="w-full h-full grid grid-cols-1 gap-4 relative">
+      {elementData.map((el: any, index: number) => {
+        if (el.type === "grid") {
+          const gridChildren = gridChildrenMap[el.id] || [];
+
+          return (
+            <div
+              key={el.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, el.id)}
+              onDragOver={(e) => handleDragOver(e, el.id)}
+              onDrop={handleDrop}
+              onDragEnd={() => setDraggedElementId(null)}
+              className="cursor-move border p-4 w-full rounded-lg transition-colors bg-white"
+            >
+              <ElementContainer element={el} state="edit">
+                <GridInput element={el} sectionId={sectionId} state={STATE}>
+                  {gridChildren.map((child) => (
+                    <GridItem key={child.id} col={child.gridPosition?.col}>
+                      {renderElement(child, sectionId)}
+                    </GridItem>
+                  ))}
+                </GridInput>
+              </ElementContainer>
+            </div>
+          );
+        }
+
+        if (!el.gridId) {
+          return (
+            <div
+              key={el.id}
+              className={clsx(
+                "group relative grid gap-y-[6px]",
+                el.elementClass
+              )}
+            >
+              {isDragging && dragOverTargetId === el.id && renderDropZone(index)}
+              <div className="group">{renderDraggableElement(el)}</div>
+              {isDragging && dragOverTargetId === el.id && renderDropZone(index + 1)}
+            </div>
+          );
+        }
+
+        return null;
+      })}
     </div>
   );
 }
+
+export default memo(ElementCanvas);

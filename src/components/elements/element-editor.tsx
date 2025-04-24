@@ -53,10 +53,11 @@ interface FormInputs {
   denominators?: any;
   responseType?: string;
   heading?: string;
-  grid?: number;
+  columns?: number;
   minAmountMessage?: string;
   value?: any;
   customClass?: string;
+  elementClass?: string
 }
 
 const schema = yup.object().shape({
@@ -69,8 +70,8 @@ const schema = yup.object().shape({
   requiredMessage: yup.string().nullable(),
   minLengthMessage: yup.string().nullable(),
   maxLengthMessage: yup.string().nullable(),
-  maxLength: yup.number().nullable(),
-  minLength: yup.number().nullable(),
+  maxLength: yup.number().typeError("Expecting a number").nullable(),
+  minLength: yup.number().typeError("Expecting a number").nullable(),
   inputType: yup.string().nullable(),
   maxAmountMessage: yup.string().nullable(),
   maxAmount: yup.string().nullable(),
@@ -96,9 +97,10 @@ const schema = yup.object().shape({
   minAmount: yup.string().nullable(),
   heading: yup.string().nullable(),
   minAmountMessage: yup.string().nullable(),
-  grid: yup.number().nullable(),
+  columns: yup.number().nullable(),
   value: yup.mixed().nullable(),
   customClass: yup.string().nullable(),
+  elementClass: yup.string().nullable(),
 });
 
 const tabs = [
@@ -258,16 +260,23 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 errors={errors}
                 element={element}
               />
-              {(!allowValue.includes(element.inputType) &&
-                !noAllowValidation.includes(element.inputType)) && (
-                <DynamicInput
-                  label="Label"
-                  name="inputLabel"
-                  register={register}
-                  errors={errors}
-                  element={element}
-                />
-              )}
+               <DynamicInput
+                label="Element Class"
+                name="elementClass"
+                register={register}
+                errors={errors}
+                element={element}
+              />
+              {!allowValue.includes(element.inputType) &&
+                !noAllowValidation.includes(element.inputType) && (
+                  <DynamicInput
+                    label="Label"
+                    name="inputLabel"
+                    register={register}
+                    errors={errors}
+                    element={element}
+                  />
+                )}
               {AllowValidationPlaceholder.includes(element.inputType) && (
                 <DynamicInput
                   label="Placeholder"
@@ -342,20 +351,20 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   value={watch("denominators")}
                 />
               )}
-              {(!allowValue.includes(element.inputType) &&
-                !noAllowValidation.includes(element.inputType)) && (
-                <DynamicInput
-                  label="Short Description"
-                  name="description"
-                  register={register}
-                  errors={errors}
-                  element={element}
-                />
-              )}
+              {!allowValue.includes(element.inputType) &&
+                !noAllowValidation.includes(element.inputType) && (
+                  <DynamicInput
+                    label="Short Description"
+                    name="description"
+                    register={register}
+                    errors={errors}
+                    element={element}
+                  />
+                )}
               {element.type.toLowerCase() === "grid" && (
                 <DynamicInput
-                  label="Number of Grids"
-                  name="grid"
+                  label="Number of columns"
+                  name="columns"
                   register={register}
                   errors={errors}
                   element={element}

@@ -17,8 +17,9 @@ export interface ElementType {
   maxLengthMessage?: string;
   value?: any;
   options?: Array<{ label: string; value: any }>;
-  grid?: number;
-  gridData?: any[];
+  columns?: number;
+  gridId?: string;
+  gridPosition?: Record<string, any>,
   maxAmount?: number | null;
   minAmount?: number | null;
   minAmountMessage?: string;
@@ -31,6 +32,7 @@ export interface ElementType {
   responseType?: string;
   headerClass?: string;
   customClass?: string | null;
+  elementClass?: string;
 }
 
 // The Elements array
@@ -54,6 +56,9 @@ export const Elements: ElementType[] = [
     maxLengthMessage: "",
     value: null,
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
   {
     type: "textField",
@@ -74,6 +79,9 @@ export const Elements: ElementType[] = [
     maxLengthMessage: "",
     value: null,
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
   {
     type: "longText",
@@ -94,6 +102,9 @@ export const Elements: ElementType[] = [
     maxLengthMessage: "",
     value: null,
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
   {
     type: "selectField",
@@ -115,6 +126,9 @@ export const Elements: ElementType[] = [
     value: null,
     options: [],
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
   {
     type: "multiSelect",
@@ -136,6 +150,9 @@ export const Elements: ElementType[] = [
     value: null,
     options: [],
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
   {
     type: "validateInput",
@@ -159,6 +176,9 @@ export const Elements: ElementType[] = [
     method: "GET",
     responseType: "string",
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
 
   {
@@ -180,6 +200,9 @@ export const Elements: ElementType[] = [
     maxLengthMessage: "",
     value: null,
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
   {
     type: "amountField",
@@ -201,6 +224,9 @@ export const Elements: ElementType[] = [
     value: null,
     prefix: null,
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
   {
     type: "date",
@@ -221,6 +247,9 @@ export const Elements: ElementType[] = [
     maxLengthMessage: "",
     value: null,
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
   {
     type: "password",
@@ -241,6 +270,9 @@ export const Elements: ElementType[] = [
     maxLengthMessage: "",
     value: null,
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
   {
     type: "checkbox",
@@ -262,6 +294,9 @@ export const Elements: ElementType[] = [
     value: null,
     options: [],
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
   {
     type: "radio",
@@ -283,6 +318,9 @@ export const Elements: ElementType[] = [
     value: null,
     options: [],
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
   {
     type: "email",
@@ -303,6 +341,9 @@ export const Elements: ElementType[] = [
     maxLengthMessage: "",
     value: null,
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
   {
     type: "file",
@@ -323,6 +364,9 @@ export const Elements: ElementType[] = [
     maxLengthMessage: "",
     value: null,
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
   {
     type: "tableInput",
@@ -344,6 +388,9 @@ export const Elements: ElementType[] = [
     value: [],
     denominators: null,
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
 
   {
@@ -353,6 +400,9 @@ export const Elements: ElementType[] = [
     inputLabel: "",
     inputType: "divider",
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
   {
     type: "spacer",
@@ -361,17 +411,19 @@ export const Elements: ElementType[] = [
     inputLabel: "",
     inputType: "spacer",
     customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null
   },
   {
     type: "grid",
     label: "Grid",
     icon: "cuida:grid-outline",
-    inputLabel: "Grid Text Label",
+    inputLabel: "",
     inputType: "grid",
     placeholder: "Type here",
     description: "",
-    grid: 2,
-    gridData: [],
+    columns: 2,
   },
 ];
 

@@ -4,7 +4,6 @@ import TextInput from "../elements/text-input";
 import MultiSelectInput from "../elements/multi-select-input";
 import EmailInput from "../elements/email-input";
 import FileInput from "../elements/file-input";
-import GridInput from "../elements/grid-input";
 import NumberInput from "../elements/text-input";
 import PasswordInput from "../elements/password-input";
 import RadioInput from "../elements/radio-input";
@@ -34,7 +33,7 @@ export const elementMap: Record<string, React.ElementType> = {
   radio: RadioInput,
   email: EmailInput,
   file: FileInput,
-  grid: GridInput,
+  // grid: GridInput,
   section: SectionInput,
   validateInput: ValidateInput,
   tableInput: TableInput,

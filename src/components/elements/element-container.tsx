@@ -5,7 +5,7 @@ import ElementEditorModal from "./element-editor";
 
 interface ElementType {
   id: string;
-  inputLabel: string;
+  inputLabel?: string;
   [key: string]: any;
 }
 

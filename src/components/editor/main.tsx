@@ -1,12 +1,11 @@
 import EditorContext from "../../context/editor-context";
 import FormBuilder from ".";
 import { useContext, useEffect } from "react";
-import { FormElement } from "./element-canvas";
 
 export default function MainPage({
   questionData,
 }: {
-  questionData: FormElement[];
+  questionData: any[];
   isReadOnly?: boolean;
 }) {
   const { setFormData } = useContext(EditorContext);

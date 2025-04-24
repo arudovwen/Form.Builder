@@ -1,14 +1,6 @@
-
-export function mapIdToValue(sections) {
-  return sections.reduce((result, section) => {
-    section.questionData.forEach((question) => {
-      result[question.id] = Object.prototype.hasOwnProperty.call(
-        question,
-        "value"
-      )
-        ? question.value
-        : null;
-    });
-    return result;
+export function mapIdToValue(answerData) {
+  return answerData.reduce((acc, item) => {
+    acc[item.id] = item.value;
+    return acc;
   }, {});
 }
