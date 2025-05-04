@@ -4,5 +4,6 @@ export interface BuilderProps {
     questionData?: any;
     isReadOnly?: boolean;
     config?: any;
+    title?: string;
 }
-export default function Layout({ onSubmit, questionData }: BuilderProps): import("react/jsx-runtime").JSX.Element;
+export default function Layout({ onSubmit, questionData, title, }: BuilderProps): import("react/jsx-runtime").JSX.Element;
