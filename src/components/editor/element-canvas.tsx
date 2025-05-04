@@ -16,6 +16,15 @@ import GridInput, { GridItem } from "../elements/grid-input";
 import ElementContainer from "../elements/element-container";
 
 const STATE = 'edit'
+export interface EditorContextType {
+  formData: FormElement[];
+  setFormData: (data: FormElement[]) => void;
+  updateElementPosition: (newData: FormElement[], sectionId: string) => void;
+  updateElement: any;
+  removeElement: any;
+  isDragging: boolean;
+}
+
 function ElementCanvas({ elementData, sectionId }: any) {
   const {
     formData,
