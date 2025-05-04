@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { DynamicInput } from "../forms/dynamic-input";
 
 export default function CheckBoxInput({
@@ -9,7 +10,7 @@ export default function CheckBoxInput({
 }) {
   const { register = () => ({}) } = validationData || {};
   return (
-    <div className="grid gap-y-[6px">
+    <div className={clsx("grid gap-y-[6px]", element.customClass)}>
       {element?.options.map(
         (item: { id: string; label: string; value: string }) => (
           <div key={item.id}>

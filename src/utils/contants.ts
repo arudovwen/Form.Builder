@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 export interface ElementType {
   type: string;
   label: string;
@@ -16,10 +17,10 @@ export interface ElementType {
   minLengthMessage?: string;
   maxLengthMessage?: string;
   value?: any;
-  options?: Array<{ label: string; value: any }>;
+  options?: Array<{ label: string; value: any; id: string }>;
   columns?: number;
   gridId?: string;
-  gridPosition?: Record<string, any>,
+  gridPosition?: Record<string, any>;
   maxAmount?: number | null;
   minAmount?: number | null;
   minAmountMessage?: string;
@@ -58,13 +59,13 @@ export const Elements: ElementType[] = [
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
   {
     type: "textField",
-    label: "Short Text Field",
+    label: "Text Field",
     icon: "fluent:text-16-filled",
-    inputLabel: "Short Text Label",
+    inputLabel: "Text Label",
     required: false,
     inputType: "text",
     maxLength: null,
@@ -81,7 +82,7 @@ export const Elements: ElementType[] = [
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
   {
     type: "longText",
@@ -104,7 +105,7 @@ export const Elements: ElementType[] = [
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
   {
     type: "selectField",
@@ -124,11 +125,22 @@ export const Elements: ElementType[] = [
     minLengthMessage: "",
     maxLengthMessage: "",
     value: null,
-    options: [],
+    options: [
+      {
+        label: "Placeholder 1",
+        value: "",
+        id: uuidv4(),
+      },
+      {
+        label: "Placeholder 2",
+        value: "",
+        id: uuidv4(),
+      },
+    ],
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
   {
     type: "multiSelect",
@@ -148,11 +160,22 @@ export const Elements: ElementType[] = [
     minLengthMessage: "",
     maxLengthMessage: "",
     value: null,
-    options: [],
+    options: [
+      {
+        label: "Placeholder 1",
+        value: "",
+        id: uuidv4(),
+      },
+      {
+        label: "Placeholder 2",
+        value: "",
+        id: uuidv4(),
+      },
+    ],
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
   {
     type: "validateInput",
@@ -178,7 +201,7 @@ export const Elements: ElementType[] = [
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
 
   {
@@ -202,7 +225,7 @@ export const Elements: ElementType[] = [
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
   {
     type: "amountField",
@@ -226,7 +249,7 @@ export const Elements: ElementType[] = [
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
   {
     type: "date",
@@ -249,7 +272,7 @@ export const Elements: ElementType[] = [
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
   {
     type: "password",
@@ -272,7 +295,7 @@ export const Elements: ElementType[] = [
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
   {
     type: "checkbox",
@@ -292,11 +315,22 @@ export const Elements: ElementType[] = [
     minLengthMessage: "",
     maxLengthMessage: "",
     value: null,
-    options: [],
+    options: [
+      {
+        label: "Placeholder 1",
+        value: "",
+        id: uuidv4(),
+      },
+      {
+        label: "Placeholder 2",
+        value: "",
+        id: uuidv4(),
+      },
+    ],
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
   {
     type: "radio",
@@ -316,11 +350,22 @@ export const Elements: ElementType[] = [
     minLengthMessage: "",
     maxLengthMessage: "",
     value: null,
-    options: [],
+    options: [
+      {
+        label: "Placeholder 1",
+        value: "",
+        id: uuidv4(),
+      },
+      {
+        label: "Placeholder 2",
+        value: "",
+        id: uuidv4(),
+      },
+    ],
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
   {
     type: "email",
@@ -343,7 +388,7 @@ export const Elements: ElementType[] = [
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
   {
     type: "file",
@@ -366,7 +411,7 @@ export const Elements: ElementType[] = [
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
   {
     type: "tableInput",
@@ -390,7 +435,7 @@ export const Elements: ElementType[] = [
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
 
   {
@@ -402,7 +447,7 @@ export const Elements: ElementType[] = [
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
   {
     type: "spacer",
@@ -413,7 +458,7 @@ export const Elements: ElementType[] = [
     customClass: "",
     elementClass: "",
     gridPosition: null,
-    gridId: null
+    gridId: null,
   },
   {
     type: "grid",

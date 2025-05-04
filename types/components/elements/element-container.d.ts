@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 interface ElementType {
     id: string;
-    inputLabel: string;
+    inputLabel?: string;
     [key: string]: any;
 }
 interface ElementContainerProps {

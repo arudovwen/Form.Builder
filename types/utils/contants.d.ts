@@ -19,9 +19,11 @@ export interface ElementType {
     options?: Array<{
         label: string;
         value: any;
+        id: string;
     }>;
-    grid?: number;
-    gridData?: any[];
+    columns?: number;
+    gridId?: string;
+    gridPosition?: Record<string, any>;
     maxAmount?: number | null;
     minAmount?: number | null;
     minAmountMessage?: string;
@@ -34,6 +36,7 @@ export interface ElementType {
     responseType?: string;
     headerClass?: string;
     customClass?: string | null;
+    elementClass?: string;
 }
 export declare const Elements: ElementType[];
 export declare const AllowValidationPrefix: string[];

@@ -57,7 +57,7 @@ interface FormInputs {
   minAmountMessage?: string;
   value?: any;
   customClass?: string;
-  elementClass?: string
+  elementClass?: string;
 }
 
 const schema = yup.object().shape({
@@ -88,7 +88,12 @@ const schema = yup.object().shape({
         }),
       })
     )
-    .nullable(),
+    .when("inputType", {
+      is: (inputType: string) => ["radio", "checkbox"].includes(inputType),
+      then: (schema) =>
+        schema.required("Options are required for radio or checkbox inputs"),
+      otherwise: (schema) => schema.nullable(),
+    }),
   prefix: yup.string().nullable(),
   url: yup.string().nullable(),
   method: yup.string().nullable(),
@@ -187,8 +192,9 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
             />
           </div>{" "}
           <button
+            disabled={fields.length === 1}
             type="button"
-            className="outline-none hover:opacity-80"
+            className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
             onClick={() => remove(index)}
           >
             <AppIcon icon="iconamoon:sign-times-fill" />
@@ -217,7 +223,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         {/* Header */}
         <div className="w-full px-6 pt-6 pb-5 flex flex-col items-start gap-4 z-10 mb-6">
           <h2 className="text-lg font-semibold text-[#475467] font-onest">
-            {element.label}
+            {element.label} Options
           </h2>
           <button
             onClick={onClose}
@@ -260,13 +266,13 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 errors={errors}
                 element={element}
               />
-               <DynamicInput
+              {/* <DynamicInput
                 label="Element Class"
                 name="elementClass"
                 register={register}
                 errors={errors}
                 element={element}
-              />
+              /> */}
               {!allowValue.includes(element.inputType) &&
                 !noAllowValidation.includes(element.inputType) && (
                   <DynamicInput
