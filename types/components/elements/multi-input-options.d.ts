@@ -3,7 +3,7 @@ type FieldType = {
     key: string;
     label: string;
     value: string;
-    type: 'text' | 'number' | 'date';
+    type: string;
 };
 type DynamicInputOptionListProps = {
     initialFields?: FieldType[];

@@ -11,15 +11,20 @@ export interface BuilderProps {
   questionData?: any; // Data for the questions in the form
   isReadOnly?: boolean; // Flag to indicate if the form is read-only
   config?: any; // Configuration for the form
+  title?: string;
 }
 
-export default function Layout({ onSubmit, questionData }: BuilderProps) {
+export default function Layout({
+  onSubmit,
+  questionData,
+  title = "Form Title",
+}: BuilderProps) {
   return (
     <EditorProvider>
       <div className="w-full h-screen bg-[#E4E7EC] flex flex-col">
         <ToastContainer />
         <div className="border-b  bg-white  border-[#E4E7EC]">
-          <TopBar />
+          <TopBar title={title} />
         </div>
         <div className="flex flex-1 ">
           <div className="w-[270px]  h-full border-l border-[#E4E7EC] bg-white">

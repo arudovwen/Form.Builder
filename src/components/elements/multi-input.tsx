@@ -6,7 +6,7 @@ type FieldType = {
   key: string;
   label: string;
   value: string;
-  type: 'text' | 'number' | 'date';
+  type: string;
 };
 
 type DynamicInputListProps = {

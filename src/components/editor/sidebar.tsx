@@ -53,7 +53,7 @@ const SideBar = () => {
                   borderColor: element.color,
                   color: element.color,
                 }}
-                className="cursor-move text-[#475467] flex justify-between items-center 
+                className="cursor-move text-[#475467] flex justify-between items-center  h-11
                            border border-[#98A2B3] rounded-lg py-3 px-[14px] shadow-custom
                            hover:shadow-lg transition-all duration-200
                            active:opacity-50"

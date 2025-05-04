@@ -11,7 +11,7 @@ export interface RenderProps {
   ignoreValidation?: boolean; // Flag to ignore validation
   loading?: boolean; // Flag to indicate if the form is loading
   config?: any; // Configuration for the form
-  renderType: "multi" | "single";
+  renderType?: "multi" | "single";
 }
 
 export default function Viewer({

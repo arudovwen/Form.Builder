@@ -41,6 +41,7 @@ const newSection = {
   questionData: [],
 };
 export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
+  
   const [elementData, setElementData] = useState({});
   const [formData, setFormData] = useState<any[]>([newSection]);
   const [isDragging, setIsDragging] = useState(false);

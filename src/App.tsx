@@ -229,6 +229,7 @@ function App() {
             }}
             // questionData={data}
             config={config}
+            title="Form Title"
           />
         }
       />

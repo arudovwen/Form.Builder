@@ -16,6 +16,12 @@ import GridInput, { GridItem } from "../elements/grid-input";
 import ElementContainer from "../elements/element-container";
 
 const STATE = 'edit'
+
+export interface FormElement {
+  id: string;
+  isReadOnly?: false;
+  [key: string]: any;
+}
 export interface EditorContextType {
   formData: FormElement[];
   setFormData: (data: FormElement[]) => void;
