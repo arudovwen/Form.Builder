@@ -17,7 +17,7 @@ export interface BuilderProps {
 export default function Layout({
   onSubmit,
   questionData,
-  title = "Form Title",
+  title,
 }: BuilderProps) {
   return (
     <EditorProvider>
