@@ -16,9 +16,15 @@ const EditorContext = createContext<
         sectionId: string
       ) => void;
       addElement: (element: any, sectionId: string) => void;
+      addElementInPosition: (
+        element: any,
+        sectionId: string,
+        index: any
+      ) => void;
       updateElement: (value: any, sectionId: string) => void;
       updateSection: (value: any, sectionId: string) => void;
       setIsDragging: (value: boolean) => void;
+      isDragging: boolean;
     }
   | undefined
 >(undefined);
@@ -35,6 +41,7 @@ const newSection = {
   questionData: [],
 };
 export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
+  
   const [elementData, setElementData] = useState({});
   const [formData, setFormData] = useState<any[]>([newSection]);
   const [isDragging, setIsDragging] = useState(false);
@@ -46,7 +53,6 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
     // Handle drag stop (implementation depends on requirements)
   }, []);
 
-  
   const addSection = React.useCallback(() => {
     const id = uuidv4();
     setFormData((prevFormData) => [...prevFormData, { ...newSection, id }]);
@@ -57,24 +63,37 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
     setFormData((prevFormData) =>
       prevFormData.filter((i) => i.id !== sectionId)
     );
+   
+    setSelectedSection(null);
   }, []);
   const removeElement = React.useCallback(
-    (elementId: any, sectionId: string) => {
+    (elementId: string, sectionId: string) => {
+      const section = formData.find((section) => section.id === sectionId);
+      const elementData = section?.questionData.find((el) => el.id === elementId);
+  
+      if (!elementData) return;
+  
       setFormData((prevFormData) =>
         prevFormData.map((section) =>
           section.id === sectionId
             ? {
                 ...section,
-                questionData: section.questionData.filter(
-                  (element: any) => element.id !== elementId
-                ),
+                questionData: section.questionData.filter((element: any) => {
+                  if (elementData.type === 'grid') {
+                    // remove both the grid and its children
+                    return element.gridId !== elementData.id && element.id !== elementData.id;
+                  }
+                  // normal element removal
+                  return element.id !== elementId;
+                }),
               }
             : section
         )
       );
     },
-    []
+    [formData, setFormData]
   );
+  
 
   const updateElementPosition = React.useCallback(
     (updatedQuestionData: any[], sectionId: string) => {
@@ -101,7 +120,25 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       )
     );
   }, []);
-
+  const addElementInPosition = React.useCallback(
+    (element: any, sectionId: string, index: any) => {
+      setFormData((prevFormData) =>
+        prevFormData.map((section) =>
+          section.id === sectionId
+            ? {
+                ...section,
+                questionData: [
+                  ...section.questionData.slice(0, index),
+                  element,
+                  ...section.questionData.slice(index),
+                ],
+              }
+            : section
+        )
+      );
+    },
+    []
+  );
   const updateGridElement = React.useCallback(
     (gridIndex: number, element: any, sectionId: string) => {
       setFormData((prevFormData) =>
@@ -113,19 +150,20 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
                   question.type === "grid" && question.gridData
                     ? {
                         ...question,
-                        gridData: question.gridData.map(
-                          (grid: any, index: number) =>
+                        gridData: question.gridData
+                          .map((grid: any, index: number) =>
                             index === gridIndex
                               ? {
                                   ...grid,
                                   ...element,
                                 }
                               : grid
-                        ).concat(
-                          gridIndex >= question.gridData.length
-                            ? { ...element }
-                            : []
-                        ),
+                          )
+                          .concat(
+                            gridIndex >= question.gridData.length
+                              ? { ...element }
+                              : []
+                          ),
                       }
                     : question
                 ),
@@ -177,6 +215,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       setElementData,
       updateElementPosition,
       addElement,
+      addElementInPosition,
       updateElement,
       addSection,
       removeSection,
@@ -196,6 +235,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       elementData,
       updateElementPosition,
       addElement,
+      addElementInPosition,
       updateElement,
       addSection,
       removeSection,

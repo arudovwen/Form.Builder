@@ -1,7 +1,14 @@
-import { useContext, useCallback, DragEvent, useState, useRef, useEffect } from "react";
+import {
+  useContext,
+  useCallback,
+  DragEvent,
+  useState,
+  useRef,
+  useEffect,
+} from "react";
 import EditorContext from "../../context/editor-context";
 import ElementCanvas from "./element-canvas";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 import AppIcon from "../ui/AppIcon";
 import SectionEditorModal from "../elements/section-editor";
 
@@ -11,17 +18,19 @@ const FormBuilder = () => {
   const containerRef = useRef<HTMLDivElement>(null); // Ref for the container
   const {
     removeSection,
-    addElement,
+    // addElement,
     formData,
     setIsDragging,
     setSelectedSection,
-    selectedSection,activeSections,setActiveSections
+    selectedSection,
+    activeSections,
+    setActiveSections,
   }: any = useContext(EditorContext);
 
   useEffect(() => {
     setSelectedSection(formData[0]?.id || null);
-  }, [])
-  
+  }, []);
+
   const onDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
@@ -32,31 +41,31 @@ const FormBuilder = () => {
     }
   }, []);
 
-  const onDrop = useCallback(
-    (event: DragEvent<HTMLDivElement>) => {
-      try {
-        event.preventDefault();
-        setIsDragging(false);
-        const targetElement = event?.currentTarget;
-        const data = event.dataTransfer.getData("properties");
-        if (data) {
-          const properties = JSON.parse(data);
+  // const onDrop = useCallback(
+  //   (event: DragEvent<HTMLDivElement>) => {
+  //     try {
+  //       event.preventDefault();
+  //       setIsDragging(false);
+  //       const targetElement = event?.currentTarget;
+  //       const data = event.dataTransfer.getData("properties");
+  //       if (data) {
+  //         const properties = JSON.parse(data);
 
-          const newElement = {
-            id: uuidv4(),
-            sectionId: targetElement.id,
-            ...properties,
-          };
+  //         const newElement = {
+  //           id: uuidv4(),
+  //           sectionId: targetElement.id,
+  //           ...properties,
+  //         };
 
-          addElement(newElement, targetElement.id);
-        }
-      } catch (error) {
-        console.log(error);
-        setIsDragging(false);
-      }
-    },
-    [addElement, setIsDragging]
-  );
+  //         addElement(newElement, targetElement.id);
+  //       }
+  //     } catch (error) {
+  //       console.log(error);
+  //       setIsDragging(false);
+  //     }
+  //   },
+  //   [addElement, setIsDragging]
+  // );
 
   function toggleSection(index: number) {
     if (activeSections.includes(index)) {
@@ -96,25 +105,21 @@ const FormBuilder = () => {
             },
             index: number
           ) => (
-            <div
-              key={section.id}
-              className={`group cursor-pointer rounded`}
-              onClick={() => setSelectedSection(section.id)}
-            >
+            <div key={section.id} className={`group cursor-pointer rounded`}>
               <div
-                className={`border border-gray-100 rounded py-4 px-4 shadow-[rgba(149,157,165,0.2)_0px_2px_4px] transition-colors duration-200
+                className={`border border-gray-100 rounded pb-6  px-4 shadow-[rgba(149,157,165,0.2)_0px_2px_4px] transition-colors duration-200
                   ${
                     selectedSection === section.id
                       ? "border-dashed border-blue-400 bg-[#f7f8fa]"
                       : "border-transparent"
-                  } ${
-                  activeSections.includes(index) ? "min-h-[300px]" : ""
-                }`}
+                  } ${activeSections.includes(index) ? "min-h-[300px]" : ""}`}
               >
                 <div className="flex justify-between items-center">
-                  <h2 className="font-medium">
-                    {section.title || "Section title"}
-                  </h2>
+                  <div onClick={() => setSelectedSection(section.id)} className="h-full flex-1 cursor-pointer py-4">
+                    <h2 className="font-medium">
+                      {section.title || "Section title"}
+                    </h2>
+                  </div>
 
                   <div className="flex gap-x-2 items-center">
                     <button
@@ -157,8 +162,9 @@ const FormBuilder = () => {
                   <div
                     className="mt-4 transition-all duration-200 h-full"
                     id={section.id}
-                    onDrop={onDrop}
                     onDragOver={onDragOver}
+                    onDragEnd={() => setIsDragging(false)}
+                    onClick={() => setSelectedSection(section.id)}
                   >
                     <hr />
                     <div className="gap-y-6 mt-4 h-full">

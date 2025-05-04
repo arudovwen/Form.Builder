@@ -53,10 +53,11 @@ interface FormInputs {
   denominators?: any;
   responseType?: string;
   heading?: string;
-  grid?: number;
+  columns?: number;
   minAmountMessage?: string;
   value?: any;
   customClass?: string;
+  elementClass?: string;
 }
 
 const schema = yup.object().shape({
@@ -69,8 +70,8 @@ const schema = yup.object().shape({
   requiredMessage: yup.string().nullable(),
   minLengthMessage: yup.string().nullable(),
   maxLengthMessage: yup.string().nullable(),
-  maxLength: yup.number().nullable(),
-  minLength: yup.number().nullable(),
+  maxLength: yup.number().typeError("Expecting a number").nullable(),
+  minLength: yup.number().typeError("Expecting a number").nullable(),
   inputType: yup.string().nullable(),
   maxAmountMessage: yup.string().nullable(),
   maxAmount: yup.string().nullable(),
@@ -87,7 +88,12 @@ const schema = yup.object().shape({
         }),
       })
     )
-    .nullable(),
+    .when("inputType", {
+      is: (inputType: string) => ["radio", "checkbox"].includes(inputType),
+      then: (schema) =>
+        schema.required("Options are required for radio or checkbox inputs"),
+      otherwise: (schema) => schema.nullable(),
+    }),
   prefix: yup.string().nullable(),
   url: yup.string().nullable(),
   method: yup.string().nullable(),
@@ -96,9 +102,10 @@ const schema = yup.object().shape({
   minAmount: yup.string().nullable(),
   heading: yup.string().nullable(),
   minAmountMessage: yup.string().nullable(),
-  grid: yup.number().nullable(),
+  columns: yup.number().nullable(),
   value: yup.mixed().nullable(),
   customClass: yup.string().nullable(),
+  elementClass: yup.string().nullable(),
 });
 
 const tabs = [
@@ -185,8 +192,9 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
             />
           </div>{" "}
           <button
+            disabled={fields.length === 1}
             type="button"
-            className="outline-none hover:opacity-80"
+            className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
             onClick={() => remove(index)}
           >
             <AppIcon icon="iconamoon:sign-times-fill" />
@@ -215,7 +223,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         {/* Header */}
         <div className="w-full px-6 pt-6 pb-5 flex flex-col items-start gap-4 z-10 mb-6">
           <h2 className="text-lg font-semibold text-[#475467] font-onest">
-            {element.label}
+            {element.label} Options
           </h2>
           <button
             onClick={onClose}
@@ -258,16 +266,23 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 errors={errors}
                 element={element}
               />
-              {(!allowValue.includes(element.inputType) &&
-                !noAllowValidation.includes(element.inputType)) && (
-                <DynamicInput
-                  label="Label"
-                  name="inputLabel"
-                  register={register}
-                  errors={errors}
-                  element={element}
-                />
-              )}
+              {/* <DynamicInput
+                label="Element Class"
+                name="elementClass"
+                register={register}
+                errors={errors}
+                element={element}
+              /> */}
+              {!allowValue.includes(element.inputType) &&
+                !noAllowValidation.includes(element.inputType) && (
+                  <DynamicInput
+                    label="Label"
+                    name="inputLabel"
+                    register={register}
+                    errors={errors}
+                    element={element}
+                  />
+                )}
               {AllowValidationPlaceholder.includes(element.inputType) && (
                 <DynamicInput
                   label="Placeholder"
@@ -342,20 +357,20 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   value={watch("denominators")}
                 />
               )}
-              {(!allowValue.includes(element.inputType) &&
-                !noAllowValidation.includes(element.inputType)) && (
-                <DynamicInput
-                  label="Short Description"
-                  name="description"
-                  register={register}
-                  errors={errors}
-                  element={element}
-                />
-              )}
+              {!allowValue.includes(element.inputType) &&
+                !noAllowValidation.includes(element.inputType) && (
+                  <DynamicInput
+                    label="Short Description"
+                    name="description"
+                    register={register}
+                    errors={errors}
+                    element={element}
+                  />
+                )}
               {element.type.toLowerCase() === "grid" && (
                 <DynamicInput
-                  label="Number of Grids"
-                  name="grid"
+                  label="Number of columns"
+                  name="columns"
                   register={register}
                   errors={errors}
                   element={element}

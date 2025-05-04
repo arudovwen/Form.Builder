@@ -38,7 +38,7 @@ export default function TableInputElement({
     if (onGetTotal) {
       onGetTotal(values);
     }
-  }, [onGetTotal, values]);
+  }, [values]);
 
   useEffect(() => {
     if (denominators?.length) {

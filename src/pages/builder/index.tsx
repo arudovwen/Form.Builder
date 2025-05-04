@@ -9,6 +9,7 @@ const HomePage = ({
   config = {
     buttonColor: "#333",
   },
+  title
 }: BuilderProps) => {
   useEffect(() => {
     if (config) {
@@ -20,6 +21,7 @@ const HomePage = ({
       onSubmit={onSubmit}
       questionData={questionData}
       isReadOnly={isReadOnly}
+      title={title}
     />
   );
 };

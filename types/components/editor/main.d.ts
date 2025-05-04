@@ -1,5 +1,4 @@
-import { FormElement } from "./element-canvas";
 export default function MainPage({ questionData, }: {
-    questionData: FormElement[];
+    questionData: any[];
     isReadOnly?: boolean;
 }): import("react/jsx-runtime").JSX.Element;
