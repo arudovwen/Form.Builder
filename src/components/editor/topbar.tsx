@@ -10,7 +10,7 @@ export default function TopBar({ title }: { title: string }) {
 
   return (
     <div className="px-[30px] py-[10px] flex justify-between items-center bg-[#F9F9FB]">
-      <h1 className="font-semibold text-lg">{title}</h1>
+      <h1 className="font-semibold text-lg">{title || ''}</h1>
       {isOpen && (
         <PreviewModalModal
           isOpen={isOpen}
