@@ -71,6 +71,7 @@ function App() {
       <FormBuilder
         onSubmit={(form_data: any) => console.log(form_data)}
         config={config}
+        title="My Form Title"
       />
       <FormViewer
         onSubmit={(e: any) => console.log(e)}
@@ -90,6 +91,7 @@ export default App;
 
 | Prop         | Type               | Description                                      |
 |--------------|--------------------|--------------------------------------------------|
+| `title`      | `string`           | TItle of the form, optional   |
 | `form_data`  | `FormElement[]`    | Array of form elements to render in the form.   |
 | `answerData` | `any[]`            | Array of user-provided answers to the form.     |
 | `config`     | `object`           | Configuration object (e.g., `buttonColor`, `loaderColor`). |
