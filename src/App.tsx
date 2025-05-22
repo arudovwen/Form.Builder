@@ -218,7 +218,7 @@ function App() {
     buttonColor: "green",
     loaderColor: "green",
     elementColor:"green",
-    elementBgColor:"green",
+    elementBgColor:"",
     elementBorderColor: "green"
   };
   return (
