@@ -21,7 +21,7 @@ export default function TopBar({
       <span className="flex items-center gap-x-[6px]">
         {" "}
         {backUrl && (
-          <button type="button" onClick={() => gotoUrl}>
+          <button type="button" onClick={() => gotoUrl()}>
             <AppIcon icon="mingcute:arrow-left-fill" />
           </button>
         )}{" "}
