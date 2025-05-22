@@ -47,7 +47,7 @@ export default function Viewer({
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full">
       <FormRenderer
         form_data={form_data}
         answerData={answerData}

@@ -22,7 +22,7 @@ export default function TopBar({
         {" "}
         {backUrl && (
           <button type="button" onClick={() => navigate(backUrl)}>
-            <AppIcon icon="cuida:arrow-left-outline" />
+            <AppIcon icon="mingcute:arrow-left-fill" />
           </button>
         )}{" "}
         <h1 className="font-semibold text-lg">{title || ""}</h1>

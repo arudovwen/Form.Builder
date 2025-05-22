@@ -2,7 +2,7 @@ import { FormViewer } from "@/";
 import React, { useContext } from "react";
 import EditorContext from "../../context/editor-context";
 import { EditorContextType } from "./element-canvas";
-import { getItem } from "src/utils/localStorageControl";
+import { getItem } from "../../utils/localStorageControl";
 
 interface PreviewModalModalProps {
   isOpen: boolean;

@@ -97,7 +97,7 @@ const FormRenderer = ({
       <FormProvider {...methods}>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="container mx-auto p-6"
+          className="container mx-auto p-6 h-full"
         >
           <div className="relative w-full flex flex-col gap-y-12 py-4">
             <div key={form_data?.[current].id}>
