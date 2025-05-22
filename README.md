@@ -1,4 +1,3 @@
-
 # React Form Builder
 
 The **Form Builder Package** is a reusable library designed to simplify the creation and management of dynamic forms in web applications. It provides a robust API and customizable components to streamline form-building workflows.
@@ -23,8 +22,9 @@ npm install @arudovwen/form-builder-react
 
 ## Demo
 
-Explore the live demo of the Form Builder Package:  
-- [Form Builder Demo](https://form-builder-inky-nine.vercel.app/)  
+Explore the live demo of the Form Builder Package:
+
+- [Form Builder Demo](https://form-builder-inky-nine.vercel.app/)
 - [Form Viewer](https://form-builder-inky-nine.vercel.app/viewer)
 
 ## GitHub Repository
@@ -89,27 +89,28 @@ export default App;
 
 ### Props for `FormBuilder`
 
-| Prop         | Type               | Description                                      |
-|--------------|--------------------|--------------------------------------------------|
-| `title`      | `string`           | TItle of the form, optional   |
-| `form_data`  | `FormElement[]`    | Array of form elements to render in the form.   |
-| `answerData` | `any[]`            | Array of user-provided answers to the form.     |
-| `config`     | `object`           | Configuration object (e.g., `buttonColor`, `loaderColor`). |
-| `onSubmit`   | `(data: any) => void` | Callback function triggered when the form is submitted. |
-| `loading`    | `boolean`          | Indicates whether the form is in a loading state. |
-| `isReadOnly` | `boolean`          | Determines if the form is rendered in read-only mode. |
-| `renderType` | `string`           | Determines the style the form is rendered, either `multi` or `single`. |
+| Prop         | Type                  | Description                                                                                                        |
+| ------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `title`      | `string`              | TItle of the form, optional                                                                                        |
+| `form_data`  | `FormElement[]`       | Array of form elements to render in the form.                                                                      |
+| `answerData` | `any[]`               | Array of user-provided answers to the form.                                                                        |
+| `config`     | `object`              | Configuration object (e.g., `buttonColor`, `loaderColor`, `elementColor`, `elementBgColor`, `elementBorderColor`). |
+| `onSubmit`   | `(data: any) => void` | Callback function triggered when the form is submitted.                                                            |
+| `loading`    | `boolean`             | Indicates whether the form is in a loading state.                                                                  |
+| `isReadOnly` | `boolean`             | Determines if the form is rendered in read-only mode.                                                              |
+| `renderType` | `string`              | Determines the style the form is rendered, either `multi` or `single`.                                             |
+| `backUrl`    | `string`              | Url to navigate back too                                                                                           |
 
 ### Form Element Types
 
 The `FormElement` type supports the following fields:
 
-| Field         | Type       | Description                              |
-|---------------|------------|------------------------------------------|
-| `id`          | `string`   | Unique identifier for the form element. |
-| `type`        | `string`   | Type of the input (e.g., `text`, `email`). |
-| `label`       | `string`   | Label for the form element.             |
-| `placeholder` | `string`   | Placeholder text for the input.         |
+| Field         | Type     | Description                                |
+| ------------- | -------- | ------------------------------------------ |
+| `id`          | `string` | Unique identifier for the form element.    |
+| `type`        | `string` | Type of the input (e.g., `text`, `email`). |
+| `label`       | `string` | Label for the form element.                |
+| `placeholder` | `string` | Placeholder text for the input.            |
 
 ## Development
 
@@ -164,4 +165,3 @@ Contributions are welcome! Please fork the repository, create a feature branch, 
 ---
 
 Happy form building!
-
