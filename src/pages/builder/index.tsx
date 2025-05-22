@@ -9,7 +9,9 @@ const HomePage = ({
   config = {
     buttonColor: "#333",
   },
-  title
+  title,
+  loading,
+  backUrl
 }: BuilderProps) => {
   useEffect(() => {
     if (config) {
@@ -22,6 +24,8 @@ const HomePage = ({
       questionData={questionData}
       isReadOnly={isReadOnly}
       title={title}
+      backUrl={backUrl}
+      loading={loading}
     />
   );
 };

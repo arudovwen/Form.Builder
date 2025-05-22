@@ -2,15 +2,31 @@ import { useState, useContext } from "react";
 import AppButton from "../ui/AppButton";
 import EditorContext from "../../context/editor-context";
 import PreviewModalModal from "./preview-modal";
+import { useNavigate } from "react-router";
+import AppIcon from "../ui/AppIcon";
 
-export default function TopBar({ title }: { title: string }) {
+export default function TopBar({
+  title,
+  backUrl,
+}: {
+  title: string;
+  backUrl: string;
+}) {
   const { addSection }: any = useContext(EditorContext);
-
+  const navigate = useNavigate();
   const [isOpen, setOpen] = useState(false);
 
   return (
     <div className="px-[30px] py-[10px] flex justify-between items-center bg-[#F9F9FB]">
-      <h1 className="font-semibold text-lg">{title || ''}</h1>
+      <span className="flex items-center gap-x-[6px]">
+        {" "}
+        {backUrl && (
+          <button type="button" onClick={() => navigate(backUrl)}>
+            <AppIcon icon="cuida:arrow-left-outline" />
+          </button>
+        )}{" "}
+        <h1 className="font-semibold text-lg">{title || ""}</h1>
+      </span>
       {isOpen && (
         <PreviewModalModal
           isOpen={isOpen}
