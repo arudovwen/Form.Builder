@@ -4,6 +4,7 @@ import AppIcon from "../ui/AppIcon";
 import EditorContext from "../../context/editor-context";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "react-toastify";
+import { getItem } from "../../utils/localStorageControl";
 
 interface ElementType {
   type: string;
@@ -38,6 +39,10 @@ const SideBar = () => {
 
     addElement(newElement, selectedSection);
   }
+  const config = getItem("config");
+  const elementColor = config?.elementColor;
+  const elementBgColor = config?.elementBgColor;
+  const elementBorderColor = config?.elementBorderColor;
   return (
     <div className="w-full">
       <div className="py-4 px-5 max-h-[80vh] overflow-y-auto">
@@ -50,8 +55,9 @@ const SideBar = () => {
                 onDragEnd={() => setIsDragging(false)}
                 onClick={() => handleElement(element)}
                 style={{
-                  borderColor: element.color,
+                  borderColor: elementBorderColor,
                   color: element.color,
+                  backgroundColor: elementBgColor
                 }}
                 className="cursor-move text-[#475467] flex justify-between items-center  h-11
                            border border-[#98A2B3] rounded-lg py-3 px-[14px] shadow-custom
@@ -60,15 +66,21 @@ const SideBar = () => {
                 draggable
               >
                 <span className="flex gap-x-2 items-center">
-                  <span className="text-gray-400">
+                  <span
+                    style={{ color: elementColor }}
+                    className="text-gray-400"
+                  >
                     <AppIcon icon="akar-icons:drag-vertical" />
                   </span>
 
-                  <span className="text-sm font-medium leading-[0]">
+                  <span
+                    style={{ color: elementColor }}
+                    className="text-sm font-medium leading-[0]"
+                  >
                     {element.label}
                   </span>
                 </span>
-                <span style={{ color: element.color }}>
+                <span style={{ color: elementColor }}>
                   <AppIcon icon={element.icon} iconClass="w-4 h-4" />
                 </span>
               </li>

@@ -6,6 +6,7 @@ import AppIcon from "../ui/AppIcon";
 
 import { DynamicInput } from "../forms/dynamic-input";
 import EditorContext from "../../context/editor-context";
+import { getItem } from "../../utils/localStorageControl";
 
 const schema = yup
   .object({
@@ -17,6 +18,7 @@ const schema = yup
 
 type FormInputs = yup.InferType<typeof schema>;
 
+ const config = getItem("config");
 const SectionEditorModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -91,6 +93,7 @@ const SectionEditorModal: React.FC<{
             <button
               type="submit"
               disabled={!isValid || isSubmitting}
+               style={{ background: config?.buttonColor || "#333" }}
               className={`flex-1 px-4 py-2.5 ${
                 !isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#2563EB]"
               } ${

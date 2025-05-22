@@ -215,15 +215,19 @@ function App() {
     form_data = null;
   }
   const config = {
-    buttonColor: "#333",
-    loaderColor: "#333",
+    buttonColor: "green",
+    loaderColor: "green",
+    elementColor:"green",
+    elementBgColor:"green",
+    elementBorderColor: "green"
   };
   return (
     <Routes>
       <Route
         path="/"
         element={
-          <BulderPage
+          <div className="h-screen">
+            <BulderPage
             onSubmit={function (e: any): void {
               console.log(e);
             }}
@@ -231,6 +235,7 @@ function App() {
             config={config}
             title="Form Title"
           />
+          </div>
         }
       />
       <Route

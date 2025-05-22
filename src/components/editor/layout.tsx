@@ -39,7 +39,7 @@ export default function Layout({
             {!loading ? (
               <MainPage questionData={questionData} />
             ) : (
-              <Loader loaderClass="w-full h-[500px]" />
+              <Loader loadingClass="!w-full !h-[800px]" />
             )}
           </div>
         </div>
