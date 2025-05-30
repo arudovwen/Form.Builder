@@ -37,6 +37,7 @@ function App() {
           <FormBuilder
             onSubmit={(e: any) => console.log(e)}
             config={config}
+            backUrl="/goan"
           />
         }
       />
@@ -48,6 +49,7 @@ function App() {
             form_data={formData}
             config={config}
             loading={loading}
+            
           />
         }
       />
