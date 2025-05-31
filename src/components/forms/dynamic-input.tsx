@@ -128,7 +128,7 @@ export const DynamicInput = ({
     );
   }
   return (
-    <div className="space-y-1.5 relative">
+    <div className="space-y-1.5 relative w-full">
       <label
         className={`block text-sm font-medium text-[#344054] font-onest ${
           isFloating

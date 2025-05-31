@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -23,6 +23,11 @@ import CustomSelect from "../CustomSelect";
 import TableInputColumn from "../TableInputColumns";
 import ApiExample from "../ApiExample";
 import { getItem } from "../../utils/localStorageControl";
+import axios from "axios";
+import { toast } from "react-toastify";
+import OptionsExample from "../OptionsExample";
+import FileReaderComponent from "../FileReaderComponent";
+import ColumnExample from "../ColumnExample";
 
 interface Option {
   label: string;
@@ -106,6 +111,7 @@ const schema = yup.object().shape({
   value: yup.mixed().nullable(),
   customClass: yup.string().nullable(),
   elementClass: yup.string().nullable(),
+  apiUrl: yup.string().nullable(),
 });
 
 const tabs = [
@@ -118,7 +124,7 @@ interface ElementEditorModalProps {
   onClose: () => void;
   element: any;
 }
-
+type optionType = "manual" | "api" | "sheet";
 const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   isOpen,
   onClose,
@@ -130,6 +136,8 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   );
   const { updateElement }: any = React.useContext(EditorContext);
   const [activeTab, setActiveTab] = useState("basic");
+  const [optionsLoading, setOptionsLoading] = useState(false);
+  const [optionTypes, setOptionTypes] = useState<optionType>("manual");
   const config = getItem("config");
   const {
     register,
@@ -147,10 +155,19 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       options: element.options || [],
     },
   });
-
+  const values = watch();
   const { fields, append, remove } = useFieldArray({
     control,
     name: "options",
+  });
+
+  const {
+    fields: dataFields,
+    append: columnAppend,
+    remove: columnRemove,
+  } = useFieldArray({
+    control,
+    name: "dataColumns",
   });
 
   useEffect(() => {
@@ -164,9 +181,83 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
     onClose();
   };
 
+  // Fetch options from api
+
+  const fetchOptions = useCallback(async () => {
+    if (!values.apiUrl) return;
+    try {
+      setOptionsLoading(true);
+      const { status, data } = await axios.get(values.apiUrl);
+      if (status === 200) {
+        if (element.type.toLowerCase() === "datagrid") {
+          setValue("dataColumns", data.record);
+          return;
+        }
+        setValue("options", data.record);
+      }
+    } catch (error) {
+      toast.error(
+        error.response.data.message ||
+          error.response.data.message ||
+          "Unable to load options"
+      );
+    } finally {
+      setOptionsLoading(false);
+    }
+  }, [element.type, setValue, values.apiUrl]);
+
+  useEffect(() => {
+    fetchOptions();
+  }, [fetchOptions, values.apiUrl]);
+  const OptionsTypes = ["manual", "api", "sheet"];
+
   // Options field rendering
   const renderOptionsFields = () => (
     <div className="flex flex-col gap-y-1 justify-start">
+      <div className="flex gap-x-5 items-center mb-4">
+        {OptionsTypes.map((i) => (
+          <label key={i} className="text-base items-center gap-x-3 capitalize">
+            <input
+              type="radio"
+              name="optionType"
+              onChange={(e) => setOptionTypes(e.target.value as optionType)}
+              value={i}
+            />{" "}
+            <span>{i} options</span>
+          </label>
+        ))}
+      </div>
+      {optionTypes === "api" && (
+        <div className="mb-4">
+          {/* Load options from api  */}
+          <div className="flex items-center relative w-full mb-2">
+            <DynamicInput
+              label="Load Options from Api"
+              name="apiUrl"
+              errors={errors}
+              register={register}
+              className="!w-full"
+              placeholder="https://example.com/options"
+              isFloating
+            />
+
+            {optionsLoading && (
+              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin absolute right-3 top-1/2 mt-1"></div>
+            )}
+          </div>
+          <OptionsExample />
+        </div>
+      )}
+      {optionTypes === "sheet" && (
+        <div className="mb-4">
+          <FileReaderComponent
+            isFloating
+            label="Load options form sheet (csv, xlxs)"
+            setValue={setValue}
+            name="options"
+          />
+        </div>
+      )}
       {fields.map((field, index) => (
         <div key={field.id} className="flex gap-x-4 items-center ">
           <div className="flex-1">
@@ -214,8 +305,118 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
     </div>
   );
 
-  // Rest of your component remains the same
-  // ... (keeping the same JSX structure for the form)
+  useEffect(() => {
+    setOptionTypes("api");
+  }, [element.type]);
+
+  // Options field rendering
+  const renderColumnsFields = () => (
+    <div className="flex flex-col gap-y-1 justify-start">
+      <div className="flex gap-x-5 items-center mb-4">
+        {OptionsTypes.map((i) => (
+          <label key={i} className="text-base items-center gap-x-3 capitalize">
+            <input
+              type="radio"
+              name="optionType"
+              onChange={(e) => setOptionTypes(e.target.value as optionType)}
+              value={i}
+              checked={i=== optionTypes}
+            />{" "}
+            <span>{i} options</span>
+          </label>
+        ))}
+      </div>
+      {optionTypes === "api" && (
+        <div className="mb-4">
+          {/* Load options from api  */}
+          <div className="flex items-center relative w-full mb-2">
+            <DynamicInput
+              label="Load Columns from Api"
+              name="apiUrl"
+              errors={errors}
+              register={register}
+              className="!w-full"
+              placeholder="https://example.com/columns"
+              isFloating
+            />
+
+            {optionsLoading && (
+              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin absolute right-3 top-1/2 mt-1"></div>
+            )}
+          </div>
+          <ColumnExample />
+        </div>
+      )}
+      {optionTypes === "sheet" && (
+        <div className="mb-4">
+          <FileReaderComponent
+            isFloating
+            label="Load columns form sheet (csv, xlxs)"
+            setValue={setValue}
+            name="dataColumns"
+          />
+        </div>
+      )}
+      {dataFields.map((field, index) => (
+        <div key={field.id} className="flex gap-x-4 items-center ">
+          <div className="flex-1">
+            <DynamicInput
+              label="Field"
+              name={`dataColumns.${index}.field`}
+              register={register}
+              errors={errors}
+              element={element}
+              placeholder="Field"
+              isFloating
+            />
+          </div>
+          <div className="flex-1">
+            <DynamicInput
+              label="Header Name"
+              name={`dataColumns.${index}.headerName`}
+              register={register}
+              errors={errors}
+              element={element}
+              placeholder="headerName"
+              isFloating
+            />
+          </div>
+          {/* <div className="flex-1 flex gap-x-3 items-center">
+            <label>
+              {" "}
+              <input type="checkbox" name={`dataColumns.${index}.editable`} />{" "}
+              <span>Is Editable</span>
+            </label>
+          </div> */}
+          <button
+            disabled={dataFields.length === 1}
+            type="button"
+            className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
+            onClick={() => columnRemove(index)}
+          >
+            <AppIcon icon="iconamoon:sign-times-fill" />
+          </button>
+        </div>
+      ))}
+      <div>
+        {" "}
+        <button
+          type="button"
+          className="mt-2  text-gray-700 font-medium text-sm  flex gap-x-1 items-center"
+          onClick={() =>
+            columnAppend({
+              headerName: "",
+              field: "",
+              editable: true,
+              id: uuidv4(),
+            })
+          }
+        >
+          <AppIcon icon="qlementine-icons:plus-16" /> Add column
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[999] cursor-default no-drag select-none">
@@ -246,260 +447,263 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
 
         {/* Form Content */}
         <form onSubmit={handleSubmit(onSubmit)} className="w-full">
-          {activeTab === "basic" && (
-            <div className="w-full px-6 flex flex-col gap-5 z-10">
-              {allowValue.includes(element.inputType) && (
-                <>
-                  <DynamicInput
-                    label="Value"
-                    name="value"
-                    register={register}
-                    errors={errors}
-                    element={element}
-                  />
-                </>
-              )}
-              <DynamicInput
-                label="Custom Class"
-                name="customClass"
-                register={register}
-                errors={errors}
-                element={element}
-              />
-              {/* <DynamicInput
+          <div className=" max-h-[800px] overflow-y-auto">
+            {activeTab === "basic" && (
+              <div className="w-full px-6 flex flex-col gap-5 z-10">
+                {allowValue.includes(element.inputType) && (
+                  <>
+                    <DynamicInput
+                      label="Value"
+                      name="value"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                    />
+                  </>
+                )}
+                <DynamicInput
+                  label="Custom Class"
+                  name="customClass"
+                  register={register}
+                  errors={errors}
+                  element={element}
+                />
+                {/* <DynamicInput
                 label="Element Class"
                 name="elementClass"
                 register={register}
                 errors={errors}
                 element={element}
               /> */}
-              {!allowValue.includes(element.inputType) &&
-                !noAllowValidation.includes(element.inputType) && (
-                  <DynamicInput
-                    label="Label"
-                    name="inputLabel"
-                    register={register}
-                    errors={errors}
-                    element={element}
-                  />
-                )}
-              {AllowValidationPlaceholder.includes(element.inputType) && (
-                <DynamicInput
-                  label="Placeholder"
-                  name="placeholder"
-                  register={register}
-                  errors={errors}
-                  element={element}
-                />
-              )}
-              {AllowValidationPrefix.includes(element.inputType) && (
-                <DynamicInput
-                  label="Prefix"
-                  name="prefix"
-                  register={register}
-                  errors={errors}
-                  element={element}
-                />
-              )}
-              {AllowApiOptions.includes(element.inputType) && (
-                <>
-                  <ApiExample />
-                  <DynamicInput
-                    label="Api Url"
-                    name="url"
-                    register={register}
-                    errors={errors}
-                    element={element}
-                  />
-                  <CustomSelect
-                    label="Api Method"
-                    options={[
-                      {
-                        label: "GET",
-                        value: "GET",
-                      },
-                      {
-                        label: "POST",
-                        value: "POST",
-                      },
-                    ]}
-                    register={register}
-                    name={"method"}
-                    setValue={setValue}
-                    trigger={trigger}
-                    value={watch("method")}
-                  />
-                  <CustomSelect
-                    label="Api Response type"
-                    options={[
-                      {
-                        label: "String",
-                        value: "string",
-                      },
-                      {
-                        label: "Object",
-                        value: "object",
-                      },
-                    ]}
-                    register={register}
-                    name={"responseType"}
-                    setValue={setValue}
-                    trigger={trigger}
-                    value={watch("responseType")}
-                  />
-                </>
-              )}
-              {AllowTableOptions.includes(element.inputType) && (
-                <TableInputColumn
-                  onChange={(newValues) => {
-                    setValue("denominators", newValues);
-                  }}
-                  value={watch("denominators")}
-                />
-              )}
-              {!allowValue.includes(element.inputType) &&
-                !noAllowValidation.includes(element.inputType) && (
-                  <DynamicInput
-                    label="Short Description"
-                    name="description"
-                    register={register}
-                    errors={errors}
-                    element={element}
-                  />
-                )}
-              {element.type.toLowerCase() === "grid" && (
-                <DynamicInput
-                  label="Number of columns"
-                  name="columns"
-                  register={register}
-                  errors={errors}
-                  element={element}
-                />
-              )}
-              {AllowOptions.includes(element.inputType) &&
-                renderOptionsFields()}
-            </div>
-          )}
-
-          {!noAllowValidation.includes(element.type.toLowerCase()) &&
-            activeTab === "validation" && (
-              <div className="w-full px-6 flex flex-col gap-5 z-10">
-                <div className="flex gap-x-6 items-center">
-                  <div className="w-[150px]">
+                {!allowValue.includes(element.inputType) &&
+                  !noAllowValidation.includes(element.inputType) && (
                     <DynamicInput
-                      label="Required"
-                      name="isRequired"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                      type="checkbox"
-                    />
-                  </div>{" "}
-                  <div className="flex-1">
-                    <DynamicInput
-                      label="Error message text"
-                      name="requiredMessage"
+                      label="Label"
+                      name="inputLabel"
                       register={register}
                       errors={errors}
                       element={element}
                     />
-                  </div>
-                </div>
-                {AllowValidationMaxMin.includes(element.inputType) && (
+                  )}
+                {AllowValidationPlaceholder.includes(element.inputType) && (
+                  <DynamicInput
+                    label="Placeholder"
+                    name="placeholder"
+                    register={register}
+                    errors={errors}
+                    element={element}
+                  />
+                )}
+                {AllowValidationPrefix.includes(element.inputType) && (
+                  <DynamicInput
+                    label="Prefix"
+                    name="prefix"
+                    register={register}
+                    errors={errors}
+                    element={element}
+                  />
+                )}
+                {AllowApiOptions.includes(element.inputType) && (
                   <>
-                    <div className="flex gap-x-6 items-center">
-                      <div className="w-[150px]">
-                        <DynamicInput
-                          label="Min Length"
-                          name="minLength"
-                          register={register}
-                          errors={errors}
-                          element={element}
-                          type="number"
-                        />
-                      </div>{" "}
-                      <div className="flex-1">
-                        <DynamicInput
-                          label="Error message text"
-                          name="minLengthMessage"
-                          register={register}
-                          errors={errors}
-                          element={element}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex gap-x-6 items-center">
-                      <div className="w-[150px]">
-                        <DynamicInput
-                          label="Max Length"
-                          name="maxLength"
-                          register={register}
-                          errors={errors}
-                          element={element}
-                          type="number"
-                        />
-                      </div>{" "}
-                      <div className="flex-1">
-                        <DynamicInput
-                          label="Error message text"
-                          name="maxLengthMessage"
-                          register={register}
-                          errors={errors}
-                          element={element}
-                        />
-                      </div>
-                    </div>
+                    <ApiExample />
+                    <DynamicInput
+                      label="Api Url"
+                      name="url"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                    />
+                    <CustomSelect
+                      label="Api Method"
+                      options={[
+                        {
+                          label: "GET",
+                          value: "GET",
+                        },
+                        {
+                          label: "POST",
+                          value: "POST",
+                        },
+                      ]}
+                      register={register}
+                      name={"method"}
+                      setValue={setValue}
+                      trigger={trigger}
+                      value={watch("method")}
+                    />
+                    <CustomSelect
+                      label="Api Response type"
+                      options={[
+                        {
+                          label: "String",
+                          value: "string",
+                        },
+                        {
+                          label: "Object",
+                          value: "object",
+                        },
+                      ]}
+                      register={register}
+                      name={"responseType"}
+                      setValue={setValue}
+                      trigger={trigger}
+                      value={watch("responseType")}
+                    />
                   </>
                 )}
-                {AllowValidationAmount.includes(element.inputType) && (
-                  <>
-                    <div className="flex gap-x-6 items-center">
-                      <div className="w-[150px]">
-                        <DynamicInput
-                          label="Min Amount"
-                          name="minAmount"
-                          register={register}
-                          errors={errors}
-                          element={element}
-                          type="amount"
-                        />
-                      </div>{" "}
-                      <div className="flex-1">
-                        <DynamicInput
-                          label="Error message text"
-                          name="minAmountMessage"
-                          register={register}
-                          errors={errors}
-                          element={element}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex gap-x-6 items-center">
-                      <div className="w-[150px]">
-                        <DynamicInput
-                          label="Max Amount"
-                          name="maxAmount"
-                          register={register}
-                          errors={errors}
-                          element={element}
-                          type="amount"
-                        />
-                      </div>{" "}
-                      <div className="flex-1">
-                        <DynamicInput
-                          label="Error message text"
-                          name="maxAmountMessage"
-                          register={register}
-                          errors={errors}
-                          element={element}
-                        />
-                      </div>
-                    </div>
-                  </>
+                {AllowTableOptions.includes(element.inputType) && (
+                  <TableInputColumn
+                    onChange={(newValues) => {
+                      setValue("denominators", newValues);
+                    }}
+                    value={watch("denominators")}
+                  />
                 )}
+                {!allowValue.includes(element.inputType) &&
+                  !noAllowValidation.includes(element.inputType) && (
+                    <DynamicInput
+                      label="Short Description"
+                      name="description"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                    />
+                  )}
+                {element.type.toLowerCase() === "grid" && (
+                  <DynamicInput
+                    label="Number of columns"
+                    name="columns"
+                    register={register}
+                    errors={errors}
+                    element={element}
+                  />
+                )}
+                {element.type.toLowerCase() === "datagrid" &&
+                  renderColumnsFields()}
+                {AllowOptions.includes(element.inputType) &&
+                  renderOptionsFields()}
               </div>
             )}
 
+            {!noAllowValidation.includes(element.type.toLowerCase()) &&
+              activeTab === "validation" && (
+                <div className="w-full px-6 flex flex-col gap-5 z-10">
+                  <div className="flex gap-x-6 items-center">
+                    <div className="w-[150px]">
+                      <DynamicInput
+                        label="Required"
+                        name="isRequired"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="checkbox"
+                      />
+                    </div>{" "}
+                    <div className="flex-1">
+                      <DynamicInput
+                        label="Error message text"
+                        name="requiredMessage"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                      />
+                    </div>
+                  </div>
+                  {AllowValidationMaxMin.includes(element.inputType) && (
+                    <>
+                      <div className="flex gap-x-6 items-center">
+                        <div className="w-[150px]">
+                          <DynamicInput
+                            label="Min Length"
+                            name="minLength"
+                            register={register}
+                            errors={errors}
+                            element={element}
+                            type="number"
+                          />
+                        </div>{" "}
+                        <div className="flex-1">
+                          <DynamicInput
+                            label="Error message text"
+                            name="minLengthMessage"
+                            register={register}
+                            errors={errors}
+                            element={element}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-x-6 items-center">
+                        <div className="w-[150px]">
+                          <DynamicInput
+                            label="Max Length"
+                            name="maxLength"
+                            register={register}
+                            errors={errors}
+                            element={element}
+                            type="number"
+                          />
+                        </div>{" "}
+                        <div className="flex-1">
+                          <DynamicInput
+                            label="Error message text"
+                            name="maxLengthMessage"
+                            register={register}
+                            errors={errors}
+                            element={element}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  {AllowValidationAmount.includes(element.inputType) && (
+                    <>
+                      <div className="flex gap-x-6 items-center">
+                        <div className="w-[150px]">
+                          <DynamicInput
+                            label="Min Amount"
+                            name="minAmount"
+                            register={register}
+                            errors={errors}
+                            element={element}
+                            type="amount"
+                          />
+                        </div>{" "}
+                        <div className="flex-1">
+                          <DynamicInput
+                            label="Error message text"
+                            name="minAmountMessage"
+                            register={register}
+                            errors={errors}
+                            element={element}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-x-6 items-center">
+                        <div className="w-[150px]">
+                          <DynamicInput
+                            label="Max Amount"
+                            name="maxAmount"
+                            register={register}
+                            errors={errors}
+                            element={element}
+                            type="amount"
+                          />
+                        </div>{" "}
+                        <div className="flex-1">
+                          <DynamicInput
+                            label="Error message text"
+                            name="maxAmountMessage"
+                            register={register}
+                            errors={errors}
+                            element={element}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+          </div>
           {/* Actions */}
           <div className="w-full px-6 pt-8 pb-6 flex gap-3 mt-4">
             <button

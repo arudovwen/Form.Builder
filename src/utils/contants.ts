@@ -1,4 +1,11 @@
 import { v4 as uuidv4 } from "uuid";
+
+interface DataColumnType {
+  field: string;
+  headerName: string;
+  width?: number;
+  editable?: boolean;
+}
 export interface ElementType {
   type: string;
   label: string;
@@ -34,6 +41,7 @@ export interface ElementType {
   headerClass?: string;
   customClass?: string | null;
   elementClass?: string;
+  dataColumns?: DataColumnType[];
 }
 
 // The Elements array
@@ -131,11 +139,6 @@ export const Elements: ElementType[] = [
         value: "",
         id: uuidv4(),
       },
-      {
-        label: "Placeholder 2",
-        value: "",
-        id: uuidv4(),
-      },
     ],
     customClass: "",
     elementClass: "",
@@ -163,11 +166,6 @@ export const Elements: ElementType[] = [
     options: [
       {
         label: "Placeholder 1",
-        value: "",
-        id: uuidv4(),
-      },
-      {
-        label: "Placeholder 2",
         value: "",
         id: uuidv4(),
       },
@@ -321,11 +319,6 @@ export const Elements: ElementType[] = [
         value: "",
         id: uuidv4(),
       },
-      {
-        label: "Placeholder 2",
-        value: "",
-        id: uuidv4(),
-      },
     ],
     customClass: "",
     elementClass: "",
@@ -353,11 +346,6 @@ export const Elements: ElementType[] = [
     options: [
       {
         label: "Placeholder 1",
-        value: "",
-        id: uuidv4(),
-      },
-      {
-        label: "Placeholder 2",
         value: "",
         id: uuidv4(),
       },
@@ -408,6 +396,33 @@ export const Elements: ElementType[] = [
     minLengthMessage: "",
     maxLengthMessage: "",
     value: null,
+    customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null,
+  },
+  {
+    type: "dataGrid",
+    label: "Data Grid",
+    icon: "iconoir:table",
+    inputLabel: "Data Grid Label",
+    required: false,
+    inputType: "dataGrid",
+    maxLength: null,
+    minLength: null,
+    placeholder: "Type here",
+    description: "",
+    isReadOnly: false,
+    isDisabled: false,
+    isRequired: false,
+    requiredMessage: "Value is required",
+    minLengthMessage: "",
+    maxLengthMessage: "",
+    value: [],
+    dataColumns: [
+      { field: "firstName", headerName: "First Name", width: 150, editable: true },
+    ],
+    denominators: null,
     customClass: "",
     elementClass: "",
     gridPosition: null,

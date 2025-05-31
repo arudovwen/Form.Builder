@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import CurrencyInput from 'react-currency-input-field';
+import React, { useState, useMemo, useEffect } from "react";
+import CurrencyInput from "react-currency-input-field";
 
 export default function TableInputElement({
   onGetTotal,
@@ -27,11 +27,12 @@ export default function TableInputElement({
 
   // Calculate total of all subtotals
   const total = useMemo(
-    () => values.reduce((sum, item) => {
+    () =>
+      values.reduce((sum, item) => {
         const subtotal = calculateSubtotal(item.key, item.value);
         return sum + subtotal;
       }, 0),
-    [values],
+    [values]
   );
 
   useEffect(() => {
@@ -47,14 +48,14 @@ export default function TableInputElement({
         value:
           Array.isArray(defaultValue) && defaultValue[index]
             ? defaultValue[index].value
-            : '',
+            : "",
       }));
       setValues(tempValues);
     }
   }, [defaultValue, denominators]);
 
   return (
-    <div className='mt-2'>
+    <div className="mt-2">
       <div className="border border-gray-200 rounded-lg overflow-hidden text-gray-700">
         <div className="grid grid-cols-3 text-sm font-bold border-b border-gray-100 bg-gray-50">
           <div className="border-r px-4 py-2">
@@ -69,7 +70,7 @@ export default function TableInputElement({
         </div>
         {values.map((item, index) => (
           <div
-          key={item.key + index + Math.random()}
+            key={index + "index"}
             className="grid grid-cols-3 text-sm border-b border-gray-100"
           >
             <div className="border-r px-4 py-2 flex items-center">
@@ -90,7 +91,7 @@ export default function TableInputElement({
                   id="input-example"
                   className="border border-gray-100 rounded w-full px-3 py-1 outline-none"
                   decimalsLimit={6}
-                  defaultValue={item.value}
+                  value={item.value}
                   onValueChange={(e) => handleValue(e, index)}
                   disabled={readOnly}
                   allowNegativeValue={false}

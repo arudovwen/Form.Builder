@@ -19,6 +19,7 @@ import Spacer from "../elements/spacer";
 import Divider from "../elements/divider";
 import Header from "../elements/header";
 import BasicText from "../elements/basic-text";
+import DataGridInput from "../elements/data-grid";
 
 export const elementMap: Record<string, React.ElementType> = {
   textField: TextInput,
@@ -33,7 +34,7 @@ export const elementMap: Record<string, React.ElementType> = {
   radio: RadioInput,
   email: EmailInput,
   file: FileInput,
-  // grid: GridInput,
+  dataGrid: DataGridInput,
   section: SectionInput,
   validateInput: ValidateInput,
   tableInput: TableInput,

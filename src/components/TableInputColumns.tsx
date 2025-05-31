@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import CurrencyInput from "react-currency-input-field";
 
-export default function TableInputColumn({ value = [], onChange, onGetValue }: any) {
+export default function TableInputColumn({
+  value = [],
+  onChange,
+  onGetValue,
+}: any) {
   // Use the value prop if provided, otherwise use local state
   const [internalValues, setInternalValues] = useState(
     value?.length > 0 ? value : [{ value: "" }]
@@ -69,7 +73,7 @@ export default function TableInputColumn({ value = [], onChange, onGetValue }: a
   }, [onGetValue, internalValues]);
 
   return (
-    <div  className="]">
+    <div className="]">
       <div className="border border-gray-200 rounded-lg overflow-hidden">
         <div className="grid text-sm font-bold border-b border-gray-100 bg-gray-50">
           <div className="px-2 py-2">
@@ -78,7 +82,7 @@ export default function TableInputColumn({ value = [], onChange, onGetValue }: a
         </div>
         {internalValues.map((item, index) => (
           <div
-            key={item.key + index + Math.random()}
+            key={index + "index"}
             className="grid text-sm border-b border-gray-100"
           >
             <div className="flex items-center gap-x-4 px-2 py-1">
