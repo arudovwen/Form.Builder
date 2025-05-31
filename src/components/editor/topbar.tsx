@@ -17,7 +17,7 @@ export default function TopBar({
     window.location.href = backUrl;
   }
   return (
-    <div className="px-[30px] py-[10px] flex justify-between items-center bg-[#F9F9FB]">
+    <div className="px-[30px] py-3 flex justify-between items-center bg-[#F9F9FB] top_bar">
       <span className="flex items-center gap-x-[6px]">
         {" "}
         {backUrl && (
@@ -34,17 +34,17 @@ export default function TopBar({
           element={undefined}
         />
       )}
-      <div className="py-4 flex justify-end gap-x-6 text-base">
+      <div className="flex justify-end gap-x-6 text-xs">
         <AppButton
           onClick={() => addSection()}
           text="Add section"
-          btnClass="text-gray-700 border-[#98A2B3] !font-medium bg-transparent"
+          btnClass="text-gray-700  !font-medium bg-transparent !text-xs section"
           icon="icon-park-outline:plus"
         />
         <AppButton
           onClick={() => setOpen(true)}
           text="Preview"
-          btnClass="text-gray-700 border-[#98A2B3] !font-medium"
+          btnClass="text-gray-700 bg-transparent] !font-medium !text-xs preview"
           icon="solar:eye-bold-duotone"
         />
       </div>

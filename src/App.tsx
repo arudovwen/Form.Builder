@@ -218,7 +218,7 @@ function App() {
     buttonColor: "green",
     loaderColor: "green",
     elementColor:"green",
-    elementBgColor:"green",
+    elementBgColor:"",
     elementBorderColor: "green"
   };
   return (
@@ -234,6 +234,7 @@ function App() {
             // questionData={data}
             config={config}
             title="Form Title"
+            backUrl="/gooana"
           />
           </div>
         }

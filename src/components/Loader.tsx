@@ -5,7 +5,7 @@ import clsx from "clsx";
 // Loader.tsx
 const Loader = ({ loadingClass }: any) => {
   const mergedClass = clsx(
-    "h-screen w-screen flex justify-center items-center",
+    "h-full w-full min-h-[300px] flex justify-center items-center",
     loadingClass
   );
   useEffect(() => {
