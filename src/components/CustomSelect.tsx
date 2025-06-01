@@ -24,6 +24,7 @@ interface CustomSelectProps {
   subText?: string;
   labelClass?: string;
   loading?: boolean;
+  disabled?: boolean;
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -42,6 +43,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   subText,
   labelClass = "text-[10px]",
   loading,
+  disabled,
 }) => {
   const [selected, setSelected] = useState<any>(isMultiple ? [] : null);
   const merged = clsx("input-control", className);
@@ -92,9 +94,14 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           {label}
         </label>
       )}
-      <Listbox value={selected} onChange={setSelected} multiple={isMultiple}>
+      <Listbox
+        value={selected}
+        onChange={setSelected}
+        multiple={isMultiple}
+        disabled={disabled}
+      >
         <div className="relative">
-          <Listbox.Button className={merged}>
+          <Listbox.Button className={merged} disabled={disabled}>
             {loading ? (
               <span className=" block opacity-60 text-sm text-left">
                 Fetching data ...

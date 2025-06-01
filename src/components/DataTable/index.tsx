@@ -44,7 +44,7 @@ export default function CustomDataGrid({
   return (
     <div className="rounded mt-4">
       <div className="flex justify-end">
-        {value.length > 0 && (
+        {columns.length > 0 && (
           <button
             onClick={addRow}
             className="mb-3 px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700"
@@ -65,7 +65,7 @@ export default function CustomDataGrid({
                   {col.headerName || col.field}
                 </th>
               ))}
-              <th className="border px-2 py-2 w-10"></th>
+              {!isReadOnly && <th className="border px-2 py-2 w-10"></th>}
             </tr>
           </thead>
           {value.length > 0 && (
@@ -96,24 +96,26 @@ export default function CustomDataGrid({
                           className="w-full px-2 py-1 border rounded text-gray-600 outline-blue-100 "
                         />
                       ) : (
-                        <span className="text-gray-700 cursor-pointer">
+                        <span className="text-gray-700 cursor-pointer py-1 block">
                           {row[col.field]}
                         </span>
                       )}
                     </td>
                   ))}
-                  <td className="border px-2 py-1 text-center">
-                    <button
-                      onClick={() => deleteRow(rowIndex)}
-                      className="text-red-500 hover:text-red-700"
-                      aria-label="Delete row"
-                    >
-                      <AppIcon
-                        icon="lets-icons:trash-duotone"
-                        iconClass="text-xl"
-                      />
-                    </button>
-                  </td>
+                  {!isReadOnly && (
+                    <td className="border px-2 py-1 text-center">
+                      <button
+                        onClick={() => deleteRow(rowIndex)}
+                        className="text-red-500 hover:text-red-700"
+                        aria-label="Delete row"
+                      >
+                        <AppIcon
+                          icon="lets-icons:trash-duotone"
+                          iconClass="text-xl"
+                        />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

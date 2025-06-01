@@ -8,20 +8,22 @@ export default function DataGridInput({
   element: any;
   validationData: any;
 }) {
-  const { register = () => ({}), setValue, getValues } = validationData || {};
-  const registeredValue = (getValues && getValues(element?.id)) || [];
+  const { register = () => ({}), setValue, watch } = validationData || {};
+  const registeredValue = (watch && watch(element?.id)) || [];
 
   useEffect(() => {
     register(element.id);
   }, [element.id, register]);
-
-  console.log('element?.dataColumns', element?.dataColumns)
+    console.log(element);
   return (
     <CustomDataGrid
       value={registeredValue}
-      onChange={(value: any)=> setValue(element.id, value)}
+      onChange={(value: any) => {
+    
+        setValue(element.id, value);
+      }}
       columns={element?.dataColumns}
-      isReadOnly
+      isReadOnly={element?.isReadOnly}
     />
   );
 }

@@ -11,14 +11,14 @@ type FieldType = {
 
 type DynamicInputListProps = {
   initialFields?: FieldType[];
-  getValues?: (values: Record<string, string>) => void;
+  watch?: (values: Record<string, string>) => void;
   readOnly?: boolean;
   tempDefaultValue?: Record<string, string>;
 };
 
 const DynamicInputList: React.FC<DynamicInputListProps> = ({
   initialFields = [],
-  getValues,
+  watch,
   readOnly = false,
   tempDefaultValue = {},
 }) => {
@@ -47,7 +47,7 @@ const DynamicInputList: React.FC<DynamicInputListProps> = ({
       return acc;
     }, {});
 
-    getValues?.(updatedTransformed);
+    watch?.(updatedTransformed);
   };
 
   const transformedFields = useMemo(() => {

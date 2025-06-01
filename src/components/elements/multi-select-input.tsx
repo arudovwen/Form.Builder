@@ -8,13 +8,12 @@ export default function MultiSelectInput({
   element: any;
   validationData: any;
 }) {
-
   const [selectedValues, setSelectedValues] = useState<
     { label: string; value: any }[]
   >(element.value || []);
 
-  const { register = () => ({}), setValue, getValues } = validationData || {};
-  const registeredValue =getValues && getValues(element?.id);
+  const { register = () => ({}), setValue, watch } = validationData || {};
+  const registeredValue = watch && watch(element?.id);
   useEffect(() => {
     register(element.id);
   }, [element.id, register]);
@@ -25,16 +24,19 @@ export default function MultiSelectInput({
     }
   }, [element.id, selectedValues, setValue]);
   useEffect(() => {
-   if(registeredValue?.length && !selectedValues?.length) {
-      setSelectedValues(registeredValue)
+    if (registeredValue?.length && !selectedValues?.length) {
+      setSelectedValues(registeredValue);
     }
-  }, [registeredValue, selectedValues?.length])
-  
+  }, [registeredValue, selectedValues?.length]);
+
   return (
     <div className="w-full z-10">
-      <Listbox value={selectedValues} onChange={setSelectedValues} multiple>
+      <Listbox value={selectedValues} onChange={setSelectedValues} multiple  disabled={element.isReadOnly}>
         <div className="relative">
-          <Listbox.Button className="w-full py-2 pl-3 pr-10 text-left bg-white input-control cursor-default ">
+          <Listbox.Button
+            className="w-full py-2 pl-3 pr-10 text-left bg-white input-control cursor-default "
+            disabled={element.isReadOnly}
+          >
             {selectedValues?.length > 0
               ? selectedValues?.map((i) => i.label).join(", ")
               : "Select options"}
@@ -52,15 +54,17 @@ export default function MultiSelectInput({
                     key={index}
                     className={({ active }) =>
                       `cursor-default select-none relative  w-full flex justify-between ${
-                        active
-                          ? "text-gray-700 bg-gray-100"
-                          : "text-gray-700"
+                        active ? "text-gray-700 bg-gray-100" : "text-gray-700"
                       }`
                     }
                     value={option}
                   >
                     {({ selected }) => (
-                      <div className={`flex items-center justify-between py-2 pl-4 pr-4 w-full ${selected ? "bg-gray-100" : ""}`}>
+                      <div
+                        className={`flex items-center justify-between py-2 pl-4 pr-4 w-full ${
+                          selected ? "bg-gray-100" : ""
+                        }`}
+                      >
                         <span
                           className={`block truncate ${
                             selected ? "font-medium" : "font-normal"

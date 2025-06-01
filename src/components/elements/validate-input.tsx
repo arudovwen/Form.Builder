@@ -12,18 +12,18 @@ export default function ValidateInput({
   element: any;
   validationData: any;
 }) {
-  const { register = () => ({}), setValue, getValues } = validationData || {};
+  const { register = () => ({}), setValue, watch } = validationData || {};
   const [value, setValueState] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
   const [isValid, setIsValid] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
 
-  const registeredValue =getValues && getValues(element?.id);
+  const registeredValue = watch && watch(element?.id);
 
   useEffect(() => {
-    setValueState(registeredValue)
-  }, [registeredValue])
-  
+    setValueState(registeredValue);
+  }, [registeredValue]);
+
   const [result, setResult] = useState<any>("");
   useEffect(() => {
     register(element.id);
@@ -53,9 +53,17 @@ export default function ValidateInput({
             setIsValid(true);
 
             if (responseType === "string") {
-              setMessage(response?.data?.data?.description || response?.data?.description || "Validation successful");
+              setMessage(
+                response?.data?.data?.description ||
+                  response?.data?.description ||
+                  "Validation successful"
+              );
             } else {
-              setResult(response?.data?.data?.description || response?.data?.description || {});
+              setResult(
+                response?.data?.data?.description ||
+                  response?.data?.description ||
+                  {}
+              );
             }
           } else {
             console.error("Invalid input:", value);
@@ -96,6 +104,7 @@ export default function ValidateInput({
             setValueState(e.target.value);
             setValue(element?.id, e.target.value);
           }}
+          disabled={element.isReadOnly}
         />
 
         <span className="absolute right-0">

@@ -14,6 +14,7 @@ export default function DateInput({
       type={element.inputType}
       className={clsx("input-control", element?.customClass)}
       {...register(element.id)}
+       disabled={element.isReadOnly}
     />
   );
 }
