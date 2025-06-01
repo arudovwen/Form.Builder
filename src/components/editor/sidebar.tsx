@@ -26,7 +26,6 @@ const SideBar = () => {
     [setIsDragging]
   );
   function handleElement(element: any) {
- 
     if (!selectedSection) {
       toast.error("Please select a section to add an element to.");
       return;
@@ -44,49 +43,44 @@ const SideBar = () => {
   const elementBgColor = config?.elementBgColor;
   const elementBorderColor = config?.elementBorderColor;
   return (
-    <div className="w-full">
-      <div className="py-4 px-5 max-h-[85vh] overflow-y-auto">
-        <div>
-          <ul className="grid gap-y-[8px] mt-3">
-            {Elements.map((element: ElementType) => (
-              <li
-                key={element.type}
-                onDragStart={(e) => handleDragStart(e, element)}
-                onDragEnd={() => setIsDragging(false)}
-                onClick={() => handleElement(element)}
-                style={{
-                  borderColor: elementBorderColor,
-                  color: element.color,
-                  backgroundColor: elementBgColor
-                }}
-                className="cursor-move text-[#475467] flex justify-between items-center  h-11
+    <div className="pt-4 pb-6 px-5 max-h-[85vh] overflow-y-auto side_shadow rounded-lg">
+      <div>
+        <ul className="grid gap-y-[8px] mt-3">
+          {Elements.map((element: ElementType) => (
+            <li
+              key={element.type}
+              onDragStart={(e) => handleDragStart(e, element)}
+              onDragEnd={() => setIsDragging(false)}
+              onClick={() => handleElement(element)}
+              style={{
+                borderColor: elementBorderColor,
+                color: element.color,
+                backgroundColor: elementBgColor,
+              }}
+              className="cursor-move text-[#475467] flex justify-between items-center  h-11
                            border border-[#98A2B3] rounded-lg py-3 px-[14px] shadow-custom
                            hover:shadow-lg transition-all duration-200
                            active:opacity-50"
-                draggable
-              >
-                <span className="flex gap-x-2 items-center">
-                  <span
-                    style={{ color: elementColor }}
-                    className="text-gray-400"
-                  >
-                    <AppIcon icon="akar-icons:drag-vertical" />
-                  </span>
+              draggable
+            >
+              <span className="flex gap-x-2 items-center">
+                <span style={{ color: elementColor }} className="text-gray-400">
+                  <AppIcon icon="akar-icons:drag-vertical" />
+                </span>
 
-                  <span
-                    style={{ color: elementColor }}
-                    className="text-sm font-medium leading-[0]"
-                  >
-                    {element.label}
-                  </span>
+                <span
+                  style={{ color: elementColor }}
+                  className="text-sm font-medium leading-[0]"
+                >
+                  {element.label}
                 </span>
-                <span style={{ color: elementColor }}>
-                  <AppIcon icon={element.icon} iconClass="w-4 h-4" />
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
+              </span>
+              <span style={{ color: elementColor }}>
+                <AppIcon icon={element.icon} iconClass="w-4 h-4" />
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
