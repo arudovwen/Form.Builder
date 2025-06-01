@@ -184,23 +184,41 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   // Fetch options from api
 
   const fetchOptions = useCallback(async () => {
-    if (!values.apiUrl) return;
+    if (!values.apiUrl || !/^https?:\/\//.test(values.apiUrl)) {
+      toast.error("Please provide a valid API URL");
+      return;
+    }
+
     try {
       setOptionsLoading(true);
+
       const { status, data } = await axios.get(values.apiUrl);
-      if (status === 200) {
-        if (element.type.toLowerCase() === "datagrid") {
-          setValue("dataColumns", data.record);
-          return;
-        }
-        setValue("options", data.record);
+
+      if (status !== 200 || !data) {
+        toast.error("Unexpected response from server.");
+        return;
+      }
+
+      // Try multiple possible response shapes
+      const options = data.data || data.record || data.result;
+
+      if (!Array.isArray(options)) {
+        toast.error("Expected an array in response (data, record, or result).");
+        return;
+      }
+
+      // Determine where to set the data
+      if (element.type?.toLowerCase() === "datagrid") {
+        setValue("dataColumns", options);
+      } else {
+        setValue("options", options);
       }
     } catch (error) {
-      toast.error(
-        error.response.data.message ||
-          error.response.data.message ||
-          "Unable to load options"
-      );
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Unable to load options";
+      toast.error(message);
     } finally {
       setOptionsLoading(false);
     }
@@ -320,7 +338,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               name="optionType"
               onChange={(e) => setOptionTypes(e.target.value as optionType)}
               value={i}
-              checked={i=== optionTypes}
+              checked={i === optionTypes}
             />{" "}
             <span>{i} options</span>
           </label>
