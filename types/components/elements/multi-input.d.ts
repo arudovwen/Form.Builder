@@ -7,7 +7,7 @@ type FieldType = {
 };
 type DynamicInputListProps = {
     initialFields?: FieldType[];
-    getValues?: (values: Record<string, string>) => void;
+    watch?: (values: Record<string, string>) => void;
     readOnly?: boolean;
     tempDefaultValue?: Record<string, string>;
 };

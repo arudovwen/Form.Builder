@@ -15,6 +15,7 @@ interface CustomSelectProps {
     subText?: string;
     labelClass?: string;
     loading?: boolean;
+    disabled?: boolean;
 }
 declare const CustomSelect: React.FC<CustomSelectProps>;
 export default CustomSelect;

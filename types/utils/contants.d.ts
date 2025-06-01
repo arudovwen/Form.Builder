@@ -1,3 +1,9 @@
+interface DataColumnType {
+    field: string;
+    headerName: string;
+    width?: number;
+    editable?: boolean;
+}
 export interface ElementType {
     type: string;
     label: string;
@@ -37,6 +43,7 @@ export interface ElementType {
     headerClass?: string;
     customClass?: string | null;
     elementClass?: string;
+    dataColumns?: DataColumnType[];
 }
 export declare const Elements: ElementType[];
 export declare const AllowValidationPrefix: string[];
@@ -50,3 +57,4 @@ export declare const AllowTableOptions: string[];
 export declare const AllowTextOptions: string[];
 export declare const noAllowEdit: string[];
 export declare const allowValue: string[];
+export {};
