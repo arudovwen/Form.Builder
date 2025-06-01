@@ -26,7 +26,7 @@ const SideBar = () => {
     [setIsDragging]
   );
   function handleElement(element: any) {
-    console.log(selectedSection);
+ 
     if (!selectedSection) {
       toast.error("Please select a section to add an element to.");
       return;
@@ -45,7 +45,7 @@ const SideBar = () => {
   const elementBorderColor = config?.elementBorderColor;
   return (
     <div className="w-full">
-      <div className="py-4 px-5 max-h-[80vh] overflow-y-auto">
+      <div className="py-4 px-5 max-h-[85vh] overflow-y-auto">
         <div>
           <ul className="grid gap-y-[8px] mt-3">
             {Elements.map((element: ElementType) => (

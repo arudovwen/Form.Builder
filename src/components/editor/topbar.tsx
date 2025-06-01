@@ -25,7 +25,7 @@ export default function TopBar({
             <AppIcon icon="mingcute:arrow-left-fill" />
           </button>
         )}{" "}
-        <h1 className="font-semibold text-lg">{title || ""}</h1>
+        <h1 className="font-semibold text-lg form_title">{title || ""}</h1>
       </span>
       {isOpen && (
         <PreviewModalModal
@@ -38,13 +38,13 @@ export default function TopBar({
         <AppButton
           onClick={() => addSection()}
           text="Add section"
-          btnClass="text-gray-700  !font-medium bg-transparent !text-xs section"
+          btnClass="text-gray-700  !font-medium bg-transparent !text-xs form_section"
           icon="icon-park-outline:plus"
         />
         <AppButton
           onClick={() => setOpen(true)}
           text="Preview"
-          btnClass="text-gray-700 bg-transparent] !font-medium !text-xs preview"
+          btnClass="text-gray-700 bg-transparent] !font-medium !text-xs form_preview"
           icon="solar:eye-bold-duotone"
         />
       </div>

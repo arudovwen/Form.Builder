@@ -1,4 +1,4 @@
-import React, { createContext, useState, useMemo, useEffect } from "react";
+import React, { createContext, useState, useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 interface EditorProviderProps {
@@ -201,9 +201,6 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
     );
   }, []);
 
-  useEffect(() => {
-    console.log("Form Data Updated:", formData);
-  }, [formData]);
 
   const value = useMemo(
     () => ({

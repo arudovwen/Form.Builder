@@ -17,7 +17,7 @@ export default function MainPage({
   }, [questionData, setFormData]);
 
   return (
-    <div className="bg-white p-4 border border-[#E4E7EC] rounded-lg h-full overflow-y-auto">
+    <div className="bg-white p-4 border border-[#E4E7EC] rounded-lg h-full overflow-y-auto no-scrollbar">
       <FormBuilder />
     </div>
   );

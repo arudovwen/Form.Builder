@@ -35,7 +35,7 @@ export default function Layout({
           <div className="w-[270px]  h-full border-l border-[#E4E7EC] bg-white">
             <SideBar />
           </div>
-          <div className="flex-1 h-full max-h-full p-4 z-[1]">
+          <div className="flex-1 h-full max-h-full p-4 z-[1] pb-20">
             {!loading ? (
               <MainPage questionData={questionData} />
             ) : (

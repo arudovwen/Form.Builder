@@ -20,12 +20,12 @@ export default function BottomBar({ onSubmit }: Props) {
     toast.success("Saved successfully");
   }
   return (
-    <div className="px-[30px] py-4 flex justify-end items-center">
+    <div className="px-[30px] py-4 flex justify-end items-center fixed z-[999] w-full bg-white bottom-0 border-t">
       <AppButton
         onClick={() => handleSubmit()}
         text="Save Form"
         style={{ background: config?.buttonColor || "#333" }}
-        btnClass={`text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg`}
+        btnClass={`text-gray-700 border-[#98A2B3] !font-medium !text-sm !py-[10px] px-10 bg-blue-600 text-white rounded-lg form_save__btn`}
       />
     </div>
   );
