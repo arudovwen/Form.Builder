@@ -3,7 +3,9 @@ import AppButton from "../ui/AppButton";
 import EditorContext from "../../context/editor-context";
 import PreviewModalModal from "./preview-modal";
 import AppIcon from "../ui/AppIcon";
+import { getItem } from "../../utils/localStorageControl";
 
+const config = getItem("config");
 export default function TopBar({
   title,
   backUrl,
@@ -38,14 +40,16 @@ export default function TopBar({
         <AppButton
           onClick={() => addSection()}
           text="Add section"
-          btnClass="text-gray-700  !font-medium bg-transparent !text-xs form_section"
+          btnClass="text-gray-700  !font-medium bg-transparent !text-sm form_section"
           icon="icon-park-outline:plus"
+          style={{ color: config?.buttonColor || "#333" }}
         />
         <AppButton
           onClick={() => setOpen(true)}
           text="Preview"
-          btnClass="text-gray-700 bg-transparent] !font-medium !text-xs form_preview"
+          btnClass="text-gray-700 bg-transparent] !font-medium !text-sm form_preview"
           icon="solar:eye-bold-duotone"
+          style={{ color: config?.buttonColor || "#333" }}
         />
       </div>
     </div>
