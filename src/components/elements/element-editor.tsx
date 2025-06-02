@@ -185,7 +185,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
 
   const fetchOptions = useCallback(async () => {
     if (!values.apiUrl || !/^https?:\/\//.test(values.apiUrl)) {
-      toast.error("Please provide a valid API URL");
+      toast.info("Please provide a valid API URL");
       return;
     }
 
@@ -225,8 +225,10 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   }, [element.type, setValue, values.apiUrl]);
 
   useEffect(() => {
-    fetchOptions();
-  }, [fetchOptions, values.apiUrl]);
+   if(optionTypes=== 'api'){
+     fetchOptions();
+   }
+  }, [fetchOptions, optionTypes, values.apiUrl]);
   const OptionsTypes = ["manual", "api", "sheet"];
 
   // Options field rendering
@@ -270,7 +272,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         <div className="mb-4">
           <FileReaderComponent
             isFloating
-            label="Load options form sheet (csv, xlxs)"
+            label="Load options form sheet (csv, xlsx)"
             setValue={setValue}
             name="options"
           />
@@ -323,9 +325,9 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
     </div>
   );
 
-  useEffect(() => {
-    setOptionTypes("api");
-  }, [element.type]);
+  // useEffect(() => {
+  //   setOptionTypes("api");
+  // }, [element.type]);
 
   // Options field rendering
   const renderColumnsFields = () => (
@@ -369,7 +371,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         <div className="mb-4">
           <FileReaderComponent
             isFloating
-            label="Load columns form sheet (csv, xlxs)"
+            label="Load columns form sheet (csv, xlsx)"
             setValue={setValue}
             name="dataColumns"
           />
@@ -379,7 +381,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         <div key={field.id} className="flex gap-x-4 items-center ">
           <div className="flex-1">
             <DynamicInput
-              label="Field"
+              label="Field key"
               name={`dataColumns.${index}.field`}
               register={register}
               errors={errors}
@@ -438,7 +440,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[999] cursor-default no-drag select-none">
-      <div className="min-w-[600px] bg-white rounded-xl shadow-xl relative flex flex-col items-center">
+      <div className="min-w-[600px] bg-white rounded-xl shadow-xl relative flex flex-col items-center max-h-[80vh] overflow-y-auto no-scrollbar">
         {/* Header */}
         <div className="w-full px-6 pt-6 pb-5 flex flex-col items-start gap-4 z-10 mb-6">
           <h2 className="text-lg font-semibold text-[#475467] font-onest">
@@ -446,6 +448,8 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           </h2>
           <button
             onClick={onClose}
+            type="button"
+            aria-label="close"
             className="absolute right-4 top-4 p-2 text-[#98A2B3] hover:bg-gray-50 rounded-lg"
           >
             <AppIcon icon="tabler:x" />
