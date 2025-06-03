@@ -6,7 +6,7 @@ import { BrowserRouter } from "react-router";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+    <div className="h-screen w-screen">  <App /></div>
     </BrowserRouter>
   </StrictMode>
 );
