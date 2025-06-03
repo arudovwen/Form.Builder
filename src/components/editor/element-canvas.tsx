@@ -15,7 +15,7 @@ import AppIcon from "../ui/AppIcon";
 import GridInput, { GridItem } from "../elements/grid-input";
 import ElementContainer from "../elements/element-container";
 
-const STATE = 'edit'
+const STATE = "edit";
 
 export interface FormElement {
   id: string;
@@ -48,100 +48,125 @@ function ElementCanvas({ elementData, sectionId }: any) {
     [formData, sectionId]
   );
 
-  const handleDragStart = useCallback((e: DragEvent<HTMLDivElement>, id: string) => {
-    e.dataTransfer.setData("properties", id);
-    setDraggedElementId(id);
-  }, []);
+  const handleDragStart = useCallback(
+    (e: DragEvent<HTMLDivElement>, id: string) => {
+      e.dataTransfer.setData("properties", id);
+      setDraggedElementId(id);
+    },
+    []
+  );
 
-  const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>, id: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragOverTargetId(id);
-  }, []);
+  const handleDragOver = useCallback(
+    (e: DragEvent<HTMLDivElement>, id: string) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragOverTargetId(id);
+    },
+    []
+  );
 
-  const handleDrop = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDrop = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    const draggedId = e.dataTransfer.getData("properties");
-    const targetId = e.currentTarget.id;
+      const draggedId = e.dataTransfer.getData("properties");
+      const targetId = e.currentTarget.id;
 
-    if (!targetId || draggedId === targetId) return;
+      if (!targetId || draggedId === targetId) return;
 
-    const fromIndex = questionData.findIndex((el) => el.id === draggedId);
-    const toIndex = questionData.findIndex((el) => el.id === targetId);
-    if (fromIndex === -1 || toIndex === -1) return;
+      const fromIndex = questionData.findIndex((el) => el.id === draggedId);
+      const toIndex = questionData.findIndex((el) => el.id === targetId);
+      if (fromIndex === -1 || toIndex === -1) return;
 
-    const updated = [...questionData];
-    const [moved] = updated.splice(fromIndex, 1);
-    updated.splice(toIndex, 0, moved);
+      const updated = [...questionData];
+      const [moved] = updated.splice(fromIndex, 1);
+      updated.splice(toIndex, 0, moved);
 
-    updateElementPosition(updated, sectionId);
-    setDraggedElementId(null);
-  }, [questionData, sectionId, updateElementPosition]);
+      updateElementPosition(updated, sectionId);
+      setDraggedElementId(null);
+    },
+    [questionData, sectionId, updateElementPosition]
+  );
 
-  const handleMainDrop = useCallback((e: DragEvent<HTMLDivElement>, index: number) => {
-    e.preventDefault();
-    setIsDragging(false);
+  const handleMainDrop = useCallback(
+    (e: DragEvent<HTMLDivElement>, index: number) => {
+      e.preventDefault();
+      setIsDragging(false);
 
-    try {
-      const data = JSON.parse(e.dataTransfer.getData("properties"));
-      const newElement = { ...data, id: uuidv4(), sectionId };
-      addElementInPosition(newElement, sectionId, index);
-    } catch (err) {
-      console.error("Drop error:", err);
-    }
-  }, [addElementInPosition, sectionId, setIsDragging]);
+      try {
+        const data = JSON.parse(e.dataTransfer.getData("properties"));
+        const newElement = { ...data, id: uuidv4(), sectionId };
+        addElementInPosition(newElement, sectionId, index);
+      } catch (err) {
+        console.error("Drop error:", err);
+      }
+    },
+    [addElementInPosition, sectionId, setIsDragging]
+  );
 
-  const renderDropZone = useCallback((index: number) => (
-    <div
-      key={`drop-${index}`}
-      className="hover:bg-blue-300 transition rounded"
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => handleMainDrop(e, index)}
-      onDragEnd={() => setIsDragging(false)}
-    >
-      <div className="bg-blue-50 rounded p-6 h-[60px] border-2 border-blue-300 border-dashed flex items-center justify-center text-gray-400 opacity-70">
-        <AppIcon icon="octicon:plus-16" />
+  const renderDropZone = useCallback(
+    (index: number) => (
+      <div
+        key={`drop-${index}`}
+        className="hover:bg-blue-300 transition rounded"
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => handleMainDrop(e, index)}
+        onDragEnd={() => setIsDragging(false)}
+      >
+        <div className="bg-blue-50 rounded p-6 h-[60px] border-2 border-blue-300 border-dashed flex items-center justify-center text-gray-400 opacity-70">
+          <AppIcon icon="octicon:plus-16" />
+        </div>
       </div>
-    </div>
-  ), [handleMainDrop, setIsDragging]);
+    ),
+    [handleMainDrop, setIsDragging]
+  );
 
-  const renderDraggableElement = useCallback((element: any) => (
-    <div
-      key={element.id}
-      id={element.id}
-      className={clsx(
-        "cursor-move border p-4 w-full rounded-lg transition-colors bg-white",
-        {
-          "bg-gray-100": draggedElementId === element.id,
-          "border-dashed border-blue-300":
-            draggedElementId && draggedElementId !== element.id,
-        }
-      )}
-      draggable
-      onDragStart={(e) => handleDragStart(e, element.id)}
-      onDragOver={(e) => handleDragOver(e, element.id)}
-      onDrop={handleDrop}
-      onDragEnd={() => setDraggedElementId(null)}
-    >
-      {renderElement(element, sectionId)}
-    </div>
-  ), [draggedElementId, handleDrop, handleDragOver, sectionId, handleDragStart]);
+  const renderDraggableElement = useCallback(
+    (element: any) => (
+      <div
+        key={element.id}
+        id={element.id}
+        className={clsx(
+          "cursor-move border p-4 w-full rounded-lg transition-colors bg-white",
+          {
+            "bg-gray-100": draggedElementId === element.id,
+            "border-dashed border-blue-300":
+              draggedElementId && draggedElementId !== element.id,
+          }
+        )}
+        draggable
+        onDragStart={(e) => handleDragStart(e, element.id)}
+        onDragOver={(e) => handleDragOver(e, element.id)}
+        onDrop={handleDrop}
+        onDragEnd={() => setDraggedElementId(null)}
+      >
+        {renderElement(element, sectionId)}
+      </div>
+    ),
+    [draggedElementId, handleDrop, handleDragOver, sectionId, handleDragStart]
+  );
 
   const gridChildrenMap = useMemo(() => {
-    return elementData?.reduce((acc: Record<string, any[]>, el: any) => {
-      if (el.gridId) {
-        acc[el.gridId] = acc[el.gridId] || [];
-        acc[el.gridId].push(el);
-      }
-      return acc;
-    }, {}) || {};
+    return (
+      elementData?.reduce((acc: Record<string, any[]>, el: any) => {
+        if (el.gridId) {
+          acc[el.gridId] = acc[el.gridId] || [];
+          acc[el.gridId].push(el);
+        }
+        return acc;
+      }, {}) || {}
+    );
   }, [elementData]);
 
   if (!elementData?.length) {
     return (
-      <div className="w-full h-full flex items-center justify-center text-gray-400 min-h-[250px] p-10 col-span-2">
+      <div
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => handleMainDrop(e, 0)}
+        onDragEnd={() => setIsDragging(false)}
+        className="w-full h-full flex items-center justify-center text-gray-400 min-h-[250px] p-10 col-span-2"
+      >
         Drag or click an element to display
       </div>
     );
@@ -185,9 +210,13 @@ function ElementCanvas({ elementData, sectionId }: any) {
                 el.elementClass
               )}
             >
-              {isDragging && dragOverTargetId === el.id && renderDropZone(index)}
+              {isDragging &&
+                dragOverTargetId === el.id &&
+                renderDropZone(index)}
               <div className="group">{renderDraggableElement(el)}</div>
-              {isDragging && dragOverTargetId === el.id && renderDropZone(index + 1)}
+              {isDragging &&
+                dragOverTargetId === el.id &&
+                renderDropZone(index + 1)}
             </div>
           );
         }

@@ -2,7 +2,7 @@ import { useContext } from "react";
 import AppButton from "../ui/AppButton";
 import EditorContext from "../../context/editor-context";
 import { EditorContextType } from "./element-canvas";
-import { toast } from "react-toastify";
+
 import { getItem } from "../../utils/localStorageControl";
 
 type Props = {
@@ -17,10 +17,9 @@ export default function BottomBar({ onSubmit }: Props) {
   function handleSubmit() {
     localStorage.setItem("formData", JSON.stringify(formData));
     onSubmit(formData);
-    toast.success("Saved successfully");
   }
   return (
-    <div className="px-[30px] py-4 flex justify-end items-center fixed z-[999] w-full bg-white bottom-0 border-t">
+    <div className="px-[30px] py-3 flex justify-end items-center  w-full">
       <AppButton
         onClick={() => handleSubmit()}
         text="Save Form"

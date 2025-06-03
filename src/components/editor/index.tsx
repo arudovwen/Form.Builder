@@ -85,7 +85,7 @@ const FormBuilder = () => {
   return (
     <div
       ref={containerRef} // Attach the ref to the container
-      className="flex gap-x-4 mx-auto h-full relative px-6 pb-5 flex-col no-scrollbar overflow-y-auto max-h-[85vh]"
+      className="flex gap-x-4 mx-auto h-full relative px-6 pb-5 flex-col"
     >
       {isOpen && (
         <SectionEditorModal

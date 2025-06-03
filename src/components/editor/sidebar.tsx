@@ -43,7 +43,7 @@ const SideBar = () => {
   const elementBgColor = config?.elementBgColor;
   const elementBorderColor = config?.elementBorderColor;
   return (
-    <div className="pt-4 pb-6 px-5 max-h-[85vh] overflow-y-auto side_shadow rounded-lg">
+    <div className="pt-4 pb-6 px-5">
       <div>
         <ul className="grid gap-y-[8px] mt-3">
           {Elements.map((element: ElementType) => (

@@ -31,10 +31,12 @@ export default function Layout({
         <div className="border-b  bg-white  border-[#E4E7EC]">
           <TopBar title={title} backUrl={backUrl} />
         </div>
-        <div className="flex flex-1 p-4 gap-x-4 pb-20">
-          <div className="w-[270px]   border-l border-[#E4E7EC] bg-white  rounded-lg max-h-max ">
+        <div className="flex flex-1 p-4 gap-x-4">
+         <div>
+           <div className="w-[270px]   border border-[#E4E7EC] bg-white  max-h-[80vh] overflow-y-auto side_shadow rounded-lg ">
             <SideBar />
           </div>
+         </div>
           <div className="flex-1 h-full max-h-full z-[1] ">
             {!loading ? (
               <MainPage questionData={questionData} />
