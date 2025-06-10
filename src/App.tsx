@@ -127,82 +127,82 @@ const data = [
 ];
 
 const answerData = [
-    {
-        "id": "0fd58e1c-3ff4-43ed-a4fc-0bc35433961b",
-        "value": "erq3wrq",
-        "sectionId": "7580dbe9-7733-4356-8a9e-0f5054d0be00",
-        "type": "textField"
-    },
-    {
-        "id": "867fd1c9-431b-4eac-b90f-812de0561e40",
-        "value": "qwrq",
-        "sectionId": "7580dbe9-7733-4356-8a9e-0f5054d0be00",
-        "type": "longText"
-    },
-    {
-        "id": "8a5856dd-0a95-4065-97a0-6b3324440bd4",
-        "sectionId": "7580dbe9-7733-4356-8a9e-0f5054d0be00",
-        "type": "selectField"
-    },
-    {
-        "id": "84501d9c-3edd-46a0-a83e-c92a2e4a7563",
-        "value": "141414",
-        "sectionId": "7580dbe9-7733-4356-8a9e-0f5054d0be00",
-        "type": "validateInput"
-    },
-    {
-        "id": "5f5a823c-94d9-4d62-a509-857ed140e4c5",
-        "value": "rqrq",
-        "sectionId": "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
-        "type": "validateInput"
-    },
-    {
-        "id": "98292376-59aa-447c-b287-7128f70d72b7",
-        "value": 33333,
-        "sectionId": "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
-        "type": "numberField"
-    },
-    {
-        "id": "9e09bad3-1dd2-496e-8816-4ec803425375",
-        "value": "2025-04-14T23:00:00.000Z",
-        "sectionId": "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
-        "type": "date"
-    },
-    {
-        "id": "2cc8ff1c-123e-4a1f-9142-bc8713f59ad9",
-        "value": "Arudovwen@17",
-        "sectionId": "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
-        "type": "password"
-    },
-    {
-        "id": "8b34148a-9f50-4ab2-90ce-20dcf4962553",
-        "sectionId": "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
-        "type": "radio"
-    },
-    {
-        "id": "9bb90d58-9264-4a5a-91d0-694d58e9a718",
-        "sectionId": "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
-        "type": "grid"
-    },
-    {
-        "id": "b8d35c26-e91e-465b-af89-b8fc0bf0dec8",
-        "value": [],
-        "sectionId": "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
-        "type": "tableInput"
-    },
-    {
-        "id": "51689b4c-4384-4ec7-8681-2b1ccb5a4d76",
-        "value": "41414",
-        "sectionId": "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
-        "type": "validateInput"
-    },
-    {
-        "id": "eabfb8b2-51da-4d59-a947-027b53dd47f4",
-        "value": "tw4t43",
-        "sectionId": "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
-        "type": "longText"
-    }
-]
+  {
+    id: "0fd58e1c-3ff4-43ed-a4fc-0bc35433961b",
+    value: "erq3wrq",
+    sectionId: "7580dbe9-7733-4356-8a9e-0f5054d0be00",
+    type: "textField",
+  },
+  {
+    id: "867fd1c9-431b-4eac-b90f-812de0561e40",
+    value: "qwrq",
+    sectionId: "7580dbe9-7733-4356-8a9e-0f5054d0be00",
+    type: "longText",
+  },
+  {
+    id: "8a5856dd-0a95-4065-97a0-6b3324440bd4",
+    sectionId: "7580dbe9-7733-4356-8a9e-0f5054d0be00",
+    type: "selectField",
+  },
+  {
+    id: "84501d9c-3edd-46a0-a83e-c92a2e4a7563",
+    value: "141414",
+    sectionId: "7580dbe9-7733-4356-8a9e-0f5054d0be00",
+    type: "validateInput",
+  },
+  {
+    id: "5f5a823c-94d9-4d62-a509-857ed140e4c5",
+    value: "rqrq",
+    sectionId: "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
+    type: "validateInput",
+  },
+  {
+    id: "98292376-59aa-447c-b287-7128f70d72b7",
+    value: 33333,
+    sectionId: "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
+    type: "numberField",
+  },
+  {
+    id: "9e09bad3-1dd2-496e-8816-4ec803425375",
+    value: "2025-04-14T23:00:00.000Z",
+    sectionId: "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
+    type: "date",
+  },
+  {
+    id: "2cc8ff1c-123e-4a1f-9142-bc8713f59ad9",
+    value: "Arudovwen@17",
+    sectionId: "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
+    type: "password",
+  },
+  {
+    id: "8b34148a-9f50-4ab2-90ce-20dcf4962553",
+    sectionId: "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
+    type: "radio",
+  },
+  {
+    id: "9bb90d58-9264-4a5a-91d0-694d58e9a718",
+    sectionId: "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
+    type: "grid",
+  },
+  {
+    id: "b8d35c26-e91e-465b-af89-b8fc0bf0dec8",
+    value: [],
+    sectionId: "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
+    type: "tableInput",
+  },
+  {
+    id: "51689b4c-4384-4ec7-8681-2b1ccb5a4d76",
+    value: "41414",
+    sectionId: "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
+    type: "validateInput",
+  },
+  {
+    id: "eabfb8b2-51da-4d59-a947-027b53dd47f4",
+    value: "tw4t43",
+    sectionId: "4db3f32b-881b-4c34-bbaf-ff3352d958ed",
+    type: "longText",
+  },
+];
 function App() {
   let form_data;
 
@@ -217,9 +217,9 @@ function App() {
   const config = {
     buttonColor: "green",
     loaderColor: "green",
-    elementColor:"green",
-    elementBgColor:"",
-    elementBorderColor: "green"
+    elementColor: "green",
+    elementBgColor: "",
+    elementBorderColor: "green",
   };
   return (
     <Routes>
@@ -228,14 +228,14 @@ function App() {
         element={
           <div className="h-screen">
             <BulderPage
-            onSubmit={function (e: any): void {
-              console.log(e);
-            }}
-            // questionData={data}
-            config={config}
-            title="Form Title"
-            backUrl="/gooana"
-          />
+              onSubmit={function (e: any): void {
+                console.log(e);
+              }}
+              // questionData={data}
+              config={config}
+              title="Form Title"
+              goBackUrl={() => undefined}
+            />
           </div>
         }
       />

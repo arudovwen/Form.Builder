@@ -109,7 +109,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
     (index: number) => (
       <div
         key={`drop-${index}`}
-        className="hover:bg-blue-300 transition rounded"
+        className="transition rounded hover:bg-blue-300"
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => handleMainDrop(e, index)}
         onDragEnd={() => setIsDragging(false)}
@@ -165,7 +165,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => handleMainDrop(e, 0)}
         onDragEnd={() => setIsDragging(false)}
-        className="w-full h-full flex items-center justify-center text-gray-400 min-h-[250px] p-10 col-span-2"
+        className="w-full h-full flex items-center justify-center text-gray-400 min-h-[200px] p-10 col-span-2 border border-dashed border-gray-300 rounded-lg"
       >
         Drag or click an element to display
       </div>
@@ -173,7 +173,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
   }
 
   return (
-    <div className="w-full h-full grid grid-cols-1 gap-4 relative">
+    <div className="relative grid w-full h-full grid-cols-1 gap-4">
       {elementData.map((el: any, index: number) => {
         if (el.type === "grid") {
           const gridChildren = gridChildrenMap[el.id] || [];
@@ -186,7 +186,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
               onDragOver={(e) => handleDragOver(e, el.id)}
               onDrop={handleDrop}
               onDragEnd={() => setDraggedElementId(null)}
-              className="cursor-move border p-4 w-full rounded-lg transition-colors bg-white"
+              className="w-full p-4 transition-colors bg-white border rounded-lg cursor-move"
             >
               <ElementContainer element={el} state="edit">
                 <GridInput element={el} sectionId={sectionId} state={STATE}>

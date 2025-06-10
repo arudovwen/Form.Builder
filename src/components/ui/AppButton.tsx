@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import AppIcon from "./AppIcon";
+import clsx from "clsx";
 
 interface ButtonProps {
   text?: string;
@@ -33,13 +34,14 @@ const Button: React.FC<ButtonProps> = ({
   style,
   onClick,
 }) => {
- 
-  const buttonClasses = `
-    btn inline-flex justify-center
-    ${isLoading ? " pointer-events-none" : ""}
-    ${isDisabled ? " opacity-40 cursor-not-allowed" : ""}
-    ${btnClass}
-  `;
+  const buttonClasses = clsx(
+    "btn inline-flex justify-center",
+    {
+      "pointer-events-none": isLoading,
+      "opacity-40 cursor-not-allowed": isDisabled,
+    },
+    btnClass
+  );
 
   const renderButtonContent = () => {
     if (isLoading) {

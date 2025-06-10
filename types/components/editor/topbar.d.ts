@@ -1,4 +1,5 @@
-export default function TopBar({ title, backUrl, }: {
+export default function TopBar({ title, goBackUrl, onSubmit, }: {
     title: string;
-    backUrl: string;
+    goBackUrl: () => void;
+    onSubmit: (e: any) => void;
 }): import("react/jsx-runtime").JSX.Element;
