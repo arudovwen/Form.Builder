@@ -224,19 +224,19 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
     }
   }, [element.type, setValue, values.apiUrl]);
 
-  useEffect(() => {
-   if(optionTypes=== 'api'){
-     fetchOptions();
-   }
-  }, [fetchOptions, optionTypes, values.apiUrl]);
   const OptionsTypes = ["manual", "api", "sheet"];
 
+  function loadApi() {
+    if (optionTypes === "api") {
+      fetchOptions();
+    }
+  }
   // Options field rendering
   const renderOptionsFields = () => (
-    <div className="flex flex-col gap-y-1 justify-start">
-      <div className="flex gap-x-5 items-center mb-4">
+    <div className="flex flex-col justify-start gap-y-1">
+      <div className="flex items-center mb-4 gap-x-5">
         {OptionsTypes.map((i) => (
-          <label key={i} className="text-base items-center gap-x-3 capitalize">
+          <label key={i} className="items-center text-base capitalize gap-x-3">
             <input
               type="radio"
               name="optionType"
@@ -250,20 +250,29 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       {optionTypes === "api" && (
         <div className="mb-4">
           {/* Load options from api  */}
-          <div className="flex items-center relative w-full mb-2">
-            <DynamicInput
-              label="Load Options from Api"
-              name="apiUrl"
-              errors={errors}
-              register={register}
-              className="!w-full"
-              placeholder="https://example.com/options"
-              isFloating
-            />
+          <div className="flex items-center gap-x-2">
+            <div className="relative flex items-center w-full mb-2">
+              <DynamicInput
+                label="Load Options from Api"
+                name="apiUrl"
+                errors={errors}
+                register={register}
+                className="!w-full"
+                placeholder="https://example.com/options"
+                isFloating
+              />
 
-            {optionsLoading && (
-              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin absolute right-3 top-1/2 mt-1"></div>
-            )}
+              {optionsLoading && (
+                <div className="absolute w-4 h-4 mt-1 border-2 border-blue-500 rounded-full border-t-transparent animate-spin right-3 top-1/2"></div>
+              )}
+            </div>
+            <button
+              onClick={loadApi}
+              className="px-3 py-1 text-xs text-white bg-gray-600 rounded"
+              type="button"
+            >
+              Load
+            </button>
           </div>
           <OptionsExample />
         </div>
@@ -279,7 +288,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         </div>
       )}
       {fields.map((field, index) => (
-        <div key={field.id} className="flex gap-x-4 items-center ">
+        <div key={field.id} className="flex items-center gap-x-4 ">
           <div className="flex-1">
             <DynamicInput
               label="Label"
@@ -316,7 +325,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         {" "}
         <button
           type="button"
-          className="mt-2  text-gray-700 font-medium text-sm  flex gap-x-1 items-center"
+          className="flex items-center mt-2 text-sm font-medium text-gray-700 gap-x-1"
           onClick={() => append({ label: "", value: "", id: uuidv4() })}
         >
           <AppIcon icon="qlementine-icons:plus-16" /> Add Option
@@ -331,10 +340,10 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
 
   // Options field rendering
   const renderColumnsFields = () => (
-    <div className="flex flex-col gap-y-1 justify-start">
-      <div className="flex gap-x-5 items-center mb-4">
+    <div className="flex flex-col justify-start gap-y-1">
+      <div className="flex items-center mb-4 gap-x-5">
         {OptionsTypes.map((i) => (
-          <label key={i} className="text-base items-center gap-x-3 capitalize">
+          <label key={i} className="items-center text-base capitalize gap-x-3">
             <input
               type="radio"
               name="optionType"
@@ -349,20 +358,29 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       {optionTypes === "api" && (
         <div className="mb-4">
           {/* Load options from api  */}
-          <div className="flex items-center relative w-full mb-2">
-            <DynamicInput
-              label="Load Columns from Api"
-              name="apiUrl"
-              errors={errors}
-              register={register}
-              className="!w-full"
-              placeholder="https://example.com/columns"
-              isFloating
-            />
+          <div className="flex items-center gap-x-2">
+            <div className="relative flex items-center w-full mb-2">
+              <DynamicInput
+                label="Load Columns from Api"
+                name="apiUrl"
+                errors={errors}
+                register={register}
+                className="!w-full"
+                placeholder="https://example.com/columns"
+                isFloating
+              />
 
-            {optionsLoading && (
-              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin absolute right-3 top-1/2 mt-1"></div>
-            )}
+              {optionsLoading && (
+                <div className="absolute w-4 h-4 mt-1 border-2 border-blue-500 rounded-full border-t-transparent animate-spin right-3 top-1/2"></div>
+              )}
+            </div>{" "}
+            <button
+              onClick={loadApi}
+              className="px-3 py-1 text-xs text-white bg-gray-600 rounded"
+              type="button"
+            >
+              Load
+            </button>
           </div>
           <ColumnExample />
         </div>
@@ -378,7 +396,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         </div>
       )}
       {dataFields.map((field, index) => (
-        <div key={field.id} className="flex gap-x-4 items-center ">
+        <div key={field.id} className="flex items-center gap-x-4 ">
           <div className="flex-1">
             <DynamicInput
               label="Field key"
@@ -401,7 +419,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               isFloating
             />
           </div>
-          {/* <div className="flex-1 flex gap-x-3 items-center">
+          {/* <div className="flex items-center flex-1 gap-x-3">
             <label>
               {" "}
               <input type="checkbox" name={`dataColumns.${index}.editable`} />{" "}
@@ -422,7 +440,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         {" "}
         <button
           type="button"
-          className="mt-2  text-gray-700 font-medium text-sm  flex gap-x-1 items-center"
+          className="flex items-center mt-2 text-sm font-medium text-gray-700 gap-x-1"
           onClick={() =>
             columnAppend({
               headerName: "",
@@ -439,10 +457,18 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[999] cursor-default no-drag select-none">
-      <div className="min-w-[600px] bg-white rounded-xl shadow-xl relative flex flex-col items-center max-h-[80vh] overflow-y-auto no-scrollbar">
+    <div
+      className="fixed inset-0 bg-black/30 flex items-center justify-center z-[999] cursor-default  select-none "
+      draggable="true"
+      onDragStart={(e) => e.preventDefault()}
+    >
+      <div
+        className="min-w-[600px] bg-white rounded-xl shadow-xl relative flex flex-col items-center max-h-[80vh] overflow-y-auto no-scrollbar  select-"
+        draggable="true"
+        onDragStart={(e) => e.preventDefault()}
+      >
         {/* Header */}
-        <div className="w-full px-6 pt-6 pb-5 flex flex-col items-start gap-4 z-10 mb-6">
+        <div className="z-10 flex flex-col items-start w-full gap-4 px-6 pt-6 pb-5 mb-6">
           <h2 className="text-lg font-semibold text-[#475467] font-onest">
             {element.label} Options
           </h2>
@@ -471,7 +497,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         <form onSubmit={handleSubmit(onSubmit)} className="w-full">
           <div className=" max-h-[800px] overflow-y-auto">
             {activeTab === "basic" && (
-              <div className="w-full px-6 flex flex-col gap-5 z-10">
+              <div className="z-10 flex flex-col w-full gap-5 px-6">
                 {allowValue.includes(element.inputType) && (
                   <>
                     <DynamicInput
@@ -609,8 +635,8 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
 
             {!noAllowValidation.includes(element.type.toLowerCase()) &&
               activeTab === "validation" && (
-                <div className="w-full px-6 flex flex-col gap-5 z-10">
-                  <div className="flex gap-x-6 items-center">
+                <div className="z-10 flex flex-col w-full gap-5 px-6">
+                  <div className="flex items-center gap-x-6">
                     <div className="w-[150px]">
                       <DynamicInput
                         label="Required"
@@ -633,7 +659,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   </div>
                   {AllowValidationMaxMin.includes(element.inputType) && (
                     <>
-                      <div className="flex gap-x-6 items-center">
+                      <div className="flex items-center gap-x-6">
                         <div className="w-[150px]">
                           <DynamicInput
                             label="Min Length"
@@ -654,7 +680,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                           />
                         </div>
                       </div>
-                      <div className="flex gap-x-6 items-center">
+                      <div className="flex items-center gap-x-6">
                         <div className="w-[150px]">
                           <DynamicInput
                             label="Max Length"
@@ -679,7 +705,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   )}
                   {AllowValidationAmount.includes(element.inputType) && (
                     <>
-                      <div className="flex gap-x-6 items-center">
+                      <div className="flex items-center gap-x-6">
                         <div className="w-[150px]">
                           <DynamicInput
                             label="Min Amount"
@@ -700,7 +726,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                           />
                         </div>
                       </div>
-                      <div className="flex gap-x-6 items-center">
+                      <div className="flex items-center gap-x-6">
                         <div className="w-[150px]">
                           <DynamicInput
                             label="Max Amount"
@@ -727,7 +753,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               )}
           </div>
           {/* Actions */}
-          <div className="w-full px-6 pt-8 pb-6 flex gap-3 mt-4">
+          <div className="flex w-full gap-3 px-6 pt-8 pb-6 mt-4">
             <button
               type="button"
               onClick={onClose}

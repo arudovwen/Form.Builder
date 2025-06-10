@@ -1,6 +1,5 @@
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import BottomBar from "./bottom-bar";
 import MainPage from "./main";
 import SideBar from "./sidebar";
 import TopBar from "./topbar";
@@ -14,14 +13,14 @@ export interface BuilderProps {
   config?: any; // Configuration for the form
   title?: string;
   loading?: boolean;
-  backUrl?: string;
+  goBackUrl?: () => void;
 }
 
 export default function Layout({
   onSubmit,
   questionData,
   title,
-  backUrl,
+  goBackUrl,
   loading,
 }: BuilderProps) {
   return (
@@ -29,14 +28,14 @@ export default function Layout({
       <div className="w-full h-full bg-[#E4E7EC] flex flex-col">
         <ToastContainer />
         <div className="border-b  bg-white  border-[#E4E7EC]">
-          <TopBar title={title} backUrl={backUrl} />
+          <TopBar title={title} goBackUrl={goBackUrl} onSubmit={onSubmit} />
         </div>
         <div className="flex flex-1 p-4 gap-x-4">
-         <div>
-           <div className="w-[270px]   border border-[#E4E7EC] bg-white  max-h-[80vh] overflow-y-auto side_shadow rounded-lg ">
-            <SideBar />
+          <div>
+            <div className="w-[270px]   border border-[#E4E7EC] bg-white   max-h-[calc(100vh-100px)] overflow-y-auto side_shadow rounded-lg no-scrollbar">
+              <SideBar />
+            </div>
           </div>
-         </div>
           <div className="flex-1 h-full max-h-full z-[1] ">
             {!loading ? (
               <MainPage questionData={questionData} />
@@ -44,9 +43,6 @@ export default function Layout({
               <Loader loadingClass="!w-full !h-[800px]" />
             )}
           </div>
-        </div>
-        <div className="border-b  bg-white border-t border-[#E4E7EC]">
-          <BottomBar onSubmit={onSubmit} />
         </div>
       </div>
     </EditorProvider>

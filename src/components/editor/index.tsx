@@ -85,7 +85,7 @@ const FormBuilder = () => {
   return (
     <div
       ref={containerRef} // Attach the ref to the container
-      className="flex gap-x-4 mx-auto h-full relative px-6 pb-5 flex-col"
+      className="relative flex flex-col h-full px-6 pb-5 mx-auto gap-x-4"
     >
       {isOpen && (
         <SectionEditorModal
@@ -94,7 +94,7 @@ const FormBuilder = () => {
           section={tempSection.current}
         />
       )}
-      <div className="relative w-full flex flex-col gap-y-6 flex-1 py-4">
+      <div className="relative flex flex-col flex-1 w-full py-4 gap-y-6">
         {formData.map(
           (
             section: {
@@ -105,26 +105,26 @@ const FormBuilder = () => {
             },
             index: number
           ) => (
-            <div key={section.id} className={`group cursor-pointer rounded`}>
+            <div key={section.id} className={`group cursor-pointer rounded `}>
               <div
-                className={`border border-gray-100 rounded pb-6  px-4 shadow-[rgba(149,157,165,0.2)_0px_2px_4px] transition-colors duration-200
+                className={`border border-gray-100 rounded  px-4 shadow-[rgba(149,157,165,0.2)_0px_2px_4px] transition-colors duration-200
                   ${
                     selectedSection === section.id
                       ? "border-dashed border-blue-400 bg-[#f7f8fa]"
-                      : "border-transparent"
-                  } ${activeSections.includes(index) ? "min-h-[300px]" : ""}`}
+                      : ""
+                  } ${activeSections.includes(index) ? "min-h-[300px] pb-6 " : ""}`}
               >
-                <div className="flex justify-between items-center">
-                  <div onClick={() => setSelectedSection(section.id)} className="h-full flex-1 cursor-pointer py-4">
+                <div className="flex items-center justify-between">
+                  <div onClick={() => setSelectedSection(section.id)} className="flex-1 h-full py-4 cursor-pointer">
                     <h2 className="font-medium">
                       {section.title || "Section title"}
                     </h2>
                   </div>
 
-                  <div className="flex gap-x-2 items-center">
+                  <div className="flex items-center gap-x-2">
                     <button
                       type="button"
-                      className="p-1 border rounded-lg text-xs"
+                      className="p-1 text-xs border rounded-lg"
                       onClick={() => handleSectionEdit(section)}
                     >
                       <AppIcon icon="fluent:edit-28-regular" />
@@ -132,7 +132,7 @@ const FormBuilder = () => {
                     {formData.length > 1 && (
                       <button
                         type="button"
-                        className="p-1 border rounded-lg text-xs"
+                        className="p-1 text-xs border rounded-lg"
                         onClick={() => removeSection(section.id)}
                       >
                         <AppIcon icon="lets-icons:trash-duotone-line" />
@@ -140,7 +140,7 @@ const FormBuilder = () => {
                     )}
                     <button
                       type="button"
-                      className="p-1 rounded-lg text-xs"
+                      className="p-1 text-xs rounded-lg"
                       onClick={() => toggleSection(index)}
                     >
                       <AppIcon
@@ -154,20 +154,20 @@ const FormBuilder = () => {
                   </div>
                 </div>
                 {section?.description && activeSections.includes(index) && (
-                  <p className="text-sm text-gray-60 mt-2 text-gray-600">
+                  <p className="mt-2 text-sm text-gray-600 text-gray-60">
                     {section?.description}
                   </p>
                 )}
                 {activeSections.includes(index) && (
                   <div
-                    className="mt-4 transition-all duration-200 h-full"
+                    className="h-full mt-4 transition-all duration-200"
                     id={section.id}
                     onDragOver={onDragOver}
                     onDragEnd={() => setIsDragging(false)}
                     onClick={() => setSelectedSection(section.id)}
                   >
                     <hr />
-                    <div className="gap-y-6 mt-4 h-full">
+                    <div className="h-full mt-4 gap-y-6">
                       {
                         <ElementCanvas
                           elementData={section.questionData}

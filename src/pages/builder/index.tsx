@@ -11,7 +11,7 @@ const HomePage = ({
   },
   title,
   loading,
-  backUrl
+  goBackUrl
 }: BuilderProps) => {
   useEffect(() => {
     if (config) {
@@ -24,7 +24,7 @@ const HomePage = ({
       questionData={questionData}
       isReadOnly={isReadOnly}
       title={title}
-      backUrl={backUrl}
+      goBackUrl={goBackUrl}
       loading={loading}
     />
   );
