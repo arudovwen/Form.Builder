@@ -32,7 +32,7 @@ export default function TopBar({
     <div className="px-[30px] py-3 flex justify-between items-center bg-[#F9F9FB] top_bar">
       <span className="flex items-center gap-x-[6px]">
         {" "}
-        {!goBackUrl && (
+        {goBackUrl && (
           <button
             type="button"
             onClick={() => goBackUrl()}
