@@ -231,6 +231,9 @@ function App() {
               onSubmit={function (e: any): void {
                 console.log(e);
               }}
+              onPublish={function (e: any): void {
+                console.log(e);
+              }}
               // questionData={data}
               config={config}
               title="Form Title"

@@ -7,5 +7,6 @@ export interface BuilderProps {
     title?: string;
     loading?: boolean;
     goBackUrl?: () => void;
+    onPublish: (e: any) => void;
 }
-export default function Layout({ onSubmit, questionData, title, goBackUrl, loading, }: BuilderProps): import("react/jsx-runtime").JSX.Element;
+export default function Layout({ onSubmit, questionData, title, goBackUrl, loading, onPublish, }: BuilderProps): import("react/jsx-runtime").JSX.Element;
