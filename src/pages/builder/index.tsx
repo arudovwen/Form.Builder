@@ -11,7 +11,8 @@ const HomePage = ({
   },
   title,
   loading,
-  goBackUrl
+  goBackUrl,
+  onPublish,
 }: BuilderProps) => {
   useEffect(() => {
     if (config) {
@@ -21,6 +22,7 @@ const HomePage = ({
   return (
     <Layout
       onSubmit={onSubmit}
+      onPublish={onPublish}
       questionData={questionData}
       isReadOnly={isReadOnly}
       title={title}

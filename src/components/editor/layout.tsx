@@ -14,6 +14,7 @@ export interface BuilderProps {
   title?: string;
   loading?: boolean;
   goBackUrl?: () => void;
+  onPublish: (e: any) => void;
 }
 
 export default function Layout({
@@ -22,13 +23,19 @@ export default function Layout({
   title,
   goBackUrl,
   loading,
+  onPublish,
 }: BuilderProps) {
   return (
     <EditorProvider>
-      <div className="w-full h-full bg-[#E4E7EC] flex flex-col">
+      <div className="w-full h-full bg-[#F5F5F5] flex flex-col">
         <ToastContainer />
         <div className="border-b  bg-white  border-[#E4E7EC]">
-          <TopBar title={title} goBackUrl={goBackUrl} onSubmit={onSubmit} />
+          <TopBar
+            title={title}
+            goBackUrl={goBackUrl}
+            onSubmit={onSubmit}
+            onPublish={onPublish}
+          />
         </div>
         <div className="flex flex-1 p-4 gap-x-4">
           <div>

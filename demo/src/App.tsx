@@ -37,7 +37,7 @@ function App() {
           <FormBuilder
             onSubmit={(e: any) => console.log(e)}
             config={config}
-            goBackUrl={()=> undefined}
+            goBackUrl={()=> "/"}
           />
         }
       />

@@ -75,13 +75,13 @@ const Button: React.FC<ButtonProps> = ({
     return (
       <span className="flex items-center">
         {icon && iconPosition === "left" && (
-          <span className={`mr-2 ${iconClass}`}>
+          <span className={`mr-[6px] ${iconClass}`}>
             <AppIcon icon={icon} />
           </span>
         )}
         {text && <span>{text}</span>}
         {icon && iconPosition === "right" && (
-          <span className={`ml-2 ${iconClass}`}>
+          <span className={`ml-[6px] ${iconClass}`}>
             <AppIcon icon={icon} />
           </span>
         )}
