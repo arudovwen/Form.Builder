@@ -7,14 +7,14 @@ import { EditorProvider } from "../../context/editor-context";
 import Loader from "../Loader";
 
 export interface BuilderProps {
-  onSubmit: (e: any) => void; // Function to handle form submission
+  onSubmit?: (e: any) => void; // Function to handle form submission
   questionData?: any; // Data for the questions in the form
   isReadOnly?: boolean; // Flag to indicate if the form is read-only
   config?: any; // Configuration for the form
   title?: string;
   loading?: boolean;
   goBackUrl?: () => void;
-  onPublish: (e: any) => void;
+  onPublish?: (e: any) => void;
 }
 
 export default function Layout({
