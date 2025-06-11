@@ -8,7 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@arudovwen/form-builder-react": "^1.1.9",
+    "@arudovwen/form-builder-react": "^1.2.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router": "^7.0.2",

@@ -14,19 +14,19 @@ export default function TopBar({
 }: {
   title: string;
   goBackUrl: () => void;
-  onSubmit: (e: any) => void;
-  onPublish: (e: any) => void;
+  onSubmit?: (e: any) => void;
+  onPublish?: (e: any) => void;
 }) {
   const { addSection, formData }: any = useContext(EditorContext);
   const [isOpen, setOpen] = useState(false);
 
   function handleSubmit() {
     localStorage.setItem("formData", JSON.stringify(formData));
-    onSubmit(formData);
+    onSubmit?.(formData);
   }
   function handlePublish() {
     localStorage.setItem("formData", JSON.stringify(formData));
-    onPublish(formData);
+    onPublish?.(formData);
   }
   return (
     <div className="px-[30px] py-3 flex justify-between items-center bg-[#F9F9FB] top_bar">
