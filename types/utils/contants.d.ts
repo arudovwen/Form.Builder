@@ -26,6 +26,7 @@ export interface ElementType {
         label: string;
         value: any;
         id: string;
+        key?: string;
     }>;
     columns?: number;
     gridId?: string;
@@ -44,6 +45,12 @@ export interface ElementType {
     customClass?: string | null;
     elementClass?: string;
     dataColumns?: DataColumnType[];
+    options2?: Array<{
+        label: string;
+        value: any;
+        id: string;
+        key?: string;
+    }>;
 }
 export declare const Elements: ElementType[];
 export declare const AllowValidationPrefix: string[];

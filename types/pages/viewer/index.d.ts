@@ -8,4 +8,4 @@ export interface RenderProps {
     config?: any;
     renderType?: "multi" | "single";
 }
-export default function Viewer({ answerData, form_data, ignoreValidation, onSubmit, isReadOnly, loading, config, renderType }: RenderProps): import("react/jsx-runtime").JSX.Element;
+export default function Viewer({ answerData, form_data, ignoreValidation, onSubmit, isReadOnly, loading, config, renderType, }: RenderProps): import("react/jsx-runtime").JSX.Element;
