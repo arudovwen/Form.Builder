@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 export interface RenderProps {
     onSubmit?: (e: any) => void;
     answerData?: any;
@@ -7,5 +8,6 @@ export interface RenderProps {
     loading?: boolean;
     config?: any;
     renderType?: "multi" | "single";
+    children?: ReactNode;
 }
-export default function Viewer({ answerData, form_data, ignoreValidation, onSubmit, isReadOnly, loading, config, renderType, }: RenderProps): import("react/jsx-runtime").JSX.Element;
+export default function Viewer({ answerData, form_data, ignoreValidation, onSubmit, isReadOnly, loading, config, renderType, children, }: RenderProps): import("react/jsx-runtime").JSX.Element;

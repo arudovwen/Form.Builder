@@ -1,8 +1,7 @@
-import { useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 import Loader from "../../components/Loader";
 import FormRenderer from "../../components/viewer";
 import { setItem } from "../../utils/localStorageControl";
-import AppButton from "../../components/ui/AppButton";
 
 export interface RenderProps {
   onSubmit?: (e: any) => void; // Function to handle form submission
@@ -13,6 +12,7 @@ export interface RenderProps {
   loading?: boolean; // Flag to indicate if the form is loading
   config?: any; // Configuration for the form
   renderType?: "multi" | "single";
+  children?: ReactNode;
 }
 
 export default function Viewer({
@@ -26,6 +26,7 @@ export default function Viewer({
     buttonColor: "#333",
   },
   renderType,
+  children,
 }: RenderProps) {
   useEffect(() => {
     if (config) {
@@ -39,10 +40,7 @@ export default function Viewer({
   if (!form_data) {
     return (
       <div>
-        <p>
-          Error: No form data available. Please ensure the form data is saved
-          correctly.
-        </p>
+        <p className="text-gray-400 tex-sm">Error: No form data available.</p>
       </div>
     );
   }
@@ -56,25 +54,8 @@ export default function Viewer({
         onSubmitData={onSubmit}
         isReadOnly={isReadOnly}
         renderType={renderType}
-      >
-        <div className="w-full">
-          {" "}
-          <hr className="my-5 border-[#D5D9EB]" />
-          <div className="flex justify-end gap-x-3">
-            <AppButton
-              btnClass="text-center !bg-transparent !border !border-[#D0D5DD] !text-secondary items-center !px-5"
-              type="button"
-              text="Cancel"
-            />
-
-            <AppButton
-              text="Submit"
-              btnClass="text-center !bg-[#333] !text-white items-center !px-6"
-              type="submit"
-            />
-          </div>
-        </div>
-      </FormRenderer>
+        children={children}
+      />
     </div>
   );
 }
