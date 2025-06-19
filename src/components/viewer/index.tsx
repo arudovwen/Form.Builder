@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useForm, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 
 import { EditorProvider } from "../../context/editor-context";
 import AppButton from "../ui/AppButton";
@@ -26,6 +26,7 @@ export interface FormRendererProps {
   onSubmitData?: (data: any[]) => void;
   isReadOnly?: boolean;
   renderType?: RenderType;
+  children?: ReactNode;
 }
 const FormRenderer = ({
   form_data,
@@ -34,6 +35,7 @@ const FormRenderer = ({
   onSubmitData,
   isReadOnly,
   renderType = "multi",
+  children,
 }: any) => {
   const [current, setCurrent] = useState(0);
   const total = useMemo(() => form_data.length, [form_data]);
@@ -73,8 +75,8 @@ const FormRenderer = ({
 
   useEffect(() => {
     if (answerData?.length) {
-      const tempData = mapIdToValue(answerData)
-      reset(tempData)
+      const tempData = mapIdToValue(answerData);
+      reset(tempData);
     }
   }, [answerData, reset]);
 
@@ -97,9 +99,9 @@ const FormRenderer = ({
       <FormProvider {...methods}>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="container mx-auto p-6 h-full"
+          className="container h-full mx-auto"
         >
-          <div className="relative w-full flex flex-col gap-y-12 py-4">
+          <div className="relative flex flex-col w-full py-4 gap-y-12">
             <div key={form_data?.[current].id}>
               <div className="mb-4">
                 {form_data?.[current].title && (
@@ -145,7 +147,7 @@ const FormRenderer = ({
             </div>
           </div>
 
-          <div className="pt-8 flex justify-end items-center gap-4">
+          <div className="flex items-center justify-end gap-4 pt-8">
             {current !== 0 && (
               <AppButton
                 type="button"
@@ -165,14 +167,20 @@ const FormRenderer = ({
               />
             ) : (
               !ignoreValidation && (
-                <AppButton
-                  isDisabled={isSubmitting}
-                  isLoading={isSubmitting}
-                  type="submit"
-                  text="Submit"
-                  style={{ background: config?.buttonColor || "#333" }}
-                  btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg"
-                />
+                <>
+                  {children ? (
+                  children
+                  ) : (
+                  <AppButton
+                    isDisabled={isSubmitting}
+                    isLoading={isSubmitting}
+                    type="submit"
+                    text="Submit"
+                    style={{ background: config?.buttonColor || "#333" }}
+                    btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg"
+                  />
+                  )}
+                </>
               )
             )}
           </div>

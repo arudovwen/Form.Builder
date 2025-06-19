@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import Loader from "../../components/Loader";
 import FormRenderer from "../../components/viewer";
 import { setItem } from "../../utils/localStorageControl";
+import AppButton from "../../components/ui/AppButton";
 
 export interface RenderProps {
   onSubmit?: (e: any) => void; // Function to handle form submission
@@ -24,7 +25,7 @@ export default function Viewer({
   config = {
     buttonColor: "#333",
   },
-  renderType
+  renderType,
 }: RenderProps) {
   useEffect(() => {
     if (config) {
@@ -55,7 +56,25 @@ export default function Viewer({
         onSubmitData={onSubmit}
         isReadOnly={isReadOnly}
         renderType={renderType}
-      />
+      >
+        <div className="w-full">
+          {" "}
+          <hr className="my-5 border-[#D5D9EB]" />
+          <div className="flex justify-end gap-x-3">
+            <AppButton
+              btnClass="text-center !bg-transparent !border !border-[#D0D5DD] !text-secondary items-center !px-5"
+              type="button"
+              text="Cancel"
+            />
+
+            <AppButton
+              text="Submit"
+              btnClass="text-center !bg-[#333] !text-white items-center !px-6"
+              type="submit"
+            />
+          </div>
+        </div>
+      </FormRenderer>
     </div>
   );
 }

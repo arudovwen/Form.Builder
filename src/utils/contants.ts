@@ -24,7 +24,7 @@ export interface ElementType {
   minLengthMessage?: string;
   maxLengthMessage?: string;
   value?: any;
-  options?: Array<{ label: string; value: any; id: string }>;
+  options?: Array<{ label: string; value: any; id: string; key?: string }>;
   columns?: number;
   gridId?: string;
   gridPosition?: Record<string, any>;
@@ -42,6 +42,7 @@ export interface ElementType {
   customClass?: string | null;
   elementClass?: string;
   dataColumns?: DataColumnType[];
+  options2?:  Array<{ label: string; value: any; id: string; key?: string }>;
 }
 
 // The Elements array
@@ -138,6 +139,45 @@ export const Elements: ElementType[] = [
         label: "Placeholder 1",
         value: "",
         id: uuidv4(),
+      },
+    ],
+    customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null,
+  },
+    {
+    type: "cascadeSelect",
+    label: "Cascade Select",
+    icon: "tabler:select",
+    inputLabel: "Select Text Label",
+    required: false,
+    inputType: "select",
+    maxLength: null,
+    minLength: null,
+    placeholder: "Type here",
+    description: "",
+    isReadOnly: false,
+    isDisabled: false,
+    isRequired: false,
+    requiredMessage: "Field is required",
+    minLengthMessage: "",
+    maxLengthMessage: "",
+    value: null,
+    options: [
+      {
+        label: "Placeholder 1",
+        value: "",
+        id: uuidv4(),
+        key: ""
+      },
+    ],
+     options2: [
+      {
+        label: "Placeholder 1",
+        value: "",
+        id: uuidv4(),
+        key:""
       },
     ],
     customClass: "",

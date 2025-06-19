@@ -20,6 +20,7 @@ import Divider from "../elements/divider";
 import Header from "../elements/header";
 import BasicText from "../elements/basic-text";
 import DataGridInput from "../elements/data-grid";
+import CascadeDropdown from "../elements/cascade-dropdown";
 
 export const elementMap: Record<string, React.ElementType> = {
   textField: TextInput,
@@ -42,6 +43,7 @@ export const elementMap: Record<string, React.ElementType> = {
   divider: Divider,
   header: Header,
   basicText: BasicText,
+  cascadeSelect: CascadeDropdown
 };
 const state = "edit"; // This can be passed as a prop or context value
 export const renderElement = (element: any, sectionId: string) => {
@@ -50,7 +52,7 @@ export const renderElement = (element: any, sectionId: string) => {
     <ElementContainer element={element} state={state}>
       <div className="relative w-full">
         {element.type.toLowerCase() !== "grid" && (
-          <div className="absolute top-0 left-0 h-full w-full z-20" />
+          <div className="absolute top-0 left-0 z-20 w-full h-full" />
         )}
         <ElementComponent
           element={element}

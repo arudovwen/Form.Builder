@@ -6,12 +6,7 @@
     "axe/aria": "off",
     "typescript-config/strict": "off",
     "typescript-config/is-valid": "off",
-    "axe/forms": [
-      "default",
-      {
-        "label": "off"
-      }
-    ],
+    "axe/forms": "off",
     "axe/name-role-value": "off"
   }
 }
