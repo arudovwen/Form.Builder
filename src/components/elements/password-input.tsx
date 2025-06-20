@@ -14,7 +14,7 @@ export default function PasswordInput({
       type={element.inputType}
       className={clsx("input-control", element?.customClass)}
       {...register(element.id)}
-       disabled={element.isReadOnly}
+       disabled={validationData.isReadOnly}
     />
   );
 }

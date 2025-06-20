@@ -104,7 +104,7 @@ export default function ValidateInput({
             setValueState(e.target.value);
             setValue(element?.id, e.target.value);
           }}
-          disabled={element.isReadOnly}
+          disabled={validationData.isReadOnly}
         />
 
         <span className="absolute right-0">

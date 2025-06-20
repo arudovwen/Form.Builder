@@ -21,7 +21,7 @@ export default function RadioInput({
               register={register}
               name={element.id}
               value={item.value}
-               disabled={element.isReadOnly}
+               disabled={validationData.isReadOnly}
             />
           </div>
         )

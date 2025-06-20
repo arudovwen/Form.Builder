@@ -254,6 +254,7 @@ function App() {
             config={config}
             loading={false}
             renderType={"multi"}
+            isReadOnly
           />
         }
       />

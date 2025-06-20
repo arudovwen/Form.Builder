@@ -15,7 +15,7 @@ export default function TextInput({
         type={element?.inputType || "text"}
         className={clsx("input-control", element?.customClass)}
         {...register(element?.id)}
-        disabled={element.isReadOnly}
+        disabled={validationData.isReadOnly}
       />
     </div>
   );

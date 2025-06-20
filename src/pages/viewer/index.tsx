@@ -40,7 +40,7 @@ export default function Viewer({
   if (!form_data) {
     return (
       <div>
-        <p className="text-gray-400 tex-sm">Error: No form data available.</p>
+        <p className="p-6 text-gray-400 tex-sm">Error: No form data available.</p>
       </div>
     );
   }

@@ -11,7 +11,8 @@ export default function AmountInput({
     register = () => ({}),
     trigger,
     setValue,
-    watch,isReadOnly
+    watch,
+    isReadOnly,
   } = validationData || {};
   let selectedValue;
   if (watch) {
