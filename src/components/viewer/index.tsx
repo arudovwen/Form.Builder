@@ -27,6 +27,7 @@ export interface FormRendererProps {
   isReadOnly?: boolean;
   renderType?: RenderType;
   children?: ReactNode;
+  hideFooter?: boolean;
 }
 const FormRenderer = ({
   form_data,
@@ -36,6 +37,7 @@ const FormRenderer = ({
   isReadOnly,
   renderType = "multi",
   children,
+  hideFooter,
 }: any) => {
   const [current, setCurrent] = useState(0);
   const total = useMemo(() => form_data.length, [form_data]);
@@ -149,57 +151,59 @@ const FormRenderer = ({
             </div>
           </div>
 
-          <footer className="flex items-center justify-end gap-4 pt-5 mt-8 border-t border-gray-100 footer">
-            {renderType === "multi" && (
-              <>
-                {current !== 0 && (
-                  <AppButton
-                    type="button"
-                    text="Back"
-                    onClick={handleBack}
-                    btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-gray-200 rounded-lg"
-                  />
-                )}
-                {current !== total - 1 ? (
-                  <AppButton
-                    type="button"
-                    text="Continue"
-                    onClick={handleProceed}
-                    style={{ background: config?.buttonColor || "#333" }}
-                    btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg continue_btn"
-                  />
-                ) : (
-                  !ignoreValidation &&
-                  (children ? (
-                    children
-                  ) : (
+          {!hideFooter && (
+            <footer className="flex items-center justify-end gap-4 pt-5 mt-8 border-t border-gray-100 footer">
+              {renderType === "multi" && (
+                <>
+                  {current !== 0 && (
                     <AppButton
-                      isDisabled={isSubmitting}
-                      isLoading={isSubmitting}
-                      type="submit"
-                      text="Submit"
-                      style={{ background: config?.buttonColor || "#333" }}
-                      btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
+                      type="button"
+                      text="Back"
+                      onClick={handleBack}
+                      btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-gray-200 rounded-lg"
                     />
-                  ))
-                )}
-              </>
-            )}
-            {renderType === "single" &&
-              !ignoreValidation &&
-              (children ? (
-                children
-              ) : (
-                <AppButton
-                  isDisabled={isSubmitting}
-                  isLoading={isSubmitting}
-                  type="submit"
-                  text="Submit"
-                  style={{ background: config?.buttonColor || "#333" }}
-                  btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
-                />
-              ))}
-          </footer>
+                  )}
+                  {current !== total - 1 ? (
+                    <AppButton
+                      type="button"
+                      text="Continue"
+                      onClick={handleProceed}
+                      style={{ background: config?.buttonColor || "#333" }}
+                      btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg continue_btn"
+                    />
+                  ) : (
+                    !ignoreValidation &&
+                    (children ? (
+                      children
+                    ) : (
+                      <AppButton
+                        isDisabled={isSubmitting}
+                        isLoading={isSubmitting}
+                        type="submit"
+                        text="Submit"
+                        style={{ background: config?.buttonColor || "#333" }}
+                        btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
+                      />
+                    ))
+                  )}
+                </>
+              )}
+              {renderType === "single" &&
+                !ignoreValidation &&
+                (children ? (
+                  children
+                ) : (
+                  <AppButton
+                    isDisabled={isSubmitting}
+                    isLoading={isSubmitting}
+                    type="submit"
+                    text="Submit"
+                    style={{ background: config?.buttonColor || "#333" }}
+                    btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
+                  />
+                ))}
+            </footer>
+          )}
         </form>
       </FormProvider>
     </EditorProvider>

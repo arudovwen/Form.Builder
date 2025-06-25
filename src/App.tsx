@@ -253,6 +253,7 @@ function App() {
             form_data={form_data}
             config={config}
             loading={false}
+            
             // renderType={"single"}
           />
         }

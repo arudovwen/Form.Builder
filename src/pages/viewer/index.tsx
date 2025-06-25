@@ -13,6 +13,7 @@ export interface RenderProps {
   config?: any; // Configuration for the form
   renderType?: "multi" | "single";
   children?: ReactNode;
+  hideFooter?: boolean
 }
 
 export default function Viewer({
@@ -27,6 +28,7 @@ export default function Viewer({
   },
   renderType,
   children,
+  hideFooter
 }: RenderProps) {
   useEffect(() => {
     if (config) {
@@ -55,6 +57,7 @@ export default function Viewer({
         isReadOnly={isReadOnly}
         renderType={renderType}
         children={children}
+        hideFooter={hideFooter}
       />
     </div>
   );

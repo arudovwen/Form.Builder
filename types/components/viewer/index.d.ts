@@ -13,6 +13,7 @@ export interface FormRendererProps {
     isReadOnly?: boolean;
     renderType?: RenderType;
     children?: ReactNode;
+    hideFooter?: boolean;
 }
-declare const FormRenderer: ({ form_data, answerData, ignoreValidation, onSubmitData, isReadOnly, renderType, children, }: any) => import("react/jsx-runtime").JSX.Element;
+declare const FormRenderer: ({ form_data, answerData, ignoreValidation, onSubmitData, isReadOnly, renderType, children, hideFooter, }: any) => import("react/jsx-runtime").JSX.Element;
 export default FormRenderer;
