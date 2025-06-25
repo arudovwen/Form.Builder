@@ -145,10 +145,11 @@ const FormBuilder = () => {
                     >
                       <AppIcon
                         icon={
-                          !activeSections.includes(index)
-                            ? "octicon:plus-16"
-                            : "gravity-ui:minus"
+                          activeSections.includes(index)
+                            ? "fa6-solid:chevron-up"
+                            : "fa6-solid:chevron-down"
                         }
+                        iconClass="text-base"
                       />
                     </button>
                   </div>

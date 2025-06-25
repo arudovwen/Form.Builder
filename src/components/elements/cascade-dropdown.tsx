@@ -75,7 +75,7 @@ const CascadeDropdown: React.FC<CascadeDropdownProps> = ({
           value={selectedFirst}
           onChange={handleFirstDropdownChange}
           className={clsx("input-control", element?.customClass)}
-          disabled={validationData.isReadOnly}
+          disabled={validationData?.isReadOnly}
         >
           <option value="">Select an option</option>
           {firstDropdownOptions?.map((option) => (
@@ -94,7 +94,7 @@ const CascadeDropdown: React.FC<CascadeDropdownProps> = ({
             value={selectedSecond}
             onChange={handleSecondDropdownChange}
             className={clsx("input-control", element?.customClass)}
-            disabled={validationData.isReadOnly}
+            disabled={validationData?.isReadOnly}
           >
             <option value="">Select an option</option>
             {secondDropdownOptions?.[selectedFirst]?.map((option) => (

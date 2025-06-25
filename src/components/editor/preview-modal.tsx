@@ -21,15 +21,15 @@ const PreviewModalModal: React.FC<PreviewModalModalProps> = ({
   const config = getItem("config");
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[999] cursor-default no-drag select-none">
-      <div className="max-w-[80vw]  bg-white rounded-xl shadow-xl relative flex flex-col items-center w-full  py-6 ">
+      <div className="max-w-[700px]  bg-white rounded-xl shadow-xl relative flex flex-col items-center w-full  py-6 px-6">
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-3 right-4 text-sm"
+          className="absolute text-sm top-3 right-4"
         >
           Close
         </button>
-        <div className="max-h-[90vh] overflow-y-auto h-full min-h-[600px] w-full">
+        <div className="max-h-[90vh] overflow-y-auto h-full min-h-[600px] w-full ">
           <FormViewer
             form_data={formData}
             ignoreValidation={true}

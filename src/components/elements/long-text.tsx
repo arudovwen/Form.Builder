@@ -14,7 +14,7 @@ export default function LongTextInput({
       rows={4}
       className={clsx("input-control resize-none", element?.customClass)}
       {...register(element.id)}
-       disabled={validationData.isReadOnly}
+       disabled={validationData?.isReadOnly}
     ></textarea>
   );
 }

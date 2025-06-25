@@ -37,7 +37,7 @@ const TabsComponent: FC<TabsComponentProps> = ({
         
         // Base class for each tab button
         const baseBtnClass = clsx(
-          "capitalize text-xs whitespace-nowrap no-scrollbar md:text-sm font-semibold pb-[14px] border-b-2 px-6 flex items-center justify-center gap-x-1 flex-1 text-center",
+          "capitalize text-sm  whitespace-nowrap no-scrollbar font-semibold pb-[14px] border-b border-[#EAECF0] px-6 flex items-center  gap-x-1 flex-1 text-center",`${tabs.length===1?'justify-start':'justify-center'}`,
           btnClass
         );
 

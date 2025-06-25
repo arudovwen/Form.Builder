@@ -35,7 +35,7 @@ export default function SelectInput({
         trigger={trigger}
         value={selectedValue}
         className={clsx("input-control", element?.customClass)}
-         disabled={validationData.isReadOnly}
+         disabled={validationData?.isReadOnly}
       />
     </div>
   );

@@ -115,7 +115,7 @@ const schema = yup.object().shape({
 });
 
 const tabs = [
-  { title: "Basics", key: "basic" },
+  { title: "Configurations", key: "basic" },
   { title: "Validations", key: "validation" },
 ];
 
@@ -463,7 +463,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       onDragStart={(e) => e.preventDefault()}
     >
       <div
-        className="min-w-[600px] bg-white rounded-xl shadow-xl relative flex flex-col items-center max-h-[80vh] overflow-y-auto no-scrollbar  select-"
+        className="min-w-[600px] bg-white rounded-xl shadow-xl relative flex flex-col pb-4 items-center max-h-[80vh] overflow-y-auto no-scrollbar  select-"
         draggable="true"
         onDragStart={(e) => e.preventDefault()}
       >
@@ -489,7 +489,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
             setActiveTab={setActiveTab}
             activeTab={activeTab}
             className="justify-start !text-left"
-            btnClass="!uppercase !text-left"
+            btnClass=" !text-left"
           />
         </div>
 
@@ -757,7 +757,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 bg-white border border-[#D0D5DD] rounded-lg shadow-xs font-semibold text-[#344054] font-onest"
+              className="flex-1 px-4 py-2.5 bg-white border border-[#D0D5DD] rounded-lg shadow-xs font-semibold text-[#344054] font-onest editor_option__cancel"
             >
               Cancel
             </button>
@@ -769,7 +769,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 !isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#2563EB]"
               } ${
                 !isValid || isSubmitting ? "text-[#98A2B3]" : "text-white"
-              } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-50`}
+              } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-50 editor_option__save`}
             >
               {isSubmitting ? "Saving..." : "Save"}
             </button>

@@ -43,7 +43,7 @@ const SideBar = () => {
   const elementBgColor = config?.elementBgColor;
   const elementBorderColor = config?.elementBorderColor;
   return (
-    <div className="pt-4 pb-6 px-5">
+    <div className="px-5 pt-4 pb-6">
       <div>
         <ul className="grid gap-y-[8px] mt-3">
           {Elements.map((element: ElementType) => (
@@ -60,10 +60,10 @@ const SideBar = () => {
               className="cursor-move text-[#475467] flex justify-between items-center  h-11
                            border border-[#98A2B3] rounded-lg py-3 px-[14px] shadow-custom
                            hover:shadow-lg transition-all duration-200
-                           active:opacity-50"
+                           active:opacity-50 element_class"
               draggable
             >
-              <span className="flex gap-x-2 items-center">
+              <span className="flex items-center gap-x-2">
                 <span style={{ color: elementColor }} className="text-gray-400">
                   <AppIcon icon="akar-icons:drag-vertical" />
                 </span>

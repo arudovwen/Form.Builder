@@ -28,7 +28,7 @@ interface GridItemProps {
 
 export const GridItem = ({ col, children, customClass }: GridItemProps) => (
   <div
-    className={clsx("w-full p-2 bg-white", customClass)}
+    className={clsx("w-full bg-white", customClass)}
     style={{ gridColumn: col }}
   >
     {children}
@@ -40,7 +40,7 @@ const GridInput = ({
   sectionId,
   children,
   customClass,
-  state
+  state,
 }: GridInputProps) => {
   const { formData, addElement, setIsDragging } = useContext(
     EditorContext
@@ -115,8 +115,9 @@ const GridInput = ({
           onDrop={(e) => handleDrop(e, index)}
           onDragOver={handleDragOver}
           className={clsx(
-            "border rounded-lg min-h-[110px] bg-white p-2",
+            "border rounded-lg min-h-[110px] bg-white ",
             "flex items-center justify-center text-gray-400 transition-colors",
+            `${state === "edit" ? "p-3" : ""}`,
             customClass
           )}
         >
@@ -131,7 +132,7 @@ const GridInput = ({
   return (
     <div className="relative z-10 w-full">
       <div
-        className="grid gap-6 w-full"
+        className="grid w-full gap-3"
         style={{
           gridTemplateColumns: `repeat(${element.columns}, 1fr)`,
         }}

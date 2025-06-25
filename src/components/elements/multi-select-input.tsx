@@ -31,11 +31,11 @@ export default function MultiSelectInput({
 
   return (
     <div className="w-full z-10">
-      <Listbox value={selectedValues} onChange={setSelectedValues} multiple  disabled={validationData.isReadOnly}>
+      <Listbox value={selectedValues} onChange={setSelectedValues} multiple  disabled={validationData?.isReadOnly}>
         <div className="relative">
           <Listbox.Button
             className="w-full py-2 pl-3 pr-10 text-left bg-white input-control cursor-default "
-            disabled={validationData.isReadOnly}
+            disabled={validationData?.isReadOnly}
           >
             {selectedValues?.length > 0
               ? selectedValues?.map((i) => i.label).join(", ")
