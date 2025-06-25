@@ -6,7 +6,7 @@ export default function SinglePage({ form_data, options }) {
   return (
     <div className="grid gap-y-10">
       {form_data.flatMap((section: any) => (
-        <div className="pb-6 border-b">
+        <div className="pb-6 border-b border-gray-100 last:border-none">
           <div className="mb-4">
             {section.title && (
               <h2 className="text-lg font-semibold mb-[4px]">

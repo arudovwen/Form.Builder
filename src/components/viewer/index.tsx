@@ -149,7 +149,7 @@ const FormRenderer = ({
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-4 pt-8">
+          <footer className="flex items-center justify-end gap-4 pt-5 mt-8 border-t border-gray-100 footer">
             {renderType === "multi" && (
               <>
                 {current !== 0 && (
@@ -199,7 +199,7 @@ const FormRenderer = ({
                   btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
                 />
               ))}
-          </div>
+          </footer>
         </form>
       </FormProvider>
     </EditorProvider>
