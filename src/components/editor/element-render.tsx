@@ -2,9 +2,9 @@ import React from "react";
 import DateInput from "../elements/date-input";
 import TextInput from "../elements/text-input";
 import MultiSelectInput from "../elements/multi-select-input";
-import EmailInput from "../elements/email-input";
+// import EmailInput from "../elements/email-input";
 import FileInput from "../elements/file-input";
-import NumberInput from "../elements/text-input";
+// import NumberInput from "../elements/text-input";
 import PasswordInput from "../elements/password-input";
 import RadioInput from "../elements/radio-input";
 import SectionInput from "../elements/section-input";
@@ -12,7 +12,7 @@ import CheckBoxInput from "../elements/checkbox-input";
 import SelectInput from "../elements/select-input";
 import LongTextInput from "../elements/long-text";
 import ElementContainer from "../elements/element-container";
-import AmountInput from "../elements/amount-input";
+// import AmountInput from "../elements/amount-input";
 import ValidateInput from "../elements/validate-input";
 import TableInput from "../elements/table-input";
 import Spacer from "../elements/spacer";
@@ -21,19 +21,21 @@ import Header from "../elements/header";
 import BasicText from "../elements/basic-text";
 import DataGridInput from "../elements/data-grid";
 import CascadeDropdown from "../elements/cascade-dropdown";
+import Rating from "../elements/rating-input";
+import CountryBank from "../elements/country-bank";
 
 export const elementMap: Record<string, React.ElementType> = {
   textField: TextInput,
   longText: LongTextInput, // You may want to use a specific component for long text
   selectField: SelectInput,
   multiSelect: MultiSelectInput,
-  numberField: NumberInput,
-  amountField: AmountInput,
+  numberField: TextInput,
+  amountField: TextInput,
   date: DateInput,
   password: PasswordInput,
   checkbox: CheckBoxInput,
   radio: RadioInput,
-  email: EmailInput,
+  email: TextInput,
   file: FileInput,
   dataGrid: DataGridInput,
   section: SectionInput,
@@ -43,7 +45,11 @@ export const elementMap: Record<string, React.ElementType> = {
   divider: Divider,
   header: Header,
   basicText: BasicText,
-  cascadeSelect: CascadeDropdown
+  phoneField: TextInput,
+  cascadeSelect: CascadeDropdown,
+  rating: Rating,
+  country: CountryBank,
+  bank: CountryBank,
 };
 const state = "edit"; // This can be passed as a prop or context value
 export const renderElement = (element: any, sectionId: string) => {

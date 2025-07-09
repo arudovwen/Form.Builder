@@ -13,9 +13,12 @@ export default function TextInput({
       <input
         placeholder={element?.placeholder || ""}
         type={element?.inputType || "text"}
-        className={clsx("input-control", element?.customClass)}
+        className={clsx("field-control", element?.customClass)}
         {...register(element?.id)}
         disabled={validationData?.isReadOnly}
+        inputMode={element?.inputMode || undefined}
+        aria-invalid={!!validationData?.errors?.[element?.id]}
+        pattern={element?.pattern || undefined}
       />
     </div>
   );

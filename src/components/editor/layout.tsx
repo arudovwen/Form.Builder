@@ -37,13 +37,13 @@ export default function Layout({
             onPublish={onPublish}
           />
         </div>
-        <div className="flex flex-1 p-4 gap-x-4">
+        <div className="flex flex-1 ">
           <div>
-            <div className="w-[270px]   border border-[#E4E7EC] bg-white   max-h-[calc(100vh-100px)] overflow-y-auto side_shadow rounded-lg no-scrollbar">
+            <div className="w-[240px]  h-[calc(100vh-64px)]  border-r border-[#E4E7EC] bg-white ">
               <SideBar />
             </div>
           </div>
-          <div className="flex-1 h-full max-h-full z-[1] ">
+          <div className="flex-1 h-full max-h-full z-[1]  p-4 ">
             {!loading ? (
               <MainPage questionData={questionData} />
             ) : (

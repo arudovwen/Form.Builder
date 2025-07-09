@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-
+import countries from "../data/countries.json";
 interface DataColumnType {
   field: string;
   headerName: string;
@@ -9,6 +9,7 @@ interface DataColumnType {
 export interface ElementType {
   type: string;
   label: string;
+  childLabel?: string;
   icon: string;
   inputLabel: string;
   required?: boolean;
@@ -42,7 +43,12 @@ export interface ElementType {
   customClass?: string | null;
   elementClass?: string;
   dataColumns?: DataColumnType[];
-  options2?:  Array<{ label: string; value: any; id: string; key?: string }>;
+  options2?: Array<{ label: string; value: any; id: string; key?: string }>;
+  inputMode?: string;
+  pattern?: string;
+  selectType?: string;
+  dateType?: string;
+  dateFormat?: string;
 }
 
 // The Elements array
@@ -138,6 +144,7 @@ export const Elements: ElementType[] = [
       {
         label: "Placeholder 1",
         value: "",
+        key: "",
         id: uuidv4(),
       },
     ],
@@ -145,10 +152,12 @@ export const Elements: ElementType[] = [
     elementClass: "",
     gridPosition: null,
     gridId: null,
+    selectType: "list",
   },
-    {
+  {
     type: "cascadeSelect",
     label: "Cascade Select",
+    childLabel: "Child Label",
     icon: "tabler:select",
     inputLabel: "Select Text Label",
     required: false,
@@ -169,15 +178,15 @@ export const Elements: ElementType[] = [
         label: "Placeholder 1",
         value: "",
         id: uuidv4(),
-        key: ""
+        key: "",
       },
     ],
-     options2: [
+    options2: [
       {
         label: "Placeholder 1",
         value: "",
         id: uuidv4(),
-        key:""
+        key: "",
       },
     ],
     customClass: "",
@@ -207,6 +216,7 @@ export const Elements: ElementType[] = [
       {
         label: "Placeholder 1",
         value: "",
+        key: "",
         id: uuidv4(),
       },
     ],
@@ -264,6 +274,32 @@ export const Elements: ElementType[] = [
     elementClass: "",
     gridPosition: null,
     gridId: null,
+    inputMode: "decimal",
+  },
+  {
+    type: "phoneField",
+    label: "Phone",
+    icon: "fluent-mdl2:add-phone",
+    inputLabel: "Phone Label",
+    required: false,
+    inputType: "tel",
+    maxLength: null,
+    minLength: null,
+    placeholder: "Type here",
+    description: "",
+    isReadOnly: false,
+    isDisabled: false,
+    isRequired: false,
+    requiredMessage: "Field is required",
+    minLengthMessage: "",
+    maxLengthMessage: "",
+    value: null,
+    customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null,
+    inputMode: "tel",
+    pattern: "^\\+?[0-9]{7,15}$",
   },
   {
     type: "amountField",
@@ -311,6 +347,9 @@ export const Elements: ElementType[] = [
     elementClass: "",
     gridPosition: null,
     gridId: null,
+    inputMode: "date",
+    dateType: "basic",
+    dateFormat: "dd/MM/yyyy", // Default date format
   },
   {
     type: "password",
@@ -334,6 +373,7 @@ export const Elements: ElementType[] = [
     elementClass: "",
     gridPosition: null,
     gridId: null,
+    inputMode: "text",
   },
   {
     type: "checkbox",
@@ -357,6 +397,7 @@ export const Elements: ElementType[] = [
       {
         label: "Placeholder 1",
         value: "",
+        key: "",
         id: uuidv4(),
       },
     ],
@@ -387,6 +428,7 @@ export const Elements: ElementType[] = [
       {
         label: "Placeholder 1",
         value: "",
+        key: "",
         id: uuidv4(),
       },
     ],
@@ -417,6 +459,7 @@ export const Elements: ElementType[] = [
     elementClass: "",
     gridPosition: null,
     gridId: null,
+    inputMode: "email",
   },
   {
     type: "file",
@@ -442,6 +485,73 @@ export const Elements: ElementType[] = [
     gridId: null,
   },
   {
+    type: "country",
+    label: "Country",
+    icon: "fluent:globe-16-regular",
+    inputLabel: "Select Country Label",
+    required: false,
+    inputType: "country",
+    description: "",
+    isReadOnly: false,
+    isDisabled: false,
+    isRequired: false,
+    requiredMessage: "Field is required",
+    value: null,
+    options: countries.map((i) => ({
+      label: i.name,
+      value: i.name,
+      key: "",
+      id: uuidv4(),
+    })),
+    customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null,
+  },
+  {
+    type: "banks",
+    label: "Bank",
+    icon: "fluent:building-bank-28-regular",
+    inputLabel: "Select Bank Label",
+    required: false,
+    inputType: "bank",
+    description: "",
+    isReadOnly: false,
+    isDisabled: false,
+    isRequired: false,
+    requiredMessage: "Field is required",
+    value: null,
+    options: [],
+    customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null,
+  },
+  {
+    type: "rating",
+    label: "Ratings",
+    icon: "streamline-ultimate:rating-star-ribbon",
+    inputLabel: "Select rating Label",
+    required: false,
+    inputType: "rating",
+    maxLength: null,
+    minLength: null,
+    placeholder: "Type here",
+    description: "",
+    isReadOnly: false,
+    isDisabled: false,
+    isRequired: false,
+    requiredMessage: "Field is required",
+    minLengthMessage: "",
+    maxLengthMessage: "",
+    value: null,
+
+    customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null,
+  },
+  {
     type: "dataGrid",
     label: "Data Grid",
     icon: "iconoir:table",
@@ -460,7 +570,12 @@ export const Elements: ElementType[] = [
     maxLengthMessage: "",
     value: [],
     dataColumns: [
-      { field: "firstName", headerName: "First Name", width: 150, editable: true },
+      {
+        field: "firstName",
+        headerName: "First Name",
+        width: 150,
+        editable: true,
+      },
     ],
     denominators: null,
     customClass: "",
@@ -555,3 +670,16 @@ export const AllowTableOptions: string[] = ["tableInput"];
 export const AllowTextOptions: string[] = ["text"];
 export const noAllowEdit: string[] = ["divider", "spacer"];
 export const allowValue: string[] = ["basicText"];
+
+export const dateFormats = [
+  { label: "Day/Month/Year", value: "dd/MM/yyyy" },
+  { label: "Month/Day/Year", value: "MM/dd/yyyy" },
+  { label: "ISO (Year-Month-Day)", value: "yyyy-MM-dd" },
+  { label: "Full Month Day, Year", value: "MMMM d, yyyy" },
+  { label: "Abbreviated Month Day, Year", value: "MMM d, yyyy" },
+  { label: "Day. Month. Year (Dots)", value: "dd.MM.yyyy" },
+  { label: "Day Month Name Year", value: "dd MMMM yyyy" },
+  { label: "Weekday, Month Day, Year", value: "EEEE, MMMM d, yyyy" },
+  { label: "Short Weekday, Month Day, Year", value: "EEE, MMM d, yyyy" },
+  { label: "Day-Month-Year", value: "dd-MM-yyyy" },
+];

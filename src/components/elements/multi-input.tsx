@@ -69,7 +69,7 @@ const DynamicInputList: React.FC<DynamicInputListProps> = ({
               <CurrencyInput
                 id={field.key}
                 placeholder={`Provide ${field.label?.toLowerCase() || 'value'}`}
-                className="input-control"
+                className="field-control"
                 decimalsLimit={6}
                 defaultValue={field.value}
                 onValueChange={(value) => handleChange(index, 'value', value)}
@@ -85,7 +85,7 @@ const DynamicInputList: React.FC<DynamicInputListProps> = ({
                 type={field.type}
                 onChange={(e) => handleChange(index, 'value', e.target.value)}
                 readOnly={readOnly}
-                className="input-control"
+                className="field-control"
               />
             )}
           </div>

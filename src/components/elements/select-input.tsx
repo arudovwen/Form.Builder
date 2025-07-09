@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import CustomSelect from "../CustomSelect";
 import clsx from "clsx";
+import CustomSearchSelect from "../CustomSearchSelect";
 // import { ElementType } from "../../utils/contants";
 
 export default function SelectInput({
@@ -26,17 +27,27 @@ export default function SelectInput({
   }, [element.id, register]);
 
   return (
-    <div>
-      <CustomSelect
-        options={element?.options ?? []}
-        register={register}
-        name={element.id}
-        setValue={setValue}
-        trigger={trigger}
-        value={selectedValue}
-        className={clsx("input-control", element?.customClass)}
-         disabled={validationData?.isReadOnly}
-      />
-    </div>
+    <>
+      {element.selectType === "list" ? (
+        <CustomSelect
+          options={element?.options ?? []}
+          register={register}
+          name={element.id}
+          setValue={setValue}
+          trigger={trigger}
+          value={selectedValue}
+          className={clsx("field-control", element?.customClass)}
+          disabled={validationData?.isReadOnly}
+        />
+      ) : (
+        <CustomSearchSelect
+          name={element.id}
+          options={element?.options ?? []}
+          defaultValue={selectedValue}
+          onGetValue={setValue}
+          readOnly={validationData?.isReadOnly}
+        />
+      )}
+    </>
   );
 }

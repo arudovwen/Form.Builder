@@ -17,6 +17,7 @@ import {
   AllowApiOptions,
   AllowTableOptions,
   allowValue,
+  dateFormats,
 } from "../../utils/contants";
 
 import CustomSelect from "../CustomSelect";
@@ -63,6 +64,8 @@ interface FormInputs {
   value?: any;
   customClass?: string;
   elementClass?: string;
+  selectType?: string;
+  dateType?: string;
 }
 
 const schema = yup.object().shape({
@@ -99,6 +102,25 @@ const schema = yup.object().shape({
         schema.required("Options are required for radio or checkbox inputs"),
       otherwise: (schema) => schema.nullable(),
     }),
+  options1: yup
+    .array()
+    .of(
+      yup.object().shape({
+        label: yup.string().nullable(),
+        value: yup.string().when("label", {
+          is: (label: string) => label && label.length > 0,
+          then: (schema) =>
+            schema.required("Value is required when label is present"),
+          otherwise: (schema) => schema.nullable(),
+        }),
+      })
+    )
+    .when("inputType", {
+      is: (inputType: string) => ["radio", "checkbox"].includes(inputType),
+      then: (schema) =>
+        schema.required("Options are required for radio or checkbox inputs"),
+      otherwise: (schema) => schema.nullable(),
+    }),
   prefix: yup.string().nullable(),
   url: yup.string().nullable(),
   method: yup.string().nullable(),
@@ -112,6 +134,8 @@ const schema = yup.object().shape({
   customClass: yup.string().nullable(),
   elementClass: yup.string().nullable(),
   apiUrl: yup.string().nullable(),
+  selectType: yup.string().default("list"),
+  dateType: yup.string().default("basic"),
 });
 
 const tabs = [
@@ -159,6 +183,15 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   const { fields, append, remove } = useFieldArray({
     control,
     name: "options",
+  });
+
+  const {
+    fields: fields1,
+    append: append1,
+    remove: remove1,
+  } = useFieldArray({
+    control,
+    name: "options1",
   });
 
   const {
@@ -287,50 +320,127 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           />
         </div>
       )}
-      {fields.map((field, index) => (
-        <div key={field.id} className="flex items-center gap-x-4 ">
-          <div className="flex-1">
-            <DynamicInput
-              label="Label"
-              name={`options.${index}.label`}
-              register={register}
-              errors={errors}
-              element={element}
-              placeholder="Label"
-              isFloating
-            />
-          </div>
-          <div className="flex-1">
-            <DynamicInput
-              label="Value"
-              name={`options.${index}.value`}
-              register={register}
-              errors={errors}
-              element={element}
-              placeholder="Value"
-              isFloating
-            />
-          </div>{" "}
-          <button
-            disabled={fields.length === 1}
-            type="button"
-            className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
-            onClick={() => remove(index)}
+      <div>
+        <h3 className="mb-4 text-sm text-gray-500">Parent Options </h3>
+        {fields.map((field, index) => (
+          <div
+            key={field.id}
+            className="flex items-center mb-1 gap-x-4 last:mb-0"
           >
-            <AppIcon icon="iconamoon:sign-times-fill" />
+            <div className="flex-1">
+              <DynamicInput
+                label="Label"
+                name={`options.${index}.label`}
+                register={register}
+                errors={errors}
+                element={element}
+                placeholder="Label"
+                isFloating
+              />
+            </div>
+            <div className="flex-1">
+              <DynamicInput
+                label="Value"
+                name={`options.${index}.value`}
+                register={register}
+                errors={errors}
+                element={element}
+                placeholder="Value"
+                isFloating
+              />
+            </div>
+
+            <button
+              disabled={fields.length === 1}
+              type="button"
+              className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
+              onClick={() => remove(index)}
+            >
+              <AppIcon icon="iconamoon:sign-times-fill" />
+            </button>
+          </div>
+        ))}{" "}
+        <div>
+          {" "}
+          <button
+            type="button"
+            className="flex items-center mt-2 text-sm font-medium text-gray-700 gap-x-1"
+            onClick={() => append({ label: "", value: "", id: uuidv4() })}
+          >
+            <AppIcon icon="qlementine-icons:plus-16" /> Add Option
           </button>
         </div>
-      ))}
-      <div>
-        {" "}
-        <button
-          type="button"
-          className="flex items-center mt-2 text-sm font-medium text-gray-700 gap-x-1"
-          onClick={() => append({ label: "", value: "", id: uuidv4() })}
-        >
-          <AppIcon icon="qlementine-icons:plus-16" /> Add Option
-        </button>
       </div>
+
+      {element.type.toLowerCase() === "cascadeselect" && (
+        <>
+          <hr className="my-5" />
+          <div>
+            {" "}
+            <h3 className="mb-4 text-sm text-gray-500">Child Options </h3>
+            {fields1?.map((field, index) => (
+              <div
+                key={field.id}
+                className="flex items-center mb-1 gap-x-4 last:mb-0"
+              >
+                <div className="flex-1">
+                  <DynamicInput
+                    label="Label"
+                    name={`options1.${index}.label`}
+                    register={register}
+                    errors={errors}
+                    element={element}
+                    placeholder="Label"
+                    isFloating
+                  />
+                </div>
+                <div className="flex-1">
+                  <DynamicInput
+                    label="Value"
+                    name={`options1.${index}.value`}
+                    register={register}
+                    errors={errors}
+                    element={element}
+                    placeholder="Value"
+                    isFloating
+                  />
+                </div>
+                <div className="flex-1">
+                  <DynamicInput
+                    label="Key"
+                    name={`options1.${index}.key`}
+                    register={register}
+                    errors={errors}
+                    element={element}
+                    placeholder="Key"
+                    isFloating
+                  />
+                </div>
+                <button
+                  disabled={fields1.length === 1}
+                  type="button"
+                  className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
+                  onClick={() => remove1(index)}
+                >
+                  <AppIcon icon="iconamoon:sign-times-fill" />
+                </button>
+              </div>
+            ))}
+            <div>
+              {" "}
+              <button
+                type="button"
+                className="flex items-center mt-2 text-sm font-medium text-gray-700 gap-x-1"
+                onClick={() =>
+                  append1({ label: "", value: "", key: "", id: uuidv4() })
+                }
+              >
+                <AppIcon icon="qlementine-icons:plus-16" /> Add Option
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 
@@ -468,10 +578,10 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         onDragStart={(e) => e.preventDefault()}
       >
         {/* Header */}
-        <div className="z-10 flex flex-col items-start w-full gap-4 px-6 pt-6 pb-5 mb-6">
-          <h2 className="text-lg font-semibold text-[#475467] font-onest">
+        <div className="z-10 flex flex-col items-start w-full gap-4 px-6 pt-4 pb-5 mb-3">
+          {/* <h2 className="text-base font-semibold text-[#475467] font-onest">
             {element.label} Options
-          </h2>
+          </h2> */}
           <button
             onClick={onClose}
             type="button"
@@ -509,13 +619,13 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                     />
                   </>
                 )}
-                <DynamicInput
+                {/* <DynamicInput
                   label="Custom Class"
                   name="customClass"
                   register={register}
                   errors={errors}
                   element={element}
-                />
+                /> */}
                 {/* <DynamicInput
                 label="Element Class"
                 name="elementClass"
@@ -525,13 +635,24 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               /> */}
                 {!allowValue.includes(element.inputType) &&
                   !noAllowValidation.includes(element.inputType) && (
-                    <DynamicInput
-                      label="Label"
-                      name="inputLabel"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                    />
+                    <>
+                      <DynamicInput
+                        label="Label"
+                        name="inputLabel"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                      />{" "}
+                      {element.type.toLowerCase() === "cascadeselect" && (
+                        <DynamicInput
+                          label="Child Label"
+                          name="childLabel"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                        />
+                      )}
+                    </>
                   )}
                 {AllowValidationPlaceholder.includes(element.inputType) && (
                   <DynamicInput
@@ -617,6 +738,59 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                       element={element}
                     />
                   )}
+                {element.type.toLowerCase() === "date" && (
+                  <>
+                    <CustomSelect
+                      label="Date Type"
+                      options={[
+                        {
+                          label: "Basic",
+                          value: "basic",
+                        },
+                        {
+                          label: "Custom",
+                          value: "custom",
+                        },
+                      ]}
+                      register={register}
+                      name={"dateType"}
+                      setValue={setValue}
+                      trigger={trigger}
+                      value={watch("dateType")}
+                    />
+                    {watch("dateType") === "custom" && (
+                      <CustomSelect
+                        label="Date Format"
+                        options={dateFormats}
+                        register={register}
+                        name={"dateFormat"}
+                        setValue={setValue}
+                        trigger={trigger}
+                        value={watch("dateFormat")}
+                      />
+                    )}
+                  </>
+                )}
+                {element.type.toLowerCase() === "selectfield" && (
+                  <CustomSelect
+                    label="Select Type"
+                    options={[
+                      {
+                        label: "List",
+                        value: "list",
+                      },
+                      {
+                        label: "Combobox",
+                        value: "Combobox",
+                      },
+                    ]}
+                    register={register}
+                    name={"selectType"}
+                    setValue={setValue}
+                    trigger={trigger}
+                    value={watch("selectType")}
+                  />
+                )}
                 {element.type.toLowerCase() === "grid" && (
                   <DynamicInput
                     label="Number of columns"

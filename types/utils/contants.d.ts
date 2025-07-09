@@ -7,6 +7,7 @@ interface DataColumnType {
 export interface ElementType {
     type: string;
     label: string;
+    childLabel?: string;
     icon: string;
     inputLabel: string;
     required?: boolean;
@@ -51,6 +52,11 @@ export interface ElementType {
         id: string;
         key?: string;
     }>;
+    inputMode?: string;
+    pattern?: string;
+    selectType?: string;
+    dateType?: string;
+    dateFormat?: string;
 }
 export declare const Elements: ElementType[];
 export declare const AllowValidationPrefix: string[];
@@ -64,4 +70,8 @@ export declare const AllowTableOptions: string[];
 export declare const AllowTextOptions: string[];
 export declare const noAllowEdit: string[];
 export declare const allowValue: string[];
+export declare const dateFormats: {
+    label: string;
+    value: string;
+}[];
 export {};

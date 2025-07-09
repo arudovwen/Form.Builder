@@ -6,6 +6,7 @@
     "declaration": true,
     "declarationDir": "types",
     "emitDeclarationOnly": true,
+    "resolveJsonModule": true,
     "jsx": "react-jsx",
     "outDir": "dist",
     "baseUrl": ".",

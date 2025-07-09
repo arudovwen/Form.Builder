@@ -2,8 +2,8 @@ import { useState, useContext } from "react";
 import AppButton from "../ui/AppButton";
 import EditorContext from "../../context/editor-context";
 import PreviewModalModal from "./preview-modal";
-import AppIcon from "../ui/AppIcon";
 import { getItem } from "../../utils/localStorageControl";
+import BackSvg from "../../assets/svgs/back";
 
 const config = getItem("config");
 export default function TopBar({
@@ -37,11 +37,12 @@ export default function TopBar({
             type="button"
             onClick={() => goBackUrl()}
             style={{ color: config?.buttonColor || "#333" }}
+            className="flex items-center gap-x-3"
           >
-            <AppIcon icon="bxs:chevron-left-square" iconClass="text-2xl" />
+          <BackSvg />  <h1 className="text-base font-semibold form_title">{title || ""}</h1>
           </button>
         )}{" "}
-        <h1 className="text-base font-semibold form_title">{title || ""}</h1>
+       
       </span>
       {isOpen && (
         <PreviewModalModal

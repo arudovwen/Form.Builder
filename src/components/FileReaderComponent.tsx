@@ -61,7 +61,7 @@ const FileReaderComponent = ({
         type="file"
         accept=".csv,.xlsx,.xls"
         onChange={handleFileUpload}
-        className="mb-4 input-control file:bg-gray-600 file:text-white file:text-sm file:rounded file:border-gray-600 file:outline-none"
+        className="mb-4 field-control file:bg-gray-600 file:text-white file:text-sm file:rounded file:border-gray-600 file:outline-none"
       />
       {fileName && (
         <p className="text-xs text-gray-600 mb-2">Uploaded: {fileName}</p>

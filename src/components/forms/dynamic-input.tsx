@@ -41,7 +41,7 @@ export const DynamicInput = ({
         <label
           className={`block text-sm font-medium text-[#344054] font-onest ${
             isFloating
-              ? "z-[40] absolute block text-[#667085] bg-white  py-[2px] px-1 -top-[10px] left-3 "
+              ? "z-[40] absolute block text-[#667085] bg-white  py-[2px] px-1 -top-[12px] left-3 "
               : "relative"
           }`}
         >
@@ -58,7 +58,7 @@ export const DynamicInput = ({
             }
           }}
           placeholder={placeholder}
-          className={`input-control ${
+          className={`field-control ${
             errors?.[name] ? "border-red-300" : "border-[#D0D5DD]"
           }`}
           decimalsLimit={2}
@@ -82,7 +82,7 @@ export const DynamicInput = ({
           <input
             {...registerProps}
             type={type}
-            className="h-4 w-4 rounded border-gray-300"
+            className="w-4 h-4 border-gray-300 rounded"
             value={value}
             disabled={disabled}
           />
@@ -105,7 +105,7 @@ export const DynamicInput = ({
         <label
           className={`block text-sm font-medium text-[#344054] font-onest ${
             isFloating
-              ? "z-[40] absolute block text-[#667085] bg-white  py-[2px] px-1 -top-[10px] left-3 "
+              ? "z-[40] absolute block text-[#667085] bg-white  py-[2px] px-1 -top-[12px] left-3 "
               : "relative"
           }`}
         >
@@ -113,7 +113,7 @@ export const DynamicInput = ({
         </label>
         <textarea
           {...registerProps}
-          className={`input-control ${
+          className={`field-control ${
             errors?.[name] ? "border-red-300" : "border-[#D0D5DD]"
           } ${className}`}
           placeholder={placeholder}
@@ -132,7 +132,7 @@ export const DynamicInput = ({
       <label
         className={`block text-sm font-medium text-[#344054] font-onest ${
           isFloating
-            ? "z-[40] absolute block text-[#667085] bg-white  py-[2px] px-1 -top-[10px] left-3"
+            ? "z-[40] absolute block text-[#667085] bg-white  py-[2px] px-1 -top-[12px] left-3"
             : "relative"
         }`}
       >
@@ -141,7 +141,7 @@ export const DynamicInput = ({
       <input
         {...registerProps}
         type={type}
-        className={`input-control ${
+        className={`field-control ${
           errors?.[name] ? "border-red-300" : "border-[#D0D5DD]"
         } ${className}`}
         placeholder={isFloating ? "" : placeholder}

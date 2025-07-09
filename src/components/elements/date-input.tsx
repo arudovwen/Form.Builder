@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import CustomDatePicker from "../CutomDatePicker";
 
 export default function DateInput({
   element,
@@ -7,14 +8,37 @@ export default function DateInput({
   element: any;
   validationData: any;
 }) {
-    const { register = () => ({}) } = validationData || {};
+  const {
+    register = () => ({}),
+
+    setValue,
+    watch,
+  } = validationData || {};
+  let selectedValue;
+  if (watch) {
+    const values = watch();
+    selectedValue = values[element.id];
+  }
   return (
-    <input
-      placeholder={element.placeholder}
-      type={element.inputType}
-      className={clsx("input-control", element?.customClass)}
-      {...register(element.id)}
-       disabled={validationData?.isReadOnly}
-    />
+    <>
+      {element.dateType === "basic" ? (
+        <input
+          placeholder={element.placeholder}
+          type={element.inputType}
+          className={clsx("field-control", element?.customClass)}
+          {...register(element.id)}
+          disabled={validationData?.isReadOnly}
+        />
+      ) : (
+        <CustomDatePicker
+          name={element.id}
+          options={element?.options ?? []}
+          defaultValue={selectedValue}
+          onGetValue={setValue}
+          readOnly={validationData?.isReadOnly}
+           dateFormat={element?.dateFormat || "dd/MM/yyyy"}
+        />
+      )}
+    </>
   );
 }

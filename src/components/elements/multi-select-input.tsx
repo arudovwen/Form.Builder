@@ -30,11 +30,11 @@ export default function MultiSelectInput({
   }, [registeredValue, selectedValues?.length]);
 
   return (
-    <div className="w-full z-10">
+    <div className="z-10 w-full">
       <Listbox value={selectedValues} onChange={setSelectedValues} multiple  disabled={validationData?.isReadOnly}>
         <div className="relative">
           <Listbox.Button
-            className="w-full py-2 pl-3 pr-10 text-left bg-white input-control cursor-default "
+            className="w-full py-2 pl-3 pr-10 text-left bg-white cursor-default field-control "
             disabled={validationData?.isReadOnly}
           >
             {selectedValues?.length > 0
@@ -47,7 +47,7 @@ export default function MultiSelectInput({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Listbox.Options className="absolute w-full py-1 mt-1  grid gap-y-[1px] bg-white rounded-md shadow-lg  ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            <Listbox.Options className="absolute w-full py-1 mt-1  grid gap-y-[1px] z-[1] bg-white rounded-md shadow-lg  ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
               {element?.options?.map(
                 (option: { label: string; value: any }, index: number) => (
                   <Listbox.Option
@@ -73,7 +73,7 @@ export default function MultiSelectInput({
                           {option?.label}
                         </span>
                         {selected ? (
-                          <span className="absolute inset-y-0 right-3 flex items-center pl-3 text-gray-600">
+                          <span className="absolute inset-y-0 flex items-center pl-3 text-gray-600 right-3">
                             ✓
                           </span>
                         ) : null}

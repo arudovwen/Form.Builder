@@ -40,7 +40,7 @@ export default function FileUpload({
         type="file"
         onChange={handleFileChange}
         disabled={disabled}
-        className="block w-full text-sm text-gray-500 file:mr-4  file:px-4  input-control !py-1 !pl-1
+        className="block w-full text-sm text-gray-500 file:mr-4  file:px-4  field-control !py-1 !pl-1
                   file:rounded-[6px] file:py-[6px] file:border-0
                    file:text-sm file:font-semibold
                    file:bg-blue-50 file:text-blue-700

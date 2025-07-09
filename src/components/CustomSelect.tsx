@@ -46,7 +46,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   disabled,
 }) => {
   const [selected, setSelected] = useState<any>(isMultiple ? [] : null);
-  const merged = clsx("input-control", className);
+  const merged = clsx("field-control", className);
 
   useEffect(() => {
     if (selected && setValue && register) {
@@ -103,17 +103,17 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         <div className="relative">
           <Listbox.Button className={merged} disabled={disabled}>
             {loading ? (
-              <span className=" block opacity-60 text-sm text-left">
+              <span className="block text-sm text-left opacity-60">
                 Fetching data ...
               </span>
             ) : (
-              <span className="block truncate text-sm text-left">
+              <span className="block text-sm text-left truncate">
                 {selected?.label || (
                   <span className="opacity-60">{placeholder}</span>
                 )}
               </span>
             )}
-            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+            <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
               <AppIcon icon="lucide:chevron-down" />
             </span>
           </Listbox.Button>
@@ -123,14 +123,14 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Listbox.Options className="z-[77] absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white darks:bg-gray-800 text-gray-900 darks:text-white/80 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            <Listbox.Options className="z-[77] absolute mt-1 max-h-60 w-full overflow-auto rounded-md no-scrollbar bg-white darks:bg-gray-800 text-gray-900 darks:text-white/80 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
               {options?.map((option, optionIdx) => (
                 <Listbox.Option
                   key={optionIdx}
                   className={({ active }) =>
                     `relative cursor-default select-none py-2 pl-4 pr-4  text-sm ${
                       active
-                        ? "bg-gray-100 darks:bg-gray-700 text-gray-900 darks:text-white/80"
+                        ? "bg-gray-100 text-gray-900"
                         : "text-gray-900 darks:text-white/70 "
                     }`
                   }

@@ -8,7 +8,7 @@
   @apply mb-2 text-[#475467]  text-sm leading-6 capitalize cursor-pointer block w-full font-medium;
 }
 
-.input-control {
+.field-control {
   @apply bg-transparent  transition duration-300 ease-in-out border border-[#D0D5DD] 
     focus:ring-0 focus:border-slate-400 focus:outline-none focus:ring-opacity-90 rounded-lg
     placeholder:text-[#98A2B3] text-[#475467] text-sm px-[14px] py-[10px] placeholder:font-normal block w-full ;
@@ -18,22 +18,22 @@
 }
 .formGroup {
   &.has-error {
-    .input-control {
+    .field-control {
       @apply border-red-500 focus:ring-red-500  focus:ring-opacity-90 focus:ring-1;
     }
   }
   &.is-valid {
-    .input-control {
+    .field-control {
       @apply border-green-500 focus:ring-green-500 focus:ring-opacity-90 focus:ring-1;
     }
   }
 }
 
-.input-control[readonly] {
+.field-control[readonly] {
   @apply bg-slate-200 text-slate-400;
 }
 
-.input-control[disabled] {
+.field-control[disabled] {
   @apply cursor-not-allowed bg-slate-50 text-slate-800 placeholder:text-opacity-60;
 }
 

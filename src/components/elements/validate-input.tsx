@@ -98,7 +98,7 @@ export default function ValidateInput({
         <input
           placeholder={element?.placeholder || ""}
           type={element?.inputType || "text"}
-          className={clsx("input-control", element?.customClass)}
+          className={clsx("field-control", element?.customClass)}
           {...register(element?.id)}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setValueState(e.target.value);

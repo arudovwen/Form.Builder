@@ -12,7 +12,7 @@ export default function LongTextInput({
     <textarea
       placeholder={element.placeholder}
       rows={4}
-      className={clsx("input-control resize-none", element?.customClass)}
+      className={clsx("field-control resize-none", element?.customClass)}
       {...register(element.id)}
        disabled={validationData?.isReadOnly}
     ></textarea>

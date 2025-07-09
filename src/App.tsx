@@ -254,7 +254,8 @@ function App() {
             config={config}
             loading={false}
             
-            // renderType={"single"}
+            
+            renderType={"single"}
           />
         }
       />

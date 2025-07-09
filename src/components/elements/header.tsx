@@ -12,7 +12,7 @@ export default function Header({
       <input
         placeholder={ "Enter text"}
         type={"text"}
-        className="input-control"
+        className="field-control"
         {...register(element?.id)}
       />
       

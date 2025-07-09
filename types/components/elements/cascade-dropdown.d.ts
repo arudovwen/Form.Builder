@@ -1,11 +1,23 @@
 import React from "react";
+type DropdownOption = {
+    key?: string;
+    value: string;
+    label: string;
+};
 type CascadeDropdownProps = {
-    element: any;
+    element: {
+        id: string;
+        customClass?: string;
+        name?: string;
+        options?: DropdownOption[];
+        options1?: DropdownOption[];
+        childLabel?: string;
+    };
     validationData: {
-        register?: () => any;
-        trigger?: any;
-        setValue?: any;
-        watch?: () => Record<string, any>;
+        register?: any;
+        trigger?: (name: string) => Promise<boolean>;
+        setValue?: (name: string, value: string) => void;
+        watch?: (name?: string) => any;
         isReadOnly?: boolean;
     };
 };

@@ -49,19 +49,19 @@ const DynamicInputOptionList: React.FC<DynamicInputOptionListProps> = ({
               placeholder="Enter Key"
               value={field.key}
               onChange={(e) => handleChange(index, 'key', e.target.value)}
-              className="input-control"
+              className="field-control"
             />
             <input
               placeholder="Enter Label"
               value={field.label}
               onChange={(e) => handleChange(index, 'label', e.target.value)}
-              className="input-control"
+              className="field-control"
             />
             <select
               aria-label={`Field type selector for field ${index + 1}`}
               value={field.type}
               onChange={(e) => handleChange(index, 'type', e.target.value)}
-              className="input-control"
+              className="field-control"
             >
               <option value="text">Text</option>
               <option value="number">Number</option>
