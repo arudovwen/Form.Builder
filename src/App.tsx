@@ -253,8 +253,11 @@ function App() {
             form_data={form_data}
             config={config}
             loading={false}
+<<<<<<< Updated upstream
             
             
+=======
+>>>>>>> Stashed changes
             renderType={"single"}
           />
         }

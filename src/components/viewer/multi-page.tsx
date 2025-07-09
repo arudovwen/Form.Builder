@@ -5,7 +5,11 @@ import { renderElement } from "./elements-render";
 
 export default function MultiPage({ form_data, options, current }) {
   return (
+<<<<<<< Updated upstream
     <div className="grid gap-y-5">
+=======
+    <div className="grid gap-y-3">
+>>>>>>> Stashed changes
       {form_data[current].questionData?.map((element: any) => {
         if (element.type === "grid") {
           const gridChildren = form_data[current].questionData.filter(
