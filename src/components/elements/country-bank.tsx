@@ -15,13 +15,17 @@ export default function CountryBank({
     setValue,
     trigger,
     isReadOnly,
+    watch,
   } = validationData || {};
-
+  let selectedValue;
   const handleSelect = (name: string, selectedValue: any) => {
     setValue?.(name, selectedValue?.value);
     trigger?.(name);
   };
-
+  if (watch) {
+    const values = watch();
+    selectedValue = values[element.id];
+  }
   return (
     <div>
       <input type="hidden" {...register(element.id)} />
@@ -30,6 +34,7 @@ export default function CountryBank({
         onGetValue={handleSelect}
         name={element.id}
         readOnly={isReadOnly}
+        defaultValue={selectedValue}
       />
     </div>
   );

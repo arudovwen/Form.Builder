@@ -63,7 +63,7 @@ const SideBar = () => {
       </div>
       <hr />
       <div>
-        <ul className="grid gap-y-[8px] mt-3 px-5 max-h-[85vh] overflow-y-auto no-scrollbar">
+        <ul className="grid gap-y-[8px] mt-3 px-5 max-h-[78vh] overflow-y-auto no-scrollbar">
           {filteredElements.map((element: ElementType) => (
             <li
               key={element.type}
@@ -82,9 +82,9 @@ const SideBar = () => {
               draggable
             >
               <span className="flex items-center gap-x-3">
-                 <span style={{ color: elementColor }}>
-                <AppIcon icon={element.icon} iconClass="w-4 h-4" />
-              </span>
+                <span style={{ color: elementColor }}>
+                  <AppIcon icon={element.icon} iconClass="w-4 h-4" />
+                </span>
                 <span
                   style={{ color: elementColor }}
                   className="text-sm font-medium leading-[0]"
@@ -92,7 +92,6 @@ const SideBar = () => {
                   {element.label}
                 </span>
               </span>
-            
             </li>
           ))}
         </ul>

@@ -23,6 +23,7 @@ import DataGridInput from "../elements/data-grid";
 import CascadeDropdown from "../elements/cascade-dropdown";
 import Rating from "../elements/rating-input";
 import CountryBank from "../elements/country-bank";
+import SignDocument from "../elements/document-sign";
 
 export const elementMap: Record<string, React.ElementType> = {
   textField: TextInput,
@@ -50,6 +51,7 @@ export const elementMap: Record<string, React.ElementType> = {
   rating: Rating,
   country: CountryBank,
   bank: CountryBank,
+  document: SignDocument
 };
 const state = "edit"; // This can be passed as a prop or context value
 export const renderElement = (element: any, sectionId: string) => {

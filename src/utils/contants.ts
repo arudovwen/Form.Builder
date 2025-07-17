@@ -49,6 +49,9 @@ export interface ElementType {
   selectType?: string;
   dateType?: string;
   dateFormat?: string;
+  documentObj?: any;
+  validationUrl?: string;
+  signatureLink?: string;
 }
 
 // The Elements array
@@ -438,6 +441,29 @@ export const Elements: ElementType[] = [
     gridId: null,
   },
   {
+    type: "document",
+    label: "Sign Document",
+    icon: "hugeicons:signature",
+    inputLabel: "Sign Document",
+    required: false,
+    inputType: "document",
+    description: "",
+    isReadOnly: false,
+    isDisabled: false,
+    isRequired: false,
+    requiredMessage: "Field is required",
+    value: null,
+    options: [],
+    customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null,
+    documentObj: "",
+    url: "",
+    validationUrl: "",
+    signatureLink: "",
+  },
+  {
     type: "email",
     label: "Email",
     icon: "mdi:email-outline",
@@ -551,6 +577,7 @@ export const Elements: ElementType[] = [
     gridPosition: null,
     gridId: null,
   },
+
   {
     type: "dataGrid",
     label: "Data Grid",

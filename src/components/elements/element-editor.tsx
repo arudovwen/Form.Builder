@@ -29,6 +29,9 @@ import { toast } from "react-toastify";
 import OptionsExample from "../OptionsExample";
 import FileReaderComponent from "../FileReaderComponent";
 import ColumnExample from "../ColumnExample";
+import DocumentSignExample from "../DocumentSign";
+import ValidateExample from "../ValidateExample";
+import { log } from "console";
 
 interface Option {
   label: string;
@@ -66,6 +69,8 @@ interface FormInputs {
   elementClass?: string;
   selectType?: string;
   dateType?: string;
+  validationUrl?: string;
+  signatureLink?: string
 }
 
 const schema = yup.object().shape({
@@ -136,6 +141,8 @@ const schema = yup.object().shape({
   apiUrl: yup.string().nullable(),
   selectType: yup.string().default("list"),
   dateType: yup.string().default("basic"),
+  validationUrl: yup.string(),
+  signatureLink: yup.string()
 });
 
 const tabs = [
@@ -444,10 +451,6 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
     </div>
   );
 
-  // useEffect(() => {
-  //   setOptionTypes("api");
-  // }, [element.type]);
-
   // Options field rendering
   const renderColumnsFields = () => (
     <div className="flex flex-col justify-start gap-y-1">
@@ -565,6 +568,24 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       </div>
     </div>
   );
+  const getDocuments = useCallback(async () => {
+    const token = getItem("token");
+    const { status, data } = await axios.get(values.url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (status === 200) {
+      console.log({ data });
+      setValue("options", data?.data || data);
+    }
+  }, [setValue, values.url]);
+
+  useEffect(() => {
+    if (element.type === "document" && values.url) {
+      getDocuments();
+    }
+  }, [values.url, element.type, getDocuments]);
 
   return (
     <div
@@ -673,7 +694,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   />
                 )}
                 {AllowApiOptions.includes(element.inputType) && (
-                  <>
+                  <div className="grid gap-y-4">
                     <ApiExample />
                     <DynamicInput
                       label="Api Url"
@@ -718,7 +739,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                       trigger={trigger}
                       value={watch("responseType")}
                     />
-                  </>
+                  </div>
                 )}
                 {AllowTableOptions.includes(element.inputType) && (
                   <TableInputColumn
@@ -799,6 +820,40 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                     errors={errors}
                     element={element}
                   />
+                )}
+                {element.type.toLowerCase() === "document" && (
+                  <div className="grid gap-y-6">
+                    <div className="grid gap-y-1">
+                      <DynamicInput
+                        label="Document Options Url"
+                        name="url"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                      />{" "}
+                      <DocumentSignExample />
+                    </div>
+                    <div className="grid gap-y-1">
+                      <DynamicInput
+                        label="Document Validation Url"
+                        name="validationUrl"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                      />
+                      <ValidateExample />
+                    </div>
+                      <div className="grid gap-y-1">
+                      <DynamicInput
+                        label="Signature Page Url"
+                        name="signatureLink"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                      />
+                      
+                    </div>
+                  </div>
                 )}
                 {element.type.toLowerCase() === "datagrid" &&
                   renderColumnsFields()}
