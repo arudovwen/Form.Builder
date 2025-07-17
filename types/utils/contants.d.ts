@@ -57,6 +57,9 @@ export interface ElementType {
     selectType?: string;
     dateType?: string;
     dateFormat?: string;
+    documentObj?: any;
+    validationUrl?: string;
+    signatureLink?: string;
 }
 export declare const Elements: ElementType[];
 export declare const AllowValidationPrefix: string[];

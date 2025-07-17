@@ -12,6 +12,7 @@ type SignDocumentProps = {
     customClass?: string;
     validationUrl: string;
     documentObj: string;
+    signatureLink?: string
   };
   validationData: {
     register?: (id: string) => any;
