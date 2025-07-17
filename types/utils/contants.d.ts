@@ -62,6 +62,14 @@ export interface ElementType {
     signatureLink?: string;
 }
 export declare const Elements: ElementType[];
+export declare const CategorizedElements: {
+    textFields: string[];
+    selectionFields: string[];
+    dateAndTime: string[];
+    fileAndMedia: string[];
+    layoutAndDisplay: string[];
+    advancedData: string[];
+};
 export declare const AllowValidationPrefix: string[];
 export declare const AllowValidationMaxMin: string[];
 export declare const AllowValidationPlaceholder: string[];

@@ -39,7 +39,7 @@ export default function Layout({
         </div>
         <div className="flex flex-1 ">
           <div>
-            <div className="w-[240px]  h-[calc(100vh-64px)]  border-r border-[#E4E7EC] bg-white ">
+            <div className="w-[260px]  h-[calc(100vh-64px)]  border-r border-[#E4E7EC] bg-white ">
               <SideBar />
             </div>
           </div>

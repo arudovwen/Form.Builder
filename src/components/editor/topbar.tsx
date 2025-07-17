@@ -17,7 +17,7 @@ export default function TopBar({
   onSubmit?: (e: any) => void;
   onPublish?: (e: any) => void;
 }) {
-  const { addSection, formData }: any = useContext(EditorContext);
+  const { formData }: any = useContext(EditorContext);
   const [isOpen, setOpen] = useState(false);
 
   function handleSubmit() {
@@ -52,14 +52,14 @@ export default function TopBar({
         />
       )}
       <div className="flex justify-end text-xs gap-x-3">
-        <AppButton
+        {/* <AppButton
           onClick={() => addSection()}
           text="Add section"
           btnClass=" !px-2   !font-medium bg-transparent !text-sm form_section !normal-case"
           icon="icon-park-outline:plus"
           iconClass="text-base"
           style={{ color: config?.buttonColor || "#333" }}
-        />
+        /> */}
         <AppButton
           onClick={() => setOpen(true)}
           text="Preview"

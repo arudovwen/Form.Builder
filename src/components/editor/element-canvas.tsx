@@ -38,7 +38,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
     isDragging,
     setIsDragging,
     addElementInPosition,
-  } = useContext(EditorContext);
+  }: any = useContext(EditorContext);
 
   const [draggedElementId, setDraggedElementId] = useState<string | null>(null);
   const [dragOverTargetId, setDragOverTargetId] = useState<string | null>(null);
@@ -96,6 +96,11 @@ function ElementCanvas({ elementData, sectionId }: any) {
 
       try {
         const data = JSON.parse(e.dataTransfer.getData("properties"));
+        console.log({ data });
+        if (data?.type === "section") {
+          // addSection()
+          return;
+        }
         const newElement = { ...data, id: uuidv4(), sectionId };
         addElementInPosition(newElement, sectionId, index);
       } catch (err) {

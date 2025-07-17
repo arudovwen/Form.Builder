@@ -31,9 +31,14 @@ export default function FileInput({ element, validationData }) {
 
   return (
     <div>
-      <FileUpload onFileLoaded={handleFileLoaded} disabled={isReadOnly} />
+      {!isReadOnly && (
+        <FileUpload onFileLoaded={handleFileLoaded} disabled={isReadOnly} />
+      )}
       {fileData && (
-        <UniversalFileViewer fileUrl={fileData.base64} fileName={fileData.name} />
+        <UniversalFileViewer
+          fileUrl={fileData.base64}
+          fileName={fileData.name}
+        />
       )}
     </div>
   );

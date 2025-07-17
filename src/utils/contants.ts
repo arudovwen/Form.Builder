@@ -581,7 +581,7 @@ export const Elements: ElementType[] = [
   {
     type: "dataGrid",
     label: "Data Grid",
-    icon: "iconoir:table",
+    icon: "carbon:data-table",
     inputLabel: "Data Grid Label",
     required: false,
     inputType: "dataGrid",
@@ -657,6 +657,17 @@ export const Elements: ElementType[] = [
     gridPosition: null,
     gridId: null,
   },
+   {
+    type: "section",
+    label: "Section",
+    icon: "stash:section-divider",
+    inputLabel: "",
+    inputType: "section",
+    customClass: "",
+    elementClass: "",
+    gridPosition: null,
+    gridId: null,
+  },
   {
     type: "grid",
     label: "Grid",
@@ -668,6 +679,45 @@ export const Elements: ElementType[] = [
     columns: 2,
   },
 ];
+export const CategorizedElements = {
+  textFields: [
+    "basicText",
+    "textField",
+    "longText",
+    "numberField",
+    "amountField",
+    "password",
+    "phoneField",
+    "email",
+    "validateInput"
+  ],
+  selectionFields: [
+    "selectField",
+    "multiSelect",
+    "cascadeSelect",
+    "radio",
+    "checkbox",
+    "country",
+    "banks",
+    "rating"
+  ],
+  dateAndTime: [
+    "date"
+  ],
+  fileAndMedia: [
+    "file"
+  ],
+  layoutAndDisplay: [
+    "divider",
+    "spacer",
+    "grid",
+    "section"
+  ],
+  advancedData: [
+    "dataGrid",
+    "tableInput"
+  ]
+};
 
 export const AllowValidationPrefix: string[] = ["amount"];
 export const AllowValidationMaxMin: string[] = ["text", "number"];
