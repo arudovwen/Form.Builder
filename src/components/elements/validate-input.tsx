@@ -4,7 +4,7 @@ import AppIcon from "../ui/AppIcon";
 import { isValidImage } from "../../utils/isValidImage";
 import ImageViewer from "../ImageViewer";
 import clsx from "clsx";
-import { getItem } from "src/utils/localStorageControl";
+import { getItem } from "../../utils/localStorageControl";
 
 export default function ValidateInput({
   element,
