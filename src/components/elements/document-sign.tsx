@@ -12,7 +12,7 @@ type SignDocumentProps = {
     customClass?: string;
     validationUrl: string;
     documentObj: string;
-    signatureLink?: string
+    signatureLink?: string;
   };
   validationData: {
     register?: (id: string) => any;
@@ -35,7 +35,16 @@ export default function SignDocument({
     if (!validationUrl || !documentObj) return;
     try {
       setChecking(true);
-      const { data } = await axios.get(`${validationUrl}/${documentObj}`);
+      const token = getItem("token");
+      const axiosconfig = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const { data } = await axios.get(
+        `${validationUrl}/${documentObj}`,
+        axiosconfig
+      );
       const signed = Boolean(data?.data?.isSigned ?? data?.isSigned);
       setIsSigned(signed);
       return signed;

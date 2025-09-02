@@ -31,7 +31,6 @@ import FileReaderComponent from "../FileReaderComponent";
 import ColumnExample from "../ColumnExample";
 import DocumentSignExample from "../DocumentSign";
 import ValidateExample from "../ValidateExample";
-import { log } from "console";
 
 interface Option {
   label: string;
@@ -70,7 +69,7 @@ interface FormInputs {
   selectType?: string;
   dateType?: string;
   validationUrl?: string;
-  signatureLink?: string
+  signatureLink?: string;
 }
 
 const schema = yup.object().shape({
@@ -142,7 +141,7 @@ const schema = yup.object().shape({
   selectType: yup.string().default("list"),
   dateType: yup.string().default("basic"),
   validationUrl: yup.string(),
-  signatureLink: yup.string()
+  signatureLink: yup.string(),
 });
 
 const tabs = [
@@ -222,7 +221,12 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   };
 
   // Fetch options from api
-
+  const token = getItem("token");
+  const axiosconfig = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
   const fetchOptions = useCallback(async () => {
     if (!values.apiUrl || !/^https?:\/\//.test(values.apiUrl)) {
       toast.info("Please provide a valid API URL");
@@ -232,7 +236,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
     try {
       setOptionsLoading(true);
 
-      const { status, data } = await axios.get(values.apiUrl);
+      const { status, data } = await axios.get(values.apiUrl, axiosconfig);
 
       if (status !== 200 || !data) {
         toast.error("Unexpected response from server.");
@@ -843,7 +847,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                       />
                       <ValidateExample />
                     </div>
-                      <div className="grid gap-y-1">
+                    <div className="grid gap-y-1">
                       <DynamicInput
                         label="Signature Page Url"
                         name="signatureLink"
@@ -851,7 +855,6 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         errors={errors}
                         element={element}
                       />
-                      
                     </div>
                   </div>
                 )}

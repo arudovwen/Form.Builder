@@ -4,6 +4,7 @@ import AppIcon from "../ui/AppIcon";
 import { isValidImage } from "../../utils/isValidImage";
 import ImageViewer from "../ImageViewer";
 import clsx from "clsx";
+import { getItem } from "src/utils/localStorageControl";
 
 export default function ValidateInput({
   element,
@@ -30,7 +31,12 @@ export default function ValidateInput({
   }, [element.id, register]);
 
   const { url, method, responseType } = element || {};
-
+  const token = getItem("token");
+  const axiosconfig = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
   const validateInput = useCallback(
     async (value: string) => {
       if (!url || !method) return;
@@ -39,9 +45,9 @@ export default function ValidateInput({
         let response;
         if (method.toLowerCase() === "get") {
           const mappedUrl = `${url}?value=${value}`;
-          response = await axios.get(mappedUrl);
+          response = await axios.get(mappedUrl, axiosconfig);
         } else if (method.toLowerCase() === "post") {
-          response = await axios.post(url, { value });
+          response = await axios.post(url, { value }, axiosconfig);
         } else {
           throw new Error("Unsupported HTTP method");
         }
@@ -135,7 +141,7 @@ export default function ValidateInput({
           )}
 
           {isValid && !loading && (
-            <span className="text-green-600 text-lg pr-3 block">
+            <span className="block pr-3 text-lg text-green-600">
               <AppIcon icon="gg:check-o" />
             </span>
           )}
@@ -150,7 +156,7 @@ export default function ValidateInput({
       )}
 
       {responseType === "object" && (
-        <div className="grid grid-cols-2 gap-6 text-sm text-gray-600 mt-2">
+        <div className="grid grid-cols-2 gap-6 mt-2 text-sm text-gray-600">
           {Object.entries(result).map(([key, value]) => (
             <div key={key} className="flex items-center gap-x-2">
               <span className="font-semibold">{key}:</span>

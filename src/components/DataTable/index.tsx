@@ -1,132 +1,160 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AppIcon from "../ui/AppIcon";
+import CurrencyInput from "react-currency-input-field";
 
 export default function CustomDataGrid({
   value = [],
-  columns = [],
   onChange,
   isReadOnly,
+  columns = [],
 }) {
+  const [rows, setRows] = useState(value);
   const [editingCell, setEditingCell] = useState(null); // { rowIndex, field }
 
-  const handleCellChange = (e, rowIndex, field) => {
-    const updatedRows = value.map((row, i) =>
-      i === rowIndex ? { ...row, [field]: e.target.value } : row
-    );
-    onChange?.(updatedRows);
+  // Keep local rows in sync with value prop
+  useEffect(() => {
+    setRows(value);
+  }, []);
+
+  const handleCellChange = (val, rowIndex, field) => {
+    const updated = rows.map((row, i) => (i === rowIndex ? { ...row, [field]: val } : row));
+    setRows(updated);
+
+    if (onChange) onChange(updated);
   };
 
   const addRow = () => {
     const newId =
-      value.length > 0
-        ? Math.max(...value.map((row) => Number(row.id) || 0)) + 1
+      rows.length > 0
+        ? Math.max(...rows.map((row) => Number(row.id) || 0)) + 1
         : 1;
 
     const newRow = columns.reduce(
       (acc, col) => ({
         ...acc,
-        [col.field]: col.field === "id" ? newId : "",
+        [col.field]: col.field === 'id' ? newId : '',
       }),
-      {}
+      {},
     );
-
-    onChange?.([...value, newRow]);
+    const updated = [...rows, newRow];
+    setRows(updated);
+    if (onChange) onChange(updated);
   };
 
   const deleteRow = (index) => {
-    const updatedRows = value.filter((_, i) => i !== index);
-    onChange?.(updatedRows);
+    const updated = rows.filter((_, i) => i !== index);
+    setRows(updated);
+    if (onChange) onChange(updated);
   };
 
-  const isEditing = (rowIndex, field) =>
-    editingCell?.rowIndex === rowIndex && editingCell?.field === field;
+  const isEditing = (rowIndex, field) => editingCell?.rowIndex === rowIndex && editingCell?.field === field;
 
   return (
-    <div className="rounded mt-4">
+    <div className="mt-4 rounded">
       <div className="flex justify-end">
-        {columns.length > 0 && (
+        {columns?.length > 0 && !isReadOnly && (
           <button
             onClick={addRow}
-            className="mb-3 px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700"
+            type="button"
+            className="px-2 py-1 mb-3 text-xs text-white bg-gray-600 rounded hover:bg-gray-700"
           >
             Add Row
           </button>
         )}
       </div>
-      {
-        <table className="w-full border-collapse text-sm rounded table-auto">
-          <thead>
-            <tr className="bg-gray-100">
-              {columns.map((col) => (
-                <th
-                  key={col.field}
-                  className="border px-3 py-2 text-left font-semibold text-xs text-gray-600"
-                >
-                  {col.headerName || col.field}
-                </th>
-              ))}
-              {!isReadOnly && <th className="border px-2 py-2 w-10"></th>}
-            </tr>
-          </thead>
-          {value.length > 0 && (
-            <tbody>
-              {value.map((row, rowIndex) => (
-                <tr key={row.id ?? rowIndex}>
-                  {columns.map((col) => (
-                    <td
-                      key={col.field}
-                      className="border px-3 py-1"
-                      onDoubleClick={() =>
-                        col.editable &&
-                        setEditingCell({ rowIndex, field: col.field })
-                      }
+
+      <table className="w-full text-sm border-collapse rounded table-auto bg-gray-50">
+        <thead>
+          <tr className="bg-gray-100">
+            {columns.map((col) => (
+              <th
+                key={col.field}
+                className="px-3 py-2 text-xs font-semibold text-left text-gray-600 border"
+              >
+                {col.headerName || col.field}
+              </th>
+            ))}
+            {!isReadOnly && <th className="w-10 px-2 py-2 border"></th>}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length > 0 ? (
+            rows.map((row, rowIndex) => (
+              <tr key={row.id ?? rowIndex}>
+                {columns.map((col) => (
+                  <td
+                    key={col.field}
+                    className="px-2 py-1 border"
+                    onDoubleClick={() => col.editable &&
+                      !isReadOnly &&
+                      setEditingCell({ rowIndex, field: col.field })
+                    }
+                  >
+                    {col.editable &&
+                    isEditing(rowIndex, col.field) &&
+                    !isReadOnly ? (
+                      <>
+                        {col.type === 'number' ? (
+                          <CurrencyInput
+                            value={row[col.field] ?? ''}
+                            onValueChange={(val) => handleCellChange(val, rowIndex, col.field)
+                            }
+                            decimalsLimit={6}
+                            allowNegativeValue={false}
+                            placeholder=""
+                            className="w-full px-2 py-1 border rounded outline-none"
+                          />
+                        ) : (
+                          <input
+                            autoFocus
+                            type="text"
+                            value={row[col.field] ?? ''}
+                            onChange={(e) => handleCellChange(
+                                e.target.value,
+                                rowIndex,
+                                col.field,
+                              )
+                            }
+                            onBlur={() => setEditingCell(null)}
+                            className="w-full px-2 py-1 text-gray-600 border rounded outline-none"
+                          />
+                        )}
+                      </>
+                    ) : (
+                      <span className="block py-1 text-gray-700 cursor-pointer">
+                        {row[col.field]}
+                      </span>
+                    )}
+                  </td>
+                ))}
+                {!isReadOnly && (
+                  <td className="px-2 py-1 text-center border">
+                    <button
+                      onClick={() => deleteRow(rowIndex)}
+                      className="text-red-500 hover:text-red-700"
+                      aria-label="Delete row"
                     >
-                      {col.editable &&
-                      isEditing(rowIndex, col.field) &&
-                      !isReadOnly ? (
-                        <input
-                          autoFocus
-                          type="text"
-                          value={row[col.field] ?? ""}
-                          disabled={isReadOnly}
-                          onChange={(e) =>
-                            handleCellChange(e, rowIndex, col.field)
-                          }
-                          onBlur={() => setEditingCell(null)}
-                          className="w-full px-2 py-1 border rounded text-gray-600 outline-blue-100 "
-                        />
-                      ) : (
-                        <span className="text-gray-700 cursor-pointer py-1 block">
-                          {row[col.field]}
-                        </span>
-                      )}
-                    </td>
-                  ))}
-                  {!isReadOnly && (
-                    <td className="border px-2 py-1 text-center">
-                      <button
-                        onClick={() => deleteRow(rowIndex)}
-                        className="text-red-500 hover:text-red-700"
-                        aria-label="Delete row"
-                      >
-                        <AppIcon
+                       <AppIcon
                           icon="lets-icons:trash-duotone"
                           iconClass="text-xl"
                         />
-                      </button>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
+                    </button>
+                  </td>
+                )}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td
+                colSpan={columns.length + (isReadOnly ? 0 : 1)}
+                className="p-2 text-xs text-center text-gray-400"
+              >
+                No data available
+              </td>
+            </tr>
           )}
-        </table>
-      }
-      {value.length === 0 && (
-        <div className="text-xs text-center p-2 text-gray-400">
-          No data available
-        </div>
-      )}
+        </tbody>
+      </table>
     </div>
   );
 }
