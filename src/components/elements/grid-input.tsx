@@ -130,7 +130,7 @@ const GridInput = ({
   };
 
   return (
-    <div className="relative z-10 w-full">
+    <div className="relative w-full">
       <div
         className="grid w-full gap-3"
         style={{

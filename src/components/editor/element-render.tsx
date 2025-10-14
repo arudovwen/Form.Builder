@@ -24,6 +24,7 @@ import CascadeDropdown from "../elements/cascade-dropdown";
 import Rating from "../elements/rating-input";
 import CountryBank from "../elements/country-bank";
 import SignDocument from "../elements/document-sign";
+import PhoneNumber from "../elements/phone-input";
 
 export const elementMap: Record<string, React.ElementType> = {
   textField: TextInput,
@@ -46,7 +47,7 @@ export const elementMap: Record<string, React.ElementType> = {
   divider: Divider,
   header: Header,
   basicText: BasicText,
-  phoneField: TextInput,
+  phoneField: PhoneNumber,
   cascadeSelect: CascadeDropdown,
   rating: Rating,
   country: CountryBank,
