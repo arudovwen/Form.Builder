@@ -15,7 +15,7 @@ export default function PhoneNumber({
     watch,
     isReadOnly,
   } = validationData || {};
-  let selectedValue = '+234-4141452353';
+  let selectedValue;
 
   useEffect(() => {
     register(element.id);
