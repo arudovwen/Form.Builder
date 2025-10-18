@@ -100,7 +100,8 @@ input[type="number"] {
 .top_bar {
   box-shadow: 0px 1px 2px 0px #0a0d120d;
 }
-.react-datepicker__input-container,.react-datepicker-wrapper{
+.react-datepicker__input-container,
+.react-datepicker-wrapper {
   width: 100%;
   display: flex !important;
   align-items: center !important;
@@ -112,4 +113,7 @@ input[type="number"] {
 }
 .react-datepicker__view-calendar-icon input {
   padding: 10px 14px !important;
+}
+.form_submit {
+  box-shadow: 0px 1px 2px 0px #0a0d120d;
 }

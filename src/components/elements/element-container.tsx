@@ -33,21 +33,21 @@ const ElementContainer = memo(
             element={element}
           />
         )}
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex items-center justify-between mb-2">
           <span>
             {" "}
             {element.inputLabel && (
-              <label className="text-sm font-medium">
+              <label className="text-sm font-medium input_label">
                 {element.inputLabel}
               </label>
             )}
           </span>
           {state === "edit" && (
-            <span className="flex gap-x-3 items-center">
+            <span className="flex items-center gap-x-3">
            
                 <button
                   type="button"
-                  className="outline-none hover:opacity-80 text-sm"
+                  className="text-sm outline-none hover:opacity-80"
                   onClick={() => setOpen(true)}
                 >
                   <AppIcon icon="circum:edit" />
@@ -55,7 +55,7 @@ const ElementContainer = memo(
              
               <button
                 type="button"
-                className="outline-none hover:opacity-80 text-sm"
+                className="text-sm outline-none hover:opacity-80"
                 onClick={handleRemove}
               >
                 <AppIcon icon="iconamoon:sign-times-fill" />

@@ -130,7 +130,7 @@ export default function PhoneInput({
         <Combobox value={selectedCountry} onChange={setSelectedCountry}>
           <div className="relative">
             <Combobox.Input
-              className="pl-3 pr-4 mr-1 text-sm bg-white border-r  py-[10px] outline-none whitespace-nowrap max-w-[70px]"
+              className="pl-3 pr-4 mr-1 text-sm bg-white  py-[10px] outline-none whitespace-nowrap max-w-[70px]"
               displayValue={(country: any) => country?.phone || "+234"}
               placeholder="+234"
               onChange={(e) => setQuery(e.target.value)}

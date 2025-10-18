@@ -99,7 +99,11 @@ export default App;
 | `loading`    | `boolean`             | Indicates whether the form is in a loading state.                                                                  |
 | `isReadOnly` | `boolean`             | Determines if the form is rendered in read-only mode.                                                              |
 | `renderType` | `string`              | Determines the style the form is rendered, either `multi` or `single`.                                             |
-| `goBackUrl`  | `function`            | function to navigate back or somewhere on your app |     
+| `goBackUrl`  | `function`            | function to navigate back or somewhere on your app |  
+| `previewLoading`  | `boolean`            | Shows loading icon |
+| `saveLoading`  | `boolean`            | Shows loading icon|  
+| `publishLoading`  | `boolean`            | Shows loading icon |  
+| `onTitleChange`  | `function`            | function to navigate back or somewhere on your app |  
 
 ### Form Element Types
 

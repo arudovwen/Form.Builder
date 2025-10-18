@@ -6,7 +6,7 @@ export const renderElement = (element: any, validationData?: any) => {
   return ElementComponent ? (
     <div>
       {element.inputLabel && (
-        <label className="block text-sm font-medium mb-[5px]">
+        <label className="block text-sm font-medium mb-[5px] input_label">
           {element.inputLabel}
         </label>
       )}

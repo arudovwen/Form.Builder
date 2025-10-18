@@ -5,7 +5,7 @@ import { renderElement } from "./elements-render";
 
 export default function MultiPage({ form_data, options, current }) {
   return (
-    <div className="grid gap-y-3">
+    <div className="grid gap-y-3 multi_section__content">
       {form_data[current].questionData?.map((element: any) => {
         if (element.type === "grid") {
           const gridChildren = form_data[current].questionData.filter(

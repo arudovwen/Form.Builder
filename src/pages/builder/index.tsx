@@ -13,6 +13,9 @@ const HomePage = ({
   loading,
   goBackUrl,
   onPublish,
+  previewLoading,
+  saveLoading,
+  publishLoading,onTitleChange
 }: BuilderProps) => {
   useEffect(() => {
     if (config) {
@@ -28,6 +31,10 @@ const HomePage = ({
       title={title}
       goBackUrl={goBackUrl}
       loading={loading}
+      previewLoading={previewLoading}
+      saveLoading={saveLoading}
+      publishLoading={publishLoading}
+      onTitleChange={onTitleChange}
     />
   );
 };

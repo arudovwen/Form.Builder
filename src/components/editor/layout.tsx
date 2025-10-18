@@ -15,6 +15,10 @@ export interface BuilderProps {
   loading?: boolean;
   goBackUrl?: () => void;
   onPublish?: (e: any) => void;
+  previewLoading?: boolean;
+  saveLoading?: boolean;
+  publishLoading?: boolean;
+  onTitleChange?: (string) => void;
 }
 
 export default function Layout({
@@ -24,10 +28,14 @@ export default function Layout({
   goBackUrl,
   loading,
   onPublish,
+  previewLoading,
+  saveLoading,
+  publishLoading,
+  onTitleChange,
 }: BuilderProps) {
   return (
     <EditorProvider>
-      <div className="w-full h-full bg-[#F5F5F5] flex flex-col">
+      <div className="w-full h-full bg-[#F8F9FC] flex flex-col">
         <ToastContainer />
         <div className="border-b  bg-white  border-[#E4E7EC]">
           <TopBar
@@ -35,6 +43,10 @@ export default function Layout({
             goBackUrl={goBackUrl}
             onSubmit={onSubmit}
             onPublish={onPublish}
+            previewLoading={previewLoading}
+            saveLoading={saveLoading}
+            publishLoading={publishLoading}
+            onTitleChange={onTitleChange}
           />
         </div>
         <div className="flex flex-1 ">

@@ -11,6 +11,7 @@ import ElementCanvas from "./element-canvas";
 // import { v4 as uuidv4 } from "uuid";
 import AppIcon from "../ui/AppIcon";
 import SectionEditorModal from "../elements/section-editor";
+import { getItem } from "../../utils/localStorageControl";
 
 const FormBuilder = () => {
   const [isOpen, setOpen] = useState(false);
@@ -19,6 +20,7 @@ const FormBuilder = () => {
   const {
     removeSection,
     // addElement,
+    addSection,
     formData,
     setIsDragging,
     setSelectedSection,
@@ -81,7 +83,7 @@ const FormBuilder = () => {
     tempSection.current = section;
     setOpen(true);
   }
-
+  const config = getItem("config");
   return (
     <div
       ref={containerRef} // Attach the ref to the container
@@ -112,10 +114,15 @@ const FormBuilder = () => {
                     selectedSection === section.id
                       ? "border-dashed border-blue-400 bg-[#f7f8fa]"
                       : ""
-                  } ${activeSections.includes(index) ? "min-h-[300px] pb-6 " : ""}`}
+                  } ${
+                  activeSections.includes(index) ? "min-h-[300px] pb-6 " : ""
+                }`}
               >
                 <div className="flex items-center justify-between">
-                  <div onClick={() => setSelectedSection(section.id)} className="flex-1 h-full py-4 cursor-pointer">
+                  <div
+                    onClick={() => setSelectedSection(section.id)}
+                    className="flex-1 h-full py-4 cursor-pointer"
+                  >
                     <h2 className="font-medium">
                       {section.title || "Section title"}
                     </h2>
@@ -167,7 +174,7 @@ const FormBuilder = () => {
                     onDragEnd={() => setIsDragging(false)}
                     onClick={() => setSelectedSection(section.id)}
                   >
-                    <hr />
+                    <hr className="group-last:hidden" />
                     <div className="h-full mt-4 gap-y-6">
                       {
                         <ElementCanvas
@@ -179,10 +186,20 @@ const FormBuilder = () => {
                   </div>
                 )}
               </div>
-              <hr className="mt-6 group-last:hidden" />
+              {/* <hr className="mt-6 group-last:hidden" /> */}
             </div>
           )
         )}
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={() => addSection()}
+            style={{ color: config?.buttonColor || "#333" }}
+            className="text-sm font-semibold"
+          >
+            + Add section{" "}
+          </button>
+        </div>
       </div>
     </div>
   );

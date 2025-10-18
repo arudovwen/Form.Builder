@@ -6,8 +6,8 @@ export default function SinglePage({ form_data, options }) {
   return (
     <div className="grid gap-y-10">
       {form_data.flatMap((section: any) => (
-        <div key={section.id} className="pb-6 border-b border-gray-100 last:border-none">
-          <div className="mb-4">
+        <div key={section.id} className="pb-6 section_box">
+          <div className="py-4 border-b border-gray-100 mb-7 section_box__title">
             {section.title && (
               <h2 className="text-lg font-semibold mb-[4px]">
                 {section?.title}
@@ -17,7 +17,7 @@ export default function SinglePage({ form_data, options }) {
               <p className="text-sm">{section?.description}</p>
             )}
           </div>
-          <div className="grid gap-y-3">
+          <div className="grid gap-y-3 section_box__content">
             {section.questionData?.map((element: any) => {
               if (element.type === "grid") {
                 const gridChildren = section.questionData.filter(

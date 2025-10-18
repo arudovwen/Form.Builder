@@ -394,7 +394,7 @@ export const Elements: ElementType[] = [
     inputType: "tel",
     maxLength: null,
     minLength: null,
-    placeholder: "Type here",
+    placeholder: "",
     description: "",
     isReadOnly: false,
     isDisabled: false,

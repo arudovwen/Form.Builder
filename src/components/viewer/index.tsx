@@ -104,9 +104,9 @@ const FormRenderer = ({
           className="container h-full mx-auto"
         >
           <div className="relative flex flex-col w-full py-4 gap-y-12">
-            <div key={form_data?.[current].id}>
+            <div className="multi_section__box" key={form_data?.[current].id}>
               {renderType === "multi" && (
-                <div className="mb-4">
+                <div className="py-4 mb-4 border-b border-gray-100 multi_section__title">
                   {form_data?.[current].title && (
                     <h2 className="text-lg font-semibold mb-[6px]">
                       {form_data[current].title}
@@ -152,7 +152,7 @@ const FormRenderer = ({
           </div>
 
           {!hideFooter && (
-            <footer className="flex items-center justify-end gap-4 pt-5 mt-8 border-t border-gray-100 footer">
+            <footer className="flex items-center justify-end gap-4 footer">
               {renderType === "multi" && (
                 <>
                   {current !== 0 && (
