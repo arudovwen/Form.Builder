@@ -49,7 +49,7 @@ export default function TopBar({
 
   return (
     <div className="px-[30px] py-3 flex justify-between items-center bg-[#F9F9FB] top_bar">
-      <span className="flex items-center gap-x-[6px]">
+      <span className="flex items-center gap-x-2">
         {goBackUrl && (
           <button
             type="button"
@@ -58,24 +58,24 @@ export default function TopBar({
             className="flex items-center gap-x-3"
           >
             <BackSvg />
-            {editing ? (
-              <input
-                type="text"
-                value={editableTitle}
-                onChange={(e) => setEditableTitle(e.target.value)}
-                onBlur={handleTitleBlur}
-                autoFocus
-                className="w-48 px-2 py-1 text-sm font-semibold outline-gray-100 input form_title"
-              />
-            ) : (
-              <h1
-                className="text-base font-semibold cursor-pointer form_title"
-                onClick={() => setEditing(true)}
-              >
-                {editableTitle || "Untitled"}
-              </h1>
-            )}
           </button>
+        )}{" "}
+        {editing ? (
+          <input
+            type="text"
+            value={editableTitle}
+            onChange={(e) => setEditableTitle(e.target.value)}
+            onBlur={handleTitleBlur}
+            autoFocus
+            className="w-48 px-2 py-1 text-sm font-semibold outline-gray-100 input form_title"
+          />
+        ) : (
+          <h1
+            className="text-base font-semibold cursor-pointer form_title"
+            onClick={() => setEditing(true)}
+          >
+            {editableTitle || "Untitled"}
+          </h1>
         )}
       </span>
 
