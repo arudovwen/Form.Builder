@@ -105,7 +105,7 @@ const FormRenderer = ({
         >
           <div className="relative flex flex-col w-full py-4 gap-y-12">
             <div className="multi_section__box" key={form_data?.[current].id}>
-              {renderType === "multi" && (
+              {renderType === "multi" && (form_data?.[current].title || form_data?.[current].description) && (
                 <div className="py-4 mb-4 border-b border-gray-100 multi_section__title">
                   {form_data?.[current].title && (
                     <h2 className="text-lg font-semibold mb-[6px]">
