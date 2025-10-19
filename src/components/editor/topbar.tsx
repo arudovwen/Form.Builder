@@ -91,7 +91,7 @@ export default function TopBar({
         <AppButton
           onClick={() => setOpen(true)}
           text="Preview"
-          btnClass="!px-2  bg-transparent !font-medium !text-sm form_preview"
+          btnClass="px-2  bg-transparent font-medium text-sm form_preview"
           icon="solar:eye-bold-duotone"
           iconClass="text-base"
           style={{ color: config?.buttonColor || "#333" }}
@@ -101,7 +101,7 @@ export default function TopBar({
         <AppButton
           onClick={handleSubmit}
           text="Save"
-          btnClass="!px-2  bg-transparent !font-medium !text-sm form_save__btn"
+          btnClass="px-2  bg-transparent font-medium text-sm form_save__btn"
           icon="lets-icons:save-duotone"
           iconClass="text-base"
           style={{ color: config?.buttonColor || "#333" }}
@@ -112,7 +112,7 @@ export default function TopBar({
           onClick={handlePublish}
           text="Publish"
           style={{ background: config?.buttonColor || "#333" }}
-          btnClass="border-[#98A2B3] !font-medium !text-sm !py-[8px] px-6 text-white rounded-lg form_publish__btn"
+          btnClass="border-[#98A2B3] font-medium text-sm py-[8px] px-6 text-white rounded-lg form_publish__btn"
           isDisabled={publishLoading}
           isLoading={publishLoading}
         />
