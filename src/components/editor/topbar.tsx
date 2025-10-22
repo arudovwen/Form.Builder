@@ -71,6 +71,7 @@ export default function TopBar({
           />
         ) : (
           <h1
+          title="Click to edit"
             className="text-base font-semibold cursor-pointer form_title"
             onClick={() => setEditing(true)}
           >

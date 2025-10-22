@@ -195,7 +195,7 @@ const FormBuilder = () => {
             type="button"
             onClick={() => addSection()}
             style={{ color: config?.buttonColor || "#333" }}
-            className="text-sm font-semibold"
+            className="text-sm font-medium"
           >
             + Add section{" "}
           </button>

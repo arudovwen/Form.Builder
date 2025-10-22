@@ -1,2 +1,7 @@
 @import url('./_form.scss');
 @import url('./_button.scss');
+@import url("https://fonts.googleapis.com/css2?family=Public Sans:wght@100..900&display=swap");
+body {
+  font-family: "Public Sans", Helvetica, sans-serif;
+  color: #414651;
+}
