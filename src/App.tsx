@@ -38,7 +38,6 @@ const questionDa = [
   //       sectionId: "ede64630-ec5b-4153-9508-db4950d668ba",
   //       allowEdit: true,
   //     },
-
   //     {
   //       type: "grid",
   //       label: "Grid",
@@ -106,7 +105,6 @@ const questionDa = [
   //       id: "bb80c881-56af-4a63-ad05-e10cdf31c7f7",
   //       sectionId: "ede64630-ec5b-4153-9508-db4950d668ba",
   //     },
-
   //     {
   //       type: "longText",
   //       label: "Long Text Field",
@@ -299,7 +297,6 @@ function App() {
             config={config}
             loading={false}
             renderType={"single"}
-            isReadOnly
           />
         }
       />

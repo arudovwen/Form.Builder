@@ -12,7 +12,7 @@ import CheckBoxInput from "../elements/checkbox-input";
 import SelectInput from "../elements/select-input";
 import LongTextInput from "../elements/long-text";
 import ElementContainer from "../elements/element-container";
-// import AmountInput from "../elements/amount-input";
+import AmountInput from "../elements/amount-input";
 import ValidateInput from "../elements/validate-input";
 import TableInput from "../elements/table-input";
 import Spacer from "../elements/spacer";
@@ -32,7 +32,7 @@ export const elementMap: Record<string, React.ElementType> = {
   selectField: SelectInput,
   multiSelect: MultiSelectInput,
   numberField: TextInput,
-  amountField: TextInput,
+  amountField: AmountInput,
   date: DateInput,
   password: PasswordInput,
   checkbox: CheckBoxInput,
