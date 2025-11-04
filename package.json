@@ -1,6 +1,6 @@
 {
   "name": "@arudovwen/form-builder-react",
-  "version": "1.4.1",
+  "version": "1.4.4",
   "description": "A React-based form builder component library.",
   "type": "module",
   "main": "./dist/form-builder.umd.js",
@@ -11,42 +11,57 @@
     "dist/form-builder.css",
     "types"
   ],
+  "sideEffects": false,
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --config demo/vite.config.ts",
     "build:types": "tsc --emitDeclarationOnly",
     "build:js": "vite build",
     "build": "npm run build:types && npm run build:js",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "analyze": "vite build && npx serve dist"
   },
+  "keywords": [
+    "react",
+    "form-builder",
+    "react-library",
+    "vite",
+    "component-library"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arudovwen/Form.Builder.git"
+  },
+  "homepage": "https://github.com/arudovwen/Form.Builder#readme",
+  "author": {
+    "name": "Success Ahon",
+    "url": "https://github.com/arudovwen"
+  },
+  "license": "MIT",
   "peerDependencies": {
+    "@headlessui/react": "^2.2.0",
+    "@hookform/resolvers": "^3.0.0",
+    "axios": "^1.0.0",
+    "papaparse": "^5.5.0",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-currency-input-field": "^3.9.0",
+    "react-datepicker": "^8.0.0",
+    "react-dom": "^18.0.0",
+    "react-draggable": "^4.4.0",
+    "react-hook-form": "^7.0.0",
+    "react-router": "^7.0.0",
+    "react-router-dom": "^7.0.0",
+    "react-toastify": "^11.0.0",
+    "uuid": "^11.0.0",
+    "xlsx": "^0.18.0",
+    "yup": "^1.0.0"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@headlessui/react": "^2.2.0",
-    "@hookform/resolvers": "^3.9.1",
-    "@iconify/react": "^5.1.0",
-    "@mui/material": "^7.1.0",
-    "@mui/x-data-grid": "^8.5.0",
-    "axios": "^1.8.4",
-    "clsx": "^2.1.1",
-    "papaparse": "^5.5.3",
-    "react-currency-input-field": "^3.9.0",
-    "react-datepicker": "^8.4.0",
-    "react-draggable": "^4.4.6",
-    "react-hook-form": "^7.54.0",
-    "react-router": "^7.0.2",
-    "react-router-dom": "^7.1.1",
-    "react-toastify": "^11.0.2",
-    "uuid": "^11.0.3",
-    "xlsx": "^0.18.5",
-    "yup": "^1.6.1"
+    "clsx": "^2.1.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
+    "@iconify/react": "^6.0.2",
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
@@ -63,14 +78,5 @@
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.15.0",
     "vite": "^6.0.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/arudovwen/Form.Builder.git"
-  },
-  "homepage": "https://github.com/arudovwen/Form.Builder#readme",
-  "author": {
-    "name": "Success Ahon",
-    "contact": "https://github.com/arudovwen/Form.Builder"
   }
 }

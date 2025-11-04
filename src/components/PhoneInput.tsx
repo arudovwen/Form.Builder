@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Combobox } from "@headlessui/react";
 import AppIcon from "./ui/AppIcon";
-import countries from "../data/countrycodes"
-
+import countries from "../data/countrycodes";
 
 interface PhoneInputProps {
   label?: string;
@@ -45,7 +44,11 @@ export default function PhoneInput({
 
   // Build country list
   const countryList = useMemo(
-    () => countries.map((c) => ({ ...c, phone: `+${c.phone}` })),
+    () =>
+      countries
+        ?.slice() // create a shallow copy so we don’t mutate state
+        .sort((a, b) => a.label.localeCompare(b.label))
+        .map((c) => ({ ...c, phone: `+${c.phone}` })),
     []
   );
 
@@ -85,7 +88,10 @@ export default function PhoneInput({
   const phoneError = useMemo(() => {
     if (error) return error;
     const len = number.length;
+
     if (isRequired && len === 0) return "Phone number is required";
+    if (len > 0 && !/^\d+$/.test(number))
+      return "Phone number must contain only digits";
     if (len > 0 && len < min) return `Minimum length is ${min}`;
     if (len > max) return `Maximum length is ${max}`;
     return "";
@@ -99,26 +105,20 @@ export default function PhoneInput({
 
   return (
     <div
-      className={`relative formGroup ${
-        phoneError ? "has-error" : ""
-      } ${horizontal ? "flex" : ""} ${
-        !phoneError && number.length > 0 ? "is-valid" : ""
-      }`}
+      className={`relative formGroup ${phoneError ? "has-error" : ""} ${
+        horizontal ? "flex" : ""
+      } ${!phoneError && number.length > 0 ? "is-valid" : ""}`}
     >
       {/* Label */}
       {label && (
         <label
           htmlFor={name}
           className={`${classLabel} ${
-            horizontal
-              ? "flex-0 mr-6 md:w-[100px] w-[60px] break-words"
-              : ""
+            horizontal ? "flex-0 mr-6 md:w-[100px] w-[60px] break-words" : ""
           } flex items-center gap-x-1 input-label text-sm text-[#1B2B41B8]`}
         >
           {label} {isRequired && <span className="text-red-500">*</span>}
-          {isOptional && (
-            <span className="text-[#98A2B3]">(Optional)</span>
-          )}
+          {isOptional && <span className="text-[#98A2B3]">(Optional)</span>}
         </label>
       )}
 
@@ -161,9 +161,10 @@ export default function PhoneInput({
             value={number}
             disabled={disabled}
             readOnly={readOnly}
-            onChange={(e) =>
-              setNumber(e.target.value.slice(0, max))
-            }
+            onChange={(e) => {
+              const numericValue = e.target.value.replace(/\D/g, ""); // remove non-digits
+              setNumber(numericValue.slice(0, max));
+            }}
             placeholder={placeholder}
             className="w-full px-3 outline-none"
           />
@@ -181,15 +182,11 @@ export default function PhoneInput({
 
       {/* Error / Success */}
       {phoneError ? (
-        <span className="block mt-1 text-sm text-red-500">
-          {phoneError}
-        </span>
+        <span className="block mt-1 text-sm text-red-500">{phoneError}</span>
       ) : (
         number.length > 0 &&
         validate && (
-          <span className="block mt-1 text-sm text-green-500">
-            {validate}
-          </span>
+          <span className="block mt-1 text-sm text-green-500">{validate}</span>
         )
       )}
 
