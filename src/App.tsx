@@ -4,7 +4,61 @@ import ViewerPage from "./pages/viewer";
 import "./assets/scss/style.scss";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const answerData = [];
+const answerData = [
+  // {
+  //     "id": "417a0622-a5c0-46c3-9e27-a471ab0077a3",
+  //     "value": "twetwtt",
+  //     "sectionId": "ede64630-ec5b-4153-9508-db4950d668ba",
+  //     "type": "textField"
+  // },
+  // {
+  //     "id": "1353545d-3c26-45e8-88b9-1205744593be",
+  //     "sectionId": "ede64630-ec5b-4153-9508-db4950d668ba",
+  //     "type": "grid"
+  // },
+  // {
+  //     "id": "20854bb1-9af0-4eb9-a2d0-0a40a10ed238",
+  //     "value": "wegg",
+  //     "sectionId": "ede64630-ec5b-4153-9508-db4950d668ba",
+  //     "type": "textField"
+  // },
+  // {
+  //     "id": "bb80c881-56af-4a63-ad05-e10cdf31c7f7",
+  //     "value": "",
+  //     "sectionId": "ede64630-ec5b-4153-9508-db4950d668ba",
+  //     "type": "textField"
+  // },
+  // {
+  //     "id": "e8d7b501-baba-4709-8aba-011df4b9b96d",
+  //     "value": "",
+  //     "sectionId": "ede64630-ec5b-4153-9508-db4950d668ba",
+  //     "type": "longText"
+  // },
+  // {
+  //     "id": "b08c2ca2-9d6a-477b-8e48-7b1eb6fccc99",
+  //     "value": "",
+  //     "sectionId": "ede64630-ec5b-4153-9508-db4950d668ba",
+  //     "type": "longText"
+  // },
+  // {
+  //     "id": "3c9b2eed-7806-4ea2-b0b2-41147a34ef3d",
+  //     "value": "",
+  //     "sectionId": "6be1ebdc-fa6e-4181-9fb6-1c692af3efef",
+  //     "type": "numberField"
+  // },
+  // {
+  //     "id": "d702960b-4aab-4158-a1c0-8dfd326336db",
+  //     "value": "",
+  //     "sectionId": "6be1ebdc-fa6e-4181-9fb6-1c692af3efef",
+  //     "type": "numberField"
+  // },
+  // {
+  //     "id": "92b650bc-d5ea-4a30-9711-449d2884bc67",
+  //     "value": "",
+  //     "sectionId": "6be1ebdc-fa6e-4181-9fb6-1c692af3efef",
+  //     "type": "validateInput"
+  // }
+];
 
 const questionDa = [
   // {
@@ -297,6 +351,9 @@ function App() {
             config={config}
             loading={false}
             renderType={"single"}
+            onGetValues={(val: any) => {
+              console.log(val);
+            }}
           />
         }
       />

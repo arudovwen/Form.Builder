@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useForm, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
 import { EditorProvider } from "../../context/editor-context";
 import AppButton from "../ui/AppButton";
@@ -38,6 +38,7 @@ const FormRenderer = ({
   renderType = "multi",
   children,
   hideFooter,
+  onGetValues,
 }: any) => {
   const [current, setCurrent] = useState(0);
   const total = useMemo(() => form_data.length, [form_data]);
@@ -61,7 +62,28 @@ const FormRenderer = ({
   } = methods;
 
   const config = getItem("config");
+  const values = watch();
+  const tempOnGetValues = useCallback(
+    (value: any) => {
+      onGetValues(value);
+    },
+    [onGetValues]
+  );
 
+  useEffect(() => {
+    if (!form_data?.length) return;
+
+    const updatedData = form_data.flatMap((section: any) =>
+      section.questionData.map((element: any) => ({
+        id: element.id,
+        value: values[element.id],
+        sectionId: section.id,
+        type: element.type,
+      }))
+    );
+
+    tempOnGetValues(updatedData);
+  }, [values, form_data, tempOnGetValues]);  
   const onSubmit = (data: any) => {
     const updatedData = form_data.flatMap((section: any) =>
       section.questionData.map((element: any) => ({
@@ -85,7 +107,7 @@ const FormRenderer = ({
   async function handleProceed() {
     if (!ignoreValidation) {
       const isValid = await trigger(
-        form_data?.[current].questionData?.map((ele: any) => ele.id)
+        form_data?.[current]?.questionData?.map((ele: any) => ele.id)
       );
       if (!isValid) return;
     }
@@ -104,19 +126,23 @@ const FormRenderer = ({
           className="container h-full mx-auto"
         >
           <div className="relative flex flex-col w-full py-4 gap-y-12">
-            <div className="multi_section__box" key={form_data?.[current].id}>
-              {renderType === "multi" && (form_data?.[current].title || form_data?.[current].description) && (
-                <div className="py-4 mb-4 border-b border-gray-100 multi_section__title">
-                  {form_data?.[current].title && (
-                    <h2 className="text-lg font-semibold mb-[6px]">
-                      {form_data[current].title}
-                    </h2>
-                  )}
-                  {form_data?.[current].description && (
-                    <p className="text-sm">{form_data[current].description}</p>
-                  )}
-                </div>
-              )}
+            <div className="multi_section__box" key={form_data?.[current]?.id}>
+              {renderType === "multi" &&
+                (form_data?.[current]?.title ||
+                  form_data?.[current]?.description) && (
+                  <div className="py-4 mb-4 border-b border-gray-100 multi_section__title">
+                    {form_data?.[current].title && (
+                      <h2 className="text-lg font-semibold mb-[6px]">
+                        {form_data[current]?.title}
+                      </h2>
+                    )}
+                    {form_data?.[current]?.description && (
+                      <p className="text-sm">
+                        {form_data[current]?.description}
+                      </p>
+                    )}
+                  </div>
+                )}
 
               {renderType === "multi" ? (
                 <MultiPage

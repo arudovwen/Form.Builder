@@ -10,5 +10,6 @@ export interface RenderProps {
     renderType?: "multi" | "single";
     children?: ReactNode;
     hideFooter?: boolean;
+    onGetValues?: (e: any) => void;
 }
-export default function Viewer({ answerData, form_data, ignoreValidation, onSubmit, isReadOnly, loading, config, renderType, children, hideFooter }: RenderProps): import("react/jsx-runtime").JSX.Element;
+export default function Viewer({ answerData, form_data, ignoreValidation, onSubmit, isReadOnly, loading, config, renderType, children, hideFooter, onGetValues, }: RenderProps): import("react/jsx-runtime").JSX.Element;

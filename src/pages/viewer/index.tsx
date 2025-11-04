@@ -13,7 +13,8 @@ export interface RenderProps {
   config?: any; // Configuration for the form
   renderType?: "multi" | "single";
   children?: ReactNode;
-  hideFooter?: boolean
+  hideFooter?: boolean;
+  onGetValues?: (e: any) => void;
 }
 
 export default function Viewer({
@@ -28,7 +29,8 @@ export default function Viewer({
   },
   renderType,
   children,
-  hideFooter
+  hideFooter,
+  onGetValues,
 }: RenderProps) {
   useEffect(() => {
     if (config) {
@@ -42,7 +44,9 @@ export default function Viewer({
   if (!form_data) {
     return (
       <div>
-        <p className="p-6 text-gray-400 tex-sm">Error: No form data available.</p>
+        <p className="p-6 text-gray-400 tex-sm">
+          Error: No form data available.
+        </p>
       </div>
     );
   }
@@ -58,6 +62,7 @@ export default function Viewer({
         renderType={renderType}
         children={children}
         hideFooter={hideFooter}
+        onGetValues={onGetValues}
       />
     </div>
   );
