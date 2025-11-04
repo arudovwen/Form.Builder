@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 export interface AnswerElement {
     id: string;
     value: any;
@@ -10,10 +10,11 @@ export interface FormRendererProps {
     answerData?: any[];
     ignoreValidation?: boolean;
     onSubmitData?: (data: any[]) => void;
+    onGetValues?: (data: any[]) => void;
     isReadOnly?: boolean;
     renderType?: RenderType;
     children?: ReactNode;
     hideFooter?: boolean;
 }
-declare const FormRenderer: ({ form_data, answerData, ignoreValidation, onSubmitData, isReadOnly, renderType, children, hideFooter, onGetValues, }: any) => import("react/jsx-runtime").JSX.Element;
-export default FormRenderer;
+declare const _default: React.NamedExoticComponent<FormRendererProps>;
+export default _default;

@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useForm, FormProvider } from "react-hook-form";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  ReactNode,
+} from "react";
+import { useForm, FormProvider, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
 import { EditorProvider } from "../../context/editor-context";
 import AppButton from "../ui/AppButton";
@@ -24,25 +30,34 @@ export interface FormRendererProps {
   answerData?: any[];
   ignoreValidation?: boolean;
   onSubmitData?: (data: any[]) => void;
+  onGetValues?: (data: any[]) => void;
   isReadOnly?: boolean;
   renderType?: RenderType;
   children?: ReactNode;
   hideFooter?: boolean;
 }
-const FormRenderer = ({
+
+const FormRenderer: React.FC<FormRendererProps> = ({
+
   form_data,
-  answerData,
-  ignoreValidation,
+  answerData = [],
+  ignoreValidation = false,
   onSubmitData,
-  isReadOnly,
+  onGetValues,
+  isReadOnly = false,
   renderType = "multi",
   children,
-  hideFooter,
-  onGetValues,
-}: any) => {
+  hideFooter = false,
+}: FormRendererProps) => {
   const [current, setCurrent] = useState(0);
-  const total = useMemo(() => form_data.length, [form_data]);
-  const validationSchema = generateDynamicSchema(form_data);
+
+  const totalSections = form_data?.length ?? 0;
+  const config = getItem("config");
+
+  const validationSchema = useMemo(
+    () => generateDynamicSchema(form_data),
+    [form_data]
+  );
 
   const methods = useForm({
     resolver: yupResolver(validationSchema),
@@ -53,70 +68,98 @@ const FormRenderer = ({
   const {
     register,
     setValue,
-    watch,
+    control,
     handleSubmit,
     reset,
     getValues,
+    watch,
     formState: { errors, isSubmitting },
     trigger,
   } = methods;
 
-  const config = getItem("config");
-  const values = watch();
-  const tempOnGetValues = useCallback(
+  // ✅ Use useWatch to efficiently track changes
+  const watchedValues = useWatch({ control });
+
+  // ✅ Deep memoization to avoid redundant updates
+  const memoizedValues = useMemo(() => watchedValues, [JSON.stringify(watchedValues)]);
+
+  // ✅ Memoize callback for parent updates
+  const handleGetValues = useCallback(
     (value: any) => {
-      onGetValues(value);
+      if (onGetValues) onGetValues(value);
     },
     [onGetValues]
   );
 
+  // ✅ Effect runs only when actual values change
   useEffect(() => {
-    if (!form_data?.length) return;
+    if (!form_data?.length || !onGetValues) return;
 
-    const updatedData = form_data.flatMap((section: any) =>
+    const updatedData = form_data.flatMap((section) =>
       section.questionData.map((element: any) => ({
         id: element.id,
-        value: values[element.id],
+        value: memoizedValues[element.id],
         sectionId: section.id,
         type: element.type,
       }))
     );
 
-    tempOnGetValues(updatedData);
-  }, [values, form_data, tempOnGetValues]);  
-  const onSubmit = (data: any) => {
-    const updatedData = form_data.flatMap((section: any) =>
-      section.questionData.map((element: any) => ({
-        id: element.id,
-        value: data[element.id],
-        sectionId: section.id,
-        type: element.type,
-      }))
-    );
+    handleGetValues(updatedData);
+  }, [memoizedValues, form_data, handleGetValues, onGetValues]);
 
-    onSubmitData?.(updatedData);
-  };
-
+  // ✅ Answer data hydration
   useEffect(() => {
     if (answerData?.length) {
-      const tempData = mapIdToValue(answerData);
-      reset(tempData);
+      reset(mapIdToValue(answerData));
     }
   }, [answerData, reset]);
 
-  async function handleProceed() {
-    if (!ignoreValidation) {
-      const isValid = await trigger(
-        form_data?.[current]?.questionData?.map((ele: any) => ele.id)
+  // ✅ Submit handler
+  const onSubmit = useCallback(
+    (data: Record<string, any>) => {
+      const updatedData = form_data.flatMap((section) =>
+        section.questionData.map((element: any) => ({
+          id: element.id,
+          value: data[element.id],
+          sectionId: section.id,
+          type: element.type,
+        }))
       );
+
+      onSubmitData?.(updatedData);
+    },
+    [form_data, onSubmitData]
+  );
+
+  // ✅ Navigation handlers
+  const handleProceed = useCallback(async () => {
+    if (!ignoreValidation) {
+      const currentFields = form_data?.[current]?.questionData?.map(
+        (ele: any) => ele.id
+      );
+      const isValid = await trigger(currentFields);
       if (!isValid) return;
     }
     setCurrent((prev) => prev + 1);
-  }
+  }, [current, form_data, ignoreValidation, trigger]);
 
-  function handleBack() {
+  const handleBack = useCallback(() => {
     setCurrent((prev) => prev - 1);
-  }
+  }, []);
+
+  const sharedOptions = useMemo(
+    () => ({
+      register,
+      setValue,
+      watch,
+      errors,
+      trigger,
+      isSubmitting,
+      isReadOnly,
+      getValues,
+    }),
+    [register, setValue, watch, errors, trigger, isSubmitting, isReadOnly, getValues]
+  );
 
   return (
     <EditorProvider>
@@ -131,12 +174,12 @@ const FormRenderer = ({
                 (form_data?.[current]?.title ||
                   form_data?.[current]?.description) && (
                   <div className="py-4 mb-4 border-b border-gray-100 multi_section__title">
-                    {form_data?.[current].title && (
+                    {form_data[current]?.title && (
                       <h2 className="text-lg font-semibold mb-[6px]">
                         {form_data[current]?.title}
                       </h2>
                     )}
-                    {form_data?.[current]?.description && (
+                    {form_data[current]?.description && (
                       <p className="text-sm">
                         {form_data[current]?.description}
                       </p>
@@ -147,41 +190,21 @@ const FormRenderer = ({
               {renderType === "multi" ? (
                 <MultiPage
                   form_data={form_data}
-                  options={{
-                    register,
-                    setValue,
-                    watch,
-                    errors,
-                    trigger,
-                    isSubmitting,
-                    isReadOnly,
-                    getValues,
-                  }}
+                  options={sharedOptions}
                   current={current}
                 />
               ) : (
-                <SinglePage
-                  form_data={form_data}
-                  options={{
-                    register,
-                    setValue,
-                    watch,
-                    errors,
-                    trigger,
-                    isSubmitting,
-                    isReadOnly,
-                    getValues,
-                  }}
-                />
+                <SinglePage form_data={form_data} options={sharedOptions} />
               )}
             </div>
           </div>
 
+          {/* ✅ Footer Controls */}
           {!hideFooter && (
             <footer className="flex items-center justify-end gap-4 footer">
-              {renderType === "multi" && (
+              {renderType === "multi" ? (
                 <>
-                  {current !== 0 && (
+                  {current > 0 && (
                     <AppButton
                       type="button"
                       text="Back"
@@ -189,7 +212,7 @@ const FormRenderer = ({
                       btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-gray-200 rounded-lg"
                     />
                   )}
-                  {current !== total - 1 ? (
+                  {current < totalSections - 1 ? (
                     <AppButton
                       type="button"
                       text="Continue"
@@ -199,9 +222,7 @@ const FormRenderer = ({
                     />
                   ) : (
                     !ignoreValidation &&
-                    (children ? (
-                      children
-                    ) : (
+                    (children ?? (
                       <AppButton
                         isDisabled={isSubmitting}
                         isLoading={isSubmitting}
@@ -213,12 +234,9 @@ const FormRenderer = ({
                     ))
                   )}
                 </>
-              )}
-              {renderType === "single" &&
+              ) : (
                 !ignoreValidation &&
-                (children ? (
-                  children
-                ) : (
+                (children ?? (
                   <AppButton
                     isDisabled={isSubmitting}
                     isLoading={isSubmitting}
@@ -227,7 +245,8 @@ const FormRenderer = ({
                     style={{ background: config?.buttonColor || "#333" }}
                     btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
                   />
-                ))}
+                ))
+              )}
             </footer>
           )}
         </form>
@@ -236,4 +255,4 @@ const FormRenderer = ({
   );
 };
 
-export default FormRenderer;
+export default React.memo(FormRenderer);
