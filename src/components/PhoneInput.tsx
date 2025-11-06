@@ -163,7 +163,7 @@ export default function PhoneInput({
             readOnly={readOnly}
             onChange={(e) => {
               const numericValue = e.target.value.replace(/\D/g, ""); // remove non-digits
-              setNumber(numericValue.slice(0, max));
+              setNumber(numericValue);
             }}
             placeholder={placeholder}
             className="w-full px-3 outline-none"
