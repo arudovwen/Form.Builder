@@ -33,7 +33,7 @@ export default function MainPage({
     <div
        onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => handleMainDrop(e)}
-      className="bg-white p-4 border border-[#E4E7EC] rounded-lg h-full overflow-y-auto no-scrollbar max-h-[calc(100vh-100px)]"
+      className="bg-white p-4 border border-[#E4E7EC] h-full overflow-y-auto no-scrollbar max-h-[calc(100vh-60px)]"
     >
       <FormBuilder />
     </div>

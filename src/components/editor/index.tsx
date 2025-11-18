@@ -107,7 +107,10 @@ const FormBuilder = () => {
             },
             index: number
           ) => (
-            <div key={section.id} className={`group cursor-pointer rounded `}>
+            <div
+              key={section.id}
+              className={`bg-white group cursor-pointer rounded `}
+            >
               <div
                 className={`border border-gray-100 rounded  px-4 shadow-[rgba(149,157,165,0.2)_0px_2px_4px] transition-colors duration-200
                   ${
