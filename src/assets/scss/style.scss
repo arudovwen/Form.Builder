@@ -1,7 +1,88 @@
 @import url('./_form.scss');
 @import url('./_button.scss');
+@import url('./_date-picker.scss');
 @import url("https://fonts.googleapis.com/css2?family=Public Sans:wght@100..900&display=swap");
 body {
   font-family: "Public Sans", Helvetica, sans-serif;
   color: #414651;
+}
+
+/* Container */
+.custom-field {
+  @apply field-control;
+}
+
+/* Labels */
+.custom-label {
+  @apply block text-sm text-[#686878]  mb-2;
+}
+
+.custom-floating-label {
+  @apply z-[40] absolute bg-white py-[2px] px-1 -top-[10px] left-3 text-[#667085];
+}
+
+/* Value + Placeholder */
+.select-value {
+  @apply block text-sm text-left truncate;
+}
+
+.select-placeholder {
+  @apply block text-sm opacity-60;
+}
+
+.placeholder {
+  @apply opacity-60;
+}
+
+/* Dropdown Icon */
+.select-icon {
+  @apply absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none;
+}
+
+/* Options Container */
+.select-options {
+  @apply z-[9999] fixed mt-1 min-w-[200px] max-h-60 w-[var(--select-width)] overflow-auto rounded-md
+         no-scrollbar bg-white  text-gray-900 
+         py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm;
+}
+
+/* Option Row */
+.select-option {
+  @apply relative cursor-pointer select-none py-2 pl-4 pr-4 text-sm text-gray-900;
+}
+
+.select-option.active {
+  @apply bg-gray-100 text-gray-900;
+}
+
+/* Option Text */
+.option-text {
+  @apply block truncate text-sm;
+}
+
+.option-text.selected {
+  @apply font-medium;
+}
+
+/* Helper + Error */
+.custom-subtext {
+  @apply text-[10px] text-[#98A2B3] leading-normal mt-[6px];
+}
+
+.custom-error {
+  @apply text-sm text-red-500;
+}
+
+/* Transitions */
+.fade-enter {
+  @apply transition ease-out duration-100;
+}
+.fade-from {
+  @apply opacity-0;
+}
+.fade-to {
+  @apply opacity-100;
+}
+.fade-leave {
+  @apply transition ease-in duration-100;
 }

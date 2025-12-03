@@ -50,7 +50,7 @@ const ElementContainer = memo(
                   className="text-sm outline-none hover:opacity-80"
                   onClick={() => setOpen(true)}
                 >
-                  <AppIcon icon="circum:edit" />
+                  <AppIcon icon="circum:edit" iconClass="text-base" />
                 </button>
              
               <button
@@ -58,7 +58,7 @@ const ElementContainer = memo(
                 className="text-sm outline-none hover:opacity-80"
                 onClick={handleRemove}
               >
-                <AppIcon icon="iconamoon:sign-times-fill" />
+                <AppIcon icon="iconamoon:trash"  iconClass="text-base"  />
               </button>
             </span>
           )}

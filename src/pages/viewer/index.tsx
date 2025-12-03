@@ -57,6 +57,7 @@ export default function Viewer({
 
   return (
     <div className="w-full h-full">
+      <div id="root-portal"></div>
       <FormRenderer
         form_data={form_data}
         answerData={answerData}

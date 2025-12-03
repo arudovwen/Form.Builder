@@ -108,6 +108,7 @@ input[type="number"] {
 }
 .react-datepicker__input-container .react-datepicker__calendar-icon {
   right: 0;
+  left: unset;
   display: flex !important;
   align-items: center !important;
 }

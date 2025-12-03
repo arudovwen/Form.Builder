@@ -25,7 +25,7 @@ const TabsComponent: FC<TabsComponentProps> = ({
 }) => {
   // Class name for the container
   const containerClass = clsx(
-    "flex gap-x-3 mb-8 w-full no-scrollbar overflow-x-auto border-b border-[#EAECF0] darks:border-gray-500",
+    "flex gap-x-3 mb-8 w-full no-scrollbar overflow-x-auto border-b-2 border-[#EAECF0] darks:border-gray-500",
     className
   );
 
@@ -37,14 +37,14 @@ const TabsComponent: FC<TabsComponentProps> = ({
         
         // Base class for each tab button
         const baseBtnClass = clsx(
-          "capitalize text-sm  whitespace-nowrap no-scrollbar font-semibold pb-[14px] border-b border-[#EAECF0] px-6 flex items-center  gap-x-1 flex-1 text-center",`${tabs.length===1?'justify-start':'justify-center'}`,
+          "capitalize text-sm  whitespace-nowrap no-scrollbar font-semibold pb-[14px] border-b-2 border-[#EAECF0] px-6 flex items-center  gap-x-1 flex-1 text-center",`${tabs.length===1?'justify-start':'justify-center'}`,
           btnClass
         );
 
         // Conditional classes based on whether the tab is active
         const activeClasses = clsx({
-          "border-gray-400 darks:border-white !text-primary darks:!text-white": isActive,
-          "border-transparent text-[#667085] darks:!text-white/60": !isActive,
+          "border-gray-500 darks:border-white !text-primary darks:!text-white": isActive,
+          "border-transparent text-gray-400 darks:!text-white/60": !isActive,
         });
 
         // Conditional count display

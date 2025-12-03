@@ -598,7 +598,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       onDragStart={(e) => e.preventDefault()}
     >
       <div
-        className="min-w-[600px] bg-white rounded-xl shadow-xl relative flex flex-col pb-4 items-center max-h-[80vh] overflow-y-auto no-scrollbar  select-"
+        className="min-w-[500px] bg-white rounded-xl shadow-xl relative flex flex-col pb-4 items-center   select-"
         draggable="true"
         onDragStart={(e) => e.preventDefault()}
       >
@@ -630,7 +630,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
 
         {/* Form Content */}
         <form onSubmit={handleSubmit(onSubmit)} className="w-full">
-          <div className=" max-h-[800px] overflow-y-auto">
+          <div className=" max-h-[600px] overflow-y-auto">
             {activeTab === "basic" && (
               <div className="z-10 flex flex-col w-full gap-5 px-6">
                 {allowValue.includes(element.inputType) && (
@@ -765,7 +765,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   )}
                 {element.type.toLowerCase() === "date" && (
                   <>
-                    <CustomSelect
+                    {/* <CustomSelect
                       label="Date Type"
                       options={[
                         {
@@ -782,8 +782,8 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                       setValue={setValue}
                       trigger={trigger}
                       value={watch("dateType")}
-                    />
-                    {watch("dateType") === "custom" && (
+                    /> */}
+                    {/* {watch("dateType") === "custom" && ( */}
                       <CustomSelect
                         label="Date Format"
                         options={dateFormats}
@@ -793,7 +793,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         trigger={trigger}
                         value={watch("dateFormat")}
                       />
-                    )}
+                     {/* )} */}
                   </>
                 )}
                 {element.type.toLowerCase() === "selectfield" && (
@@ -985,7 +985,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               )}
           </div>
           {/* Actions */}
-          <div className="flex w-full gap-3 px-6 pt-8 pb-6 mt-4">
+          <div className="sticky flex w-full gap-3 px-6 pt-4 pb-4 mt-4 border-t">
             <button
               type="button"
               onClick={onClose}

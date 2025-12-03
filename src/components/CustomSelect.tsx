@@ -1,20 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import clsx from "clsx";
 import AppIcon from "./ui/AppIcon";
-
-// interface Option {
-//   label: string;
-//   value: string | number | null;
-// }
 
 interface CustomSelectProps {
   className?: string;
   options: any[];
   placeholder?: string;
   errors?: any;
-  register?: any; // Adjust type based on your useForm usage
-  setValue?: any; // Adjust type based on your useForm usage
+  register?: any;
+  setValue?: any;
   name: string;
   label?: string;
   value?: any;
@@ -48,52 +43,60 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   const [selected, setSelected] = useState<any>(isMultiple ? [] : null);
   const merged = clsx("field-control", className);
 
-  useEffect(() => {
-    if (selected && setValue && register) {
-      setValue(name, selected?.value);
-      if (register) {
-        register(name);
-      }
-      if (trigger) {
-        trigger(name);
-      }
-    }
-  }, [name, register, selected, setValue, trigger]);
+  /** ----------------------------------------------
+   *  Compute selected option from external value
+   *  Only recompute when value or options change
+   * ---------------------------------------------- */
+  const computedSelected = useMemo(() => {
+    if (!options) return null;
 
-  useEffect(() => {
-    const tempData = options?.find((option: any) => {
-      // If option.value and value are both strings, compare them case-insensitively
-      if (typeof option.value === "string" && typeof value === "string") {
-        return option.value.toLowerCase() === value.toLowerCase();
-      }
+    return (
+      options.find((o: any) => {
+        if (typeof o.value === "string" && typeof value === "string")
+          return o.value.toLowerCase() === value.toLowerCase();
 
-      // If option.value and value are both objects, compare based on some unique property (e.g., 'id')
-      if (typeof option.value === "object" && typeof value === "object") {
-        return option.value.id === value?.id; // Assuming both have 'id' property for comparison
-      }
+        if (typeof o.value === "object" && typeof value === "object")
+          return o.value.id === value?.id;
 
-      // Default case: compare primitive values directly
-      return option.value === value;
-    });
-
-    // Set selected option or null if not found
-    setSelected(tempData || null);
+        return o.value === value;
+      }) || null
+    );
   }, [value, options]);
+
+  /** Sync external value → internal state */
+  useEffect(() => {
+    // Avoid unnecessary updates
+    if (computedSelected?.value !== selected?.value) {
+      setSelected(computedSelected);
+    }
+  }, [computedSelected]);
+
+  /** Update form state (setValue, trigger, register) */
+  useEffect(() => {
+    if (!selected || !setValue) return;
+
+    setValue(name, selected?.value);
+
+    register?.(name);
+    trigger?.(name);
+  }, [selected]);
 
   return (
     <div className="relative">
       {!isFloatingLabel && label && (
-        <label className="block text-sm text-[#686878] darks:!text-white/70  mb-2">
+        <label className="block text-sm text-[#686878] darks:text-white/70 mb-2">
           {label}
         </label>
       )}
+
       {isFloatingLabel && (
         <label
-          className={`z-[40] absolute block text-[#667085] bg-white  py-[2px] px-1 -top-[10px] left-3  ${labelClass}`}
+          className={`z-[40] absolute bg-white py-[2px] px-1 -top-[10px] left-3 ${labelClass}`}
         >
           {label}
         </label>
       )}
+
       <Listbox
         value={selected}
         onChange={setSelected}
@@ -103,9 +106,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         <div className="relative">
           <Listbox.Button className={merged} disabled={disabled}>
             {loading ? (
-              <span className="block text-sm text-left opacity-60">
-                Fetching data ...
-              </span>
+              <span className="text-sm opacity-60">Fetching data...</span>
             ) : (
               <span className="block text-sm text-left truncate">
                 {selected?.label || (
@@ -113,34 +114,31 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 )}
               </span>
             )}
+
             <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
               <AppIcon icon="lucide:chevron-down" />
             </span>
           </Listbox.Button>
+
           <Transition
-            as={React.Fragment}
             leave="transition ease-in duration-100"
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Listbox.Options className="z-[77] absolute mt-1 max-h-60 w-full overflow-auto rounded-md no-scrollbar bg-white darks:bg-gray-800 text-gray-900 darks:text-white/80 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {options?.map((option, optionIdx) => (
+            <Listbox.Options anchor="bottom start" className="select-options">
+              {options?.map((option: any, idx: number) => (
                 <Listbox.Option
-                  key={optionIdx}
-                  className={({ active }) =>
-                    `relative cursor-default select-none py-2 pl-4 pr-4  text-sm ${
-                      active
-                        ? "bg-gray-100 text-gray-900"
-                        : "text-gray-900 darks:text-white/70 "
-                    }`
-                  }
+                  key={idx}
                   value={option}
+                  className={({ active }) =>
+                    clsx("select-option", { active })
+                  }
                 >
                   {({ selected }) => (
                     <div
-                      className={`block truncate text-sm ${
-                        selected ? "font-medium" : "font-normal"
-                      }`}
+                      className={clsx("option-text", {
+                        selected,
+                      })}
                     >
                       {option.label}
                     </div>
@@ -151,11 +149,11 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           </Transition>
         </div>
       </Listbox>
+
       {!errors && subText && (
-        <p className="text-[10px] text-[#98A2B3] leading-normal mt-[6px]">
-          {subText}
-        </p>
+        <p className="text-[10px] text-[#98A2B3] mt-[6px]">{subText}</p>
       )}
+
       {errors && <span className="text-sm text-red-500">{errors.message}</span>}
     </div>
   );
