@@ -1,7 +1,7 @@
 import React from "react";
 interface CustomSelectProps {
     className?: string;
-    options: any[];
+    options: any;
     placeholder?: string;
     errors?: any;
     register?: any;

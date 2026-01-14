@@ -1,4 +1,4 @@
-import { FormViewer } from "@/";
+import { FormViewer } from "../../";
 import React, { useContext } from "react";
 import EditorContext from "../../context/editor-context";
 import { EditorContextType } from "./element-canvas";

@@ -19,7 +19,6 @@ export default function MultiSelectInput({
   value = [],
   onChange,
   options,
-  label
 }: MultiSelectInputProps) {
   const [selectedOptions, setSelectedOptions] = useState<Option[]>(value);
 
