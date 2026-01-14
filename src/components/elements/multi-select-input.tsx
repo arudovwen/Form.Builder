@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useState } from "react";
 import { Listbox, Transition } from "@headlessui/react";
+import AppIcon from "@/components/ui/AppIcon";
 
 export default function MultiSelectInput({
   element,
@@ -12,71 +13,89 @@ export default function MultiSelectInput({
     { label: string; value: any }[]
   >(element.value || []);
 
-  const { register = () => ({}), setValue, watch } = validationData || {};
-  const registeredValue = watch && watch(element?.id);
+  const {
+    register = () => ({}),
+    setValue,
+    watch,
+    isReadOnly,
+  } = validationData || {};
+
+  const registeredValue = watch?.(element?.id);
+
+  /* ---------------- Register field ---------------- */
   useEffect(() => {
     register(element.id);
   }, [element.id, register]);
 
+  /* ---------------- Sync value ---------------- */
   useEffect(() => {
-    if (setValue) {
-      setValue(element.id, selectedValues);
-    }
+    setValue?.(element.id, selectedValues);
   }, [element.id, selectedValues, setValue]);
+
+  /* ---------------- Restore value ---------------- */
   useEffect(() => {
-    if (registeredValue?.length && !selectedValues?.length) {
+    if (registeredValue?.length && !selectedValues.length) {
       setSelectedValues(registeredValue);
     }
-  }, [registeredValue, selectedValues?.length]);
+  }, [registeredValue, selectedValues.length]);
 
   return (
-    <div className="z-10 w-full">
-      <Listbox value={selectedValues} onChange={setSelectedValues} multiple  disabled={validationData?.isReadOnly}>
-        <div className="relative">
+    <div className="custom-select">
+      <Listbox
+        value={selectedValues}
+        onChange={setSelectedValues}
+        multiple
+        disabled={isReadOnly}
+      >
+        <div className="custom-select__wrapper">
           <Listbox.Button
-            className="w-full py-2 pl-3 pr-10 text-left bg-white cursor-default field-control "
-            disabled={validationData?.isReadOnly}
+            className="custom-select__control field-control"
+            disabled={isReadOnly}
           >
-            {selectedValues?.length > 0
-              ? selectedValues?.map((i) => i.label).join(", ")
-              : "Select options"}
+            <span className="custom-select__value">
+              {selectedValues.length > 0 ? (
+                selectedValues.map((i) => i.label).join(", ")
+              ) : (
+                <span className="custom-select__placeholder">
+                  Select options
+                </span>
+              )}
+            </span>
+
+            <span className="custom-select__icon">
+              <AppIcon icon="lucide:chevron-down" />
+            </span>
           </Listbox.Button>
-          <Transition
-            as={Fragment}
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <Listbox.Options className="absolute w-full py-1 mt-1  grid gap-y-[1px] z-[1] bg-white rounded-md shadow-lg  ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+
+          <Transition as={Fragment} leave="custom-select__transition">
+            <Listbox.Options
+              anchor="bottom start"
+              className="custom-select__options"
+            >
               {element?.options?.map(
                 (option: { label: string; value: any }, index: number) => (
                   <Listbox.Option
                     key={index}
+                    value={option}
                     className={({ active }) =>
-                      `cursor-default select-none relative  w-full flex justify-between ${
-                        active ? "text-gray-700 bg-gray-100" : "text-gray-700"
+                      `custom-select__option ${
+                        active ? "custom-select__option--active" : ""
                       }`
                     }
-                    value={option}
                   >
                     {({ selected }) => (
-                      <div
-                        className={`flex items-center justify-between py-2 pl-4 pr-4 w-full ${
-                          selected ? "bg-gray-100" : ""
-                        }`}
-                      >
+                      <div className="custom-select__option-row">
                         <span
-                          className={`block truncate ${
-                            selected ? "font-medium" : "font-normal"
+                          className={`custom-select__option-label ${
+                            selected ? "custom-select__option--selected" : ""
                           }`}
                         >
-                          {option?.label}
+                          {option.label}
                         </span>
-                        {selected ? (
-                          <span className="absolute inset-y-0 flex items-center pl-3 text-gray-600 right-3">
-                            ✓
-                          </span>
-                        ) : null}
+
+                        {selected && (
+                          <span className="custom-select__check">✓</span>
+                        )}
                       </div>
                     )}
                   </Listbox.Option>

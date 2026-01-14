@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useCallback } from "react";
 import Loader from "../../components/Loader";
 import FormRenderer from "../../components/viewer";
 import { setItem } from "../../utils/localStorageControl";
+import { EditorProvider } from "@/context/editor-context";
 
 export interface RenderProps {
   onSubmit?: (e: any) => void;
@@ -58,6 +59,7 @@ export default function Viewer({
   return (
     <div className="w-full h-full">
       <div id="root-portal"></div>
+      <EditorProvider>
       <FormRenderer
         form_data={form_data}
         answerData={answerData}
@@ -70,6 +72,7 @@ export default function Viewer({
       >
         {children}
       </FormRenderer>
+      </EditorProvider>
     </div>
   );
 }

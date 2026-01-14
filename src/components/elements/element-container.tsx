@@ -24,6 +24,7 @@ const ElementContainer = memo(
       removeElement(element.id, element.sectionId);
     }, [element.id, element.sectionId, removeElement]);
 
+  
     return (
       <div className="w-full">
         {isOpen && (

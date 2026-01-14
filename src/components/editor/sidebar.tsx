@@ -3,7 +3,7 @@ import { CategorizedElements, Elements } from "../../utils/contants";
 import AppIcon from "../ui/AppIcon";
 import EditorContext from "../../context/editor-context";
 import { v4 as uuidv4 } from "uuid";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { getItem } from "../../utils/localStorageControl";
 
 interface ElementType {
@@ -30,6 +30,10 @@ const SideBar = () => {
 
   const handleDragStart = useCallback(
     (event: DragEvent<HTMLLIElement>, element: ElementType) => {
+      if (!selectedSection) {
+        toast.error("Please select a section to add an element.");
+        return;
+      }
       event.dataTransfer.setData("properties", JSON.stringify(element));
       event.dataTransfer.effectAllowed = "move";
       setIsDragging(true);
@@ -39,7 +43,7 @@ const SideBar = () => {
 
   function handleElement(element: any) {
     if (!selectedSection) {
-      toast.error("Please select a section to add an element to.");
+      toast.error("Please select a section to add an element.");
       return;
     }
     const newElement = {
@@ -72,6 +76,7 @@ const SideBar = () => {
 
   return (
     <div className="pt-4 pb-6">
+        <ToastContainer />
       <div className="px-5 mb-4">
         <input
           className="field-control"

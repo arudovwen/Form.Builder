@@ -5,11 +5,12 @@ import React, {
   useMemo,
   useState,
   ReactNode,
+  useContext,
 } from "react";
 import { useForm, FormProvider, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import { EditorProvider } from "../../context/editor-context";
+import EditorContext, { EditorProvider } from "../../context/editor-context";
 import AppButton from "../ui/AppButton";
 import { generateDynamicSchema } from "./validation";
 import { mapIdToValue } from "../../utils/mapIdToValue";
@@ -38,7 +39,6 @@ export interface FormRendererProps {
 }
 
 const FormRenderer: React.FC<FormRendererProps> = ({
-
   form_data,
   answerData = [],
   ignoreValidation = false,
@@ -49,6 +49,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   children,
   hideFooter = false,
 }: FormRendererProps) => {
+  const { setAnswerData }: any = useContext(EditorContext);
   const [current, setCurrent] = useState(0);
 
   const totalSections = form_data?.length ?? 0;
@@ -81,7 +82,10 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   const watchedValues = useWatch({ control });
 
   // ✅ Deep memoization to avoid redundant updates
-  const memoizedValues = useMemo(() => watchedValues, [JSON.stringify(watchedValues)]);
+  const memoizedValues = useMemo(
+    () => watchedValues,
+    [JSON.stringify(watchedValues)]
+  );
 
   // ✅ Memoize callback for parent updates
   const handleGetValues = useCallback(
@@ -105,7 +109,8 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     );
 
     handleGetValues(updatedData);
-  }, [memoizedValues, form_data, handleGetValues, onGetValues]);
+    setAnswerData(memoizedValues);
+  }, [memoizedValues, form_data, handleGetValues, onGetValues, setAnswerData]);
 
   // ✅ Answer data hydration
   useEffect(() => {
@@ -158,100 +163,105 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       isReadOnly,
       getValues,
     }),
-    [register, setValue, watch, errors, trigger, isSubmitting, isReadOnly, getValues]
+    [
+      register,
+      setValue,
+      watch,
+      errors,
+      trigger,
+      isSubmitting,
+      isReadOnly,
+      getValues,
+    ]
   );
 
   return (
-    <EditorProvider>
-      <FormProvider {...methods}>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="container h-full mx-auto"
-        >
-          <div className="relative flex flex-col w-full py-4 gap-y-12">
-            <div className="multi_section__box" key={form_data?.[current]?.id}>
-              {renderType === "multi" &&
-                (form_data?.[current]?.title ||
-                  form_data?.[current]?.description) && (
-                  <div className="py-4 mb-4 border-b border-gray-100 multi_section__title">
-                    {form_data[current]?.title && (
-                      <h2 className="text-lg font-semibold mb-[6px]">
-                        {form_data[current]?.title}
-                      </h2>
-                    )}
-                    {form_data[current]?.description && (
-                      <p className="text-sm">
-                        {form_data[current]?.description}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-              {renderType === "multi" ? (
-                <MultiPage
-                  form_data={form_data}
-                  options={sharedOptions}
-                  current={current}
-                />
-              ) : (
-                <SinglePage form_data={form_data} options={sharedOptions} />
+    <FormProvider {...methods}>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="container h-full mx-auto"
+      >
+        <div className="relative flex flex-col w-full py-4 gap-y-12">
+          <div className="multi_section__box" key={form_data?.[current]?.id}>
+            {renderType === "multi" &&
+              (form_data?.[current]?.title ||
+                form_data?.[current]?.description) && (
+                <div className="py-4 mb-4 border-b border-gray-100 multi_section__title">
+                  {form_data[current]?.title && (
+                    <h2 className="text-lg font-semibold mb-[6px]">
+                      {form_data[current]?.title}
+                    </h2>
+                  )}
+                  {form_data[current]?.description && (
+                    <p className="text-sm">{form_data[current]?.description}</p>
+                  )}
+                </div>
               )}
-            </div>
+
+            {renderType === "multi" ? (
+              <MultiPage
+                form_data={form_data}
+                options={sharedOptions}
+                current={current}
+              />
+            ) : (
+              <SinglePage form_data={form_data} options={sharedOptions} />
+            )}
           </div>
+        </div>
 
-          {/* ✅ Footer Controls */}
-          {!hideFooter && (
-            <footer className="flex items-center justify-end gap-4 footer">
-              {renderType === "multi" ? (
-                <>
-                  {current > 0 && (
-                    <AppButton
-                      type="button"
-                      text="Back"
-                      onClick={handleBack}
-                      btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-gray-200 rounded-lg"
-                    />
-                  )}
-                  {current < totalSections - 1 ? (
-                    <AppButton
-                      type="button"
-                      text="Continue"
-                      onClick={handleProceed}
-                      style={{ background: config?.buttonColor || "#333" }}
-                      btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg continue_btn"
-                    />
-                  ) : (
-                    !ignoreValidation &&
-                    (children ?? (
-                      <AppButton
-                        isDisabled={isSubmitting}
-                        isLoading={isSubmitting}
-                        type="submit"
-                        text="Submit"
-                        style={{ background: config?.buttonColor || "#333" }}
-                        btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
-                      />
-                    ))
-                  )}
-                </>
-              ) : (
-                !ignoreValidation &&
-                (children ?? (
+        {/* ✅ Footer Controls */}
+        {!hideFooter && (
+          <footer className="flex items-center justify-end gap-4 footer">
+            {renderType === "multi" ? (
+              <>
+                {current > 0 && (
                   <AppButton
-                    isDisabled={isSubmitting}
-                    isLoading={isSubmitting}
-                    type="submit"
-                    text="Submit"
-                    style={{ background: config?.buttonColor || "#333" }}
-                    btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
+                    type="button"
+                    text="Back"
+                    onClick={handleBack}
+                    btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-gray-200 rounded-lg"
                   />
-                ))
-              )}
-            </footer>
-          )}
-        </form>
-      </FormProvider>
-    </EditorProvider>
+                )}
+                {current < totalSections - 1 ? (
+                  <AppButton
+                    type="button"
+                    text="Continue"
+                    onClick={handleProceed}
+                    style={{ background: config?.buttonColor || "#333" }}
+                    btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg continue_btn"
+                  />
+                ) : (
+                  !ignoreValidation &&
+                  (children ?? (
+                    <AppButton
+                      isDisabled={isSubmitting}
+                      isLoading={isSubmitting}
+                      type="submit"
+                      text="Submit"
+                      style={{ background: config?.buttonColor || "#333" }}
+                      btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
+                    />
+                  ))
+                )}
+              </>
+            ) : (
+              !ignoreValidation &&
+              (children ?? (
+                <AppButton
+                  isDisabled={isSubmitting}
+                  isLoading={isSubmitting}
+                  type="submit"
+                  text="Submit"
+                  style={{ background: config?.buttonColor || "#333" }}
+                  btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
+                />
+              ))
+            )}
+          </footer>
+        )}
+      </form>
+    </FormProvider>
   );
 };
 

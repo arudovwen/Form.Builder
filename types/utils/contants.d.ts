@@ -60,6 +60,10 @@ export interface ElementType {
     documentObj?: any;
     validationUrl?: string;
     signatureLink?: string;
+    minDate?: string | null;
+    maxDate?: string | null;
+    canHaveDateRange?: boolean;
+    allowYearPicker?: boolean;
 }
 export declare const Elements: ElementType[];
 export declare const CategorizedElements: {

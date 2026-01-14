@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import GridInput, { GridItem } from "../elements/grid-input";
-import { renderElement } from "./elements-render";
+import { RenderElement } from "./elements-render";
 
  export  const getElementOptions = (element: any, options: any) => {
     if (!element?.allowEdit) return options;
@@ -21,7 +21,7 @@ export default function SinglePage({ form_data, options }) {
           col={child.gridPosition?.col}
           customClass="p-0"
         >
-          {renderElement(child, getElementOptions(child, options))}
+          {RenderElement(child, getElementOptions(child, options))}
         </GridItem>
       ))}
     </GridInput>
@@ -32,7 +32,7 @@ export default function SinglePage({ form_data, options }) {
       key={element.id}
       className={clsx("group relative grid gap-y-[6px]", element.elementClass)}
     >
-      {renderElement(element, getElementOptions(element, options))}
+      {RenderElement(element, getElementOptions(element, options))}
       {options?.errors?.[element.id]?.message && (
         <div className="mt-1 text-xs text-red-600">
           {options.errors[element.id].message}

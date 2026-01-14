@@ -55,7 +55,7 @@ export const elementMap: Record<string, React.ElementType> = {
   document: SignDocument
 };
 const state = "edit"; // This can be passed as a prop or context value
-export const renderElement = (element: any, sectionId: string) => {
+export const RenderElement = (element: any, sectionId: string) => {
   const ElementComponent = elementMap[element.type];
   return ElementComponent ? (
     <ElementContainer element={element} state={state}>

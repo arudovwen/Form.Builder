@@ -1,6 +1,6 @@
 {
   "name": "@arudovwen/form-builder-react",
-  "version": "1.4.10",
+  "version": "1.4.12",
   "description": "A React-based form builder component library.",
   "type": "module",
   "main": "./dist/form-builder.umd.js",
@@ -19,7 +19,8 @@
     "build": "npm run build:types && npm run build:js",
     "lint": "eslint .",
     "preview": "vite preview",
-    "analyze": "vite build && npx serve dist"
+    "analyze": "vite build && npx serve dist",
+    "deploy": "npm run build && npm publish"
   },
   "keywords": [
     "react",

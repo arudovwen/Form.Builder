@@ -31,6 +31,8 @@ import FileReaderComponent from "../FileReaderComponent";
 import ColumnExample from "../ColumnExample";
 import DocumentSignExample from "../DocumentSign";
 import ValidateExample from "../ValidateExample";
+import CustomDatePicker from "../CutomDatePicker";
+import VisibilityEditor from "./visibility-editor";
 
 interface Option {
   label: string;
@@ -142,6 +144,12 @@ const schema = yup.object().shape({
   dateType: yup.string().default("basic"),
   validationUrl: yup.string(),
   signatureLink: yup.string(),
+  minDate: yup.string().nullable(),
+  maxDate: yup.string().nullable(),
+  canHaveDateRange: yup.boolean(),
+  allowYearPicker: yup.boolean(),
+  isHidden: yup.boolean(),
+  visibilityDependentFields: yup.array().nullable(),
 });
 
 const tabs = [
@@ -598,15 +606,12 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       onDragStart={(e) => e.preventDefault()}
     >
       <div
-        className="min-w-[500px] bg-white rounded-xl shadow-xl relative flex flex-col pb-4 items-center   select-"
+        className="min-w-[600px] bg-white rounded-xl shadow-xl relative flex flex-col pb-4 items-center   select-"
         draggable="true"
         onDragStart={(e) => e.preventDefault()}
       >
         {/* Header */}
         <div className="z-10 flex flex-col items-start w-full gap-4 px-6 pt-4 pb-5 mb-3">
-          {/* <h2 className="text-base font-semibold text-[#475467] font-onest">
-            {element.label} Options
-          </h2> */}
           <button
             onClick={onClose}
             type="button"
@@ -644,20 +649,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                     />
                   </>
                 )}
-                {/* <DynamicInput
-                  label="Custom Class"
-                  name="customClass"
-                  register={register}
-                  errors={errors}
-                  element={element}
-                /> */}
-                {/* <DynamicInput
-                label="Element Class"
-                name="elementClass"
-                register={register}
-                errors={errors}
-                element={element}
-              /> */}
+
                 {!allowValue.includes(element.inputType) &&
                   !noAllowValidation.includes(element.inputType) && (
                     <>
@@ -765,35 +757,49 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   )}
                 {element.type.toLowerCase() === "date" && (
                   <>
-                    {/* <CustomSelect
-                      label="Date Type"
-                      options={[
-                        {
-                          label: "Basic",
-                          value: "basic",
-                        },
-                        {
-                          label: "Custom",
-                          value: "custom",
-                        },
-                      ]}
+                    {/* {watch("dateType") === "custom" && ( */}
+                    <CustomSelect
+                      label="Date Format"
+                      options={dateFormats}
                       register={register}
-                      name={"dateType"}
+                      name={"dateFormat"}
                       setValue={setValue}
                       trigger={trigger}
-                      value={watch("dateType")}
-                    /> */}
-                    {/* {watch("dateType") === "custom" && ( */}
-                      <CustomSelect
-                        label="Date Format"
-                        options={dateFormats}
-                        register={register}
-                        name={"dateFormat"}
-                        setValue={setValue}
-                        trigger={trigger}
-                        value={watch("dateFormat")}
-                      />
-                     {/* )} */}
+                      value={watch("dateFormat")}
+                    />
+                    <DynamicInput
+                      label="Allow Range"
+                      name="canHaveDateRange"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                      type="checkbox"
+                    />
+                    {values?.canHaveDateRange && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <CustomDatePicker
+                          name="minDate"
+                          value={values?.minDate}
+                          onGetValue={setValue}
+                          placeholder="Select min date"
+                        />
+                        <CustomDatePicker
+                          name="maxDate"
+                          value={values?.minDate}
+                          onGetValue={setValue}
+                          placeholder="Select max date"
+                          minDate={values?.minDate}
+                        />
+                      </div>
+                    )}
+                    <DynamicInput
+                      label="Allow Year Picker"
+                      name="allowYearPicker"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                      type="checkbox"
+                    />
                   </>
                 )}
                 {element.type.toLowerCase() === "selectfield" && (
@@ -862,6 +868,28 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   renderColumnsFields()}
                 {AllowOptions.includes(element.inputType) &&
                   renderOptionsFields()}
+                {/* VisibilityEditor  */}
+                <div>
+                  <div className="w-[150px] mb-4">
+                    <DynamicInput
+                      label="Toggle Visibility"
+                      name="isHidden"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                      type="checkbox"
+                    />
+                  </div>{" "}
+                  {values.isHidden && (
+                    <VisibilityEditor
+                      register={register}
+                      setValue={setValue}
+                      trigger={trigger}
+                      watch={watch}
+                      id={element?.id}
+                    />
+                  )}
+                </div>
               </div>
             )}
 

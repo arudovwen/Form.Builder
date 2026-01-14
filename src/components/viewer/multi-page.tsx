@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import React from "react";
 import GridInput, { GridItem } from "../elements/grid-input";
-import { renderElement } from "./elements-render";
+import { RenderElement } from "./elements-render";
 import { getElementOptions } from "./single-page";
 
 export default function MultiPage({ form_data, options, current }) {
@@ -25,7 +25,7 @@ export default function MultiPage({ form_data, options, current }) {
                   col={child.gridPosition?.col}
                   customClass="p-0"
                 >
-                  {renderElement(child, getElementOptions(child, options))}
+                  {RenderElement(child, getElementOptions(child, options))}
                 </GridItem>
               ))}
             </GridInput>
@@ -41,7 +41,7 @@ export default function MultiPage({ form_data, options, current }) {
                 element.elementClass
               )}
             >
-              {renderElement(element, getElementOptions(element, options))}
+              {RenderElement(element, getElementOptions(element, options))}
               <div className="mt-1 text-xs text-red-600">
                 {options?.errors?.[element.id]?.message}
               </div>

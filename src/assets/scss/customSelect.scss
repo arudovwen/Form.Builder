@@ -1,0 +1,250 @@
+.custom-select {
+  position: relative;
+  width: 100%;
+}
+
+/* Labels */
+.custom-select__label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #686878;
+}
+
+.custom-select__floating-label {
+  position: absolute;
+  top: -10px;
+  left: 12px;
+  background: #ffffff;
+  padding: 2px 6px;
+  font-size: 10px;
+  color: #667085;
+  z-index: 40;
+}
+
+/* Control */
+.custom-select__control {
+  width: 100%;
+  padding: 10px 36px 10px 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  background: #ffffff;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+}
+
+.custom-select__control:disabled {
+  background: #f2f4f7;
+  cursor: not-allowed;
+}
+
+/* Value */
+.custom-select__value {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-select__placeholder {
+  opacity: 0.6;
+}
+
+/* Icon */
+.custom-select__icon {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+/* Dropdown */
+.custom-select__options {
+  width: var(--button-width);
+  z-index: 9999;
+  max-height: 240px;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  border: 1px solid #e4e7ec;
+}
+
+/* Options */
+.custom-select__option {
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.custom-select__option--active {
+  background: #f2f4f7;
+}
+
+.custom-select__option--selected {
+  font-weight: 600;
+}
+
+/* Sub text */
+.custom-select__subtext {
+  margin-top: 6px;
+  font-size: 10px;
+  color: #98a2b3;
+}
+
+/* Error */
+.custom-select__error {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+  color: #d92d20;
+}
+
+/* Transition */
+.custom-select__transition {
+  transition: opacity 100ms ease-in;
+}
+
+/* Wrapper */
+.custom-select__wrapper {
+  position: relative;
+}
+
+/* Empty state */
+.custom-select__empty {
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #98a2b3;
+}
+
+/* Chips (selected items) */
+.custom-select__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.custom-select__chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  background: #f2f4f7;
+  border: 1px solid #e4e7ec;
+  border-radius: 999px;
+  color: #344054;
+}
+
+.custom-select__chip-remove {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #667085;
+  display: flex;
+  align-items: center;
+}
+
+.custom-select__chip-remove:hover {
+  color: #101828;
+}
+/* Option row layout */
+.custom-select__option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Check icon */
+.custom-select__check {
+  font-size: 14px;
+  color: #667085;
+}
+
+.visibility-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  color: #686878;
+  margin-bottom: 0.5rem;
+}
+
+.dependent-fields {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.dependent-field {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background-color: #f3f3f3;
+  border-radius: 0.375rem;
+  align-items: center;
+}
+
+.field-label,
+.field-value {
+  flex: 1;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.field-listbox {
+  flex: 1;
+  position: relative;
+}
+
+.listbox-wrapper {
+  position: relative;
+}
+
+.listbox-button {
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  text-align: left;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  background-color: #fff;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.listbox-options {
+  width: var(--button-width);
+  z-index: 10;
+  margin-top: 0.25rem;
+  background-color: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-height: 12rem;
+  overflow-y: auto;
+
+}
+
+
+
+.listbox-option {
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  
+}
+
+.listbox-option:hover {
+  background-color: #e0f2fe;
+}

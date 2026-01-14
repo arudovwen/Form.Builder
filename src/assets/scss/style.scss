@@ -1,5 +1,7 @@
 @import url('./_form.scss');
 @import url('./_button.scss');
+@import url('./customSelect.scss');
+@import url('./_button.scss');
 @import url('./_date-picker.scss');
 @import url("https://fonts.googleapis.com/css2?family=Public Sans:wght@100..900&display=swap");
 body {
@@ -42,7 +44,7 @@ body {
 /* Options Container */
 .select-options {
   @apply z-[9999] fixed mt-1 min-w-[200px] max-h-60 w-[var(--select-width)] overflow-auto rounded-md
-         no-scrollbar bg-white  text-gray-900 
+          bg-white  text-gray-900 
          py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm;
 }
 

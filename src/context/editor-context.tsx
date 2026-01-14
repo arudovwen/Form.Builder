@@ -41,7 +41,7 @@ const newSection = {
   questionData: [],
 };
 export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
-  
+  const [answerData, setAnswerData] = useState({});
   const [elementData, setElementData] = useState({});
   const [formData, setFormData] = useState<any[]>([newSection]);
   const [isDragging, setIsDragging] = useState(false);
@@ -63,25 +63,30 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
     setFormData((prevFormData) =>
       prevFormData.filter((i) => i.id !== sectionId)
     );
-   
+
     setSelectedSection(null);
   }, []);
   const removeElement = React.useCallback(
     (elementId: string, sectionId: string) => {
       const section = formData.find((section) => section.id === sectionId);
-      const elementData = section?.questionData.find((el) => el.id === elementId);
-  
+      const elementData = section?.questionData.find(
+        (el) => el.id === elementId
+      );
+
       if (!elementData) return;
-  
+
       setFormData((prevFormData) =>
         prevFormData.map((section) =>
           section.id === sectionId
             ? {
                 ...section,
                 questionData: section.questionData.filter((element: any) => {
-                  if (elementData.type === 'grid') {
+                  if (elementData.type === "grid") {
                     // remove both the grid and its children
-                    return element.gridId !== elementData.id && element.id !== elementData.id;
+                    return (
+                      element.gridId !== elementData.id &&
+                      element.id !== elementData.id
+                    );
                   }
                   // normal element removal
                   return element.id !== elementId;
@@ -93,7 +98,6 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
     },
     [formData, setFormData]
   );
-  
 
   const updateElementPosition = React.useCallback(
     (updatedQuestionData: any[], sectionId: string) => {
@@ -201,7 +205,6 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
     );
   }, []);
 
-
   const value = useMemo(
     () => ({
       formData,
@@ -224,6 +227,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       activeSections,
       setActiveSections,
       updateGridElement,
+      answerData,
+      setAnswerData,
     }),
     [
       formData,
@@ -241,6 +246,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       selectedSection,
       activeSections,
       updateGridElement,
+      answerData,
     ]
   );
 

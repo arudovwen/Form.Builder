@@ -108,7 +108,7 @@ export function generateDynamicSchema(data: Section[]) {
   const schemaFields: Record<string, yup.Schema<any>> = {};
 
   data.forEach(({ questionData }) => {
-    questionData.forEach((question) => {
+    questionData?.forEach((question) => {
       const { id, type, isRequired, requiredMessage } = question;
       
       let fieldSchema = getBaseSchema(type);

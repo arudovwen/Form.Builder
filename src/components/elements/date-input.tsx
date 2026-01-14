@@ -23,27 +23,17 @@ export default function DateInput({
 
   useEffect(() => {
     register(element.id);
-  }, []);
+  }, [element.id]);
   return (
-    <>
-      {/* {element.dateType === "basic" ? (
-        <input
-          placeholder={element.placeholder}
-          type={element.inputType}
-          className={clsx("field-control", element?.customClass)}
-          {...register(element.id)}
-          disabled={validationData?.isReadOnly}
-        />
-      ) : ( */}
-      <CustomDatePicker
-        name={element.id}
-        options={element?.options ?? []}
-        defaultValue={selectedValue}
-        onGetValue={setValue}
-        readOnly={validationData?.isReadOnly}
-        dateFormat={element?.dateFormat || "dd/MM/yyyy"}
-      />
-      {/* )} */}
-    </>
+    <CustomDatePicker
+      name={element.id}
+      value={selectedValue}
+      onGetValue={setValue}
+      readOnly={validationData?.isReadOnly}
+      dateFormat={element?.dateFormat || "dd/MM/yyyy"}
+      minDate={element?.minDate}
+      maxDate={element?.maxDate}
+      showYearDropdown={element?.allowYearPicker}
+    />
   );
 }

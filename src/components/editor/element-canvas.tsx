@@ -10,7 +10,7 @@ import clsx from "clsx";
 import { v4 as uuidv4 } from "uuid";
 
 import EditorContext from "../../context/editor-context";
-import { renderElement } from "./element-render";
+import { RenderElement } from "./element-render";
 import AppIcon from "../ui/AppIcon";
 import GridInput, { GridItem } from "../elements/grid-input";
 import ElementContainer from "../elements/element-container";
@@ -146,7 +146,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
         onDrop={handleDrop}
         onDragEnd={() => setDraggedElementId(null)}
       >
-        {renderElement(element, sectionId)}
+        {RenderElement(element, sectionId)}
       </div>
     ),
     [draggedElementId, handleDrop, handleDragOver, sectionId, handleDragStart]
@@ -197,7 +197,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
                 <GridInput element={el} sectionId={sectionId} state={STATE}>
                   {gridChildren.map((child) => (
                     <GridItem key={child.id} col={child.gridPosition?.col}>
-                      {renderElement(child, sectionId)}
+                      {RenderElement(child, sectionId)}
                     </GridItem>
                   ))}
                 </GridInput>

@@ -1,601 +1,339 @@
-import { v4 as uuidv4 } from "uuid";
 import countries from "../data/countries.json";
-interface DataColumnType {
+
+/* ---------------------------------- */
+/* Enums & Types */
+/* ---------------------------------- */
+
+export enum ElementKind {
+  BASIC_TEXT = "basicText",
+  TEXT = "textField",
+  LONG_TEXT = "longText",
+  SELECT = "selectField",
+  CASCADE_SELECT = "cascadeSelect",
+  MULTI_SELECT = "multiSelect",
+  VALIDATE_INPUT = "validateInput",
+  NUMBER = "numberField",
+  AMOUNT = "amountField",
+  DATE = "date",
+  PASSWORD = "password",
+  CHECKBOX = "checkbox",
+  PHONE = "phoneField",
+  RADIO = "radio",
+  EMAIL = "email",
+  FILE = "file",
+  COUNTRY = "country",
+  RATING = "rating",
+  DATA_GRID = "dataGrid",
+  TABLE_INPUT = "tableInput",
+  DIVIDER = "divider",
+  SPACER = "spacer",
+  SECTION = "section",
+  GRID = "grid",
+}
+
+export interface DataColumnType {
   field: string;
   headerName: string;
   width?: number;
   editable?: boolean;
 }
-export interface ElementType {
-  type: string;
+
+export interface OptionType {
   label: string;
-  childLabel?: string;
+  value: any;
+  id: string;
+  key?: string;
+}
+
+export interface ElementType {
+  type: ElementKind;
+  label: string;
   icon: string;
   inputLabel: string;
-  required?: boolean;
   inputType: string;
-  maxLength?: number | null;
-  minLength?: number | null;
+
+  required?: boolean;
   placeholder?: string;
   description?: string;
+  value?: any;
+
+  maxLength?: number | null;
+  minLength?: number | null;
+  maxAmount?: number | null;
+  minAmount?: number | null;
+
   isReadOnly?: boolean;
   isDisabled?: boolean;
   isRequired?: boolean;
+
   requiredMessage?: string;
   minLengthMessage?: string;
   maxLengthMessage?: string;
-  value?: any;
-  options?: Array<{ label: string; value: any; id: string; key?: string }>;
-  columns?: number;
-  gridId?: string;
-  gridPosition?: Record<string, any>;
-  maxAmount?: number | null;
-  minAmount?: number | null;
   minAmountMessage?: string;
   maxAmountMessage?: string;
-  prefix?: string | null;
-  sectionId?: string;
-  url?: string;
-  method?: string;
-  denominators?: null;
-  responseType?: string;
-  headerClass?: string;
-  customClass?: string | null;
-  elementClass?: string;
+
+  options?: OptionType[];
+  options2?: OptionType[];
+
+  columns?: number;
   dataColumns?: DataColumnType[];
-  options2?: Array<{ label: string; value: any; id: string; key?: string }>;
+
+  prefix?: string | null;
   inputMode?: string;
   pattern?: string;
+
   selectType?: string;
   dateType?: string;
   dateFormat?: string;
-  documentObj?: any;
-  validationUrl?: string;
-  signatureLink?: string;
+  minDate?: string | null;
+  maxDate?: string | null;
+  canHaveDateRange?: boolean;
+  allowYearPicker?: boolean;
+
+  url?: string;
+  method?: string;
+  responseType?: string;
+
+  customClass?: string | null;
+  elementClass?: string;
+  gridPosition?: any;
+  gridId?: string | null;
+
+  isHidden: boolean;
+  visibilityDependentFields?: string;
+  visibilityDependentFieldsValue?: any;
 }
 
-// The Elements array
+/* ---------------------------------- */
+/* Shared Defaults */
+/* ---------------------------------- */
+
+const baseElement = {
+  required: false,
+  description: "",
+  value: null,
+  isReadOnly: false,
+  isDisabled: false,
+  isRequired: false,
+  customClass: "",
+  elementClass: "",
+  gridPosition: null,
+  gridId: null,
+  isHidden: false,
+  visibilityDependentFields: [],
+};
+
+const textDefaults = {
+  ...baseElement,
+  maxLength: null,
+  minLength: null,
+  placeholder: "Type here",
+  requiredMessage: "Field is required",
+  minLengthMessage: "",
+  maxLengthMessage: "",
+};
+
+/* ---------------------------------- */
+/* Helpers */
+/* ---------------------------------- */
+
+const option = (label: string, value = label): OptionType => ({
+  label,
+  value,
+  id: value,
+});
+
+const createElement = (config: Partial<ElementType>): ElementType =>
+  ({
+    ...textDefaults,
+    ...config,
+  } as ElementType);
+
+/* ---------------------------------- */
+/* Static Options */
+/* ---------------------------------- */
+
+export const countryOptions: OptionType[] = countries.map((c: any) => ({
+  label: c.name,
+  value: c.name,
+  id: c.code || c.name,
+}));
+
+/* ---------------------------------- */
+/* Elements */
+/* ---------------------------------- */
+
 export const Elements: ElementType[] = [
-  {
-    type: "basicText",
+  createElement({
+    type: ElementKind.BASIC_TEXT,
     label: "Basic Text",
     icon: "fluent:text-16-filled",
     inputLabel: "",
-    required: false,
     inputType: "basicText",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
-    value: null,
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
-  {
-    type: "textField",
+  }),
+
+  createElement({
+    type: ElementKind.TEXT,
     label: "Text Field",
     icon: "fluent:text-16-filled",
     inputLabel: "Text Label",
-    required: false,
     inputType: "text",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
-    value: null,
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
-  {
-    type: "longText",
+  }),
+
+  createElement({
+    type: ElementKind.LONG_TEXT,
     label: "Long Text Field",
     icon: "dashicons:text",
     inputLabel: "Long Text Label",
-    required: false,
     inputType: "text",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
-    value: null,
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
-  {
-    type: "selectField",
+  }),
+
+  createElement({
+    type: ElementKind.SELECT,
     label: "Select List",
     icon: "tabler:select",
     inputLabel: "Select Text Label",
-    required: false,
     inputType: "select",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
-    value: null,
-    options: [
-      {
-        label: "Placeholder 1",
-        value: "",
-        key: "",
-        id: uuidv4(),
-      },
-    ],
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
     selectType: "list",
-  },
-  {
-    type: "cascadeSelect",
+    options: [option("Placeholder 1", "")],
+  }),
+
+  createElement({
+    type: ElementKind.CASCADE_SELECT,
     label: "Cascade Select",
-    childLabel: "Child Label",
     icon: "tabler:select",
     inputLabel: "Select Text Label",
-    required: false,
     inputType: "select",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
-    value: null,
-    options: [
-      {
-        label: "Placeholder 1",
-        value: "",
-        id: uuidv4(),
-        key: "",
-      },
-    ],
-    options2: [
-      {
-        label: "Placeholder 1",
-        value: "",
-        id: uuidv4(),
-        key: "",
-      },
-    ],
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
-  {
-    type: "multiSelect",
-    label: "MultiSelect",
+    options: [option("Parent", "")],
+    options2: [option("Child", "")],
+  }),
+
+  createElement({
+    type: ElementKind.MULTI_SELECT,
+    label: "Multi Select",
     icon: "fluent-mdl2:multi-select",
     inputLabel: "Select Text Label",
-    required: false,
     inputType: "select",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
-    value: null,
-    options: [
-      {
-        label: "Placeholder 1",
-        value: "",
-        key: "",
-        id: uuidv4(),
-      },
-    ],
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
-  {
-    type: "validateInput",
+    options: [option("Placeholder 1", "")],
+  }),
+
+  createElement({
+    type: ElementKind.VALIDATE_INPUT,
     label: "Validate Input",
     icon: "iconoir:www",
     inputLabel: "Validate Input Label",
-    required: false,
     inputType: "validateInput",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Value is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
-    value: null,
     url: "https://api.example.com/validate?value={value}",
     method: "GET",
     responseType: "string",
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
+  }),
 
-  {
-    type: "numberField",
+  createElement({
+    type: ElementKind.NUMBER,
     label: "Number",
     icon: "octicon:number-16",
     inputLabel: "Number Label",
-    required: false,
     inputType: "number",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
-    value: null,
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
     inputMode: "decimal",
-  },
+  }),
 
-  {
-    type: "amountField",
+  createElement({
+    type: ElementKind.AMOUNT,
     label: "Amount",
     icon: "carbon:currency",
     inputLabel: "Enter amount",
-    required: false,
     inputType: "amount",
-    maxAmount: null,
-    minAmount: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    minAmountMessage: "",
-    maxAmountMessage: "",
-    value: null,
     prefix: null,
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
-  {
-    type: "date",
+  }),
+
+  createElement({
+    type: ElementKind.DATE,
     label: "Date",
     icon: "bx:calendar",
-    inputLabel: "Date Text Label",
-    required: false,
+    inputLabel: "Date Label",
     inputType: "date",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
-    value: null,
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-    inputMode: "date",
-    dateType: "basic",
-    dateFormat: "dd/MM/yyyy", // Default date format
-  },
-  {
-    type: "password",
+    dateType: "custom",
+    dateFormat: "dd/MM/yyyy",
+    minDate: null,
+    maxDate: null,
+    canHaveDateRange: false,
+    allowYearPicker: false,
+  }),
+
+  createElement({
+    type: ElementKind.PASSWORD,
     label: "Password",
     icon: "ic:round-password",
-    inputLabel: "Password Text Label",
-    required: false,
+    inputLabel: "Password Label",
     inputType: "password",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
-    value: null,
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-    inputMode: "text",
-  },
-  {
-    type: "checkbox",
+  }),
+
+  createElement({
+    type: ElementKind.CHECKBOX,
     label: "Checkbox",
     icon: "mingcute:checkbox-line",
-    inputLabel: "Checkbox Text Label",
-    required: false,
+    inputLabel: "Checkbox Label",
     inputType: "checkbox",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
-    value: null,
-    options: [
-      {
-        label: "Placeholder 1",
-        value: "",
-        key: "",
-        id: uuidv4(),
-      },
-    ],
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
-    {
-    type: "phoneField",
+    options: [option("Checkbox Option", "")],
+  }),
+
+  createElement({
+    type: ElementKind.PHONE,
     label: "Phone Number",
     icon: "fluent-mdl2:add-phone",
     inputLabel: "Phone Label",
-    required: false,
     inputType: "tel",
-    maxLength: null,
-    minLength: null,
-    placeholder: "",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
-    value: null,
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-    inputMode: "tel",
     pattern: "^\\+?[0-9]{7,15}$",
-  },
-  {
-    type: "radio",
-    label: "Radio select",
+  }),
+
+  createElement({
+    type: ElementKind.RADIO,
+    label: "Radio Select",
     icon: "ri:checkbox-circle-line",
-    inputLabel: "Radio Text Label",
-    required: false,
+    inputLabel: "Radio Label",
     inputType: "radio",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
-    value: null,
-    options: [
-      {
-        label: "Placeholder 1",
-        value: "",
-        key: "",
-        id: uuidv4(),
-      },
-    ],
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
-  // {
-  //   type: "document",
-  //   label: "Sign Document",
-  //   icon: "hugeicons:signature",
-  //   inputLabel: "Sign Document",
-  //   required: false,
-  //   inputType: "document",
-  //   description: "",
-  //   isReadOnly: false,
-  //   isDisabled: false,
-  //   isRequired: false,
-  //   requiredMessage: "Field is required",
-  //   value: null,
-  //   options: [],
-  //   customClass: "",
-  //   elementClass: "",
-  //   gridPosition: null,
-  //   gridId: null,
-  //   documentObj: "",
-  //   url: "",
-  //   validationUrl: "",
-  //   signatureLink: "",
-  // },
-  {
-    type: "email",
+    options: [option("Radio Option", "")],
+  }),
+
+  createElement({
+    type: ElementKind.EMAIL,
     label: "Email",
     icon: "mdi:email-outline",
-    inputLabel: "Email Text Label",
-    required: false,
+    inputLabel: "Email Label",
     inputType: "email",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
-    value: null,
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-    inputMode: "email",
-  },
-  {
-    type: "file",
+  }),
+
+  createElement({
+    type: ElementKind.FILE,
     label: "File Attachment",
     icon: "ion:attach-sharp",
-    inputLabel: "File Text Label",
-    required: false,
+    inputLabel: "File Label",
     inputType: "file",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
-    value: null,
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
-  {
-    type: "country",
+  }),
+
+  createElement({
+    type: ElementKind.COUNTRY,
     label: "Country",
     icon: "fluent:globe-16-regular",
-    inputLabel: "Select Country Label",
-    required: false,
+    inputLabel: "Select Country",
     inputType: "country",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    value: null,
-    options: countries.map((i) => ({
-      label: i.name,
-      value: i.name,
-      key: "",
-      id: uuidv4(),
-    })),
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
-  // {
-  //   type: "banks",
-  //   label: "Bank",
-  //   icon: "fluent:building-bank-28-regular",
-  //   inputLabel: "Select Bank Label",
-  //   required: false,
-  //   inputType: "bank",
-  //   description: "",
-  //   isReadOnly: false,
-  //   isDisabled: false,
-  //   isRequired: false,
-  //   requiredMessage: "Field is required",
-  //   value: null,
-  //   options: [],
-  //   customClass: "",
-  //   elementClass: "",
-  //   gridPosition: null,
-  //   gridId: null,
-  // },
-  {
-    type: "rating",
+    options: countryOptions,
+  }),
+
+  createElement({
+    type: ElementKind.RATING,
     label: "Ratings",
     icon: "streamline-ultimate:rating-star-ribbon",
-    inputLabel: "Select rating Label",
-    required: false,
+    inputLabel: "Rating Label",
     inputType: "rating",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Field is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
-    value: null,
+  }),
 
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
-
-  {
-    type: "dataGrid",
+  createElement({
+    type: ElementKind.DATA_GRID,
     label: "Data Grid",
     icon: "carbon:data-table",
     inputLabel: "Data Grid Label",
-    required: false,
     inputType: "dataGrid",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Value is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
     value: [],
     dataColumns: [
       {
@@ -605,120 +343,103 @@ export const Elements: ElementType[] = [
         editable: true,
       },
     ],
-    denominators: null,
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
-  {
-    type: "tableInput",
+  }),
+
+  createElement({
+    type: ElementKind.TABLE_INPUT,
     label: "Table Input",
     icon: "iconoir:table",
     inputLabel: "Table Input Label",
-    required: false,
     inputType: "tableInput",
-    maxLength: null,
-    minLength: null,
-    placeholder: "Type here",
-    description: "",
-    isReadOnly: false,
-    isDisabled: false,
-    isRequired: false,
-    requiredMessage: "Value is required",
-    minLengthMessage: "",
-    maxLengthMessage: "",
     value: [],
-    denominators: null,
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
+  }),
 
-  {
-    type: "divider",
+  createElement({
+    type: ElementKind.DIVIDER,
     label: "Divider",
     icon: "pixel:divider",
     inputLabel: "",
     inputType: "divider",
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
-  {
-    type: "spacer",
+  }),
+
+  createElement({
+    type: ElementKind.SPACER,
     label: "Spacer",
     icon: "fluent-mdl2:spacer",
     inputLabel: "",
     inputType: "spacer",
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
-   {
-    type: "section",
+  }),
+
+  createElement({
+    type: ElementKind.SECTION,
     label: "Section",
     icon: "stash:section-divider",
     inputLabel: "",
     inputType: "section",
-    customClass: "",
-    elementClass: "",
-    gridPosition: null,
-    gridId: null,
-  },
-  {
-    type: "grid",
+  }),
+
+  createElement({
+    type: ElementKind.GRID,
     label: "Grid",
     icon: "cuida:grid-outline",
     inputLabel: "",
     inputType: "grid",
-    placeholder: "Type here",
-    description: "",
     columns: 2,
-  },
+  }),
 ];
-export const CategorizedElements = {
+
+/* ---------------------------------- */
+/* Categorization */
+/* ---------------------------------- */
+
+export const CategorizedElements = Object.freeze({
   textFields: [
-    "basicText",
-    "textField",
-    "longText",
-    "numberField",
-    "amountField",
-    "password",
-    "phoneField",
-    "email",
-    "validateInput"
+    ElementKind.BASIC_TEXT,
+    ElementKind.TEXT,
+    ElementKind.LONG_TEXT,
+    ElementKind.NUMBER,
+    ElementKind.AMOUNT,
+    ElementKind.PASSWORD,
+    ElementKind.PHONE,
+    ElementKind.EMAIL,
+    ElementKind.VALIDATE_INPUT,
   ],
   selectionFields: [
-    "selectField",
-    "multiSelect",
-    "cascadeSelect",
-    "radio",
-    "checkbox",
-    "country",
-    "banks",
-    "rating"
+    ElementKind.SELECT,
+    ElementKind.MULTI_SELECT,
+    ElementKind.CASCADE_SELECT,
+    ElementKind.RADIO,
+    ElementKind.CHECKBOX,
+    ElementKind.COUNTRY,
+    ElementKind.RATING,
   ],
-  dateAndTime: [
-    "date"
-  ],
-  fileAndMedia: [
-    "file"
-  ],
+  dateAndTime: [ElementKind.DATE],
+  fileAndMedia: [ElementKind.FILE],
   layoutAndDisplay: [
-    "divider",
-    "spacer",
-    "grid",
-    "section"
+    ElementKind.DIVIDER,
+    ElementKind.SPACER,
+    ElementKind.GRID,
+    ElementKind.SECTION,
   ],
-  advancedData: [
-    "dataGrid",
-    "tableInput"
-  ]
-};
+  advancedData: [ElementKind.DATA_GRID, ElementKind.TABLE_INPUT],
+});
+
+/* ---------------------------------- */
+/* Date Formats */
+/* ---------------------------------- */
+
+export const dateFormats = Object.freeze([
+  { label: "Day/Month/Year", value: "dd/MM/yyyy" },
+  { label: "Month/Day/Year", value: "MM/dd/yyyy" },
+  { label: "ISO (Year-Month-Day)", value: "yyyy-MM-dd" },
+  { label: "Full Month Day, Year", value: "MMMM d, yyyy" },
+  { label: "Abbreviated Month Day, Year", value: "MMM d, yyyy" },
+  { label: "Day. Month. Year", value: "dd.MM.yyyy" },
+  { label: "Day Month Name Year", value: "dd MMMM yyyy" },
+  { label: "Weekday, Month Day, Year", value: "EEEE, MMMM d, yyyy" },
+  { label: "Short Weekday, Month Day, Year", value: "EEE, MMM d, yyyy" },
+  { label: "Day-Month-Year", value: "dd-MM-yyyy" },
+]);
 
 export const AllowValidationPrefix: string[] = ["amount"];
 export const AllowValidationMaxMin: string[] = ["text", "number"];
@@ -748,16 +469,3 @@ export const AllowTableOptions: string[] = ["tableInput"];
 export const AllowTextOptions: string[] = ["text"];
 export const noAllowEdit: string[] = ["divider", "spacer"];
 export const allowValue: string[] = ["basicText"];
-
-export const dateFormats = [
-  { label: "Day/Month/Year", value: "dd/MM/yyyy" },
-  { label: "Month/Day/Year", value: "MM/dd/yyyy" },
-  { label: "ISO (Year-Month-Day)", value: "yyyy-MM-dd" },
-  { label: "Full Month Day, Year", value: "MMMM d, yyyy" },
-  { label: "Abbreviated Month Day, Year", value: "MMM d, yyyy" },
-  { label: "Day. Month. Year (Dots)", value: "dd.MM.yyyy" },
-  { label: "Day Month Name Year", value: "dd MMMM yyyy" },
-  { label: "Weekday, Month Day, Year", value: "EEEE, MMMM d, yyyy" },
-  { label: "Short Weekday, Month Day, Year", value: "EEE, MMM d, yyyy" },
-  { label: "Day-Month-Year", value: "dd-MM-yyyy" },
-];
