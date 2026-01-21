@@ -30,7 +30,7 @@ export default function VisibilityEditor({
         return {
           id: i.id,
           value: i.id,
-          label: i.label,
+          label: i.inputLabel,
           sectionId: i.sectionId,
           fieldType: currentField?.fieldType || "text",
           operator: currentField?.operator || "equals",
@@ -40,7 +40,7 @@ export default function VisibilityEditor({
               : "",
         };
       });
-  }, [formData, visibilityDependentFields]);
+  }, [formData, visibilityDependentFields, id]);
 
   const handleValueChange = (index: number, name: string, newValue: any) => {
     const updatedFields = visibilityDependentFields.map((item, i) =>

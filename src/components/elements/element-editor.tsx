@@ -1013,7 +1013,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               )}
           </div>
           {/* Actions */}
-          <div className="sticky flex w-full gap-3 px-6 pt-4 pb-4 mt-4 border-t">
+          <div className="sticky flex w-full gap-3 px-6 pt-8 pb-4 mt-10 border-t">
             <button
               type="button"
               onClick={onClose}
