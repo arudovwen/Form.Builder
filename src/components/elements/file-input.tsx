@@ -29,16 +29,24 @@ export default function FileInput({ element, validationData }) {
     setFileData(data);
   };
 
+  const handleDeleteFile = () => {
+    setValue?.(element.id, null);
+    setFileData(null);
+  };
+
   return (
     <div>
       {!isReadOnly && (
-        <FileUpload onFileLoaded={handleFileLoaded} disabled={isReadOnly} />
+        <FileUpload onFileLoaded={handleFileLoaded} disabled={isReadOnly}  handleDeleteFile={handleDeleteFile} />
       )}
       {fileData && (
-        <UniversalFileViewer
-          fileUrl={fileData.base64}
-          fileName={fileData.name}
-        />
+        <div className="relative">
+          <UniversalFileViewer
+            fileUrl={fileData.base64}
+            fileName={fileData.name}
+         
+          />
+        </div>
       )}
     </div>
   );

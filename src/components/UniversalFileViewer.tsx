@@ -11,13 +11,6 @@ const IMAGE_EXTENSIONS = [
   "svg",
   "image",
 ];
-const ICONS = {
-  pdf: "/pdf-icon.png",
-  word: "/word-icon.png",
-  excel: "/excel-icon.png",
-  powerpoint: "/ppt-icon.png",
-  other: "/file-icon.png",
-};
 
 const getFileType = (url = "") => {
   const ext = url.split(".").pop()?.toLowerCase() || "";
@@ -75,7 +68,7 @@ export default function UniversalFileViewer({ fileUrl, fileName }) {
 
   const closeModal = () => setIsModalOpen(false);
 
-  const icon = ICONS[fileType] || ICONS.other;
+
   const fileLabel = fileName || fileUrl?.split("/").pop() || "Unknown file";
   function downloadFile(fileUrl, fileName = "download") {
     if (!fileUrl) return;
@@ -108,11 +101,10 @@ export default function UniversalFileViewer({ fileUrl, fileName }) {
         title={`Click to preview ${fileLabel}`}
       >
         {fileType === "image" && (
-          <div className="flex items-center justify-center mb-2 w-14 h-14">
-            <img
-              src={icon}
-              alt={`${fileType} icon`}
-              className="max-w-full max-h-full"
+          <div className="flex items-center justify-center ">
+            <AppIcon
+             iconClass="text-4xl"
+              icon="fluent-color:image-48"
             />
           </div>
         )}

@@ -30,6 +30,7 @@ const SideBar = () => {
 
   const handleDragStart = useCallback(
     (event: DragEvent<HTMLLIElement>, element: ElementType) => {
+ 
       if (!selectedSection) {
         toast.error("Please select a section to add an element.");
         return;
@@ -38,7 +39,7 @@ const SideBar = () => {
       event.dataTransfer.effectAllowed = "move";
       setIsDragging(true);
     },
-    [setIsDragging]
+    [setIsDragging, selectedSection]
   );
 
   function handleElement(element: any) {
