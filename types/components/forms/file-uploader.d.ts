@@ -1,11 +1,14 @@
 interface FileUploadProps {
-    onFileLoaded: (data: {
+    onFileLoaded: (data: Array<{
         base64: string;
         type: string;
         name: string;
-    }) => void;
+    }>) => void;
     disabled?: boolean;
     handleDeleteFile?: () => void;
+    multiple?: boolean;
+    list: any;
+    accept?: any[];
 }
-export default function FileUpload({ onFileLoaded, disabled, handleDeleteFile, }: FileUploadProps): import("react/jsx-runtime").JSX.Element;
+export default function FileUpload({ onFileLoaded, disabled, handleDeleteFile, multiple, list, accept, }: FileUploadProps): import("react/jsx-runtime").JSX.Element;
 export {};

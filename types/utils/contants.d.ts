@@ -82,6 +82,8 @@ export interface ElementType {
     isHidden: boolean;
     visibilityDependentFields?: string;
     visibilityDependentFieldsValue?: any;
+    isMultiple: boolean;
+    acceptedFiles: any[];
 }
 export declare const countryOptions: OptionType[];
 export declare const Elements: ElementType[];
@@ -108,3 +110,7 @@ export declare const AllowTableOptions: string[];
 export declare const AllowTextOptions: string[];
 export declare const noAllowEdit: string[];
 export declare const allowValue: string[];
+export declare const FileTypes: {
+    value: string;
+    label: string;
+}[];
