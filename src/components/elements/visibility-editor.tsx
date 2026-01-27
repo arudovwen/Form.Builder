@@ -25,7 +25,7 @@ export default function VisibilityEditor({
       .filter((i) => i.id !== id)
       .map((i) => {
         const currentField = visibilityDependentFields.find(
-          (j) => j.id === i.id
+          (j) => j.id === i.id,
         );
         return {
           id: i.id,
@@ -44,7 +44,7 @@ export default function VisibilityEditor({
 
   const handleValueChange = (index: number, name: string, newValue: any) => {
     const updatedFields = visibilityDependentFields.map((item, i) =>
-      i === index ? { ...item, [name]: newValue } : item
+      i === index ? { ...item, [name]: newValue } : item,
     );
     setValue("visibilityDependentFields", updatedFields);
   };
@@ -54,7 +54,11 @@ export default function VisibilityEditor({
       <label className="label">Select Dependent Fields</label>
 
       <MultiSelectInput
-        element={{ options: questionData, id: "visibilityDependentFields" }}
+        element={{
+          options: questionData,
+          id: "visibilityDependentFields",
+          value: watch("visibilityDependentFields"),
+        }}
         validationData={{ register, setValue, trigger, watch }}
       />
 
@@ -168,8 +172,8 @@ export default function VisibilityEditor({
                         {field.fieldValue === true
                           ? "True"
                           : field.fieldValue === false
-                          ? "False"
-                          : "Select value"}
+                            ? "False"
+                            : "Select value"}
                       </Listbox.Button>
                       <Transition
                         as={Fragment}

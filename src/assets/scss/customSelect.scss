@@ -43,7 +43,7 @@
 /* Value */
 .custom-select__value {
   display: block;
-  white-space: nowrap;
+  white-space: wrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }

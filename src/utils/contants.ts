@@ -102,6 +102,9 @@ export interface ElementType {
   isHidden: boolean;
   visibilityDependentFields?: string;
   visibilityDependentFieldsValue?: any;
+
+  isMultiple: boolean
+  acceptedFiles: any[]
 }
 
 /* ---------------------------------- */
@@ -309,6 +312,8 @@ export const Elements: ElementType[] = [
     icon: "ion:attach-sharp",
     inputLabel: "File Label",
     inputType: "file",
+    isMultiple: false,
+    acceptedFiles: []
   }),
 
   createElement({
@@ -469,3 +474,48 @@ export const AllowTableOptions: string[] = ["tableInput"];
 export const AllowTextOptions: string[] = ["text"];
 export const noAllowEdit: string[] = ["divider", "spacer"];
 export const allowValue: string[] = ["basicText"];
+
+
+export const FileTypes = [
+  {
+    value: [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "image/svg+xml",
+      "image/heic",
+    ].join(", "),
+    label: "Image",
+  },
+  {
+    value: "application/pdf",
+    label: "PDF",
+  },
+  {
+    value: [
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+    ].join(", "),
+    label: "Word",
+  },
+  {
+    value: [
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ].join(", "),
+    label: "Spreadsheet",
+  },
+  {
+    value: [
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ].join(", "),
+    label: "PowerPoint",
+  },
+  {
+    value: ["video/mp4", "video/x-m4v", "video/*"].join(", "),
+    label: "Videos",
+  },
+];

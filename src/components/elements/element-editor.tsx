@@ -18,6 +18,7 @@ import {
   AllowTableOptions,
   allowValue,
   dateFormats,
+  FileTypes,
 } from "../../utils/contants";
 
 import CustomSelect from "../CustomSelect";
@@ -33,6 +34,7 @@ import DocumentSignExample from "../DocumentSign";
 import ValidateExample from "../ValidateExample";
 import CustomDatePicker from "../CutomDatePicker";
 import VisibilityEditor from "./visibility-editor";
+import MultiSelectInput from "./multi-select-input";
 
 interface Option {
   label: string;
@@ -72,6 +74,8 @@ interface FormInputs {
   dateType?: string;
   validationUrl?: string;
   signatureLink?: string;
+  isMultiple?: boolean;
+  acceptedFiles?: string;
 }
 
 const schema = yup.object().shape({
@@ -100,7 +104,7 @@ const schema = yup.object().shape({
             schema.required("Value is required when label is present"),
           otherwise: (schema) => schema.nullable(),
         }),
-      })
+      }),
     )
     .when("inputType", {
       is: (inputType: string) => ["radio", "checkbox"].includes(inputType),
@@ -119,7 +123,7 @@ const schema = yup.object().shape({
             schema.required("Value is required when label is present"),
           otherwise: (schema) => schema.nullable(),
         }),
-      })
+      }),
     )
     .when("inputType", {
       is: (inputType: string) => ["radio", "checkbox"].includes(inputType),
@@ -150,6 +154,8 @@ const schema = yup.object().shape({
   allowYearPicker: yup.boolean(),
   isHidden: yup.boolean(),
   visibilityDependentFields: yup.array().nullable(),
+  isMultiple: yup.boolean(),
+  acceptedFiles: yup.array(),
 });
 
 const tabs = [
@@ -170,7 +176,8 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
 }) => {
   const filteredTabs = tabs.filter(
     (tab) =>
-      !noAllowValidation.includes(element.inputType) || tab.key !== "validation"
+      !noAllowValidation.includes(element.inputType) ||
+      tab.key !== "validation",
   );
   const { updateElement }: any = React.useContext(EditorContext);
   const [activeTab, setActiveTab] = useState("basic");
@@ -601,17 +608,17 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black/30 flex items-center justify-center z-[999] cursor-default  select-none "
+      className="fixed inset-0 bg-black/30 flex items-center justify-end z-[999] cursor-default  select-none "
       draggable="true"
       onDragStart={(e) => e.preventDefault()}
     >
       <div
-        className="min-w-[600px] bg-white rounded-xl shadow-xl relative flex flex-col pb-4 items-center   select-"
+        className="w-full lg:w-1/3 xl:w-1/4 bg-white h-screen  shadow-xl relative flex flex-col  items-center   select-"
         draggable="true"
         onDragStart={(e) => e.preventDefault()}
       >
         {/* Header */}
-        <div className="z-10 flex flex-col items-start w-full gap-4 px-6 pt-4 pb-5 mb-3">
+        {/* <div className="z-10 flex flex-col items-start w-full gap-4 px-6 pt-4 pb-5 mb-3">
           <button
             onClick={onClose}
             type="button"
@@ -620,10 +627,10 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           >
             <AppIcon icon="tabler:x" />
           </button>
-        </div>
+        </div> */}
 
         {/* Tabs */}
-        <div className="w-full">
+        <div className="w-full pt-4">
           <TabsComponent
             tabs={filteredTabs}
             setActiveTab={setActiveTab}
@@ -634,8 +641,8 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         </div>
 
         {/* Form Content */}
-        <form onSubmit={handleSubmit(onSubmit)} className="w-full">
-          <div className=" max-h-[600px] overflow-y-auto">
+        <form onSubmit={handleSubmit(onSubmit)} className="w-full flex-1 flex flex-col">
+         <div className="flex-1"> <div className=" max-h-[75vh] overflow-y-auto flex-1">
             {activeTab === "basic" && (
               <div className="z-10 flex flex-col w-full gap-5 px-6">
                 {allowValue.includes(element.inputType) && (
@@ -866,6 +873,28 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 )}
                 {element.type.toLowerCase() === "datagrid" &&
                   renderColumnsFields()}
+
+                {element.type.toLowerCase() === "file" && (
+                  <>
+                    <DynamicInput
+                      label="Allow Multiple Uploads"
+                      name="isMultiple"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                      type="checkbox"
+                    />
+                    <MultiSelectInput
+                      element={{
+                        options: FileTypes,
+                        id: "acceptedFiles",
+                        value: values?.acceptedFiles,
+                      }}
+                      validationData={{ register, setValue, trigger, watch }}
+                      placeholder="Choose file types"
+                    />
+                  </>
+                )}
                 {AllowOptions.includes(element.inputType) &&
                   renderOptionsFields()}
                 {/* VisibilityEditor  */}
@@ -1011,7 +1040,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   )}
                 </div>
               )}
-          </div>
+          </div></div>
           {/* Actions */}
           <div className="sticky flex w-full gap-3 px-6 pt-8 pb-4 mt-10 border-t">
             <button

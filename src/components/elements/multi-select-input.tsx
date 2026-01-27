@@ -1,13 +1,15 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState, useMemo } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import AppIcon from "@/components/ui/AppIcon";
 
 export default function MultiSelectInput({
   element,
   validationData,
+  placeholder,
 }: {
   element: any;
   validationData: any;
+  placeholder?: string;
 }) {
   const [selectedValues, setSelectedValues] = useState<
     { label: string; value: any }[]
@@ -16,36 +18,32 @@ export default function MultiSelectInput({
   const {
     register = () => ({}),
     setValue,
-    watch,
     isReadOnly,
   } = validationData || {};
 
-  const registeredValue = watch?.(element?.id);
+  const displayValue = useMemo(
+    () => selectedValues.map((i) => i.label).join(", "),
+    [selectedValues]
+  );
 
   /* ---------------- Register field ---------------- */
   useEffect(() => {
     register(element.id);
   }, [element.id, register]);
-
-  /* ---------------- Sync value ---------------- */
-  useEffect(() => {
-    setValue?.(element.id, selectedValues);
-  }, [element.id, selectedValues, setValue]);
-
-  /* ---------------- Restore value ---------------- */
-  useEffect(() => {
-    if (registeredValue?.length && !selectedValues.length) {
-      setSelectedValues(registeredValue);
-    }
-  }, [registeredValue, selectedValues.length]);
+console.log({selectedValues, options:element.options});
 
   return (
     <div className="custom-select">
+    
       <Listbox
         value={selectedValues}
-        onChange={setSelectedValues}
+        onChange={(values) => {
+          setSelectedValues(values);
+          setValue?.(element.id, values);
+        }}
         multiple
         disabled={isReadOnly}
+        by="value"
       >
         <div className="custom-select__wrapper">
           <Listbox.Button
@@ -54,10 +52,10 @@ export default function MultiSelectInput({
           >
             <span className="custom-select__value">
               {selectedValues.length > 0 ? (
-                selectedValues.map((i) => i.label).join(", ")
+                displayValue
               ) : (
                 <span className="custom-select__placeholder">
-                  Select options
+                  {placeholder ?? " Select options"}
                 </span>
               )}
             </span>
@@ -99,7 +97,7 @@ export default function MultiSelectInput({
                       </div>
                     )}
                   </Listbox.Option>
-                )
+                ),
               )}
             </Listbox.Options>
           </Transition>

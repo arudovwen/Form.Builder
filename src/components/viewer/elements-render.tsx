@@ -5,10 +5,13 @@ import EditorContext from "@/context/editor-context";
 export const RenderElement = (element: any, validationData?: any) => {
   const ElementComponent = elementMap[element.type];
   const { answerData }: any = useContext(EditorContext);
-
+  const acceptedFileLabels = useMemo(
+    () => element?.acceptedFiles?.map((i) => i.label).join(", "),
+    [element],
+  );
   const fields = useMemo(
     () => element?.visibilityDependentFields || [],
-    [element]
+    [element],
   );
 
   // Compute visibility based on dependent fields
@@ -20,7 +23,6 @@ export const RenderElement = (element: any, validationData?: any) => {
       const valA = field.fieldValue;
       const valB = value;
 
- 
       switch (field.operator) {
         case "equals":
           return String(valA).toLowerCase() === String(valB).toLowerCase();
@@ -50,7 +52,8 @@ export const RenderElement = (element: any, validationData?: any) => {
     <div className={!isVisible ? "invisible h-0" : ""}>
       {element.inputLabel && (
         <label className="block text-sm font-medium mb-[5px] input_label">
-          {element.inputLabel}
+          {element.inputLabel}{" "}
+         {acceptedFileLabels && <span className="text-gray-400 text-xs">({acceptedFileLabels?.toLowerCase()})</span>}
         </label>
       )}
       <ElementComponent

@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import FileUpload from "../forms/file-uploader";
-import UniversalFileViewer from "../UniversalFileViewer";
 
 export default function FileInput({ element, validationData }) {
   const [fileData, setFileData] = useState(element?.value ?? null);
@@ -24,10 +23,13 @@ export default function FileInput({ element, validationData }) {
     }
   }, [watch, element.id]);
 
-  const handleFileLoaded = (data) => {
-    setValue?.(element.id, data);
-    setFileData(data);
-  };
+  const handleFileLoaded = useCallback(
+    (data) => {
+      setValue?.(element.id, data);
+      setFileData(data);
+    },
+    [element.id, setValue],
+  );
 
   const handleDeleteFile = () => {
     setValue?.(element.id, null);
@@ -37,16 +39,14 @@ export default function FileInput({ element, validationData }) {
   return (
     <div>
       {!isReadOnly && (
-        <FileUpload onFileLoaded={handleFileLoaded} disabled={isReadOnly}  handleDeleteFile={handleDeleteFile} />
-      )}
-      {fileData && (
-        <div className="relative">
-          <UniversalFileViewer
-            fileUrl={fileData.base64}
-            fileName={fileData.name}
-         
-          />
-        </div>
+        <FileUpload
+          onFileLoaded={handleFileLoaded}
+          disabled={isReadOnly}
+          multiple={element?.isMultiple}
+          handleDeleteFile={handleDeleteFile}
+          list={fileData}
+          accept={element?.acceptedFiles}
+        />
       )}
     </div>
   );

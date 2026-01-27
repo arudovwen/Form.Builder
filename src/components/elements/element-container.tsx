@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, memo, useState } from "react";
+import React, { ReactNode, useCallback, memo, useState, useMemo } from "react";
 import AppIcon from "../ui/AppIcon";
 import EditorContext from "../../context/editor-context";
 import ElementEditorModal from "./element-editor";
@@ -19,12 +19,14 @@ const ElementContainer = memo(
   ({ state, element, children }: ElementContainerProps) => {
     const [isOpen, setOpen] = useState(false);
     const { removeElement }: any = React.useContext(EditorContext);
-
+    const acceptedFileLabels = useMemo(
+      () => element?.acceptedFiles?.map((i) => i.label).join(", "),
+      [element],
+    );
     const handleRemove = useCallback(() => {
       removeElement(element.id, element.sectionId);
     }, [element.id, element.sectionId, removeElement]);
 
-  
     return (
       <div className="w-full">
         {isOpen && (
@@ -39,27 +41,31 @@ const ElementContainer = memo(
             {" "}
             {element.inputLabel && (
               <label className="text-sm font-medium input_label">
-                {element.inputLabel}
+                {element.inputLabel}{" "}
+                {acceptedFileLabels && (
+                  <span className="text-gray-400 text-xs">
+                    ({acceptedFileLabels?.toLowerCase()})
+                  </span>
+                )}
               </label>
             )}
           </span>
           {state === "edit" && (
             <span className="flex items-center gap-x-3">
-           
-                <button
-                  type="button"
-                  className="text-sm outline-none hover:opacity-80"
-                  onClick={() => setOpen(true)}
-                >
-                  <AppIcon icon="circum:edit" iconClass="text-base" />
-                </button>
-             
+              <button
+                type="button"
+                className="text-sm outline-none hover:opacity-80"
+                onClick={() => setOpen(true)}
+              >
+                <AppIcon icon="circum:edit" iconClass="text-base" />
+              </button>
+
               <button
                 type="button"
                 className="text-sm outline-none hover:opacity-80"
                 onClick={handleRemove}
               >
-                <AppIcon icon="iconamoon:trash"  iconClass="text-base"  />
+                <AppIcon icon="iconamoon:trash" iconClass="text-base" />
               </button>
             </span>
           )}
@@ -67,7 +73,7 @@ const ElementContainer = memo(
         {children}
       </div>
     );
-  }
+  },
 );
 
 ElementContainer.displayName = "ElementContainer";

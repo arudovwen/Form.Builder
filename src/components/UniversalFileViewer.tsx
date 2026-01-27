@@ -28,7 +28,7 @@ const FileIcon: Record<string, string> = {
   excel: "vscode-icons:file-type-excel",
   powerpoint: "vscode-icons:file-type-powerpoint2",
 };
-export default function UniversalFileViewer({ fileUrl, fileName }) {
+export default function UniversalFileViewer({ fileUrl, fileName, removeFile }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fileType, setFileType] = useState("unknown");
   const [blobUrl, setBlobUrl] = useState(null);
@@ -68,7 +68,6 @@ export default function UniversalFileViewer({ fileUrl, fileName }) {
 
   const closeModal = () => setIsModalOpen(false);
 
-
   const fileLabel = fileName || fileUrl?.split("/").pop() || "Unknown file";
   function downloadFile(fileUrl, fileName = "download") {
     if (!fileUrl) return;
@@ -102,10 +101,7 @@ export default function UniversalFileViewer({ fileUrl, fileName }) {
       >
         {fileType === "image" && (
           <div className="flex items-center justify-center ">
-            <AppIcon
-             iconClass="text-4xl"
-              icon="fluent-color:image-48"
-            />
+            <AppIcon iconClass="text-4xl" icon="fluent-color:image-48" />
           </div>
         )}
         {fileType !== "image" && (
@@ -115,14 +111,23 @@ export default function UniversalFileViewer({ fileUrl, fileName }) {
           {fileLabel}
         </span>
       </div>
-      <button
-        type="button"
-        className="p-2"
-        onClick={() => downloadFile(blobUrl || fileUrl, fileName)}
+      <div className="flex gap-x-1 items-center">
+        <button
+          type="button"
+          className="p-2"
+          onClick={() => downloadFile(blobUrl || fileUrl, fileName)}
           title={`Download ${fileLabel}`}
-      >
-        <AppIcon icon="streamline-flex:download-tray-solid" />
-      </button>
+        >
+          <AppIcon icon="streamline-flex:download-tray-solid" />
+        </button>
+        <button
+          type="button"
+          className="p-2 text-lg text-red-500"
+          onClick={removeFile}
+        >
+          <AppIcon icon="lets-icons:trash-duotone" />
+        </button>
+      </div>
       {isModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
