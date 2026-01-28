@@ -13,18 +13,20 @@ const EditorContext = createContext<
       removeElement: (elementId: string, sectionId: string) => void;
       updateElementPosition: (
         updatedFormData: any[],
-        sectionId: string
+        sectionId: string,
       ) => void;
       addElement: (element: any, sectionId: string) => void;
       addElementInPosition: (
         element: any,
         sectionId: string,
-        index: any
+        index: any,
       ) => void;
       updateElement: (value: any, sectionId: string) => void;
       updateSection: (value: any, sectionId: string) => void;
       setIsDragging: (value: boolean) => void;
       isDragging: boolean;
+      uploadUrl: string;
+      setUploadUrl: (e: string) => void;
     }
   | undefined
 >(undefined);
@@ -49,6 +51,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
   const [activeSections, setActiveSections] = useState<Array<string | number>>([
     0,
   ]);
+  const [uploadUrl, setUploadUrl] = useState<string>("");
   const handleDragStop = React.useCallback(() => {
     // Handle drag stop (implementation depends on requirements)
   }, []);
@@ -61,7 +64,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
   }, [formData]);
   const removeSection = React.useCallback((sectionId: string) => {
     setFormData((prevFormData) =>
-      prevFormData.filter((i) => i.id !== sectionId)
+      prevFormData.filter((i) => i.id !== sectionId),
     );
 
     setSelectedSection(null);
@@ -70,7 +73,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
     (elementId: string, sectionId: string) => {
       const section = formData.find((section) => section.id === sectionId);
       const elementData = section?.questionData.find(
-        (el) => el.id === elementId
+        (el) => el.id === elementId,
       );
 
       if (!elementData) return;
@@ -92,11 +95,11 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
                   return element.id !== elementId;
                 }),
               }
-            : section
-        )
+            : section,
+        ),
       );
     },
-    [formData, setFormData]
+    [formData, setFormData],
   );
 
   const updateElementPosition = React.useCallback(
@@ -105,11 +108,11 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
         prevFormData.map((section) =>
           section.id === sectionId
             ? { ...section, questionData: updatedQuestionData }
-            : section
-        )
+            : section,
+        ),
       );
     },
-    []
+    [],
   );
 
   const addElement = React.useCallback((element: any, sectionId: string) => {
@@ -120,8 +123,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
               ...section,
               questionData: [...section.questionData, element],
             }
-          : section
-      )
+          : section,
+      ),
     );
   }, []);
   const addElementInPosition = React.useCallback(
@@ -137,11 +140,11 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
                   ...section.questionData.slice(index),
                 ],
               }
-            : section
-        )
+            : section,
+        ),
       );
     },
-    []
+    [],
   );
   const updateGridElement = React.useCallback(
     (gridIndex: number, element: any, sectionId: string) => {
@@ -161,22 +164,22 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
                                   ...grid,
                                   ...element,
                                 }
-                              : grid
+                              : grid,
                           )
                           .concat(
                             gridIndex >= question.gridData.length
                               ? { ...element }
-                              : []
+                              : [],
                           ),
                       }
-                    : question
+                    : question,
                 ),
               }
-            : section
-        )
+            : section,
+        ),
       );
     },
-    []
+    [],
   );
   const updateElement = React.useCallback((value: any, sectionId: string) => {
     setFormData((prevFormData) =>
@@ -185,11 +188,11 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
           ? {
               ...section,
               questionData: section.questionData.map((ele: any) =>
-                ele.id === value.id ? { ...ele, ...value } : ele
+                ele.id === value.id ? { ...ele, ...value } : ele,
               ),
             }
-          : section
-      )
+          : section,
+      ),
     );
   }, []);
   const updateSection = React.useCallback((value: any, sectionId: string) => {
@@ -200,8 +203,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
               ...section,
               ...value,
             }
-          : section
-      )
+          : section,
+      ),
     );
   }, []);
 
@@ -229,6 +232,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       updateGridElement,
       answerData,
       setAnswerData,
+      uploadUrl,
+      setUploadUrl,
     }),
     [
       formData,
@@ -247,7 +252,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       activeSections,
       updateGridElement,
       answerData,
-    ]
+      uploadUrl,
+    ],
   );
 
   return (

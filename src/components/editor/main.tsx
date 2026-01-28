@@ -4,20 +4,26 @@ import { useCallback, useContext, useEffect } from "react";
 
 export default function MainPage({
   questionData,
+  uploadUrl,
 }: {
   questionData: any[];
   isReadOnly?: boolean;
+  uploadUrl?: string;
 }) {
-  const { setFormData, addSection }: any = useContext(EditorContext);
+  const { setFormData, addSection, setUploadUrl }: any =
+    useContext(EditorContext);
 
   useEffect(() => {
     if (questionData && questionData.length > 0) {
       setFormData(questionData);
     }
   }, [questionData, setFormData]);
+
+  useEffect(() => {
+    setUploadUrl(uploadUrl);
+  }, [uploadUrl, setUploadUrl]);
   const handleMainDrop = useCallback((e: any) => {
     e.preventDefault();
- 
 
     try {
       const data = JSON.parse(e.dataTransfer.getData("properties"));
@@ -31,7 +37,7 @@ export default function MainPage({
   }, []);
   return (
     <div
-       onDragOver={(e) => e.preventDefault()}
+      onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => handleMainDrop(e)}
       className="bg-white p-4 border border-[#E4E7EC] h-full overflow-y-auto no-scrollbar max-h-[calc(100vh-60px)]"
     >

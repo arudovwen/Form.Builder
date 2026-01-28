@@ -36,6 +36,7 @@ export interface FormRendererProps {
   renderType?: RenderType;
   children?: ReactNode;
   hideFooter?: boolean;
+  uploadUrl?: string;
 }
 
 const FormRenderer: React.FC<FormRendererProps> = ({
@@ -48,8 +49,9 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   renderType = "multi",
   children,
   hideFooter = false,
+  uploadUrl,
 }: FormRendererProps) => {
-  const { setAnswerData }: any = useContext(EditorContext);
+  const { setAnswerData, setUploadUrl }: any = useContext(EditorContext);
   const [current, setCurrent] = useState(0);
 
   const totalSections = form_data?.length ?? 0;
@@ -57,7 +59,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
 
   const validationSchema = useMemo(
     () => generateDynamicSchema(form_data),
-    [form_data]
+    [form_data],
   );
 
   const methods = useForm({
@@ -84,7 +86,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   // ✅ Deep memoization to avoid redundant updates
   const memoizedValues = useMemo(
     () => watchedValues,
-    [JSON.stringify(watchedValues)]
+    [JSON.stringify(watchedValues)],
   );
 
   // ✅ Memoize callback for parent updates
@@ -92,9 +94,12 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     (value: any) => {
       if (onGetValues) onGetValues(value);
     },
-    [onGetValues]
+    [onGetValues],
   );
 
+  useEffect(() => {
+    setUploadUrl(uploadUrl);
+  }, [setUploadUrl, uploadUrl]);
   // ✅ Effect runs only when actual values change
   useEffect(() => {
     if (!form_data?.length || !onGetValues) return;
@@ -105,7 +110,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
         value: memoizedValues[element.id],
         sectionId: section.id,
         type: element.type,
-      }))
+      })),
     );
 
     handleGetValues(updatedData);
@@ -128,19 +133,19 @@ const FormRenderer: React.FC<FormRendererProps> = ({
           value: data[element.id],
           sectionId: section.id,
           type: element.type,
-        }))
+        })),
       );
 
       onSubmitData?.(updatedData);
     },
-    [form_data, onSubmitData]
+    [form_data, onSubmitData],
   );
 
   // ✅ Navigation handlers
   const handleProceed = useCallback(async () => {
     if (!ignoreValidation) {
       const currentFields = form_data?.[current]?.questionData?.map(
-        (ele: any) => ele.id
+        (ele: any) => ele.id,
       );
       const isValid = await trigger(currentFields);
       if (!isValid) return;
@@ -172,7 +177,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       isSubmitting,
       isReadOnly,
       getValues,
-    ]
+    ],
   );
 
   return (

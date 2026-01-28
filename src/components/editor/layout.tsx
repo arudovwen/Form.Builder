@@ -19,6 +19,7 @@ export interface BuilderProps {
   saveLoading?: boolean;
   publishLoading?: boolean;
   onTitleChange?: (string) => void;
+  uploadUrl?: string;
 }
 
 export default function Layout({
@@ -32,6 +33,7 @@ export default function Layout({
   saveLoading,
   publishLoading,
   onTitleChange,
+  uploadUrl,
 }: BuilderProps) {
   return (
     <EditorProvider>
@@ -57,7 +59,7 @@ export default function Layout({
           </div>
           <div className="flex-1 h-full max-h-full z-[1]">
             {!loading ? (
-              <MainPage questionData={questionData} />
+              <MainPage questionData={questionData} uploadUrl={uploadUrl} />
             ) : (
               <Loader loadingClass="!w-full !h-[800px]" />
             )}

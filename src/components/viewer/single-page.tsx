@@ -70,7 +70,7 @@ export default function SinglePage({ form_data, options }) {
                 )}
               </div>
             )}
-            <div className="grid gap-y-3 section_box__content">
+            <div className="grid gap-y-6 section_box__content">
               {section.questionData?.map((element: any) => {
                 if (element.gridId) return null;
                 

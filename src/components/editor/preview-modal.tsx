@@ -15,11 +15,12 @@ const PreviewModalModal: React.FC<PreviewModalModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { formData } = useContext(
-    EditorContext
+  const { formData, uploadUrl } = useContext(
+    EditorContext,
   ) as unknown as EditorContextType;
   if (!isOpen) return null;
   const config = getItem("config");
+  
   return (
     <div className="fixed inset-0  flex  justify-center z-[999] cursor-default no-drag select-none w-screen h-screen pt-20 bg-[#F8F9FC]">
       <button
@@ -35,6 +36,7 @@ const PreviewModalModal: React.FC<PreviewModalModalProps> = ({
           form_data={formData}
           ignoreValidation={true}
           config={config}
+          uploadUrl={uploadUrl}
         />
       </div>
     </div>

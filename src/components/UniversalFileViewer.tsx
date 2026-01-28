@@ -14,6 +14,7 @@ const IMAGE_EXTENSIONS = [
 
 const getFileType = (url = "") => {
   const ext = url.split(".").pop()?.toLowerCase() || "";
+
   if (IMAGE_EXTENSIONS.includes(ext) || url.startsWith("data:image/"))
     return "image";
   if (ext === "pdf" || url.startsWith("data:application/pdf")) return "pdf";
@@ -28,7 +29,12 @@ const FileIcon: Record<string, string> = {
   excel: "vscode-icons:file-type-excel",
   powerpoint: "vscode-icons:file-type-powerpoint2",
 };
-export default function UniversalFileViewer({ fileUrl, fileName, removeFile }) {
+export default function UniversalFileViewer({
+  fileUrl,
+  fileName,
+  removeFile,
+}: any) {
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fileType, setFileType] = useState("unknown");
   const [blobUrl, setBlobUrl] = useState(null);
@@ -107,7 +113,7 @@ export default function UniversalFileViewer({ fileUrl, fileName, removeFile }) {
         {fileType !== "image" && (
           <AppIcon icon={FileIcon[fileType]} iconClass="text-4xl" />
         )}
-        <span className="text-sm font-semibold text-center text-gray-700 truncate">
+        <span className="text-sm font-semibold text-center text-gray-700 truncate max-w-[300px]">
           {fileLabel}
         </span>
       </div>
@@ -120,13 +126,15 @@ export default function UniversalFileViewer({ fileUrl, fileName, removeFile }) {
         >
           <AppIcon icon="streamline-flex:download-tray-solid" />
         </button>
-        <button
-          type="button"
-          className="p-2 text-lg text-red-500"
-          onClick={removeFile}
-        >
-          <AppIcon icon="lets-icons:trash-duotone" />
-        </button>
+        {removeFile && (
+          <button
+            type="button"
+            className="p-2 text-lg text-red-500"
+            onClick={removeFile}
+          >
+            <AppIcon icon="lets-icons:trash-duotone" />
+          </button>
+        )}
       </div>
       {isModalOpen && (
         <div

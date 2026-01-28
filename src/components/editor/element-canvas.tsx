@@ -29,6 +29,7 @@ export interface EditorContextType {
   updateElement: any;
   removeElement: any;
   isDragging: boolean;
+  uploadUrl?: string
 }
 
 function ElementCanvas({ elementData, sectionId }: any) {

@@ -43,31 +43,6 @@ const FormBuilder = () => {
     }
   }, []);
 
-  // const onDrop = useCallback(
-  //   (event: DragEvent<HTMLDivElement>) => {
-  //     try {
-  //       event.preventDefault();
-  //       setIsDragging(false);
-  //       const targetElement = event?.currentTarget;
-  //       const data = event.dataTransfer.getData("properties");
-  //       if (data) {
-  //         const properties = JSON.parse(data);
-
-  //         const newElement = {
-  //           id: uuidv4(),
-  //           sectionId: targetElement.id,
-  //           ...properties,
-  //         };
-
-  //         addElement(newElement, targetElement.id);
-  //       }
-  //     } catch (error) {
-  //       console.log(error);
-  //       setIsDragging(false);
-  //     }
-  //   },
-  //   [addElement, setIsDragging]
-  // );
 
   function toggleSection(index: number) {
     if (activeSections.includes(index)) {

@@ -15,7 +15,9 @@ const HomePage = ({
   onPublish,
   previewLoading,
   saveLoading,
-  publishLoading,onTitleChange
+  publishLoading,
+  onTitleChange,
+  uploadUrl,
 }: BuilderProps) => {
   useEffect(() => {
     if (config) {
@@ -35,6 +37,7 @@ const HomePage = ({
       saveLoading={saveLoading}
       publishLoading={publishLoading}
       onTitleChange={onTitleChange}
+      uploadUrl={uploadUrl}
     />
   );
 };

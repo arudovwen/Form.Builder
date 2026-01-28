@@ -16,6 +16,7 @@ export interface RenderProps {
   children?: ReactNode;
   hideFooter?: boolean;
   onGetValues?: (e: any) => void;
+  uploadUrl?: string;
 }
 
 export default function Viewer({
@@ -30,6 +31,7 @@ export default function Viewer({
   children,
   hideFooter,
   onGetValues,
+  uploadUrl,
 }: RenderProps) {
   // ✅ Store config in localStorage only when it changes
   useEffect(() => {
@@ -41,7 +43,7 @@ export default function Viewer({
     (vals: any) => {
       if (onGetValues) onGetValues(vals);
     },
-    [onGetValues]
+    [onGetValues],
   );
 
   if (loading) return <Loader />;
@@ -60,18 +62,19 @@ export default function Viewer({
     <div className="w-full h-full">
       <div id="root-portal"></div>
       <EditorProvider>
-      <FormRenderer
-        form_data={form_data}
-        answerData={answerData}
-        ignoreValidation={ignoreValidation}
-        onSubmitData={onSubmit}
-        isReadOnly={isReadOnly}
-        renderType={renderType}
-        hideFooter={hideFooter}
-        onGetValues={stableOnGetValues} // ✅ stable reference
-      >
-        {children}
-      </FormRenderer>
+        <FormRenderer
+          form_data={form_data}
+          answerData={answerData}
+          ignoreValidation={ignoreValidation}
+          onSubmitData={onSubmit}
+          isReadOnly={isReadOnly}
+          renderType={renderType}
+          hideFooter={hideFooter}
+          onGetValues={stableOnGetValues} // ✅ stable reference
+          uploadUrl={uploadUrl}
+        >
+          {children}
+        </FormRenderer>
       </EditorProvider>
     </div>
   );

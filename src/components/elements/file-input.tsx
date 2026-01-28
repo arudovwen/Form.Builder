@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import FileUpload from "../forms/file-uploader";
+import UniversalFileViewer from "../UniversalFileViewer";
 
 export default function FileInput({ element, validationData }) {
   const [fileData, setFileData] = useState(element?.value ?? null);
@@ -47,6 +48,15 @@ export default function FileInput({ element, validationData }) {
           list={fileData}
           accept={element?.acceptedFiles}
         />
+      )}
+      {fileData && isReadOnly && (
+        <div className="relative grid gap-y-1 flex-1 w-full">
+          {fileData.map((file, index) => (
+            <div key={index}>
+              <UniversalFileViewer fileUrl={file.base64} fileName={file.name} />
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
