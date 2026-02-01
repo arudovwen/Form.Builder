@@ -10,6 +10,7 @@ export interface EditorContextType {
     updateElement: any;
     removeElement: any;
     isDragging: boolean;
+    uploadUrl?: string;
 }
 declare function ElementCanvas({ elementData, sectionId }: any): import("react/jsx-runtime").JSX.Element;
 declare const _default: import("react").MemoExoticComponent<typeof ElementCanvas>;

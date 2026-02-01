@@ -14,6 +14,8 @@ declare const EditorContext: React.Context<{
     updateSection: (value: any, sectionId: string) => void;
     setIsDragging: (value: boolean) => void;
     isDragging: boolean;
+    uploadUrl: string;
+    setUploadUrl: (e: string) => void;
 }>;
 export declare const EditorProvider: React.FC<EditorProviderProps>;
 export default EditorContext;

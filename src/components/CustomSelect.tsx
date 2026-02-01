@@ -23,7 +23,6 @@ interface CustomSelectProps {
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
-  className = "",
   options,
   placeholder = "Select",
   errors,
@@ -41,8 +40,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   disabled,
 }) => {
   const [selected, setSelected] = useState<any>(isMultiple ? [] : null);
-  const merged = clsx("field-control", className);
-
+ 
   /** ----------------------------------------------
    *  Compute selected option from external value
    *  Only recompute when value or options change
@@ -69,7 +67,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
     if (computedSelected?.value !== selected?.value) {
       setSelected(computedSelected);
     }
-  }, [computedSelected]);
+  }, [computedSelected, selected?.value]);
 
   /** Update form state (setValue, trigger, register) */
   useEffect(() => {
@@ -79,7 +77,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
 
     register?.(name);
     trigger?.(name);
-  }, [selected]);
+  }, [name, register, selected, setValue, trigger]);
 
   return (
     <div className="relative">
@@ -104,7 +102,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         disabled={disabled}
       >
         <div className="relative">
-          <Listbox.Button className={merged} disabled={disabled}>
+          <Listbox.Button  className={"field-control"} disabled={disabled}>
             {loading ? (
               <span className="text-sm opacity-60">Fetching data...</span>
             ) : (

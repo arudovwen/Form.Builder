@@ -156,6 +156,7 @@ const schema = yup.object().shape({
   visibilityDependentFields: yup.array().nullable(),
   isMultiple: yup.boolean(),
   acceptedFiles: yup.array(),
+  showState: yup.boolean(),
 });
 
 const tabs = [
@@ -641,406 +642,422 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         </div>
 
         {/* Form Content */}
-        <form onSubmit={handleSubmit(onSubmit)} className="w-full flex-1 flex flex-col">
-         <div className="flex-1"> <div className=" max-h-[75vh] overflow-y-auto flex-1">
-            {activeTab === "basic" && (
-              <div className="z-10 flex flex-col w-full gap-5 px-6">
-                {allowValue.includes(element.inputType) && (
-                  <>
-                    <DynamicInput
-                      label="Value"
-                      name="value"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                    />
-                  </>
-                )}
-
-                {!allowValue.includes(element.inputType) &&
-                  !noAllowValidation.includes(element.inputType) && (
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="w-full flex-1 flex flex-col"
+        >
+          <div className="flex-1">
+            {" "}
+            <div className=" max-h-[75vh] overflow-y-auto flex-1">
+              {activeTab === "basic" && (
+                <div className="z-10 flex flex-col w-full gap-5 px-6">
+                  {allowValue.includes(element.inputType) && (
                     <>
                       <DynamicInput
-                        label="Label"
-                        name="inputLabel"
+                        label="Value"
+                        name="value"
                         register={register}
                         errors={errors}
                         element={element}
-                      />{" "}
-                      {element.type.toLowerCase() === "cascadeselect" && (
+                      />
+                    </>
+                  )}
+
+                  {!allowValue.includes(element.inputType) &&
+                    !noAllowValidation.includes(element.inputType) && (
+                      <>
                         <DynamicInput
-                          label="Child Label"
-                          name="childLabel"
+                          label="Label"
+                          name="inputLabel"
                           register={register}
                           errors={errors}
                           element={element}
-                        />
-                      )}
-                    </>
-                  )}
-                {AllowValidationPlaceholder.includes(element.inputType) && (
-                  <DynamicInput
-                    label="Placeholder"
-                    name="placeholder"
-                    register={register}
-                    errors={errors}
-                    element={element}
-                  />
-                )}
-                {AllowValidationPrefix.includes(element.inputType) && (
-                  <DynamicInput
-                    label="Prefix"
-                    name="prefix"
-                    register={register}
-                    errors={errors}
-                    element={element}
-                  />
-                )}
-                {AllowApiOptions.includes(element.inputType) && (
-                  <div className="grid gap-y-4">
-                    <ApiExample />
-                    <DynamicInput
-                      label="Api Url"
-                      name="url"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                    />
-                    <CustomSelect
-                      label="Api Method"
-                      options={[
-                        {
-                          label: "GET",
-                          value: "GET",
-                        },
-                        {
-                          label: "POST",
-                          value: "POST",
-                        },
-                      ]}
-                      register={register}
-                      name={"method"}
-                      setValue={setValue}
-                      trigger={trigger}
-                      value={watch("method")}
-                    />
-                    <CustomSelect
-                      label="Api Response type"
-                      options={[
-                        {
-                          label: "String",
-                          value: "string",
-                        },
-                        {
-                          label: "Object",
-                          value: "object",
-                        },
-                      ]}
-                      register={register}
-                      name={"responseType"}
-                      setValue={setValue}
-                      trigger={trigger}
-                      value={watch("responseType")}
-                    />
-                  </div>
-                )}
-                {AllowTableOptions.includes(element.inputType) && (
-                  <TableInputColumn
-                    onChange={(newValues) => {
-                      setValue("denominators", newValues);
-                    }}
-                    value={watch("denominators")}
-                  />
-                )}
-                {!allowValue.includes(element.inputType) &&
-                  !noAllowValidation.includes(element.inputType) && (
-                    <DynamicInput
-                      label="Short Description"
-                      name="description"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                    />
-                  )}
-                {element.type.toLowerCase() === "date" && (
-                  <>
-                    {/* {watch("dateType") === "custom" && ( */}
-                    <CustomSelect
-                      label="Date Format"
-                      options={dateFormats}
-                      register={register}
-                      name={"dateFormat"}
-                      setValue={setValue}
-                      trigger={trigger}
-                      value={watch("dateFormat")}
-                    />
-                    <DynamicInput
-                      label="Allow Range"
-                      name="canHaveDateRange"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                      type="checkbox"
-                    />
-                    {values?.canHaveDateRange && (
-                      <div className="grid grid-cols-2 gap-4">
-                        <CustomDatePicker
-                          name="minDate"
-                          value={values?.minDate}
-                          onGetValue={setValue}
-                          placeholder="Select min date"
-                        />
-                        <CustomDatePicker
-                          name="maxDate"
-                          value={values?.minDate}
-                          onGetValue={setValue}
-                          placeholder="Select max date"
-                          minDate={values?.minDate}
-                        />
-                      </div>
+                        />{" "}
+                        {element.type.toLowerCase() === "cascadeselect" && (
+                          <DynamicInput
+                            label="Child Label"
+                            name="childLabel"
+                            register={register}
+                            errors={errors}
+                            element={element}
+                          />
+                        )}
+                      </>
                     )}
+                  {AllowValidationPlaceholder.includes(element.inputType) && (
                     <DynamicInput
-                      label="Allow Year Picker"
-                      name="allowYearPicker"
+                      label="Placeholder"
+                      name="placeholder"
                       register={register}
                       errors={errors}
                       element={element}
-                      type="checkbox"
                     />
-                  </>
-                )}
-                {element.type.toLowerCase() === "selectfield" && (
-                  <CustomSelect
-                    label="Select Type"
-                    options={[
-                      {
-                        label: "List",
-                        value: "list",
-                      },
-                      {
-                        label: "Combobox",
-                        value: "Combobox",
-                      },
-                    ]}
-                    register={register}
-                    name={"selectType"}
-                    setValue={setValue}
-                    trigger={trigger}
-                    value={watch("selectType")}
-                  />
-                )}
-                {element.type.toLowerCase() === "grid" && (
-                  <DynamicInput
-                    label="Number of columns"
-                    name="columns"
-                    register={register}
-                    errors={errors}
-                    element={element}
-                  />
-                )}
-                {element.type.toLowerCase() === "document" && (
-                  <div className="grid gap-y-6">
-                    <div className="grid gap-y-1">
+                  )}
+                  {AllowValidationPrefix.includes(element.inputType) && (
+                    <DynamicInput
+                      label="Prefix"
+                      name="prefix"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                    />
+                  )}
+                  {AllowApiOptions.includes(element.inputType) && (
+                    <div className="grid gap-y-4">
+                      <ApiExample />
                       <DynamicInput
-                        label="Document Options Url"
+                        label="Api Url"
                         name="url"
                         register={register}
                         errors={errors}
                         element={element}
-                      />{" "}
-                      <DocumentSignExample />
-                    </div>
-                    <div className="grid gap-y-1">
-                      <DynamicInput
-                        label="Document Validation Url"
-                        name="validationUrl"
-                        register={register}
-                        errors={errors}
-                        element={element}
                       />
-                      <ValidateExample />
-                    </div>
-                    <div className="grid gap-y-1">
-                      <DynamicInput
-                        label="Signature Page Url"
-                        name="signatureLink"
+                      <CustomSelect
+                        label="Api Method"
+                        options={[
+                          {
+                            label: "GET",
+                            value: "GET",
+                          },
+                          {
+                            label: "POST",
+                            value: "POST",
+                          },
+                        ]}
                         register={register}
-                        errors={errors}
-                        element={element}
+                        name={"method"}
+                        setValue={setValue}
+                        trigger={trigger}
+                        value={watch("method")}
+                      />
+                      <CustomSelect
+                        label="Api Response type"
+                        options={[
+                          {
+                            label: "String",
+                            value: "string",
+                          },
+                          {
+                            label: "Object",
+                            value: "object",
+                          },
+                        ]}
+                        register={register}
+                        name={"responseType"}
+                        setValue={setValue}
+                        trigger={trigger}
+                        value={watch("responseType")}
                       />
                     </div>
-                  </div>
-                )}
-                {element.type.toLowerCase() === "datagrid" &&
-                  renderColumnsFields()}
-
-                {element.type.toLowerCase() === "file" && (
-                  <>
-                    <DynamicInput
-                      label="Allow Multiple Uploads"
-                      name="isMultiple"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                      type="checkbox"
-                    />
-                    <MultiSelectInput
-                      element={{
-                        options: FileTypes,
-                        id: "acceptedFiles",
-                        value: values?.acceptedFiles,
+                  )}
+                  {AllowTableOptions.includes(element.inputType) && (
+                    <TableInputColumn
+                      onChange={(newValues) => {
+                        setValue("denominators", newValues);
                       }}
-                      validationData={{ register, setValue, trigger, watch }}
-                      placeholder="Choose file types"
-                    />
-                  </>
-                )}
-                {AllowOptions.includes(element.inputType) &&
-                  renderOptionsFields()}
-                {/* VisibilityEditor  */}
-                <div>
-                  <div className="w-[150px] mb-4">
-                    <DynamicInput
-                      label="Toggle Visibility"
-                      name="isHidden"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                      type="checkbox"
-                    />
-                  </div>{" "}
-                  {values.isHidden && (
-                    <VisibilityEditor
-                      register={register}
-                      setValue={setValue}
-                      trigger={trigger}
-                      watch={watch}
-                      id={element?.id}
+                      value={watch("denominators")}
                     />
                   )}
-                </div>
-              </div>
-            )}
-
-            {!noAllowValidation.includes(element.type.toLowerCase()) &&
-              activeTab === "validation" && (
-                <div className="z-10 flex flex-col w-full gap-5 px-6">
-                  <div className="flex items-center gap-x-6">
-                    <div className="w-[150px]">
+                  {!allowValue.includes(element.inputType) &&
+                    !noAllowValidation.includes(element.inputType) && (
                       <DynamicInput
-                        label="Required"
-                        name="isRequired"
+                        label="Short Description"
+                        name="description"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                      />
+                    )}
+                  {element.type.toLowerCase() === "date" && (
+                    <>
+                      {/* {watch("dateType") === "custom" && ( */}
+                      <CustomSelect
+                        label="Date Format"
+                        options={dateFormats}
+                        register={register}
+                        name={"dateFormat"}
+                        setValue={setValue}
+                        trigger={trigger}
+                        value={watch("dateFormat")}
+                      />
+                      <DynamicInput
+                        label="Allow Range"
+                        name="canHaveDateRange"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="checkbox"
+                      />
+                      {values?.canHaveDateRange && (
+                        <div className="grid grid-cols-2 gap-4">
+                          <CustomDatePicker
+                            name="minDate"
+                            value={values?.minDate}
+                            onGetValue={setValue}
+                            placeholder="Select min date"
+                          />
+                          <CustomDatePicker
+                            name="maxDate"
+                            value={values?.minDate}
+                            onGetValue={setValue}
+                            placeholder="Select max date"
+                            minDate={values?.minDate}
+                          />
+                        </div>
+                      )}
+                      <DynamicInput
+                        label="Allow Year Picker"
+                        name="allowYearPicker"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="checkbox"
+                      />
+                    </>
+                  )}
+                  {element.type.toLowerCase() === "country" && (
+                    <DynamicInput
+                      label="Allow States"
+                      name="showState"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                      type="checkbox"
+                    />
+                  )}
+                  {element.type.toLowerCase() === "selectfield" && (
+                    <CustomSelect
+                      label="Select Type"
+                      options={[
+                        {
+                          label: "List",
+                          value: "list",
+                        },
+                        {
+                          label: "Combobox",
+                          value: "Combobox",
+                        },
+                      ]}
+                      register={register}
+                      name={"selectType"}
+                      setValue={setValue}
+                      trigger={trigger}
+                      value={watch("selectType")}
+                    />
+                  )}
+                  {element.type.toLowerCase() === "grid" && (
+                    <DynamicInput
+                      label="Number of columns"
+                      name="columns"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                    />
+                  )}
+                  {element.type.toLowerCase() === "document" && (
+                    <div className="grid gap-y-6">
+                      <div className="grid gap-y-1">
+                        <DynamicInput
+                          label="Document Options Url"
+                          name="url"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                        />{" "}
+                        <DocumentSignExample />
+                      </div>
+                      <div className="grid gap-y-1">
+                        <DynamicInput
+                          label="Document Validation Url"
+                          name="validationUrl"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                        />
+                        <ValidateExample />
+                      </div>
+                      <div className="grid gap-y-1">
+                        <DynamicInput
+                          label="Signature Page Url"
+                          name="signatureLink"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {element.type.toLowerCase() === "datagrid" &&
+                    renderColumnsFields()}
+
+                  {element.type.toLowerCase() === "file" && (
+                    <>
+                      <DynamicInput
+                        label="Allow Multiple Uploads"
+                        name="isMultiple"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="checkbox"
+                      />
+                      <MultiSelectInput
+                        element={{
+                          options: FileTypes,
+                          id: "acceptedFiles",
+                          value: values?.acceptedFiles,
+                        }}
+                        validationData={{ register, setValue, trigger, watch }}
+                        placeholder="Choose file types"
+                      />
+                    </>
+                  )}
+                  {AllowOptions.includes(element.inputType) &&
+                    renderOptionsFields()}
+                  {/* VisibilityEditor  */}
+                  <div>
+                    <div className="w-[150px] mb-4">
+                      <DynamicInput
+                        label="Toggle Visibility"
+                        name="isHidden"
                         register={register}
                         errors={errors}
                         element={element}
                         type="checkbox"
                       />
                     </div>{" "}
-                    <div className="flex-1">
-                      <DynamicInput
-                        label="Error message text"
-                        name="requiredMessage"
+                    {values.isHidden && (
+                      <VisibilityEditor
                         register={register}
-                        errors={errors}
-                        element={element}
+                        setValue={setValue}
+                        trigger={trigger}
+                        watch={watch}
+                        id={element?.id}
                       />
-                    </div>
+                    )}
                   </div>
-                  {AllowValidationMaxMin.includes(element.inputType) && (
-                    <>
-                      <div className="flex items-center gap-x-6">
-                        <div className="w-[150px]">
-                          <DynamicInput
-                            label="Min Length"
-                            name="minLength"
-                            register={register}
-                            errors={errors}
-                            element={element}
-                            type="number"
-                          />
-                        </div>{" "}
-                        <div className="flex-1">
-                          <DynamicInput
-                            label="Error message text"
-                            name="minLengthMessage"
-                            register={register}
-                            errors={errors}
-                            element={element}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-x-6">
-                        <div className="w-[150px]">
-                          <DynamicInput
-                            label="Max Length"
-                            name="maxLength"
-                            register={register}
-                            errors={errors}
-                            element={element}
-                            type="number"
-                          />
-                        </div>{" "}
-                        <div className="flex-1">
-                          <DynamicInput
-                            label="Error message text"
-                            name="maxLengthMessage"
-                            register={register}
-                            errors={errors}
-                            element={element}
-                          />
-                        </div>
-                      </div>
-                    </>
-                  )}
-                  {AllowValidationAmount.includes(element.inputType) && (
-                    <>
-                      <div className="flex items-center gap-x-6">
-                        <div className="w-[150px]">
-                          <DynamicInput
-                            label="Min Amount"
-                            name="minAmount"
-                            register={register}
-                            errors={errors}
-                            element={element}
-                            type="amount"
-                          />
-                        </div>{" "}
-                        <div className="flex-1">
-                          <DynamicInput
-                            label="Error message text"
-                            name="minAmountMessage"
-                            register={register}
-                            errors={errors}
-                            element={element}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-x-6">
-                        <div className="w-[150px]">
-                          <DynamicInput
-                            label="Max Amount"
-                            name="maxAmount"
-                            register={register}
-                            errors={errors}
-                            element={element}
-                            type="amount"
-                          />
-                        </div>{" "}
-                        <div className="flex-1">
-                          <DynamicInput
-                            label="Error message text"
-                            name="maxAmountMessage"
-                            register={register}
-                            errors={errors}
-                            element={element}
-                          />
-                        </div>
-                      </div>
-                    </>
-                  )}
                 </div>
               )}
-          </div></div>
+
+              {!noAllowValidation.includes(element.type.toLowerCase()) &&
+                activeTab === "validation" && (
+                  <div className="z-10 flex flex-col w-full gap-5 px-6">
+                    <div className="flex items-center gap-x-6">
+                      <div className="w-[150px]">
+                        <DynamicInput
+                          label="Required"
+                          name="isRequired"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                          type="checkbox"
+                        />
+                      </div>{" "}
+                      <div className="flex-1">
+                        <DynamicInput
+                          label="Error message text"
+                          name="requiredMessage"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                        />
+                      </div>
+                    </div>
+                    {AllowValidationMaxMin.includes(element.inputType) && (
+                      <>
+                        <div className="flex items-center gap-x-6">
+                          <div className="w-[150px]">
+                            <DynamicInput
+                              label="Min Length"
+                              name="minLength"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                              type="number"
+                            />
+                          </div>{" "}
+                          <div className="flex-1">
+                            <DynamicInput
+                              label="Error message text"
+                              name="minLengthMessage"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-x-6">
+                          <div className="w-[150px]">
+                            <DynamicInput
+                              label="Max Length"
+                              name="maxLength"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                              type="number"
+                            />
+                          </div>{" "}
+                          <div className="flex-1">
+                            <DynamicInput
+                              label="Error message text"
+                              name="maxLengthMessage"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    {AllowValidationAmount.includes(element.inputType) && (
+                      <>
+                        <div className="flex items-center gap-x-6">
+                          <div className="w-[150px]">
+                            <DynamicInput
+                              label="Min Amount"
+                              name="minAmount"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                              type="amount"
+                            />
+                          </div>{" "}
+                          <div className="flex-1">
+                            <DynamicInput
+                              label="Error message text"
+                              name="minAmountMessage"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-x-6">
+                          <div className="w-[150px]">
+                            <DynamicInput
+                              label="Max Amount"
+                              name="maxAmount"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                              type="amount"
+                            />
+                          </div>{" "}
+                          <div className="flex-1">
+                            <DynamicInput
+                              label="Error message text"
+                              name="maxAmountMessage"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+            </div>
+          </div>
           {/* Actions */}
           <div className="sticky flex w-full gap-3 px-6 pt-8 pb-4 mt-10 border-t">
             <button

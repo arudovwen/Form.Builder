@@ -84,6 +84,7 @@ export interface ElementType {
     visibilityDependentFieldsValue?: any;
     isMultiple: boolean;
     acceptedFiles: any[];
+    showState?: boolean;
 }
 export declare const countryOptions: OptionType[];
 export declare const Elements: ElementType[];

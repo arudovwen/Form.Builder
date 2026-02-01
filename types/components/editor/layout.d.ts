@@ -12,5 +12,6 @@ export interface BuilderProps {
     saveLoading?: boolean;
     publishLoading?: boolean;
     onTitleChange?: (string: any) => void;
+    uploadUrl?: string;
 }
-export default function Layout({ onSubmit, questionData, title, goBackUrl, loading, onPublish, previewLoading, saveLoading, publishLoading, onTitleChange, }: BuilderProps): import("react/jsx-runtime").JSX.Element;
+export default function Layout({ onSubmit, questionData, title, goBackUrl, loading, onPublish, previewLoading, saveLoading, publishLoading, onTitleChange, uploadUrl, }: BuilderProps): import("react/jsx-runtime").JSX.Element;

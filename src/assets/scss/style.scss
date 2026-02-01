@@ -47,6 +47,12 @@ body {
           bg-white  text-gray-900 
          py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm;
 }
+.select-options__combo {
+  @apply z-[9999] fixed mt-1 min-w-[200px] max-h-60 w-[var(--input-width)] overflow-auto rounded-md
+          bg-white  text-gray-900 
+         py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm;
+}
+
 
 /* Option Row */
 .select-option {
@@ -54,7 +60,13 @@ body {
 }
 
 .select-option.active {
+  @apply bg-gray-50 text-gray-900;
+}
+.select-option.selected {
   @apply bg-gray-100 text-gray-900;
+}
+.select-option .selected {
+  @apply font-extrabold;
 }
 
 /* Option Text */

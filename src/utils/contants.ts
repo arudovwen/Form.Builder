@@ -105,6 +105,8 @@ export interface ElementType {
 
   isMultiple: boolean
   acceptedFiles: any[]
+
+  showState?: boolean
 }
 
 /* ---------------------------------- */
@@ -201,15 +203,15 @@ export const Elements: ElementType[] = [
     options: [option("Placeholder 1", "")],
   }),
 
-  createElement({
-    type: ElementKind.CASCADE_SELECT,
-    label: "Cascade Select",
-    icon: "tabler:select",
-    inputLabel: "Select Text Label",
-    inputType: "select",
-    options: [option("Parent", "")],
-    options2: [option("Child", "")],
-  }),
+  // createElement({
+  //   type: ElementKind.CASCADE_SELECT,
+  //   label: "Cascade Select",
+  //   icon: "tabler:select",
+  //   inputLabel: "Select Text Label",
+  //   inputType: "select",
+  //   options: [option("Parent", "")],
+  //   options2: [option("Child", "")],
+  // }),
 
   createElement({
     type: ElementKind.MULTI_SELECT,
@@ -323,6 +325,7 @@ export const Elements: ElementType[] = [
     inputLabel: "Select Country",
     inputType: "country",
     options: countryOptions,
+    showState: false
   }),
 
   createElement({

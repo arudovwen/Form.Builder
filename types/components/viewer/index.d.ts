@@ -15,6 +15,7 @@ export interface FormRendererProps {
     renderType?: RenderType;
     children?: ReactNode;
     hideFooter?: boolean;
+    uploadUrl?: string;
 }
 declare const _default: React.NamedExoticComponent<FormRendererProps>;
 export default _default;
