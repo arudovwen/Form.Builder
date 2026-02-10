@@ -6,7 +6,7 @@ export const RenderElement = (element: any, validationData?: any) => {
   const ElementComponent = elementMap[element.type];
   const { answerData }: any = useContext(EditorContext);
   const acceptedFileLabels = useMemo(
-    () => element?.acceptedFiles?.map((i) => i.label).join(", "),
+    () => element?.acceptedFiles?.map((i: { label: any; }) => i.label).join(", "),
     [element],
   );
   const fields = useMemo(
@@ -18,7 +18,8 @@ export const RenderElement = (element: any, validationData?: any) => {
   const isVisible = useMemo(() => {
     if (!fields.length) return true; // No dependencies, always visible
 
-    return fields.every((field) => {
+    return fields.every((field: { id: string | number; fieldValue: any; operator: any; }) => {
+      if (!element.isHidden) return true
       const value = answerData?.[field.id];
       const valA = field.fieldValue;
       const valB = value;
@@ -44,7 +45,7 @@ export const RenderElement = (element: any, validationData?: any) => {
           return true; // fallback: show
       }
     });
-  }, [fields, answerData]);
+  }, [fields, answerData, element]);
 
   if (!ElementComponent) return null;
 
@@ -53,7 +54,7 @@ export const RenderElement = (element: any, validationData?: any) => {
       {element.inputLabel && (
         <label className="block text-sm font-medium mb-1.5 input_label">
           {element.inputLabel}{" "}
-         {acceptedFileLabels && <span className="text-gray-400 text-xs">({acceptedFileLabels?.toLowerCase()})</span>}
+          {acceptedFileLabels && <span className="text-gray-400 text-xs">({acceptedFileLabels?.toLowerCase()})</span>}
         </label>
       )}
       <ElementComponent

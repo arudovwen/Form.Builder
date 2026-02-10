@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 
-import "react-datepicker/dist/react-datepicker.css";
+
+import "@/assets/scss/_date-picker.scss"
 import CalendarSvg from "../assets/svgs/calendar";
 
 interface CustomDatePickerProps {
@@ -20,7 +21,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   value = null,
   onGetValue,
   readOnly = false,
-  dateFormat='dd/MM/yyyy',
+  dateFormat = 'dd/MM/yyyy',
   name,
   placeholder = "Select date",
   minDate,
@@ -57,7 +58,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   };
 
   return (
-    <>
+    <div className="builder_date__picker">
       <DatePicker
         showIcon
         icon={<CalendarSvg className="react-datepicker__calendar-icon" />}
@@ -72,9 +73,11 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         minDate={minDate}
         maxDate={maxDate}
         showYearDropdown={showYearDropdown}
-        dropdownMode="select"
+        scrollableYearDropdown
+        yearDropdownItemNumber={40}
+
       />
-    </>
+    </div>
   );
 };
 

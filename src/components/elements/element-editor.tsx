@@ -609,15 +609,17 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black/30 flex items-center justify-end z-[999] cursor-default  select-none "
+      className="fixed inset-0 bg-gray-800/40 backdrop-blur-sm flex items-center justify-end z-[999] cursor-default  select-none "
       draggable="true"
       onDragStart={(e) => e.preventDefault()}
     >
       <div
-        className="w-full lg:w-1/3 xl:w-1/4 bg-white h-screen  shadow-xl relative flex flex-col  items-center   select-"
+        className="w-full lg:w-2/3 xl:w-2/5 bg-white h-screen  shadow-xl relative flex flex-col  items-center  select-"
         draggable="true"
         onDragStart={(e) => e.preventDefault()}
       >
+        <button className="bg-white h-10 w-10 flex justify-center items-center absolute top-1 -left-12 rounded-lg hover:bg-gray-50" onClick={onClose}>
+          <AppIcon icon="tabler:x" iconClass="text-xl" /></button>
         {/* Header */}
         {/* <div className="z-10 flex flex-col items-start w-full gap-4 px-6 pt-4 pb-5 mb-3">
           <button
@@ -648,7 +650,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         >
           <div className="flex-1">
             {" "}
-            <div className=" max-h-[75vh] overflow-y-auto flex-1">
+            <div className=" max-h-[70vh] overflow-y-auto flex-1">
               {activeTab === "basic" && (
                 <div className="z-10 flex flex-col w-full gap-5 px-6">
                   {allowValue.includes(element.inputType) && (
@@ -1059,7 +1061,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
             </div>
           </div>
           {/* Actions */}
-          <div className="sticky flex w-full gap-3 px-6 pt-8 pb-4 mt-10 border-t">
+          <div className="sticky flex w-full gap-3 px-6 pt-8 pb-10 mt-10 border-t">
             <button
               type="button"
               onClick={onClose}
@@ -1071,11 +1073,9 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               type="submit"
               disabled={!isValid || isSubmitting}
               style={{ background: config?.buttonColor || "#333" }}
-              className={`flex-1 px-4 py-2.5 ${
-                !isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#2563EB]"
-              } ${
-                !isValid || isSubmitting ? "text-[#98A2B3]" : "text-white"
-              } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-50 editor_option__save`}
+              className={`flex-1 px-4 py-2.5 ${!isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#2563EB]"
+                } ${!isValid || isSubmitting ? "text-[#98A2B3]" : "text-white"
+                } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-50 editor_option__save`}
             >
               {isSubmitting ? "Saving..." : "Save"}
             </button>

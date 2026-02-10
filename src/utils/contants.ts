@@ -353,14 +353,14 @@ export const Elements: ElementType[] = [
     ],
   }),
 
-  createElement({
-    type: ElementKind.TABLE_INPUT,
-    label: "Table Input",
-    icon: "iconoir:table",
-    inputLabel: "Table Input Label",
-    inputType: "tableInput",
-    value: [],
-  }),
+  // createElement({
+  //   type: ElementKind.TABLE_INPUT,
+  //   label: "Table Input",
+  //   icon: "iconoir:table",
+  //   inputLabel: "Table Input Label",
+  //   inputType: "tableInput",
+  //   value: [],
+  // }),
 
   createElement({
     type: ElementKind.DIVIDER,
@@ -378,13 +378,13 @@ export const Elements: ElementType[] = [
     inputType: "spacer",
   }),
 
-  createElement({
-    type: ElementKind.SECTION,
-    label: "Section",
-    icon: "stash:section-divider",
-    inputLabel: "",
-    inputType: "section",
-  }),
+  // createElement({
+  //   type: ElementKind.SECTION,
+  //   label: "Section",
+  //   icon: "stash:section-divider",
+  //   inputLabel: "",
+  //   inputType: "section",
+  // }),
 
   createElement({
     type: ElementKind.GRID,
@@ -436,7 +436,7 @@ export const CategorizedElements = Object.freeze({
 /* Date Formats */
 /* ---------------------------------- */
 
-export const dateFormats = Object.freeze([
+export const dateFormats = [
   { label: "Day/Month/Year", value: "dd/MM/yyyy" },
   { label: "Month/Day/Year", value: "MM/dd/yyyy" },
   { label: "ISO (Year-Month-Day)", value: "yyyy-MM-dd" },
@@ -447,7 +447,7 @@ export const dateFormats = Object.freeze([
   { label: "Weekday, Month Day, Year", value: "EEEE, MMMM d, yyyy" },
   { label: "Short Weekday, Month Day, Year", value: "EEE, MMM d, yyyy" },
   { label: "Day-Month-Year", value: "dd-MM-yyyy" },
-]);
+];
 
 export const AllowValidationPrefix: string[] = ["amount"];
 export const AllowValidationMaxMin: string[] = ["text", "number"];

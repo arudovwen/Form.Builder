@@ -1,19 +1,24 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import clsx from "clsx";
 import AppIcon from "./ui/AppIcon";
 
+interface Option {
+  label: string;
+  value: any;
+}
+
 interface CustomSelectProps {
   className?: string;
-  options: any;
+  options: any[];
   placeholder?: string;
-  errors?: any;
+  errors?: { message?: string };
   register?: any;
-  setValue?: any;
+  setValue?: (name: string, value: any) => void;
   name: string;
   label?: string;
   value?: any;
-  trigger?: any;
+  trigger?: (name: string) => void;
   isMultiple?: boolean;
   isFloatingLabel?: boolean;
   subText?: string;
@@ -23,7 +28,7 @@ interface CustomSelectProps {
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
-  options,
+  options = [],
   placeholder = "Select",
   errors,
   register,
@@ -39,45 +44,89 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   loading,
   disabled,
 }) => {
-  const [selected, setSelected] = useState<any>(isMultiple ? [] : null);
- 
+  const [selected, setSelected] = useState<Option | Option[] | null>(isMultiple ? [] : null);
+  const isUserChange = useRef(false);
+
   /** ----------------------------------------------
-   *  Compute selected option from external value
-   *  Only recompute when value or options change
+   *  Find matching option from external value
    * ---------------------------------------------- */
   const computedSelected = useMemo(() => {
-    if (!options) return null;
+    if (!value || !options || options.length === 0) return isMultiple ? [] : null;
 
-    return (
-      options.find((o: any) => {
-        if (typeof o.value === "string" && typeof value === "string")
-          return o.value.toLowerCase() === value.toLowerCase();
+    if (isMultiple) {
+      // Handle multiple selection
+      return Array.isArray(value)
+        ? options.filter(o => value.some(v => 
+            typeof o.value === "object" ? o.value?.id === v?.id : o.value === v
+          ))
+        : [];
+    }
 
-        if (typeof o.value === "object" && typeof value === "object")
-          return o.value.id === value?.id;
+    // Single selection - find matching option
+    return options.find((o) => {
+      if (typeof o.value === "string" && typeof value === "string") {
+        return o.value.toLowerCase() === value.toLowerCase();
+      }
+      if (typeof o.value === "object" && typeof value === "object") {
+        return o.value?.id === value?.id;
+      }
+      return o.value === value;
+    }) || null;
+  }, [value, options, isMultiple]);
 
-        return o.value === value;
-      }) || null
-    );
-  }, [value, options]);
-
-  /** Sync external value → internal state */
+  /** Sync external value → internal state (avoid loops) */
   useEffect(() => {
-    // Avoid unnecessary updates
-    if (computedSelected?.value !== selected?.value) {
+    if (isUserChange.current) {
+      isUserChange.current = false;
+      return;
+    }
+
+    // Deep comparison for arrays
+    if (isMultiple && Array.isArray(computedSelected) && Array.isArray(selected)) {
+      const selectedValues = (selected as Option[]).map(s => s.value);
+      const computedValues: any = (computedSelected as Option[]).map(s => s.value);
+      
+      if (JSON.stringify(selectedValues) !== JSON.stringify(computedValues)) {
+        setSelected(computedSelected);
+      }
+    } else if ((computedSelected as any)?.value !== (selected as Option)?.value) {
       setSelected(computedSelected);
     }
-  }, [computedSelected, selected?.value]);
+  }, [computedSelected, isMultiple]);
 
-  /** Update form state (setValue, trigger, register) */
-  useEffect(() => {
-    if (!selected || !setValue) return;
+  /** Handle selection change */
+  const handleChange = useCallback((newValue: Option | Option[] | null) => {
+    isUserChange.current = true;
+    setSelected(newValue);
 
-    setValue(name, selected?.value);
+    if (setValue) {
+      const formValue = isMultiple
+        ? Array.isArray(newValue) ? newValue.map(v => v.value) : []
+        : (newValue as Option)?.value ?? null;
 
-    register?.(name);
-    trigger?.(name);
-  }, [name, register, selected, setValue, trigger]);
+      setValue(name, formValue);
+      trigger?.(name);
+    }
+
+    if (register && !isUserChange.current) {
+      register(name);
+    }
+  }, [setValue, name, trigger, register, isMultiple]);
+
+  /** Display text */
+  const displayText = useMemo(() => {
+    if (loading) return "Fetching data...";
+    
+    if (!selected) return placeholder;
+
+    if (isMultiple && Array.isArray(selected)) {
+      return selected.length > 0
+        ? selected.map(s => s.label).join(", ")
+        : placeholder;
+    }
+
+    return (selected as Option)?.label || placeholder;
+  }, [selected, loading, placeholder, isMultiple]);
 
   return (
     <div className="relative">
@@ -87,9 +136,12 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         </label>
       )}
 
-      {isFloatingLabel && (
+      {isFloatingLabel && label && (
         <label
-          className={`z-[40] absolute bg-white py-[2px] px-1 -top-[10px] left-3 ${labelClass}`}
+          className={clsx(
+            "z-[40] absolute bg-white py-[2px] px-1 -top-[10px] left-3",
+            labelClass
+          )}
         >
           {label}
         </label>
@@ -97,21 +149,19 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
 
       <Listbox
         value={selected}
-        onChange={setSelected}
+        onChange={handleChange}
         multiple={isMultiple}
-        disabled={disabled}
+        disabled={disabled || loading}
       >
         <div className="relative">
-          <Listbox.Button  className={"field-control"} disabled={disabled}>
-            {loading ? (
-              <span className="text-sm opacity-60">Fetching data...</span>
-            ) : (
-              <span className="block text-sm text-left truncate">
-                {selected?.label || (
-                  <span className="opacity-60">{placeholder}</span>
-                )}
-              </span>
-            )}
+          <Listbox.Button className="field-control" disabled={disabled || loading}>
+            <span
+              className={clsx("block text-sm text-left truncate", {
+                "opacity-60": !selected || loading,
+              })}
+            >
+              {displayText}
+            </span>
 
             <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
               <AppIcon icon="lucide:chevron-down" />
@@ -123,26 +173,26 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Listbox.Options anchor="bottom start" className="select-options">
-              {options?.map((option: any, idx: number) => (
-                <Listbox.Option
-                  key={idx}
-                  value={option}
-                  className={({ active }) =>
-                    clsx("select-option", { active })
-                  }
-                >
-                  {({ selected }) => (
-                    <div
-                      className={clsx("option-text", {
-                        selected,
-                      })}
-                    >
-                      {option.label}
-                    </div>
-                  )}
-                </Listbox.Option>
-              ))}
+            <Listbox.Options anchor="bottom start" className="select-button-options">
+              {options.length === 0 ? (
+                <div className="px-3 py-2 text-sm text-gray-500">
+                  No options available
+                </div>
+              ) : (
+                options.map((option, idx) => (
+                  <Listbox.Option
+                    key={option.value?.id || option.value || idx}
+                    value={option}
+                    className={({ active }) => clsx("select-option", { active })}
+                  >
+                    {({ selected }) => (
+                      <div className={clsx("option-text", { selected })}>
+                        {option.label}
+                      </div>
+                    )}
+                  </Listbox.Option>
+                ))
+              )}
             </Listbox.Options>
           </Transition>
         </div>
@@ -152,7 +202,9 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         <p className="text-[10px] text-[#98A2B3] mt-[6px]">{subText}</p>
       )}
 
-      {errors && <span className="text-sm text-red-500">{errors.message}</span>}
+      {errors?.message && (
+        <span className="text-sm text-red-500">{errors.message}</span>
+      )}
     </div>
   );
 };

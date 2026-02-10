@@ -96,7 +96,7 @@ export declare const CategorizedElements: Readonly<{
     layoutAndDisplay: ElementKind[];
     advancedData: ElementKind[];
 }>;
-export declare const dateFormats: readonly {
+export declare const dateFormats: {
     label: string;
     value: string;
 }[];

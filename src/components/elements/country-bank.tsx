@@ -25,7 +25,7 @@ export default function CountryBank({
   // Parse country and state from rawValue
   const { country, state } = useMemo(() => {
     if (typeof rawValue === "string" && rawValue.includes(",")) {
-      const [state, country] = rawValue.split(",").map(s => s.trim());
+      const [state, country] = rawValue.split(",").map((s) => s.trim());
       return { country, state };
     }
     return { country: rawValue, state: "" };
@@ -94,14 +94,19 @@ export default function CountryBank({
 
       {/* State */}
       {states.length > 0 && element.showState && (
-        <CustomSearchSelect
-          options={states}
-          onGetValue={handleStateSelect}
-          name={`${element.id}-state`}
-          readOnly={isReadOnly}
-          defaultValue={state}
-          key={`state-${state}`} // Force re-render when state changes externally
-        />
+        <div>
+          <label className="block text-sm font-medium mb-1.5 input_label">
+            State
+          </label>
+          <CustomSearchSelect
+            options={states}
+            onGetValue={handleStateSelect}
+            name={`${element.id}-state`}
+            readOnly={isReadOnly}
+            defaultValue={state}
+            key={`state-${state}`} // Force re-render when state changes externally
+          />
+        </div>
       )}
     </div>
   );

@@ -69,7 +69,7 @@ export default function CustomDataGrid({
             {columns.map((col) => (
               <th
                 key={col.field}
-                className="px-3 py-2 text-xs font-semibold text-left text-gray-600 border"
+                className="px-3 py-2 text-xs font-semibold text-left text-gray-600 border whitespace-nowrap"
               >
                 {col.headerName || col.field}
               </th>
