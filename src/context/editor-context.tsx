@@ -7,27 +7,27 @@ interface EditorProviderProps {
 
 const EditorContext = createContext<
   | {
-      formData: any;
-      setFormData: React.Dispatch<React.SetStateAction<any>>;
-      handleDragStop: (e: any, elementId: string) => void;
-      removeElement: (elementId: string, sectionId: string) => void;
-      updateElementPosition: (
-        updatedFormData: any[],
-        sectionId: string,
-      ) => void;
-      addElement: (element: any, sectionId: string) => void;
-      addElementInPosition: (
-        element: any,
-        sectionId: string,
-        index: any,
-      ) => void;
-      updateElement: (value: any, sectionId: string) => void;
-      updateSection: (value: any, sectionId: string) => void;
-      setIsDragging: (value: boolean) => void;
-      isDragging: boolean;
-      uploadUrl: string;
-      setUploadUrl: (e: string) => void;
-    }
+    formData: any;
+    setFormData: React.Dispatch<React.SetStateAction<any>>;
+    handleDragStop: (e: any, elementId: string) => void;
+    removeElement: (elementId: string, sectionId: string) => void;
+    updateElementPosition: (
+      updatedFormData: any[],
+      sectionId: string,
+    ) => void;
+    addElement: (element: any, sectionId: string) => void;
+    addElementInPosition: (
+      element: any,
+      sectionId: string,
+      index: any,
+    ) => void;
+    updateElement: (value: any, sectionId: string) => void;
+    updateSection: (value: any, sectionId: string) => void;
+    setIsDragging: (value: boolean) => void;
+    isDragging: boolean;
+    uploadUrl: string;
+    setUploadUrl: (e: string) => void;
+  }
   | undefined
 >(undefined);
 
@@ -82,26 +82,88 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
         prevFormData.map((section) =>
           section.id === sectionId
             ? {
-                ...section,
-                questionData: section.questionData.filter((element: any) => {
-                  if (elementData.type === "grid") {
-                    // remove both the grid and its children
-                    return (
-                      element.gridId !== elementData.id &&
-                      element.id !== elementData.id
-                    );
-                  }
-                  // normal element removal
-                  return element.id !== elementId;
-                }),
-              }
+              ...section,
+              questionData: section.questionData.filter((element: any) => {
+                if (elementData.type === "grid") {
+                  // remove both the grid and its children
+                  return (
+                    element.gridId !== elementData.id &&
+                    element.id !== elementData.id
+                  );
+                }
+                // normal element removal
+                return element.id !== elementId;
+              }),
+            }
             : section,
         ),
       );
     },
     [formData, setFormData],
   );
+  const duplicateElement = React.useCallback(
+    (elementId: string, sectionId: string) => {
+      const section = formData.find((sec) => sec.id === sectionId);
+      if (!section) return;
 
+      const elementIndex = section.questionData.findIndex((el: any) => el.id === elementId);
+      if (elementIndex === -1) return;
+
+      const original = section.questionData[elementIndex];
+
+      const deepCloneWithNewId = (obj: any, overrides: any = {}) => ({
+        ...JSON.parse(JSON.stringify(obj)),
+        id: uuidv4(),
+        ...overrides,
+      });
+
+      setFormData((prevFormData) =>
+        prevFormData.map((sec: any) => {
+          if (sec.id !== sectionId) return sec;
+
+          const qd = [...sec.questionData];
+
+          if (original.type === "grid") {
+            // Duplicate a grid and all its children
+            const relatedIndices = qd
+              .map((e, i) => ({ e, i }))
+              .filter(({ e }) => e.id === original.id || e.gridId === original.id)
+              .map(({ i }) => i);
+
+            const insertAfter = relatedIndices.length ? Math.max(...relatedIndices) + 1 : elementIndex + 1;
+
+            const newGridId = uuidv4();
+            const newGrid = deepCloneWithNewId(original, {});
+            newGrid.id = newGridId;
+
+            const children = qd.filter((e: any) => e.gridId === original.id);
+            const newChildren = children.map((child: any) =>
+              deepCloneWithNewId(child, { gridId: newGridId })
+            );
+
+            const newQuestionData = [
+              ...qd.slice(0, insertAfter),
+              newGrid,
+              ...newChildren,
+              ...qd.slice(insertAfter),
+            ];
+
+            return { ...sec, questionData: newQuestionData };
+          } else {
+            // Duplicate a normal element
+            const newElement = deepCloneWithNewId(original, original.gridId ? { gridId: original.gridId } : {});
+            const newQuestionData = [
+              ...qd.slice(0, elementIndex + 1),
+              newElement,
+              ...qd.slice(elementIndex + 1),
+            ];
+            return { ...sec, questionData: newQuestionData };
+          }
+        })
+      );
+    },
+    [formData, setFormData],
+  );
   const updateElementPosition = React.useCallback(
     (updatedQuestionData: any[], sectionId: string) => {
       setFormData((prevFormData) =>
@@ -120,9 +182,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       prevFormData.map((section) =>
         section.id === sectionId
           ? {
-              ...section,
-              questionData: [...section.questionData, element],
-            }
+            ...section,
+            questionData: [...section.questionData, element],
+          }
           : section,
       ),
     );
@@ -133,13 +195,13 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
         prevFormData.map((section) =>
           section.id === sectionId
             ? {
-                ...section,
-                questionData: [
-                  ...section.questionData.slice(0, index),
-                  element,
-                  ...section.questionData.slice(index),
-                ],
-              }
+              ...section,
+              questionData: [
+                ...section.questionData.slice(0, index),
+                element,
+                ...section.questionData.slice(index),
+              ],
+            }
             : section,
         ),
       );
@@ -152,29 +214,29 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
         prevFormData.map((section) =>
           section.id === sectionId
             ? {
-                ...section,
-                questionData: section.questionData.map((question: any) =>
-                  question.type === "grid" && question.gridData
-                    ? {
-                        ...question,
-                        gridData: question.gridData
-                          .map((grid: any, index: number) =>
-                            index === gridIndex
-                              ? {
-                                  ...grid,
-                                  ...element,
-                                }
-                              : grid,
-                          )
-                          .concat(
-                            gridIndex >= question.gridData.length
-                              ? { ...element }
-                              : [],
-                          ),
-                      }
-                    : question,
-                ),
-              }
+              ...section,
+              questionData: section.questionData.map((question: any) =>
+                question.type === "grid" && question.gridData
+                  ? {
+                    ...question,
+                    gridData: question.gridData
+                      .map((grid: any, index: number) =>
+                        index === gridIndex
+                          ? {
+                            ...grid,
+                            ...element,
+                          }
+                          : grid,
+                      )
+                      .concat(
+                        gridIndex >= question.gridData.length
+                          ? { ...element }
+                          : [],
+                      ),
+                  }
+                  : question,
+              ),
+            }
             : section,
         ),
       );
@@ -186,11 +248,11 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       prevFormData.map((section) =>
         section.id === sectionId
           ? {
-              ...section,
-              questionData: section.questionData.map((ele: any) =>
-                ele.id === value.id ? { ...ele, ...value } : ele,
-              ),
-            }
+            ...section,
+            questionData: section.questionData.map((ele: any) =>
+              ele.id === value.id ? { ...ele, ...value } : ele,
+            ),
+          }
           : section,
       ),
     );
@@ -200,9 +262,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       prevFormData.map((section) =>
         section.id === sectionId
           ? {
-              ...section,
-              ...value,
-            }
+            ...section,
+            ...value,
+          }
           : section,
       ),
     );
@@ -233,7 +295,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       answerData,
       setAnswerData,
       uploadUrl,
-      setUploadUrl,
+      setUploadUrl, duplicateElement
     }),
     [
       formData,
@@ -252,7 +314,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       activeSections,
       updateGridElement,
       answerData,
-      uploadUrl,
+      uploadUrl, duplicateElement
     ],
   );
 

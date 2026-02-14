@@ -51,12 +51,15 @@ export const RenderElement = (element: any, validationData?: any) => {
 
   return (
     <div className={!isVisible ? "invisible h-0" : ""}>
-      {element.inputLabel && (
-        <label className="block text-sm font-medium mb-1.5 input_label">
-          {element.inputLabel}{" "}
-          {acceptedFileLabels && <span className="text-gray-400 text-xs">({acceptedFileLabels?.toLowerCase()})</span>}
-        </label>
-      )}
+      <div className="mb-1.5">
+        {element.inputLabel && (
+          <label className="block text-sm font-medium  input_label">
+            {element.inputLabel}{" "}
+            {acceptedFileLabels && <span className="text-gray-400 text-xs">({acceptedFileLabels?.toLowerCase()})</span>}
+          </label>
+        )}
+       {element.description  && <small className="block text-gray-400 mt-0.5 text-xs"> {element.description}</small>}
+      </div>
       <ElementComponent
         element={element}
         state="edit"
