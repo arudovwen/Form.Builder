@@ -273,7 +273,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       } else {
         setValue("options", options);
       }
-    } catch (error) {
+    } catch (error: any) {
       const message =
         error?.response?.data?.message ||
         error?.message ||
@@ -754,7 +754,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   )}
                   {AllowTableOptions.includes(element.inputType) && (
                     <TableInputColumn
-                      onChange={(newValues) => {
+                      onChange={(newValues: any) => {
                         setValue("denominators", newValues);
                       }}
                       value={watch("denominators")}
