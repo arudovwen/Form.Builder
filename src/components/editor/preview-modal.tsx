@@ -31,7 +31,7 @@ const PreviewModalModal: React.FC<PreviewModalModalProps> = ({
       >
         <CloseSvg />
       </button>{" "}
-      <div className="max-h-[80vh] overflow-y-auto  h-max  w-full max-w-[650px] border border-[#D5D9EB] rounded-lg    bg-white form_submit">
+      <div className="max-h-[80vh] overflow-y-auto  h-max  w-full max-w-[650px] min-w-0 border border-[#D5D9EB] rounded-lg    bg-white form_submit">
         <FormViewer
           form_data={formData}
           ignoreValidation={true}

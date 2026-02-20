@@ -74,6 +74,7 @@ const SideBar = () => {
       ),
     }))
     .filter((category) => category.elements.length > 0); // remove empty categories
+console.log({categorizedElements});
 
   return (
     <div className="pt-4 pb-6">

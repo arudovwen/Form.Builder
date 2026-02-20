@@ -1,6 +1,12 @@
-import React, { useState, useEffect, useRef, useCallback, memo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  memo,
+  useMemo,
+} from "react";
 import CurrencyInput from "react-currency-input-field";
-import axios, { AxiosError } from "axios";
 import AppIcon from "../ui/AppIcon";
 import { v4 as uuidv4 } from "uuid";
 
@@ -236,6 +242,12 @@ export default function CustomDataGrid<T extends { id: string }>({
 
   const tableRef = useRef<HTMLDivElement>(null);
 
+  const formElement = document.getElementById("form");
+  const width = useMemo(() => {
+    const width = formElement?.getBoundingClientRect().width || 0;
+    return width ? width - 48 : width;
+  }, [formElement]);
+
   /* ---- Safe sync external value ---- */
   useEffect(() => {
     setRows((prevRows) => {
@@ -315,50 +327,57 @@ export default function CustomDataGrid<T extends { id: string }>({
         )}
       </div>
 
-      <table className="w-full text-sm border-collapse rounded table-auto bg-gray-50">
-        <thead>
-          <tr className="bg-gray-100">
-            {columns.map((col: any, idx) => (
-              <th
-                key={`${String(col.id)}-${idx}`}
-                className="px-3 py-2 text-xs font-semibold text-left text-gray-600 border whitespace-nowrap"
-              >
-                {col.headerName ?? String(col.field)}
-                {col.validate && <span className="ml-1 text-blue-600">*</span>}
-              </th>
-            ))}
-            {!isReadOnly && <th className="w-10 px-2 py-2 border"></th>}
-          </tr>
-        </thead>
-
-        <tbody>
-          {rows.length > 0 ? (
-            rows.map((row) => (
-              <MemoRow
-                key={row.id}
-                row={row}
-                columns={columns}
-                isReadOnly={isReadOnly}
-                editingCell={editingCell}
-                setEditingCell={setEditingCell}
-                handleCellChange={handleCellChange}
-                debouncedValidate={() => {}}
-                getValidationStatus={getValidationStatus}
-                deleteRow={deleteRow}
-              />
-            ))
-          ) : (
-            <tr>
-              <td
-                colSpan={columns.length + (isReadOnly ? 0 : 1)}
-                className="p-2 text-xs text-center text-gray-400"
-              >
-                No data available
-              </td>
+      <div
+        className="w-full max-w-full overflow-x-auto"
+        style={{ maxWidth: `${width}px` }}
+      >
+        <table className="min-w-max w-full text-sm border-collapse rounded table-auto bg-gray-50">
+          <thead>
+            <tr className="bg-gray-100">
+              {columns.map((col: any, idx) => (
+                <th
+                  key={`${String(col.id)}-${idx}`}
+                  className="px-3 py-2 text-xs font-semibold text-left text-gray-600 border whitespace-nowrap"
+                >
+                  {col.headerName ?? String(col.field)}
+                  {col.validate && (
+                    <span className="ml-1 text-blue-600">*</span>
+                  )}
+                </th>
+              ))}
+              {!isReadOnly && <th className="w-10 px-2 py-2 border"></th>}
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {rows.length > 0 ? (
+              rows.map((row) => (
+                <MemoRow
+                  key={row.id}
+                  row={row}
+                  columns={columns}
+                  isReadOnly={isReadOnly}
+                  editingCell={editingCell}
+                  setEditingCell={setEditingCell}
+                  handleCellChange={handleCellChange}
+                  debouncedValidate={() => {}}
+                  getValidationStatus={getValidationStatus}
+                  deleteRow={deleteRow}
+                />
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan={columns.length + (isReadOnly ? 0 : 1)}
+                  className="p-2 text-xs text-center text-gray-400"
+                >
+                  No data available
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

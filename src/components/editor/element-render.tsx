@@ -25,6 +25,7 @@ import Rating from "../elements/rating-input";
 import CountryBank from "../elements/country-bank";
 import SignDocument from "../elements/document-sign";
 import PhoneNumber from "../elements/phone-input";
+import LinkElement from "../elements/link-element";
 
 export const elementMap: Record<string, React.ElementType> = {
   textField: TextInput,
@@ -52,7 +53,8 @@ export const elementMap: Record<string, React.ElementType> = {
   rating: Rating,
   country: CountryBank,
   bank: CountryBank,
-  document: SignDocument
+  document: SignDocument,
+  link: LinkElement
 };
 const state = "edit"; // This can be passed as a prop or context value
 export const RenderElement = (element: any, sectionId: string) => {

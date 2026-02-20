@@ -16,6 +16,7 @@ export enum ElementKind {
   NUMBER = "numberField",
   AMOUNT = "amountField",
   DATE = "date",
+  LINK = "link",
   PASSWORD = "password",
   CHECKBOX = "checkbox",
   PHONE = "phoneField",
@@ -254,7 +255,6 @@ export const Elements: ElementType[] = [
     inputType: "amount",
     prefix: null,
   }),
-
   createElement({
     type: ElementKind.DATE,
     label: "Date",
@@ -267,6 +267,14 @@ export const Elements: ElementType[] = [
     maxDate: null,
     canHaveDateRange: false,
     allowYearPicker: false,
+  }),
+
+  createElement({
+    type: ElementKind.LINK,
+    label: "Link",
+    icon: "iconamoon:link",
+    inputLabel: "Url Link",
+    inputType: "text",
   }),
 
   createElement({
@@ -418,6 +426,7 @@ export const CategorizedElements = Object.freeze({
     ElementKind.PHONE,
     ElementKind.EMAIL,
     ElementKind.VALIDATE_INPUT,
+    ElementKind.LINK,
   ],
   selectionFields: [
     ElementKind.SELECT,
