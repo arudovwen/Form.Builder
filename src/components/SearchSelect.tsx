@@ -112,7 +112,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             leave="custom-select__transition"
           >
             <Listbox.Options className="custom-select__options"  anchor="bottom">
-              {memoizedOptions.map((option, idx) => (
+              {memoizedOptions?.map((option, idx) => (
                 <Listbox.Option
                   key={idx}
                   value={option}

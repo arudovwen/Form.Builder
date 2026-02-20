@@ -90,7 +90,7 @@ export default function CustomSearchSelect({
               No results found.
             </div>
           ) : (
-            filteredOptions.map((option) => (
+            filteredOptions?.map((option) => (
               <ComboboxOption
                 key={option.value}
                 value={option}

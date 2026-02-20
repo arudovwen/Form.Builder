@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { Key, useCallback, useEffect, useState } from "react";
 import FileUpload from "../forms/file-uploader";
 import UniversalFileViewer from "../UniversalFileViewer";
 
@@ -17,7 +17,7 @@ export default function FileInput({ element, validationData }) {
 
   useEffect(() => {
     if (watch) {
-      const subscription = watch((values) => {
+      const subscription = watch((values: { [x: string]: any; }) => {
         setFileData(values[element.id]);
       });
       return () => subscription.unsubscribe?.(); // clean up if watch returns a subscription (e.g., react-hook-form)
@@ -25,7 +25,7 @@ export default function FileInput({ element, validationData }) {
   }, [watch, element.id]);
 
   const handleFileLoaded = useCallback(
-    (data) => {
+    (data: any) => {
       setValue?.(element.id, data);
       setFileData(data);
     },
@@ -51,7 +51,7 @@ export default function FileInput({ element, validationData }) {
       )}
       {fileData && isReadOnly && (
         <div className="relative grid gap-y-1 flex-1 w-full">
-          {fileData.map((file, index) => (
+          {typeof fileData === 'object'  && fileData?.map((file: { base64: any; name: any; }, index: Key | null | undefined) => (
             <div key={index}>
               <UniversalFileViewer fileUrl={file.base64} fileName={file.name} />
             </div>

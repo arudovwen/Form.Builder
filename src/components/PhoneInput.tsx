@@ -48,7 +48,7 @@ export default function PhoneInput({
       countries
         ?.slice() // create a shallow copy so we don’t mutate state
         .sort((a, b) => a.label.localeCompare(b.label))
-        .map((c) => ({ ...c, phone: `+${c.phone}` })),
+        ?.map((c) => ({ ...c, phone: `+${c.phone}` })),
     []
   );
 
@@ -140,7 +140,7 @@ export default function PhoneInput({
             </Combobox.Button>
 
             <Combobox.Options className="absolute z-10 w-[250px] left-0 bg-white border rounded-md shadow-lg max-h-[400px] overflow-y-auto">
-              {filteredCountries.map((country, index) => (
+              {filteredCountries?.map((country, index) => (
                 <Combobox.Option
                   key={`${country.code}+ ${index}`}
                   value={country}

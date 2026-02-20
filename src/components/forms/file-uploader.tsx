@@ -38,7 +38,7 @@ export default function FileUpload({
   list = null,
   accept = [],
 }: FileUploadProps) {
-  const { uploadUrl } = useContext(EditorContext);
+  const { uploadUrl }: any = useContext(EditorContext);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [fileData, setFileData] = useState<FileItem[] | null>(list);
@@ -50,12 +50,12 @@ export default function FileUpload({
   }, [list]);
 
   const acceptedFiles = useMemo(
-    () => accept.map((i) => i.value).join(", "),
+    () => accept?.map((i) => i.value).join(", "),
     [accept]
   );
 
   const acceptedFileLabels = useMemo(
-    () => accept.map((i) => i.label).join(", "),
+    () => accept?.map((i) => i.label).join(", "),
     [accept]
   );
 
@@ -118,7 +118,7 @@ export default function FileUpload({
   const validateFiles = useCallback(
     (files: File[]): boolean => {
       const allowedTypes = acceptedFiles
-        ? acceptedFiles.split(",").map((t) => t.trim())
+        ? acceptedFiles.split(",")?.map((t) => t.trim())
         : [];
 
       for (const file of files) {
@@ -165,7 +165,7 @@ export default function FileUpload({
       try {
         setIsUploading(true);
 
-        const uploaded = await Promise.all(files.map(uploadFile));
+        const uploaded = await Promise.all(files?.map(uploadFile));
 
         setFileData((prev) => {
           const updated = multiple && prev ? [...prev, ...uploaded] : uploaded;
@@ -256,7 +256,7 @@ export default function FileUpload({
             </div>
           )}
 
-          {fileData.map((file, index) => (
+          {typeof fileData === 'object'  && fileData?.map((file, index) => (
             <UniversalFileViewer
               key={`${file.name}-${index}`}
               fileUrl={file.base64}

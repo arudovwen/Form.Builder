@@ -22,7 +22,7 @@ export default function MultiSelectInput({
   } = validationData || {};
 
   const displayValue = useMemo(
-    () => selectedValues.map((i) => i.label).join(", "),
+    () => selectedValues?.map((i) => i.label).join(", "),
     [selectedValues]
   );
 
@@ -30,7 +30,6 @@ export default function MultiSelectInput({
   useEffect(() => {
     register(element.id);
   }, [element.id, register]);
-console.log({selectedValues, options:element.options});
 
   return (
     <div className="custom-select">

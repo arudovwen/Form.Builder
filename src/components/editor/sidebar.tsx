@@ -65,7 +65,7 @@ const SideBar = () => {
   );
 
   const categorizedElements = categoryTitles
-    .map((category) => ({
+    ?.map((category) => ({
       title: category.title,
       elements: filteredElements.filter((e) =>
         CategorizedElements[
@@ -89,13 +89,13 @@ const SideBar = () => {
       <hr />
       <div>
         <ul className="grid gap-y-5 mt-3 px-5 max-h-[80vh] overflow-y-auto no-scrollbar">
-          {categorizedElements.map((category, index) => (
+          {categorizedElements?.map((category, index) => (
             <li key={index}>
               <h4 className="mb-2 text-[11px] font-bold text-gray-500 uppercase">
                 {category.title}
               </h4>
               <ul className="grid gap-y-[6px] mb-3">
-                {category.elements.map((element) => (
+                {category.elements?.map((element) => (
                   <li
                     key={element.type}
                     onDragStart={(e) => handleDragStart(e, element)}

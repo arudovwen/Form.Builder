@@ -80,7 +80,7 @@ export default function TableInputColumn({
             <span className="">Add Denominations</span>
           </div>
         </div>
-        {internalValues.map((item, index) => (
+        {internalValues?.map((item, index) => (
           <div
             key={index + "index"}
             className="grid text-sm border-b border-gray-100"

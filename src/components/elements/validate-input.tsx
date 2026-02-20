@@ -157,7 +157,7 @@ export default function ValidateInput({
 
       {responseType === "object" && (
         <div className="grid grid-cols-2 gap-6 mt-2 text-sm text-gray-600">
-          {Object.entries(result).map(([key, value]) => (
+          {Object.entries(result)?.map(([key, value]) => (
             <div key={key} className="flex items-center gap-x-2">
               <span className="font-semibold">{key}:</span>
               {isValidImage(value) ? (

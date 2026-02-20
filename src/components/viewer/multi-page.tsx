@@ -19,7 +19,7 @@ export default function MultiPage({ form_data, options, current }) {
               element={element}
               customClass="p-0 min-h-[60px] border-none"
             >
-              {gridChildren.map((child: any) => (
+              {gridChildren?.map((child: any) => (
                 <GridItem
                   key={child.id}
                   col={child.gridPosition?.col}

@@ -5,6 +5,7 @@ import {
   DragEvent,
   memo,
   useMemo,
+  Key,
 } from "react";
 import clsx from "clsx";
 import { v4 as uuidv4 } from "uuid";
@@ -45,7 +46,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
   const [dragOverTargetId, setDragOverTargetId] = useState<string | null>(null);
 
   const questionData = useMemo(
-    () => formData.find((s) => s.id === sectionId)?.questionData || [],
+    () => formData.find((s: { id: any; }) => s.id === sectionId)?.questionData || [],
     [formData, sectionId]
   );
 
@@ -76,8 +77,8 @@ function ElementCanvas({ elementData, sectionId }: any) {
 
       if (!targetId || draggedId === targetId) return;
 
-      const fromIndex = questionData.findIndex((el) => el.id === draggedId);
-      const toIndex = questionData.findIndex((el) => el.id === targetId);
+      const fromIndex = questionData.findIndex((el: { id: string; }) => el.id === draggedId);
+      const toIndex = questionData.findIndex((el: { id: string; }) => el.id === targetId);
       if (fromIndex === -1 || toIndex === -1) return;
 
       const updated = [...questionData];
@@ -97,7 +98,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
 
       try {
         const data = JSON.parse(e.dataTransfer.getData("properties"));
-        console.log({ data });
+      
         if (data?.type === "section") {
           // addSection()
           return;
@@ -180,7 +181,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
 
   return (
     <div className="relative grid w-full h-full grid-cols-1 gap-4">
-      {elementData.map((el: any, index: number) => {
+      {elementData?.map((el: any, index: number) => {
         if (el.type === "grid") {
           const gridChildren = gridChildrenMap[el.id] || [];
 
@@ -196,7 +197,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
             >
               <ElementContainer element={el} state="edit">
                 <GridInput element={el} sectionId={sectionId} state={STATE}>
-                  {gridChildren.map((child) => (
+                  {gridChildren?.map((child: { id: Key | null | undefined; gridPosition: { col: number; }; }) => (
                     <GridItem key={child.id} col={child.gridPosition?.col}>
                       {RenderElement(child, sectionId)}
                     </GridItem>

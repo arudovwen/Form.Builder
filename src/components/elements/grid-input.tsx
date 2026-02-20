@@ -137,7 +137,7 @@ const GridInput = ({
           gridTemplateColumns: `repeat(${element.columns}, 1fr)`,
         }}
       >
-        {gridItems.map((_, index) => renderGridCell(index, customClass, state))}
+        {gridItems?.map((_, index) => renderGridCell(index, customClass, state))}
       </div>
     </div>
   );

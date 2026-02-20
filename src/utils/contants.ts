@@ -1,4 +1,5 @@
 import countries from "../data/countries.json";
+import { v4 as uuidv4 } from "uuid";
 
 /* ---------------------------------- */
 /* Enums & Types */
@@ -36,6 +37,9 @@ export interface DataColumnType {
   headerName: string;
   width?: number;
   editable?: boolean;
+  type?: string;
+  validate?: boolean;
+  id: string;
 }
 
 export interface OptionType {
@@ -103,10 +107,10 @@ export interface ElementType {
   visibilityDependentFields?: string;
   visibilityDependentFieldsValue?: any;
 
-  isMultiple: boolean
-  acceptedFiles: any[]
+  isMultiple: boolean;
+  acceptedFiles: any[];
 
-  showState?: boolean
+  showState?: boolean;
 }
 
 /* ---------------------------------- */
@@ -152,13 +156,13 @@ const createElement = (config: Partial<ElementType>): ElementType =>
   ({
     ...textDefaults,
     ...config,
-  } as ElementType);
+  }) as ElementType;
 
 /* ---------------------------------- */
 /* Static Options */
 /* ---------------------------------- */
 
-export const countryOptions: OptionType[] = countries.map((c: any) => ({
+export const countryOptions: OptionType[] = countries?.map((c: any) => ({
   label: c.name,
   value: c.name,
   id: c.code || c.name,
@@ -315,7 +319,7 @@ export const Elements: ElementType[] = [
     inputLabel: "File Label",
     inputType: "file",
     isMultiple: false,
-    acceptedFiles: []
+    acceptedFiles: [],
   }),
 
   createElement({
@@ -325,7 +329,7 @@ export const Elements: ElementType[] = [
     inputLabel: "Select Country",
     inputType: "country",
     options: countryOptions,
-    showState: false
+    showState: false,
   }),
 
   createElement({
@@ -345,10 +349,13 @@ export const Elements: ElementType[] = [
     value: [],
     dataColumns: [
       {
-        field: "firstName",
-        headerName: "First Name",
+        id: uuidv4(),
+        field: "",
+        headerName: "",
         width: 150,
         editable: true,
+        type: "text",
+        validate: false,
       },
     ],
   }),
@@ -477,7 +484,6 @@ export const AllowTableOptions: string[] = ["tableInput"];
 export const AllowTextOptions: string[] = ["text"];
 export const noAllowEdit: string[] = ["divider", "spacer"];
 export const allowValue: string[] = ["basicText"];
-
 
 export const FileTypes = [
   {

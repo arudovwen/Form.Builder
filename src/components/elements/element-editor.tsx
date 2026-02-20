@@ -295,7 +295,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   const renderOptionsFields = () => (
     <div className="flex flex-col justify-start gap-y-1">
       <div className="flex items-center mb-4 gap-x-5">
-        {OptionsTypes.map((i) => (
+        {OptionsTypes?.map((i) => (
           <label key={i} className="items-center text-base capitalize gap-x-3">
             <input
               type="radio"
@@ -349,7 +349,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       )}
       <div>
         <h3 className="mb-4 text-sm text-gray-500">Parent Options </h3>
-        {fields.map((field, index) => (
+        {fields?.map((field, index) => (
           <div
             key={field.id}
             className="flex items-center mb-1 gap-x-4 last:mb-0"
@@ -475,7 +475,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   const renderColumnsFields = () => (
     <div className="flex flex-col justify-start gap-y-1">
       <div className="flex items-center mb-4 gap-x-5">
-        {OptionsTypes.map((i) => (
+        {OptionsTypes?.map((i) => (
           <label key={i} className="items-center text-base capitalize gap-x-3">
             <input
               type="radio"
@@ -528,30 +528,61 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           />
         </div>
       )}
-      {dataFields.map((field, index) => (
+      {dataFields?.map((field, index) => (
         <div key={field.id} className="flex items-center gap-x-4 ">
+          <div className="min-w-[140px]">
+            <CustomSelect
+              label={index === 0 ? "Type" : ""}
+              options={[
+                {
+                  label: "Text",
+                  value: "text",
+                },
+                {
+                  label: "Number",
+                  value: "number",
+                },
+                {
+                  label: "Checkbox",
+                  value: "checkbox",
+                },
+              ]}
+              register={register}
+              name={`dataColumns.${index}.type`}
+              setValue={setValue}
+              trigger={trigger}
+              value={values.dataColumns[index].type}
+            />
+          </div>
+
           <div className="flex-1">
             <DynamicInput
-              label="Field key"
+              label={index === 0 ? "Field key" : ""}
               name={`dataColumns.${index}.field`}
               register={register}
               errors={errors}
               element={element}
-              placeholder="Field"
-              isFloating
+              placeholder="fieldKey"
             />
           </div>
           <div className="flex-1">
             <DynamicInput
-              label="Header Name"
+               label={index === 0 ? "Display header" : ""}
               name={`dataColumns.${index}.headerName`}
               register={register}
               errors={errors}
               element={element}
-              placeholder="headerName"
-              isFloating
+              placeholder="header"
             />
           </div>
+          {/* <label className="flex items-center mb-0 gap-x-2">
+            <input
+              type="checkbox"
+              checked={values.dataColumns[index].validate}
+              {...register(`dataColumns.${index}.validate`)}
+            />
+            Validate
+          </label> */}
           {/* <div className="flex items-center flex-1 gap-x-3">
             <label>
               {" "}
@@ -580,6 +611,8 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               field: "",
               editable: true,
               id: uuidv4(),
+              type: "text",
+              validate: false,
             })
           }
         >
@@ -596,7 +629,6 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       },
     });
     if (status === 200) {
-      console.log({ data });
       setValue("options", data?.data || data);
     }
   }, [setValue, values.url]);
@@ -618,8 +650,12 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         draggable="true"
         onDragStart={(e) => e.preventDefault()}
       >
-        <button className="bg-white h-10 w-10 flex justify-center items-center absolute top-1 -left-12 rounded-lg hover:bg-gray-50" onClick={onClose}>
-          <AppIcon icon="tabler:x" iconClass="text-xl" /></button>
+        <button
+          className="bg-white h-10 w-10 flex justify-center items-center absolute top-1 -left-12 rounded-lg hover:bg-gray-50"
+          onClick={onClose}
+        >
+          <AppIcon icon="tabler:x" iconClass="text-xl" />
+        </button>
         {/* Header */}
         {/* <div className="z-10 flex flex-col items-start w-full gap-4 px-6 pt-4 pb-5 mb-3">
           <button
@@ -1073,9 +1109,11 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               type="submit"
               disabled={!isValid || isSubmitting}
               style={{ background: config?.buttonColor || "#333" }}
-              className={`flex-1 px-4 py-2.5 ${!isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#2563EB]"
-                } ${!isValid || isSubmitting ? "text-[#98A2B3]" : "text-white"
-                } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-50 editor_option__save`}
+              className={`flex-1 px-4 py-2.5 ${
+                !isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#2563EB]"
+              } ${
+                !isValid || isSubmitting ? "text-[#98A2B3]" : "text-white"
+              } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-50 editor_option__save`}
             >
               {isSubmitting ? "Saving..." : "Save"}
             </button>

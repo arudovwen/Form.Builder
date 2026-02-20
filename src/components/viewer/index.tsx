@@ -105,7 +105,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     if (!form_data?.length || !onGetValues) return;
 
     const updatedData = form_data.flatMap((section) =>
-      section.questionData.map((element: any) => ({
+      section.questionData?.map((element: any) => ({
         id: element.id,
         value: memoizedValues[element.id],
         sectionId: section.id,
@@ -128,7 +128,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   const onSubmit = useCallback(
     (data: Record<string, any>) => {
       const updatedData = form_data.flatMap((section) =>
-        section.questionData.map((element: any) => ({
+        section.questionData?.map((element: any) => ({
           id: element.id,
           value: data[element.id],
           sectionId: section.id,

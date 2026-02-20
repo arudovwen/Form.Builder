@@ -25,7 +25,7 @@ export default function CountryBank({
   // Parse country and state from rawValue
   const { country, state } = useMemo(() => {
     if (typeof rawValue === "string" && rawValue.includes(",")) {
-      const [state, country] = rawValue.split(",").map((s) => s.trim());
+      const [state, country] = rawValue.split(",")?.map((s) => s.trim());
       return { country, state };
     }
     return { country: rawValue, state: "" };

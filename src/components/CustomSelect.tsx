@@ -83,8 +83,8 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
 
     // Deep comparison for arrays
     if (isMultiple && Array.isArray(computedSelected) && Array.isArray(selected)) {
-      const selectedValues = (selected as Option[]).map(s => s.value);
-      const computedValues: any = (computedSelected as Option[]).map(s => s.value);
+      const selectedValues = (selected as Option[])?.map(s => s.value);
+      const computedValues: any = (computedSelected as Option[])?.map(s => s.value);
       
       if (JSON.stringify(selectedValues) !== JSON.stringify(computedValues)) {
         setSelected(computedSelected);
@@ -101,7 +101,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
 
     if (setValue) {
       const formValue = isMultiple
-        ? Array.isArray(newValue) ? newValue.map(v => v.value) : []
+        ? Array.isArray(newValue) ? newValue?.map(v => v.value) : []
         : (newValue as Option)?.value ?? null;
 
       setValue(name, formValue);
@@ -121,7 +121,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
 
     if (isMultiple && Array.isArray(selected)) {
       return selected.length > 0
-        ? selected.map(s => s.label).join(", ")
+        ? selected?.map(s => s.label).join(", ")
         : placeholder;
     }
 
@@ -179,7 +179,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                   No options available
                 </div>
               ) : (
-                options.map((option, idx) => (
+                options?.map((option, idx) => (
                   <Listbox.Option
                     key={option.value?.id || option.value || idx}
                     value={option}

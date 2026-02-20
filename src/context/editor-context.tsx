@@ -79,7 +79,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       if (!elementData) return;
 
       setFormData((prevFormData) =>
-        prevFormData.map((section) =>
+        prevFormData?.map((section) =>
           section.id === sectionId
             ? {
               ...section,
@@ -118,7 +118,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       });
 
       setFormData((prevFormData) =>
-        prevFormData.map((sec: any) => {
+        prevFormData?.map((sec: any) => {
           if (sec.id !== sectionId) return sec;
 
           const qd = [...sec.questionData];
@@ -126,9 +126,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
           if (original.type === "grid") {
             // Duplicate a grid and all its children
             const relatedIndices = qd
-              .map((e, i) => ({ e, i }))
+              ?.map((e, i) => ({ e, i }))
               .filter(({ e }) => e.id === original.id || e.gridId === original.id)
-              .map(({ i }) => i);
+              ?.map(({ i }) => i);
 
             const insertAfter = relatedIndices.length ? Math.max(...relatedIndices) + 1 : elementIndex + 1;
 
@@ -137,7 +137,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
             newGrid.id = newGridId;
 
             const children = qd.filter((e: any) => e.gridId === original.id);
-            const newChildren = children.map((child: any) =>
+            const newChildren = children?.map((child: any) =>
               deepCloneWithNewId(child, { gridId: newGridId })
             );
 
@@ -167,7 +167,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
   const updateElementPosition = React.useCallback(
     (updatedQuestionData: any[], sectionId: string) => {
       setFormData((prevFormData) =>
-        prevFormData.map((section) =>
+        prevFormData?.map((section) =>
           section.id === sectionId
             ? { ...section, questionData: updatedQuestionData }
             : section,
@@ -179,7 +179,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
 
   const addElement = React.useCallback((element: any, sectionId: string) => {
     setFormData((prevFormData) =>
-      prevFormData.map((section) =>
+      prevFormData?.map((section) =>
         section.id === sectionId
           ? {
             ...section,
@@ -192,7 +192,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
   const addElementInPosition = React.useCallback(
     (element: any, sectionId: string, index: any) => {
       setFormData((prevFormData) =>
-        prevFormData.map((section) =>
+        prevFormData?.map((section) =>
           section.id === sectionId
             ? {
               ...section,
@@ -211,16 +211,16 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
   const updateGridElement = React.useCallback(
     (gridIndex: number, element: any, sectionId: string) => {
       setFormData((prevFormData) =>
-        prevFormData.map((section) =>
+        prevFormData?.map((section) =>
           section.id === sectionId
             ? {
               ...section,
-              questionData: section.questionData.map((question: any) =>
+              questionData: section.questionData?.map((question: any) =>
                 question.type === "grid" && question.gridData
                   ? {
                     ...question,
                     gridData: question.gridData
-                      .map((grid: any, index: number) =>
+                      ?.map((grid: any, index: number) =>
                         index === gridIndex
                           ? {
                             ...grid,
@@ -245,11 +245,11 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
   );
   const updateElement = React.useCallback((value: any, sectionId: string) => {
     setFormData((prevFormData) =>
-      prevFormData.map((section) =>
+      prevFormData?.map((section) =>
         section.id === sectionId
           ? {
             ...section,
-            questionData: section.questionData.map((ele: any) =>
+            questionData: section.questionData?.map((ele: any) =>
               ele.id === value.id ? { ...ele, ...value } : ele,
             ),
           }
@@ -259,7 +259,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
   }, []);
   const updateSection = React.useCallback((value: any, sectionId: string) => {
     setFormData((prevFormData) =>
-      prevFormData.map((section) =>
+      prevFormData?.map((section) =>
         section.id === sectionId
           ? {
             ...section,

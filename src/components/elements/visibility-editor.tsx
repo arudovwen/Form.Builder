@@ -23,7 +23,7 @@ export default function VisibilityEditor({
   const questionData = useMemo(() => {
     return getAllQuestionData(formData)
       .filter((i) => i.id !== id)
-      .map((i) => {
+      ?.map((i) => {
         const currentField = visibilityDependentFields.find(
           (j) => j.id === i.id,
         );
@@ -43,7 +43,7 @@ export default function VisibilityEditor({
   }, [formData, visibilityDependentFields, id]);
 
   const handleValueChange = (index: number, name: string, newValue: any) => {
-    const updatedFields = visibilityDependentFields.map((item, i) =>
+    const updatedFields = visibilityDependentFields?.map((item, i) =>
       i === index ? { ...item, [name]: newValue } : item,
     );
     setValue("visibilityDependentFields", updatedFields);
@@ -64,7 +64,7 @@ export default function VisibilityEditor({
 
       {visibilityDependentFields.length > 0 && (
         <div className="py-1 bg-gray-100 rounded dependent-fields">
-          {visibilityDependentFields.map((field, index) => (
+          {visibilityDependentFields?.map((field, index) => (
             <div key={field.id} className="dependent-field">
               {/* Field label */}
               <input
@@ -95,7 +95,7 @@ export default function VisibilityEditor({
                         className="listbox-options "
                         anchor="bottom"
                       >
-                        {fieldTypes.map((type) => (
+                        {fieldTypes?.map((type) => (
                           <Listbox.Option
                             key={type}
                             value={type}
@@ -133,7 +133,7 @@ export default function VisibilityEditor({
                         {(field.fieldType === "number"
                           ? [...operators, ...numberOperators]
                           : operators
-                        ).map((op) => (
+                        )?.map((op) => (
                           <Listbox.Option
                             key={op}
                             value={op}

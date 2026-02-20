@@ -41,7 +41,7 @@ export default function MultiSelectInput({
           <Listbox.Button className="custom-select__control">
             <span className="custom-select__value">
               {selectedOptions.length > 0 ? (
-                selectedOptions.map((opt) => opt.label).join(", ")
+                selectedOptions?.map((opt) => opt.label).join(", ")
               ) : (
                 <span className="custom-select__placeholder">
                   Select options
@@ -58,7 +58,7 @@ export default function MultiSelectInput({
             className="custom-select__options"
           >
             {filteredOptions.length > 0 ? (
-              filteredOptions.map((option) => (
+              filteredOptions?.map((option) => (
                 <Listbox.Option
                   key={option.id}
                   value={option}
@@ -90,7 +90,7 @@ export default function MultiSelectInput({
 
       {selectedOptions.length > 0 && (
         <div className="custom-select__chips">
-          {selectedOptions.map((opt) => (
+          {selectedOptions?.map((opt) => (
             <span key={opt.id} className="custom-select__chip">
               {opt.label}
               <button

@@ -72,7 +72,7 @@ const FormBuilder = () => {
         />
       )}
       <div className="relative flex flex-col flex-1 w-full py-4 gap-y-6">
-        {formData.map(
+        {formData?.map(
           (
             section: {
               id: string | undefined;

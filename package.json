@@ -1,6 +1,6 @@
 {
   "name": "@arudovwen/form-builder-react",
-  "version": "1.4.24",
+  "version": "1.4.25",
   "description": "A React-based form builder component library.",
   "type": "module",
   "main": "./dist/form-builder.umd.js",

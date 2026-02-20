@@ -15,7 +15,7 @@ export default function SinglePage({ form_data, options }) {
       element={element}
       customClass="p-0 min-h-[60px] border-none"
     >
-      {gridChildren.map((child: any) => (
+      {gridChildren?.map((child: any) => (
         <GridItem
           key={child.id}
           col={child.gridPosition?.col}
@@ -43,7 +43,7 @@ export default function SinglePage({ form_data, options }) {
 
   return (
     <div className="grid gap-y-10">
-      {form_data.map((section: any) => {
+      {form_data?.map((section: any) => {
         const gridChildren = new Map<string, any[]>();
         
         // Pre-group grid children for efficient lookup

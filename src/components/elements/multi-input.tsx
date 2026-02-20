@@ -25,7 +25,7 @@ const DynamicInputList: React.FC<DynamicInputListProps> = ({
   const [fields, setFields] = useState<FieldType[]>([]);
 
   useEffect(() => {
-    const tempData = initialFields.map((field) => ({
+    const tempData = initialFields?.map((field) => ({
       ...field,
       value: tempDefaultValue?.[field.key] ?? '',
     }));
@@ -60,7 +60,7 @@ const DynamicInputList: React.FC<DynamicInputListProps> = ({
   return (
     <>
       <div>
-        {fields.map((field, index) => (
+        {fields?.map((field, index) => (
           <div key={index} style={{ marginBottom: 10 }}>
             <label className="block text-sm text-[#686878] darks:!text-white/70 mb-2">
               {field.label}

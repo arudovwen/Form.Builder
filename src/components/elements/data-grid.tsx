@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import CustomDataGrid from "../DataTable";
 
 export default function DataGridInput({
@@ -14,14 +14,16 @@ export default function DataGridInput({
   useEffect(() => {
     register(element.id);
   }, [element.id, register]);
-    console.log(element);
+  const handleChange = useCallback(
+    (value: any) => {
+      setValue?.(element.id, value);
+    },
+    [element.id, setValue],
+  );
   return (
     <CustomDataGrid
       value={registeredValue}
-      onChange={(value: any) => {
-    
-        setValue(element.id, value);
-      }}
+      onChange={handleChange}
       columns={element?.dataColumns}
       isReadOnly={element?.isReadOnly}
     />

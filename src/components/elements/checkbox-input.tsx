@@ -11,7 +11,7 @@ export default function CheckBoxInput({
   const { register = () => ({}) } = validationData || {};
   return (
     <div className={clsx("grid gap-y-[6px]", element.customClass)}>
-      {element?.options.map(
+      {element?.options?.map(
         (item: { id: string; label: string; value: string }) => (
           <div key={item.id}>
             <DynamicInput
