@@ -78,11 +78,13 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     watch,
     formState: { errors, isSubmitting },
     trigger,
+    setError,
+    clearErrors,
   } = methods;
 
   // ✅ Use useWatch to efficiently track changes
   const watchedValues = useWatch({ control });
-
+  console.log({ errors });
   // ✅ Deep memoization to avoid redundant updates
   const memoizedValues = useMemo(
     () => watchedValues,
@@ -135,7 +137,9 @@ const FormRenderer: React.FC<FormRendererProps> = ({
           type: element.type,
         })),
       );
-
+      if (Object.keys(errors).length > 0) {
+        return;
+      }
       onSubmitData?.(updatedData);
     },
     [form_data, onSubmitData],
@@ -167,6 +171,8 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       isSubmitting,
       isReadOnly,
       getValues,
+      setError,
+      clearErrors,
     }),
     [
       register,
@@ -177,6 +183,8 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       isSubmitting,
       isReadOnly,
       getValues,
+      setError,
+      clearErrors,
     ],
   );
 
@@ -240,7 +248,9 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                   !ignoreValidation &&
                   (children ?? (
                     <AppButton
-                      isDisabled={isSubmitting}
+                      isDisabled={
+                        isSubmitting || Object.keys(errors).length > 0
+                      }
                       isLoading={isSubmitting}
                       type="submit"
                       text="Submit"
@@ -254,7 +264,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
               !ignoreValidation &&
               (children ?? (
                 <AppButton
-                  isDisabled={isSubmitting}
+                  isDisabled={isSubmitting || Object.keys(errors).length > 0}
                   isLoading={isSubmitting}
                   type="submit"
                   text="Submit"

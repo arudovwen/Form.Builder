@@ -16,12 +16,12 @@ export default function LinkElement({
 
   return (
     <div>
-      <input
+     {!validationData?.isReadOnly  && <input
         placeholder={element?.placeholder || "Enter Url link"}
         className={clsx("field-control", element?.customClass)}
         {...register(element?.id)}
         disabled={validationData?.isReadOnly}
-      />
+      />}
       {selectedValue && (
         <div
           className={

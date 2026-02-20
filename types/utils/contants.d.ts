@@ -9,6 +9,7 @@ export declare enum ElementKind {
     NUMBER = "numberField",
     AMOUNT = "amountField",
     DATE = "date",
+    LINK = "link",
     PASSWORD = "password",
     CHECKBOX = "checkbox",
     PHONE = "phoneField",
@@ -29,6 +30,9 @@ export interface DataColumnType {
     headerName: string;
     width?: number;
     editable?: boolean;
+    type?: string;
+    validate?: boolean;
+    id: string;
 }
 export interface OptionType {
     label: string;

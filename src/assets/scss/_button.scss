@@ -1,4 +1,4 @@
 .btn {
-  @apply font-medium  px-6 py-2 rounded-lg capitalize  transition-all duration-150 md:whitespace-nowrap whitespace-normal  disabled:opacity-80 disabled:bg-[#F2F4F7] disabled:border-[#E4E7EC] disabled:text-[#98A2B3] disabled:cursor-not-allowed relative active:scale-95;
+  @apply font-medium  px-6 py-2 rounded-lg capitalize  transition-all duration-150 md:whitespace-nowrap whitespace-normal  disabled:opacity-50 disabled:bg-[#F2F4F7] disabled:border-[#E4E7EC] disabled:text-[#98A2B3] disabled:cursor-not-allowed relative active:scale-95;
 }
  

@@ -10,10 +10,11 @@ export default function PhoneNumber({
 }) {
   const {
     register = () => ({}),
-    trigger,
     setValue,
     watch,
     isReadOnly,
+    setError,
+    clearErrors,
   } = validationData || {};
   let selectedValue;
 
@@ -33,11 +34,17 @@ export default function PhoneNumber({
       value={selectedValue}
       readOnly={isReadOnly}
       disabled={isReadOnly}
+      onError={(err) => {
+        if (err) {
+          setError?.(element.id, { type: "manual", message: err });
+        } else {
+          clearErrors(element.id);
+        }
+      }}
       onChange={(data) => {
-        if(!data) return
- 
+        if (!data) return;
         setValue?.(element.id, data);
-        trigger?.(element.id);
+
       }}
     />
   );

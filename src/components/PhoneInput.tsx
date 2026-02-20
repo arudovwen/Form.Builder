@@ -105,9 +105,9 @@ export default function PhoneInput({
 
   return (
     <div
-      className={`relative formGroup ${phoneError ? "has-error" : ""} ${
+      className={`relative formGroup ${phoneError  && !readOnly ? "has-error" : ""} ${
         horizontal ? "flex" : ""
-      } ${!phoneError && number.length > 0 ? "is-valid" : ""}`}
+      } ${!phoneError && number.length > 0 && !readOnly ? "is-valid" : ""}`}
     >
       {/* Label */}
       {label && (
@@ -171,7 +171,7 @@ export default function PhoneInput({
 
           {/* Icons */}
           <div className="absolute flex text-xl -translate-y-1/2 top-1/2 right-4">
-            {!phoneError && number.length > 0 && (
+            {!phoneError && number.length > 0 && !readOnly && (
               <span className="text-green-500">
                 <AppIcon icon="bi:check-lg" />
               </span>
@@ -181,14 +181,14 @@ export default function PhoneInput({
       </div>
 
       {/* Error / Success */}
-      {phoneError ? (
+      {/* {phoneError ? (
         <span className="block mt-1 text-sm text-red-500">{phoneError}</span>
       ) : (
         number.length > 0 &&
         validate && (
           <span className="block mt-1 text-sm text-green-500">{validate}</span>
         )
-      )}
+      )} */}
 
       {/* Description */}
       {description && (

@@ -48,6 +48,8 @@ const SectionEditorModal: React.FC<{
     updateSection(value, section.id);
     onClose();
   };
+
+  
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[999] cursor-default no-drag select-none">
       <div className="min-w-[600px] bg-white rounded-xl shadow-xl relative flex flex-col items-center">
