@@ -316,7 +316,7 @@ export default function CustomDataGrid<T extends { id: string }>({
   return (
     <div className="mt-3 rounded" ref={tableRef}>
       <div className="flex justify-end">
-        {columns.length > 0 && !isReadOnly && (
+        {!isReadOnly && (
           <button
             onClick={addRow}
             type="button"

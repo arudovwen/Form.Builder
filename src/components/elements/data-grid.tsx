@@ -8,7 +8,12 @@ export default function DataGridInput({
   element: any;
   validationData: any;
 }) {
-  const { register = () => ({}), setValue, watch } = validationData || {};
+  const {
+    register = () => ({}),
+    setValue,
+    watch,
+    isReadOnly,
+  } = validationData || {};
   const registeredValue = (watch && watch(element?.id)) || [];
 
   useEffect(() => {
@@ -25,7 +30,7 @@ export default function DataGridInput({
       value={registeredValue}
       onChange={handleChange}
       columns={element?.dataColumns}
-      isReadOnly={element?.isReadOnly}
+      isReadOnly={isReadOnly}
     />
   );
 }
