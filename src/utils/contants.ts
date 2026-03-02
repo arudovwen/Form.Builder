@@ -150,7 +150,7 @@ const textDefaults = {
 const option = (label: string, value = label): OptionType => ({
   label,
   value,
-  id: value,
+  id: uuidv4(),
 });
 
 const createElement = (config: Partial<ElementType>): ElementType =>

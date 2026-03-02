@@ -13,17 +13,18 @@ export default function MultiSelectInput({
 }) {
   const [selectedValues, setSelectedValues] = useState<
     { label: string; value: any }[]
-  >(element.value || []);
+  >([]);
 
   const {
     register = () => ({}),
     setValue,
     isReadOnly,
+    watch,
   } = validationData || {};
 
   const displayValue = useMemo(
     () => selectedValues?.map((i) => i.label).join(", "),
-    [selectedValues]
+    [selectedValues],
   );
 
   /* ---------------- Register field ---------------- */
@@ -31,11 +32,18 @@ export default function MultiSelectInput({
     register(element.id);
   }, [element.id, register]);
 
+  useEffect(() => {
+    if (watch) {
+      const subscription = watch((values: { [x: string]: any }) => {
+        setSelectedValues(values[element.id]);
+      });
+      return () => subscription.unsubscribe?.(); // clean up if watch returns a subscription (e.g., react-hook-form)
+    }
+  }, [watch, element.id]);
   return (
     <div className="custom-select">
-    
       <Listbox
-        value={selectedValues}
+        value={selectedValues || []}
         onChange={(values) => {
           setSelectedValues(values);
           setValue?.(element.id, values);
@@ -50,7 +58,7 @@ export default function MultiSelectInput({
             disabled={isReadOnly}
           >
             <span className="custom-select__value">
-              {selectedValues.length > 0 ? (
+              {selectedValues?.length > 0 ? (
                 displayValue
               ) : (
                 <span className="custom-select__placeholder">

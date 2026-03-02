@@ -313,6 +313,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           <div className="flex items-center gap-x-2">
             <div className="relative flex items-center w-full mb-2">
               <DynamicInput
+                watch={watch}
                 label="Load Options from Api"
                 name="apiUrl"
                 errors={errors}
@@ -356,24 +357,24 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           >
             <div className="flex-1">
               <DynamicInput
-                label="Label"
+                watch={watch}
+                label={index === 0 ? "Label" : ""}
                 name={`options.${index}.label`}
                 register={register}
                 errors={errors}
                 element={element}
                 placeholder="Label"
-                isFloating
               />
             </div>
             <div className="flex-1">
               <DynamicInput
-                label="Value"
+                watch={watch}
+                label={index === 0 ? "Value" : ""}
                 name={`options.${index}.value`}
                 register={register}
                 errors={errors}
                 element={element}
                 placeholder="Value"
-                isFloating
               />
             </div>
 
@@ -412,6 +413,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               >
                 <div className="flex-1">
                   <DynamicInput
+                    watch={watch}
                     label="Label"
                     name={`options1.${index}.label`}
                     register={register}
@@ -423,6 +425,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 </div>
                 <div className="flex-1">
                   <DynamicInput
+                    watch={watch}
                     label="Value"
                     name={`options1.${index}.value`}
                     register={register}
@@ -434,6 +437,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 </div>
                 <div className="flex-1">
                   <DynamicInput
+                    watch={watch}
                     label="Key"
                     name={`options1.${index}.key`}
                     register={register}
@@ -494,6 +498,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           <div className="flex items-center gap-x-2">
             <div className="relative flex items-center w-full mb-2">
               <DynamicInput
+                watch={watch}
                 label="Load Columns from Api"
                 name="apiUrl"
                 errors={errors}
@@ -557,6 +562,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
 
           <div className="flex-1">
             <DynamicInput
+              watch={watch}
               label={index === 0 ? "Field key" : ""}
               name={`dataColumns.${index}.field`}
               register={register}
@@ -567,7 +573,8 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           </div>
           <div className="flex-1">
             <DynamicInput
-               label={index === 0 ? "Display header" : ""}
+              watch={watch}
+              label={index === 0 ? "Display header" : ""}
               name={`dataColumns.${index}.headerName`}
               register={register}
               errors={errors}
@@ -692,6 +699,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   {allowValue.includes(element.inputType) && (
                     <>
                       <DynamicInput
+                        watch={watch}
                         label="Value"
                         name="value"
                         register={register}
@@ -705,6 +713,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                     !noAllowValidation.includes(element.inputType) && (
                       <>
                         <DynamicInput
+                          watch={watch}
                           label="Label"
                           name="inputLabel"
                           register={register}
@@ -713,6 +722,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         />{" "}
                         {element.type.toLowerCase() === "cascadeselect" && (
                           <DynamicInput
+                            watch={watch}
                             label="Child Label"
                             name="childLabel"
                             register={register}
@@ -724,6 +734,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                     )}
                   {AllowValidationPlaceholder.includes(element.inputType) && (
                     <DynamicInput
+                      watch={watch}
                       label="Placeholder"
                       name="placeholder"
                       register={register}
@@ -733,6 +744,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   )}
                   {AllowValidationPrefix.includes(element.inputType) && (
                     <DynamicInput
+                      watch={watch}
                       label="Prefix"
                       name="prefix"
                       register={register}
@@ -744,6 +756,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                     <div className="grid gap-y-4">
                       <ApiExample />
                       <DynamicInput
+                        watch={watch}
                         label="Api Url"
                         name="url"
                         register={register}
@@ -799,6 +812,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   {!allowValue.includes(element.inputType) &&
                     !noAllowValidation.includes(element.inputType) && (
                       <DynamicInput
+                        watch={watch}
                         label="Short Description"
                         name="description"
                         register={register}
@@ -819,6 +833,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         value={watch("dateFormat")}
                       />
                       <DynamicInput
+                        watch={watch}
                         label="Allow Range"
                         name="canHaveDateRange"
                         register={register}
@@ -844,6 +859,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         </div>
                       )}
                       <DynamicInput
+                        watch={watch}
                         label="Allow Year Picker"
                         name="allowYearPicker"
                         register={register}
@@ -855,6 +871,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   )}
                   {element.type.toLowerCase() === "country" && (
                     <DynamicInput
+                      watch={watch}
                       label="Allow States"
                       name="showState"
                       register={register}
@@ -885,6 +902,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   )}
                   {element.type.toLowerCase() === "grid" && (
                     <DynamicInput
+                      watch={watch}
                       label="Number of columns"
                       name="columns"
                       register={register}
@@ -896,6 +914,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                     <div className="grid gap-y-6">
                       <div className="grid gap-y-1">
                         <DynamicInput
+                          watch={watch}
                           label="Document Options Url"
                           name="url"
                           register={register}
@@ -906,6 +925,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                       </div>
                       <div className="grid gap-y-1">
                         <DynamicInput
+                          watch={watch}
                           label="Document Validation Url"
                           name="validationUrl"
                           register={register}
@@ -916,6 +936,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                       </div>
                       <div className="grid gap-y-1">
                         <DynamicInput
+                          watch={watch}
                           label="Signature Page Url"
                           name="signatureLink"
                           register={register}
@@ -931,6 +952,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   {element.type.toLowerCase() === "file" && (
                     <>
                       <DynamicInput
+                        watch={watch}
                         label="Allow Multiple Uploads"
                         name="isMultiple"
                         register={register}
@@ -955,6 +977,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   <div>
                     <div className="w-[150px] mb-4">
                       <DynamicInput
+                        watch={watch}
                         label="Toggle Visibility"
                         name="isHidden"
                         register={register}
@@ -982,6 +1005,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                     <div className="flex items-center gap-x-6">
                       <div className="w-[150px]">
                         <DynamicInput
+                          watch={watch}
                           label="Required"
                           name="isRequired"
                           register={register}
@@ -992,6 +1016,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                       </div>{" "}
                       <div className="flex-1">
                         <DynamicInput
+                          watch={watch}
                           label="Error message text"
                           name="requiredMessage"
                           register={register}
@@ -1005,6 +1030,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         <div className="flex items-center gap-x-6">
                           <div className="w-[150px]">
                             <DynamicInput
+                              watch={watch}
                               label="Min Length"
                               name="minLength"
                               register={register}
@@ -1015,6 +1041,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                           </div>{" "}
                           <div className="flex-1">
                             <DynamicInput
+                              watch={watch}
                               label="Error message text"
                               name="minLengthMessage"
                               register={register}
@@ -1026,6 +1053,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         <div className="flex items-center gap-x-6">
                           <div className="w-[150px]">
                             <DynamicInput
+                              watch={watch}
                               label="Max Length"
                               name="maxLength"
                               register={register}
@@ -1036,6 +1064,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                           </div>{" "}
                           <div className="flex-1">
                             <DynamicInput
+                              watch={watch}
                               label="Error message text"
                               name="maxLengthMessage"
                               register={register}
@@ -1051,6 +1080,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         <div className="flex items-center gap-x-6">
                           <div className="w-[150px]">
                             <DynamicInput
+                              watch={watch}
                               label="Min Amount"
                               name="minAmount"
                               register={register}
@@ -1061,6 +1091,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                           </div>{" "}
                           <div className="flex-1">
                             <DynamicInput
+                              watch={watch}
                               label="Error message text"
                               name="minAmountMessage"
                               register={register}
@@ -1072,6 +1103,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         <div className="flex items-center gap-x-6">
                           <div className="w-[150px]">
                             <DynamicInput
+                              watch={watch}
                               label="Max Amount"
                               name="maxAmount"
                               register={register}
@@ -1082,6 +1114,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                           </div>{" "}
                           <div className="flex-1">
                             <DynamicInput
+                              watch={watch}
                               label="Error message text"
                               name="maxAmountMessage"
                               register={register}

@@ -8,7 +8,7 @@ export default function RadioInput({
   element: any;
   validationData: any;
 }) {
-  const { register = () => ({}) } = validationData || {};
+  const { register = () => ({}), watch } = validationData || {};
   return (
     <div className={clsx("grid gap-y-[6px]", element.customClass)}>
       {element?.options?.map(
@@ -22,6 +22,7 @@ export default function RadioInput({
               name={element.id}
               value={item.value}
                disabled={validationData?.isReadOnly}
+               watch={watch}
             />
           </div>
         )

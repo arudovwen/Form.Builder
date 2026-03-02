@@ -41,6 +41,7 @@ const newSection = {
   description: "",
   id: uuidv4(),
   questionData: [],
+  disabled: false
 };
 export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
   const [answerData, setAnswerData] = useState({});
@@ -73,7 +74,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
     (elementId: string, sectionId: string) => {
       const section = formData.find((section) => section.id === sectionId);
       const elementData = section?.questionData.find(
-        (el) => el.id === elementId,
+        (el:{id: string}) => el.id === elementId,
       );
 
       if (!elementData) return;

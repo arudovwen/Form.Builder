@@ -31,6 +31,7 @@ export default function AmountInput({
       value={selectedValue}
       prefix={element.prefix}
       disabled={isReadOnly}
+      watch={watch}
     />
   );
 }

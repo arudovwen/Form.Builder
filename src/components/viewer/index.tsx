@@ -10,13 +10,13 @@ import React, {
 import { useForm, FormProvider, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import EditorContext, { EditorProvider } from "../../context/editor-context";
+import EditorContext, { EditorProvider } from "@/context/editor-context";
 import AppButton from "../ui/AppButton";
 import { generateDynamicSchema } from "./validation";
-import { mapIdToValue } from "../../utils/mapIdToValue";
-import { getItem } from "../../utils/localStorageControl";
+import { getItem } from "@/utils/localStorageControl";
 import SinglePage from "./single-page";
 import MultiPage from "./multi-page";
+import { mapIdToValue } from "@/utils/mapIdToValue";
 
 export interface AnswerElement {
   id: string;
@@ -54,12 +54,16 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   const { setAnswerData, setUploadUrl }: any = useContext(EditorContext);
   const [current, setCurrent] = useState(0);
 
-  const totalSections = form_data?.length ?? 0;
+  const filteredFormData = useMemo(
+    () => form_data.filter((i) => !i.disabled),
+    [form_data],
+  );
+  const totalSections = filteredFormData?.length ?? 0;
   const config = getItem("config");
 
   const validationSchema = useMemo(
-    () => generateDynamicSchema(form_data),
-    [form_data],
+    () => generateDynamicSchema(filteredFormData),
+    [filteredFormData],
   );
 
   const methods = useForm({
@@ -84,7 +88,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
 
   // ✅ Use useWatch to efficiently track changes
   const watchedValues = useWatch({ control });
-  console.log({ errors });
+ 
   // ✅ Deep memoization to avoid redundant updates
   const memoizedValues = useMemo(
     () => watchedValues,
@@ -104,9 +108,9 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   }, [setUploadUrl, uploadUrl]);
   // ✅ Effect runs only when actual values change
   useEffect(() => {
-    if (!form_data?.length || !onGetValues) return;
+    if (!filteredFormData?.length || !onGetValues) return;
 
-    const updatedData = form_data.flatMap((section) =>
+    const updatedData = filteredFormData.flatMap((section) =>
       section.questionData?.map((element: any) => ({
         id: element.id,
         value: memoizedValues[element.id],
@@ -117,7 +121,13 @@ const FormRenderer: React.FC<FormRendererProps> = ({
 
     handleGetValues(updatedData);
     setAnswerData(memoizedValues);
-  }, [memoizedValues, form_data, handleGetValues, onGetValues, setAnswerData]);
+  }, [
+    memoizedValues,
+    filteredFormData,
+    handleGetValues,
+    onGetValues,
+    setAnswerData,
+  ]);
 
   // ✅ Answer data hydration
   useEffect(() => {
@@ -129,7 +139,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   // ✅ Submit handler
   const onSubmit = useCallback(
     (data: Record<string, any>) => {
-      const updatedData = form_data.flatMap((section) =>
+      const updatedData = filteredFormData.flatMap((section) =>
         section.questionData?.map((element: any) => ({
           id: element.id,
           value: data[element.id],
@@ -142,20 +152,20 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       }
       onSubmitData?.(updatedData);
     },
-    [form_data, onSubmitData],
+    [errors, filteredFormData, onSubmitData],
   );
 
   // ✅ Navigation handlers
   const handleProceed = useCallback(async () => {
     if (!ignoreValidation) {
-      const currentFields = form_data?.[current]?.questionData?.map(
+      const currentFields = filteredFormData?.[current]?.questionData?.map(
         (ele: any) => ele.id,
       );
       const isValid = await trigger(currentFields);
       if (!isValid) return;
     }
     setCurrent((prev) => prev + 1);
-  }, [current, form_data, ignoreValidation, trigger]);
+  }, [current, filteredFormData, ignoreValidation, trigger]);
 
   const handleBack = useCallback(() => {
     setCurrent((prev) => prev - 1);
@@ -195,30 +205,38 @@ const FormRenderer: React.FC<FormRendererProps> = ({
         className="container h-full mx-auto"
       >
         <div className="relative flex flex-col w-full py-4 gap-y-12">
-          <div className="multi_section__box" key={form_data?.[current]?.id}>
+          <div
+            className="multi_section__box"
+            key={filteredFormData?.[current]?.id}
+          >
             {renderType === "multi" &&
-              (form_data?.[current]?.title ||
-                form_data?.[current]?.description) && (
+              (filteredFormData?.[current]?.title ||
+                filteredFormData?.[current]?.description) && (
                 <div className="py-4 mb-4 border-b border-gray-100 multi_section__title">
-                  {form_data[current]?.title && (
+                  {filteredFormData[current]?.title && (
                     <h2 className="text-lg font-semibold mb-[6px]">
-                      {form_data[current]?.title}
+                      {filteredFormData[current]?.title}
                     </h2>
                   )}
-                  {form_data[current]?.description && (
-                    <p className="text-sm">{form_data[current]?.description}</p>
+                  {filteredFormData[current]?.description && (
+                    <p className="text-sm">
+                      {filteredFormData[current]?.description}
+                    </p>
                   )}
                 </div>
               )}
 
             {renderType === "multi" ? (
               <MultiPage
-                form_data={form_data}
+                form_data={filteredFormData}
                 options={sharedOptions}
                 current={current}
               />
             ) : (
-              <SinglePage form_data={form_data} options={sharedOptions} />
+              <SinglePage
+                form_data={filteredFormData}
+                options={sharedOptions}
+              />
             )}
           </div>
         </div>

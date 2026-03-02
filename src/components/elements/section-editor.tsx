@@ -18,7 +18,7 @@ const schema = yup
 
 type FormInputs = yup.InferType<typeof schema>;
 
- const config = getItem("config");
+const config = getItem("config");
 const SectionEditorModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -29,6 +29,7 @@ const SectionEditorModal: React.FC<{
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting, isValid },
     reset,
   } = useForm<FormInputs>({
@@ -49,7 +50,6 @@ const SectionEditorModal: React.FC<{
     onClose();
   };
 
-  
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[999] cursor-default no-drag select-none">
       <div className="min-w-[600px] bg-white rounded-xl shadow-xl relative flex flex-col items-center">
@@ -74,6 +74,7 @@ const SectionEditorModal: React.FC<{
               name="title"
               register={register}
               errors={errors}
+              watch={watch}
             />
 
             <DynamicInput
@@ -81,6 +82,7 @@ const SectionEditorModal: React.FC<{
               name="description"
               register={register}
               errors={errors}
+              watch={watch}
             />
           </div>
 
@@ -95,7 +97,7 @@ const SectionEditorModal: React.FC<{
             <button
               type="submit"
               disabled={!isValid || isSubmitting}
-               style={{ background: config?.buttonColor || "#333" }}
+              style={{ background: config?.buttonColor || "#333" }}
               className={`flex-1 px-4 py-2.5 ${
                 !isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#2563EB]"
               } ${

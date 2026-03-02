@@ -1,5 +1,6 @@
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import CurrencyInput from "react-currency-input-field";
+import AppIcon from "../ui/AppIcon";
 
 interface InputProps {
   label: string;
@@ -16,6 +17,7 @@ interface InputProps {
   trigger?: any;
   prefix?: string;
   disabled?: boolean;
+  watch?: any;
 }
 
 export const DynamicInput = ({
@@ -31,7 +33,8 @@ export const DynamicInput = ({
   value,
   trigger,
   prefix,
-  disabled
+  disabled,
+  watch,
 }: InputProps) => {
   const registerProps = register ? { ...register(name) } : {};
 
@@ -76,22 +79,54 @@ export const DynamicInput = ({
   }
 
   if (["checkbox", "radio"].includes(type)) {
+    const checkedValue = watch?.(name) || null;
+    let isChecked = false;
+
+    if (checkedValue) {
+      if (checkedValue?.length && type === "checkbox") {
+        isChecked = checkedValue?.includes(value);
+      } else {
+        isChecked = checkedValue == value;
+      }
+    }
+
     return (
-      <div>
-        <label className="flex items-center space-x-2">
+      <div className="space-y-1">
+        <label className="flex items-center gap-3 cursor-pointer select-none">
           <input
             {...registerProps}
             type={type}
-            className="w-4 h-4 border-gray-300 rounded"
-            value={value}
+            value={value || ''}
             disabled={disabled}
+            className="peer sr-only"
           />
+
+          <div
+            className={`
+            w-[18px] h-[18px] flex items-center justify-center
+            border rounded-md transition-all duration-200
+            ${errors?.[name] ? "border-red-300" : "border-[#D0D5DD]"}
+            peer-checked:bg-[#7F56D9]
+            peer-checked:border-[#7F56D9]
+            peer-disabled:opacity-60
+            peer-disabled:cursor-not-allowed
+          `}
+          >
+            {isChecked && (
+              <AppIcon
+                icon="meteor-icons:check"
+                iconClass="w-3.5 h-3.5 text-white"
+              />
+            )}
+          </div>
+
           <span className="text-sm font-medium text-[#344054] font-onest">
             {label}
           </span>
         </label>
+
         {errors?.[name] && (
-          <p className="ml-2 text-sm text-red-600">
+          <p className="ml-8 text-sm text-red-600">
             {errors[name]?.message as string}
           </p>
         )}
