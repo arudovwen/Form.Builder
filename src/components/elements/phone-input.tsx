@@ -38,7 +38,7 @@ export default function PhoneNumber({
         if (err) {
           setError?.(element.id, { type: "manual", message: err });
         } else {
-          clearErrors(element.id);
+          clearErrors?.(element.id);
         }
       }}
       onChange={(data) => {
