@@ -167,6 +167,8 @@ export default function PhoneInput({
             }}
             placeholder={placeholder}
             className="w-full px-3 outline-none"
+            maxLength={max}
+            minLength={min} 
           />
 
           {/* Icons */}

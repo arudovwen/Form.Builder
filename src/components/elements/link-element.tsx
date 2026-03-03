@@ -18,6 +18,7 @@ export default function LinkElement({
     <div>
      {!validationData?.isReadOnly  && <input
         placeholder={element?.placeholder || "Enter Url link"}
+        // type="url"
         className={clsx("field-control", element?.customClass)}
         {...register(element?.id)}
         disabled={validationData?.isReadOnly}

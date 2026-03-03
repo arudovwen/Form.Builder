@@ -54,7 +54,7 @@ export const elementMap: Record<string, React.ElementType> = {
   country: CountryBank,
   bank: CountryBank,
   document: SignDocument,
-  link: LinkElement
+  url: LinkElement
 };
 const state = "edit"; // This can be passed as a prop or context value
 export const RenderElement = (element: any, sectionId: string) => {

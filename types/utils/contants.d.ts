@@ -9,7 +9,7 @@ export declare enum ElementKind {
     NUMBER = "numberField",
     AMOUNT = "amountField",
     DATE = "date",
-    LINK = "link",
+    URL = "url",
     PASSWORD = "password",
     CHECKBOX = "checkbox",
     PHONE = "phoneField",

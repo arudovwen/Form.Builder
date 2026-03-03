@@ -1,7 +1,7 @@
 import * as yup from "yup";
 interface QuestionData {
     id: string;
-    type: 'textField' | 'longText' | 'numberField' | 'amountField' | 'selectField' | 'checkbox' | 'email' | 'date';
+    type: "textField" | "longText" | "numberField" | "amountField" | "selectField" | "checkbox" | "email" | "date" | "url";
     isRequired?: boolean;
     requiredMessage?: string;
     minLength?: number;
