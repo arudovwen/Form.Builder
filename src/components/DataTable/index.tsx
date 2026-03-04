@@ -1,11 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  memo,
-  useMemo,
-} from "react";
+import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import CurrencyInput from "react-currency-input-field";
 import AppIcon from "../ui/AppIcon";
 import { v4 as uuidv4 } from "uuid";
@@ -242,11 +235,31 @@ export default function CustomDataGrid<T extends { id: string }>({
 
   const tableRef = useRef<HTMLDivElement>(null);
 
-  const formElement = document.getElementById("form");
-  const width = useMemo(() => {
-    const width = formElement?.getBoundingClientRect().width || 0;
-    return width ? width - 48 : width;
-  }, [formElement]);
+  const [width, setWidth] = useState<number>(0);
+
+  // Keep the table's max-width in sync with the #form container width,
+  // including on every resize (window resize, sidebar toggle, etc.).
+  useEffect(() => {
+    const formElement = document.getElementById("form");
+    if (!formElement) return;
+
+    const updateWidth = (el: Element) => {
+      const w = el.getBoundingClientRect().width;
+      setWidth(w ? w - 58 : 0);
+    };
+
+    // Set immediately on mount
+    updateWidth(formElement);
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        updateWidth(entry.target);
+      }
+    });
+
+    observer.observe(formElement);
+    return () => observer.disconnect();
+  }, []);
 
   /* ---- Safe sync external value ---- */
   useEffect(() => {

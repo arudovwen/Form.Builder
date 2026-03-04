@@ -55,7 +55,7 @@ const ElementContainer = memo(
             <span className="flex items-center gap-x-3">
               {!element.gridPosition && <button
                 type="button"
-                className="text-sm outline-none hover:opacity-80"
+                className="text-sm outline-none hover:opacity-80 py-1"
                 onClick={() => duplicateElement(element?.id, element.sectionId)}
                 title="Duplicate"
               >
@@ -64,7 +64,7 @@ const ElementContainer = memo(
 
               <button
                 type="button"
-                className="text-sm outline-none hover:opacity-80"
+                className="text-sm outline-none hover:opacity-80 text-gray-600 py-1"
                 onClick={() => setOpen(true)}
                 title="Edit"
               >
@@ -73,7 +73,7 @@ const ElementContainer = memo(
 
               <button
                 type="button"
-                className="text-sm outline-none hover:opacity-80"
+                className="text-sm outline-none hover:opacity-80 text-gray-600 py-1"
                 onClick={handleRemove}
                 title="Remove"
               >

@@ -139,7 +139,7 @@ const schema = yup.object().shape({
   minAmount: yup.string().nullable(),
   heading: yup.string().nullable(),
   minAmountMessage: yup.string().nullable(),
-  columns: yup.number().nullable(),
+  columns: yup.number().nullable().max(4).min(2),
   value: yup.mixed().nullable(),
   customClass: yup.string().nullable(),
   elementClass: yup.string().nullable(),
@@ -903,11 +903,13 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   {element.type.toLowerCase() === "grid" && (
                     <DynamicInput
                       watch={watch}
-                      label="Number of columns"
+                      label="Number of columns (max: 4)"
                       name="columns"
                       register={register}
                       errors={errors}
                       element={element}
+                      max={4}
+                      min={1}
                     />
                   )}
                   {element.type.toLowerCase() === "document" && (

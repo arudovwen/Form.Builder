@@ -2,13 +2,12 @@ import clsx from "clsx";
 import GridInput, { GridItem } from "../elements/grid-input";
 import { RenderElement } from "./elements-render";
 
- export  const getElementOptions = (element: any, options: any) => {
-    if (!element?.allowEdit) return options;
-    return { ...options, isReadOnly: false };
-  };
+export const getElementOptions = (element: any, options: any) => {
+  if (!element?.allowEdit) return options;
+  return { ...options, isReadOnly: false };
+};
 
 export default function SinglePage({ form_data, options }) {
-
   const renderGridElement = (element: any, gridChildren: any[]) => (
     <GridInput
       key={element.id}
@@ -22,6 +21,11 @@ export default function SinglePage({ form_data, options }) {
           customClass="p-0"
         >
           {RenderElement(child, getElementOptions(child, options))}
+          {options?.errors?.[child.id]?.message && (
+            <div className="mt-1 text-xs text-red-600">
+              {options.errors[child.id].message}
+            </div>
+          )}
         </GridItem>
       ))}
     </GridInput>
@@ -45,7 +49,7 @@ export default function SinglePage({ form_data, options }) {
     <div className="grid gap-y-10">
       {form_data?.map((section: any) => {
         const gridChildren = new Map<string, any[]>();
-        
+
         // Pre-group grid children for efficient lookup
         section.questionData?.forEach((el: any) => {
           if (el.gridId) {
@@ -73,14 +77,14 @@ export default function SinglePage({ form_data, options }) {
             <div className="grid gap-y-6 section_box__content">
               {section.questionData?.map((element: any) => {
                 if (element.gridId) return null;
-                
+
                 if (element.type === "grid") {
                   return renderGridElement(
                     element,
-                    gridChildren.get(element.id) || []
+                    gridChildren.get(element.id) || [],
                   );
                 }
-                
+
                 return renderStandardElement(element);
               })}
             </div>

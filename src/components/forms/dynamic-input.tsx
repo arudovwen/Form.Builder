@@ -18,6 +18,8 @@ interface InputProps {
   prefix?: string;
   disabled?: boolean;
   watch?: any;
+  min?: number;
+  max?: number;
 }
 
 export const DynamicInput = ({
@@ -35,6 +37,8 @@ export const DynamicInput = ({
   prefix,
   disabled,
   watch,
+  min,
+  max,
 }: InputProps) => {
   const registerProps = register ? { ...register(name) } : {};
 
@@ -181,6 +185,8 @@ export const DynamicInput = ({
         } ${className}`}
         placeholder={isFloating ? "" : placeholder}
         disabled={disabled}
+        min={min}
+        max={max}
       />
       {errors?.[name] && (
         <p className="mt-1 text-sm text-red-600">

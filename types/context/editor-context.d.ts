@@ -16,6 +16,21 @@ declare const EditorContext: React.Context<{
     isDragging: boolean;
     uploadUrl: string;
     setUploadUrl: (e: string) => void;
+    /**
+     * Universal element move:
+     *  - canvas  → canvas  (reorder by index)
+     *  - grid    → canvas  (eject; targetIndex = insertion point)
+     *  - canvas  → grid    (inject into col; targetGridId + targetCol required)
+     *  - grid    → grid    (transfer between cells)
+     */
+    moveElement: (opts: {
+        draggedId: string;
+        sectionId: string;
+        targetIndex?: number;
+        targetId?: string;
+        targetGridId?: string;
+        targetCol?: number;
+    }) => void;
 }>;
 export declare const EditorProvider: React.FC<EditorProviderProps>;
 export default EditorContext;

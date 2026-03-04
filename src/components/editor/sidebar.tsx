@@ -85,6 +85,8 @@ console.log({categorizedElements});
           placeholder="Search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          name="search"
+          id="search"
         />
       </div>
       <hr />

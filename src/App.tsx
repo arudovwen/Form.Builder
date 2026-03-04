@@ -23,7 +23,7 @@ const questionDa = [
     {
         "title": "",
         "description": "",
-        "id": "3a76c324-49e7-4d95-9f6a-ea323adafb45",
+        "id": "339a89dc-d9d1-45e9-8c6e-8df1c5c3a376",
         "questionData": [
             {
                 "required": false,
@@ -44,13 +44,14 @@ const questionDa = [
                 "requiredMessage": "Field is required",
                 "minLengthMessage": "",
                 "maxLengthMessage": "",
-                "type": "url",
-                "label": "Link",
-                "icon": "iconamoon:link",
-                "inputLabel": "Url Link",
-                "inputType": "url",
-                "id": "0f751a61-bd0c-4109-942f-4d8472e7e2f7",
-                "sectionId": "3a76c324-49e7-4d95-9f6a-ea323adafb45"
+                "type": "grid",
+                "label": "Grid",
+                "icon": "cuida:grid-outline",
+                "inputLabel": "",
+                "inputType": "grid",
+                "columns": 2,
+                "id": "6c40e388-36e2-433c-a6ff-7e13a78dec1b",
+                "sectionId": "339a89dc-d9d1-45e9-8c6e-8df1c5c3a376"
             },
             {
                 "required": false,
@@ -61,8 +62,10 @@ const questionDa = [
                 "isRequired": false,
                 "customClass": "",
                 "elementClass": "",
-                "gridPosition": null,
-                "gridId": null,
+                "gridPosition": {
+                    "col": 1
+                },
+                "gridId": "6c40e388-36e2-433c-a6ff-7e13a78dec1b",
                 "isHidden": false,
                 "visibilityDependentFields": [],
                 "maxLength": null,
@@ -76,8 +79,37 @@ const questionDa = [
                 "icon": "mdi:email-outline",
                 "inputLabel": "Email Label",
                 "inputType": "email",
-                "id": "41b5b059-7ddb-4583-a5a7-a6212be762fc",
-                "sectionId": "3a76c324-49e7-4d95-9f6a-ea323adafb45"
+                "id": "a9c12cd4-bfa5-4e2b-89c4-67fdf7fae110",
+                "sectionId": "339a89dc-d9d1-45e9-8c6e-8df1c5c3a376"
+            },
+            {
+                "required": false,
+                "description": "",
+                "value": null,
+                "isReadOnly": false,
+                "isDisabled": false,
+                "isRequired": false,
+                "customClass": "",
+                "elementClass": "",
+                "gridPosition": {
+                    "col": 2
+                },
+                "gridId": "6c40e388-36e2-433c-a6ff-7e13a78dec1b",
+                "isHidden": false,
+                "visibilityDependentFields": [],
+                "maxLength": null,
+                "minLength": null,
+                "placeholder": "Type here",
+                "requiredMessage": "Field is required",
+                "minLengthMessage": "",
+                "maxLengthMessage": "",
+                "type": "email",
+                "label": "Email",
+                "icon": "mdi:email-outline",
+                "inputLabel": "Email Label",
+                "inputType": "email",
+                "id": "e8f309c0-5b16-451b-87cc-38eb3fc8593a",
+                "sectionId": "339a89dc-d9d1-45e9-8c6e-8df1c5c3a376"
             }
         ],
         "disabled": false

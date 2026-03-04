@@ -26,6 +26,9 @@ export default function MultiPage({ form_data, options, current }) {
                   customClass="p-0"
                 >
                   {RenderElement(child, getElementOptions(child, options))}
+                  <div className="mt-1 text-xs text-red-600">
+                    {options?.errors?.[child.id]?.message}
+                  </div>
                 </GridItem>
               ))}
             </GridInput>

@@ -350,7 +350,7 @@ export const Elements: ElementType[] = [
 
   createElement({
     type: ElementKind.DATA_GRID,
-    label: "Data Grid",
+    label: "Table",
     icon: "carbon:data-table",
     inputLabel: "Data Grid Label",
     inputType: "dataGrid",

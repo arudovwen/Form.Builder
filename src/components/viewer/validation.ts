@@ -61,7 +61,9 @@ const getBaseSchema = (type: QuestionData["type"]) => {
         DEFAULT_MESSAGES.email,
       ),
     date: yup.date().typeError("Invalid date").nullable(),
-    url: yup.string().nullable().url(DEFAULT_MESSAGES.url),
+    url: yup.string().nullable().matches(/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/,
+      DEFAULT_MESSAGES.url,
+    ),
   };
 
   return schemas[type] || yup.mixed().nullable();

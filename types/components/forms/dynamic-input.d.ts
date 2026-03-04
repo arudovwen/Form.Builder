@@ -15,6 +15,8 @@ interface InputProps {
     prefix?: string;
     disabled?: boolean;
     watch?: any;
+    min?: number;
+    max?: number;
 }
-export declare const DynamicInput: ({ label, name, register, errors, className, type, placeholder, isFloating, setValue, value, trigger, prefix, disabled, watch, }: InputProps) => import("react/jsx-runtime").JSX.Element;
+export declare const DynamicInput: ({ label, name, register, errors, className, type, placeholder, isFloating, setValue, value, trigger, prefix, disabled, watch, min, max, }: InputProps) => import("react/jsx-runtime").JSX.Element;
 export {};
