@@ -371,7 +371,20 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
             return { ...section, questionData: without };
           }
 
-          // ── Scenario 1: canvas → canvas reorder ────────────────────────────
+          // ── Scenario 1a: canvas → canvas reorder by targetIndex ──────────
+          if (
+            !dragged.gridId &&
+            targetIndex !== undefined &&
+            targetGridId === undefined &&
+            !targetId
+          ) {
+            qd.splice(draggedIdx, 1);
+            const insertAt = Math.min(targetIndex, qd.length);
+            qd.splice(insertAt, 0, dragged);
+            return { ...section, questionData: qd };
+          }
+
+          // ── Scenario 1b: canvas → canvas reorder by targetId ───────────────
           if (targetId) {
             const toIdx = qd.findIndex((el: any) => el.id === targetId);
             if (toIdx === -1) return section;

@@ -17,6 +17,7 @@ import { getItem } from "@/utils/localStorageControl";
 import SinglePage from "./single-page";
 import MultiPage from "./multi-page";
 import { mapIdToValue } from "@/utils/mapIdToValue";
+import { Toaster } from "sonner";
 
 export interface AnswerElement {
   id: string;
@@ -88,7 +89,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
 
   // ✅ Use useWatch to efficiently track changes
   const watchedValues = useWatch({ control });
- 
+
   // ✅ Deep memoization to avoid redundant updates
   const memoizedValues = useMemo(
     () => watchedValues,
@@ -200,6 +201,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
 
   return (
     <FormProvider {...methods}>
+      <Toaster position="top-right" richColors closeButton />
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="container h-full mx-auto"

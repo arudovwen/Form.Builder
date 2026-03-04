@@ -255,10 +255,6 @@ function ElementCanvas({ elementData, sectionId }: any) {
     );
   }, [elementData]);
 
-  useEffect(() => {
-    console.log({ draggedElementId });
-  }, [draggedElementId]);
-
   // ── Empty canvas ─────────────────────────────────────────────────────────────
   if (!elementData?.length) {
     return (

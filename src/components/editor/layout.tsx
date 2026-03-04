@@ -3,6 +3,7 @@ import SideBar from "./sidebar";
 import TopBar from "./topbar";
 import { EditorProvider } from "../../context/editor-context";
 import Loader from "../Loader";
+import { Toaster } from "sonner";
 
 export interface BuilderProps {
   onSubmit?: (e: any) => void; // Function to handle form submission
@@ -35,6 +36,7 @@ export default function Layout({
 }: BuilderProps) {
   return (
     <EditorProvider>
+      <Toaster position="top-right" richColors closeButton />
       <div className="w-full h-full bg-[#F8F9FC] flex flex-col">
         <div className="border-b  bg-white  border-[#E4E7EC]">
           <TopBar
