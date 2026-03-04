@@ -158,6 +158,7 @@ export default function UniversalFileViewer({
                 src={fileUrl}
                 alt={fileLabel}
                 className="max-w-full max-h-[80vh] mx-auto object-contain"
+                crossOrigin="anonymous"
               />
             ) : fileType === "pdf" ? (
               <iframe

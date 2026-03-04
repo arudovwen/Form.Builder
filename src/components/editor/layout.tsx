@@ -1,5 +1,3 @@
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import MainPage from "./main";
 import SideBar from "./sidebar";
 import TopBar from "./topbar";
@@ -38,7 +36,6 @@ export default function Layout({
   return (
     <EditorProvider>
       <div className="w-full h-full bg-[#F8F9FC] flex flex-col">
-        <ToastContainer />
         <div className="border-b  bg-white  border-[#E4E7EC]">
           <TopBar
             title={title}

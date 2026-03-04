@@ -3,7 +3,7 @@ import { CategorizedElements, Elements } from "../../utils/contants";
 import AppIcon from "../ui/AppIcon";
 import EditorContext from "../../context/editor-context";
 import { v4 as uuidv4 } from "uuid";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "sonner";
 import { getItem } from "../../utils/localStorageControl";
 
 interface ElementType {
@@ -30,7 +30,6 @@ const SideBar = () => {
 
   const handleDragStart = useCallback(
     (event: DragEvent<HTMLLIElement>, element: ElementType) => {
- 
       if (!selectedSection) {
         toast.error("Please select a section to add an element.");
         return;
@@ -39,7 +38,7 @@ const SideBar = () => {
       event.dataTransfer.effectAllowed = "move";
       setIsDragging(true);
     },
-    [setIsDragging, selectedSection]
+    [setIsDragging, selectedSection],
   );
 
   function handleElement(element: any) {
@@ -61,7 +60,7 @@ const SideBar = () => {
   const elementBorderColor = config.elementBorderColor;
 
   const filteredElements = Elements.filter((element: ElementType) =>
-    element.label.toLowerCase().includes(query.toLowerCase())
+    element.label.toLowerCase().includes(query.toLowerCase()),
   );
 
   const categorizedElements = categoryTitles
@@ -70,15 +69,13 @@ const SideBar = () => {
       elements: filteredElements.filter((e) =>
         CategorizedElements[
           category.key as keyof typeof CategorizedElements
-        ]?.includes(e.type)
+        ]?.includes(e.type),
       ),
     }))
     .filter((category) => category.elements.length > 0); // remove empty categories
-console.log({categorizedElements});
 
   return (
     <div className="pt-4 pb-6">
-        <ToastContainer />
       <div className="px-5 mb-4">
         <input
           className="field-control"

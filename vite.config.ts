@@ -26,29 +26,29 @@ export default defineConfig({
         "axios",
         "@headlessui/react",
         "@hookform/resolvers",
-        "react-toastify",
+        "sonner",
         "react-datepicker",
         "react-draggable",
         "react-currency-input-field",
         "uuid",
         "xlsx",
-        "papaparse"
+        "papaparse",
       ],
       output: {
         globals: {
-          react: "React",         // Ensure that React is provided globally
-          "react-dom": "ReactDOM" // Same for ReactDOM
-        }
-      }
+          react: "React", // Ensure that React is provided globally
+          "react-dom": "ReactDOM", // Same for ReactDOM
+        },
+      },
     },
     target: "es2018",
     minify: "esbuild", // Use esbuild to minify for better performance
     cssCodeSplit: true,
     sourcemap: false,
     assetsInlineLimit: 0, // Ensure assets like images aren't inlined
-    emptyOutDir: true     // Clear output directory before build
+    emptyOutDir: true, // Clear output directory before build
   },
   optimizeDeps: {
     // No need to exclude react and react-dom here
-  }
+  },
 });

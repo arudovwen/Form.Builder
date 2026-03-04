@@ -1,4 +1,3 @@
-import "react-toastify/dist/ReactToastify.css";
 export interface BuilderProps {
     onSubmit?: (e: any) => void;
     questionData?: any;

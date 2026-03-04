@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import AppIcon from "../ui/AppIcon";
 import UniversalFileViewer from "../UniversalFileViewer";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import EditorContext from "@/context/editor-context";
 import axios from "axios";
 import { getItem } from "@/utils/localStorageControl";
@@ -51,12 +51,12 @@ export default function FileUpload({
 
   const acceptedFiles = useMemo(
     () => accept?.map((i) => i.value).join(", "),
-    [accept]
+    [accept],
   );
 
   const acceptedFileLabels = useMemo(
     () => accept?.map((i) => i.label).join(", "),
-    [accept]
+    [accept],
   );
 
   const getFileUrl = useCallback(
@@ -76,7 +76,7 @@ export default function FileUpload({
         throw new Error("Failed to upload file to server");
       }
     },
-    [uploadUrl]
+    [uploadUrl],
   );
 
   const uploadFile = useCallback(
@@ -88,7 +88,7 @@ export default function FileUpload({
           try {
             const base64 = (reader.result as string).replace(
               /^data:.*;base64,/,
-              ""
+              "",
             );
 
             const result = uploadUrl
@@ -112,7 +112,7 @@ export default function FileUpload({
         reader.onerror = () => reject(new Error("File read failed"));
         reader.readAsDataURL(file);
       }),
-    [uploadUrl, getFileUrl]
+    [uploadUrl, getFileUrl],
   );
 
   const validateFiles = useCallback(
@@ -124,7 +124,7 @@ export default function FileUpload({
       for (const file of files) {
         if (file.size > MAX_FILE_SIZE) {
           toast.error(
-            `File "${file.name}" exceeds 5MB limit (${(file.size / 1024 / 1024).toFixed(2)}MB)`
+            `File "${file.name}" exceeds 5MB limit (${(file.size / 1024 / 1024).toFixed(2)}MB)`,
           );
           return false;
         }
@@ -133,11 +133,12 @@ export default function FileUpload({
           allowedTypes.length &&
           !allowedTypes.some(
             (type) =>
-              file.type === type || file.name.toLowerCase().endsWith(type.replace("*", ""))
+              file.type === type ||
+              file.name.toLowerCase().endsWith(type.replace("*", "")),
           )
         ) {
           toast.error(
-            `File "${file.name}" is not an allowed type. Allowed: ${acceptedFileLabels || "any"}`
+            `File "${file.name}" is not an allowed type. Allowed: ${acceptedFileLabels || "any"}`,
           );
           return false;
         }
@@ -145,13 +146,13 @@ export default function FileUpload({
 
       return true;
     },
-    [acceptedFiles, acceptedFileLabels]
+    [acceptedFiles, acceptedFileLabels],
   );
 
   const handleFileChange = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(event.target.files || []);
-      
+
       if (!files.length || isUploading) return;
 
       if (!validateFiles(files)) {
@@ -167,11 +168,10 @@ export default function FileUpload({
 
         const uploaded = await Promise.all(files?.map(uploadFile));
 
-        setFileData((prev) => {
-          const updated = multiple && prev ? [...prev, ...uploaded] : uploaded;
-          onFileLoaded(updated);
-          return updated;
-        });
+        const updated =
+          multiple && fileData ? [...fileData, ...uploaded] : uploaded;
+        setFileData(updated);
+        onFileLoaded(updated);
 
         toast.success(`Successfully uploaded ${files.length} file(s)`);
       } catch (error) {
@@ -185,7 +185,7 @@ export default function FileUpload({
         }
       }
     },
-    [isUploading, validateFiles, uploadFile, onFileLoaded, multiple]
+    [isUploading, validateFiles, uploadFile, onFileLoaded, multiple, fileData],
   );
 
   const removeFile = useCallback(
@@ -208,7 +208,7 @@ export default function FileUpload({
 
       handleDeleteFile?.();
     },
-    [handleDeleteFile, onFileLoaded, isUploading]
+    [handleDeleteFile, onFileLoaded, isUploading],
   );
 
   const hasFiles = fileData && fileData.length > 0;
@@ -256,14 +256,15 @@ export default function FileUpload({
             </div>
           )}
 
-          {typeof fileData === 'object'  && fileData?.map((file, index) => (
-            <UniversalFileViewer
-              key={`${file.name}-${index}`}
-              fileUrl={file.base64}
-              fileName={file.name}
-              removeFile={() => removeFile(index)}
-            />
-          ))}
+          {typeof fileData === "object" &&
+            fileData?.map((file, index) => (
+              <UniversalFileViewer
+                key={`${file.name}-${index}`}
+                fileUrl={file.base64}
+                fileName={file.name}
+                removeFile={() => removeFile(index)}
+              />
+            ))}
         </div>
       )}
     </div>

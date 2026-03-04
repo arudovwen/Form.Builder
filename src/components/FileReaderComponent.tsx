@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 const FileReaderComponent = ({
   setValue,

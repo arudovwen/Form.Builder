@@ -26,7 +26,7 @@ import TableInputColumn from "../TableInputColumns";
 import ApiExample from "../ApiExample";
 import { getItem } from "../../utils/localStorageControl";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import OptionsExample from "../OptionsExample";
 import FileReaderComponent from "../FileReaderComponent";
 import ColumnExample from "../ColumnExample";
