@@ -1,4 +1,5 @@
 import React from "react";
+import "react-datepicker/dist/react-datepicker.css";
 import "@/assets/scss/_date-picker.scss";
 interface CustomDatePickerProps {
     value?: Date | string | null;
