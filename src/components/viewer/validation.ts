@@ -22,6 +22,7 @@ interface QuestionData {
   maxLengthMessage?: string;
   minAmountMessage?: string;
   maxAmountMessage?: string;
+  isDisabled?: boolean;
 }
 
 interface Section {
@@ -56,14 +57,22 @@ const getBaseSchema = (type: QuestionData["type"]) => {
     email: yup
       .string()
       .nullable()
-      .matches(
-        /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/,
-        DEFAULT_MESSAGES.email,
-      ),
+      .test("email-format", DEFAULT_MESSAGES.email, (value) => {
+        // Skip validation if no value is entered
+        if (!value || value.trim() === "") return true;
+        return /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(value);
+      }),
     date: yup.date().typeError("Invalid date").nullable(),
-    url: yup.string().nullable().matches(/^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/,
-      DEFAULT_MESSAGES.url,
-    ),
+    url: yup
+      .string()
+      .nullable()
+      .test("url-format", DEFAULT_MESSAGES.url, (value) => {
+        // Skip validation if no value is entered
+        if (!value || value.trim() === "") return true;
+        return /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/.test(
+          value,
+        );
+      }),
   };
 
   return schemas[type] || yup.mixed().nullable();
@@ -144,14 +153,14 @@ export function generateDynamicSchema(data: Section[]) {
 
   data.forEach(({ questionData }) => {
     questionData?.forEach((question) => {
-      const { id, type, isRequired, requiredMessage } = question;
+      const { id, type, isRequired, requiredMessage, isDisabled } = question;
 
       let fieldSchema = getBaseSchema(type);
 
       // Add required validation
       fieldSchema = addRequiredValidation(
         fieldSchema,
-        isRequired,
+        isDisabled ? false : isRequired,
         requiredMessage,
       );
 

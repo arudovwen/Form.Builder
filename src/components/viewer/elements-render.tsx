@@ -6,7 +6,8 @@ export const RenderElement = (element: any, validationData?: any) => {
   const ElementComponent = elementMap[element.type];
   const { answerData }: any = useContext(EditorContext);
   const acceptedFileLabels = useMemo(
-    () => element?.acceptedFiles?.map((i: { label: any; }) => i.label).join(", "),
+    () =>
+      element?.acceptedFiles?.map((i: { label: any }) => i.label).join(", "),
     [element],
   );
   const fields = useMemo(
@@ -18,33 +19,35 @@ export const RenderElement = (element: any, validationData?: any) => {
   const isVisible = useMemo(() => {
     if (!fields.length) return true; // No dependencies, always visible
 
-    return fields.every((field: { id: string | number; fieldValue: any; operator: any; }) => {
-      if (!element.isHidden) return true
-      const value = answerData?.[field.id];
-      const valA = field.fieldValue;
-      const valB = value;
+    return fields.every(
+      (field: { id: string | number; fieldValue: any; operator: any }) => {
+        if (!element.isHidden) return true;
+        const value = answerData?.[field.id];
+        const valA = field.fieldValue;
+        const valB = value;
 
-      switch (field.operator) {
-        case "equals":
-          return String(valA).toLowerCase() === String(valB).toLowerCase();
-        case "not_equals":
-          return String(valA).toLowerCase() !== String(valB).toLowerCase();
-        case "greater":
-          return Number(valB) > Number(valA);
-        case "less":
-          return Number(valB) < Number(valA);
-        case "contains":
-          return String(valB)
-            .toLowerCase()
-            .includes(String(valA).toLowerCase());
-        case "not_contains":
-          return !String(valB)
-            .toLowerCase()
-            .includes(String(valA).toLowerCase());
-        default:
-          return true; // fallback: show
-      }
-    });
+        switch (field.operator) {
+          case "equals":
+            return String(valA).toLowerCase() === String(valB).toLowerCase();
+          case "not_equals":
+            return String(valA).toLowerCase() !== String(valB).toLowerCase();
+          case "greater":
+            return Number(valB) > Number(valA);
+          case "less":
+            return Number(valB) < Number(valA);
+          case "contains":
+            return String(valB)
+              .toLowerCase()
+              .includes(String(valA).toLowerCase());
+          case "not_contains":
+            return !String(valB)
+              .toLowerCase()
+              .includes(String(valA).toLowerCase());
+          default:
+            return true; // fallback: show
+        }
+      },
+    );
   }, [fields, answerData, element]);
 
   if (!ElementComponent) return null;
@@ -55,15 +58,27 @@ export const RenderElement = (element: any, validationData?: any) => {
         {element.inputLabel && (
           <label className="block text-sm font-medium  input_label">
             {element.inputLabel}{" "}
-            {acceptedFileLabels && <span className="text-gray-400 text-xs">({acceptedFileLabels?.toLowerCase()})</span>}
+            {acceptedFileLabels && (
+              <span className="text-gray-400 text-xs">
+                ({acceptedFileLabels?.toLowerCase()})
+              </span>
+            )}
           </label>
         )}
-       {element.description  && <small className="block text-gray-400 mt-0.5 text-xs"> {element.description}</small>}
+        {element.description && (
+          <small className="block text-gray-400 mt-0.5 text-xs">
+            {" "}
+            {element.description}
+          </small>
+        )}
       </div>
       <ElementComponent
         element={element}
         state="edit"
-        validationData={validationData}
+        validationData={{
+          ...validationData,
+          isReadOnly: validationData.isReadOnly || element.isDisabled,
+        }}
       />
     </div>
   );

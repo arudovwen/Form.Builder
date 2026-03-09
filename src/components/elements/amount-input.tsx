@@ -19,6 +19,7 @@ export default function AmountInput({
     const values = watch();
     selectedValue = values[element.id];
   }
+
   return (
     <DynamicInput
       placeholder={element.placeholder}

@@ -57,6 +57,7 @@ const newSection = {
   id: uuidv4(),
   questionData: [],
   disabled: false,
+  isHidden: false,
 };
 export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
   const [answerData, setAnswerData] = useState({});

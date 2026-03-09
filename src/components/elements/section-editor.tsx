@@ -12,6 +12,8 @@ const schema = yup
   .object({
     title: yup.string(),
     description: yup.string(),
+    disabled: yup.boolean().default(false),
+    isHidden: yup.boolean().default(false),
   })
 
   .required();
@@ -49,6 +51,7 @@ const SectionEditorModal: React.FC<{
     updateSection(value, section.id);
     onClose();
   };
+  const values = watch();
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[999] cursor-default no-drag select-none">
@@ -83,6 +86,27 @@ const SectionEditorModal: React.FC<{
               register={register}
               errors={errors}
               watch={watch}
+              type="textarea"
+            />
+            <DynamicInput
+              label="Disable Section"
+              name="disabled"
+              register={register}
+              errors={errors}
+              watch={watch}
+              type="checkbox"
+              value={values.disabled}
+              description="Disables all fields in this section"
+            />
+            <DynamicInput
+              label="Hide Section"
+              name="isHidden"
+              register={register}
+              errors={errors}
+              watch={watch}
+              type="checkbox"
+              value={values.isHidden}
+              description="Hides this section from the form"
             />
           </div>
 

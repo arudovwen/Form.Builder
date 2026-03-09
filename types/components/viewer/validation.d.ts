@@ -12,6 +12,7 @@ interface QuestionData {
     maxLengthMessage?: string;
     minAmountMessage?: string;
     maxAmountMessage?: string;
+    isDisabled?: boolean;
 }
 interface Section {
     questionData: QuestionData[];

@@ -56,7 +56,22 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   const [current, setCurrent] = useState(0);
 
   const filteredFormData = useMemo(
-    () => form_data.filter((i) => !i.disabled),
+    () =>
+      form_data
+        .filter((i) => !i.isHidden)
+        .map((section) => {
+          const isSectionDisabled = section.isDisabled || section.disabled;
+          if (isSectionDisabled) {
+            return {
+              ...section,
+              questionData: section.questionData?.map((q: any) => ({
+                ...q,
+                isDisabled: true,
+              })),
+            };
+          }
+          return section;
+        }),
     [form_data],
   );
   const totalSections = filteredFormData?.length ?? 0;
@@ -114,9 +129,12 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     const updatedData = filteredFormData.flatMap((section) =>
       section.questionData?.map((element: any) => ({
         id: element.id,
-        value: memoizedValues[element.id],
+        value: memoizedValues[element.id] || "",
         sectionId: section.id,
         type: element.type,
+        metaData: {
+          prefix: element.prefix,
+        },
       })),
     );
 
@@ -143,9 +161,12 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       const updatedData = filteredFormData.flatMap((section) =>
         section.questionData?.map((element: any) => ({
           id: element.id,
-          value: data[element.id],
+          value: data[element.id] || "",
           sectionId: section.id,
           type: element.type,
+          metaData: {
+            prefix: element.prefix,
+          },
         })),
       );
       if (Object.keys(errors).length > 0) {
@@ -245,26 +266,29 @@ const FormRenderer: React.FC<FormRendererProps> = ({
 
         {/* ✅ Footer Controls */}
         {!hideFooter && (
-          <footer className="flex items-center justify-end gap-4 footer">
+          <footer className="flex items-center justify-end gap-4 footer flex-wrap">
             {renderType === "multi" ? (
               <>
-                {current > 0 && (
-                  <AppButton
-                    type="button"
-                    text="Back"
-                    onClick={handleBack}
-                    btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-gray-200 rounded-lg"
-                  />
-                )}
-                {current < totalSections - 1 ? (
-                  <AppButton
-                    type="button"
-                    text="Continue"
-                    onClick={handleProceed}
-                    style={{ background: config?.buttonColor || "#333" }}
-                    btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg continue_btn"
-                  />
-                ) : (
+                <div className="flex gap-x-4 justify-end navigation_container">
+                  {current > 0 && (
+                    <AppButton
+                      type="button"
+                      text="Back"
+                      onClick={handleBack}
+                      btnClass="text-gray-700 back_btn text-sm border-[#98A2B3] !font-medium !py-[10px] px-10 bg-gray-200 rounded-lg"
+                    />
+                  )}
+                  {current < totalSections - 1 && (
+                    <AppButton
+                      type="button"
+                      text="Next"
+                      onClick={handleProceed}
+                      style={{ background: config?.buttonColor || "#333" }}
+                      btnClass="text-gray-700 next_btn text-sm border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg continue_btn"
+                    />
+                  )}
+                </div>
+                {(current === totalSections - 1 || isReadOnly) &&
                   !ignoreValidation &&
                   (children ?? (
                     <AppButton
@@ -275,10 +299,9 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                       type="submit"
                       text="Submit"
                       style={{ background: config?.buttonColor || "#333" }}
-                      btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
+                      btnClass="text-gray-700 border-[#98A2B3] submit_btn !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
                     />
-                  ))
-                )}
+                  ))}
               </>
             ) : (
               !ignoreValidation &&
@@ -289,7 +312,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                   type="submit"
                   text="Submit"
                   style={{ background: config?.buttonColor || "#333" }}
-                  btnClass="text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
+                  btnClass="text-gray-700 border-[#98A2B3] submit_btn !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
                 />
               ))
             )}

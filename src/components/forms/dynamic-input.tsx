@@ -20,6 +20,7 @@ interface InputProps {
   watch?: any;
   min?: number;
   max?: number;
+  description?: string;
 }
 
 export const DynamicInput = ({
@@ -39,6 +40,7 @@ export const DynamicInput = ({
   watch,
   min,
   max,
+  description,
 }: InputProps) => {
   const registerProps = register ? { ...register(name) } : {};
 
@@ -56,7 +58,7 @@ export const DynamicInput = ({
         </label>
         <CurrencyInput
           onValueChange={(value: any) => {
-            setValue(name, value);
+            setValue(name, value ?? null);
             if (register) {
               register(name);
             }
@@ -96,11 +98,13 @@ export const DynamicInput = ({
 
     return (
       <div className="space-y-1">
-        <label className="flex items-center gap-3 cursor-pointer select-none">
+        <label
+          className={`flex  gap-3 cursor-pointer select-none ${description ? "items-start" : "items-center"}`}
+        >
           <input
             {...registerProps}
             type={type}
-            value={value || ''}
+            value={value || ""}
             disabled={disabled}
             className="peer sr-only"
           />
@@ -124,9 +128,17 @@ export const DynamicInput = ({
             )}
           </div>
 
-          <span className="text-sm font-medium text-[#344054] font-onest">
-            {label}
-          </span>
+          <div>
+            <span className="text-sm leading-none block font-medium text-[#344054] font-onest">
+              {label}
+            </span>
+
+            {description && (
+              <span className="text-xs font-medium leading-none text-[#5c6c86] font-onest">
+                {description}
+              </span>
+            )}
+          </div>
         </label>
 
         {errors?.[name] && (

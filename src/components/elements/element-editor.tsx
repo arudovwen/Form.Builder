@@ -840,6 +840,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         errors={errors}
                         element={element}
                         type="checkbox"
+                        value={values.canHaveDateRange}
                       />
                       {values?.canHaveDateRange && (
                         <div className="grid grid-cols-2 gap-4">
@@ -866,6 +867,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         errors={errors}
                         element={element}
                         type="checkbox"
+                        value={values.allowYearPicker}
                       />
                     </>
                   )}
@@ -878,6 +880,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                       errors={errors}
                       element={element}
                       type="checkbox"
+                      value={values.showState}
                     />
                   )}
                   {element.type.toLowerCase() === "selectfield" && (
@@ -961,6 +964,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         errors={errors}
                         element={element}
                         type="checkbox"
+                        value={values.isMultiple}
                       />
                       <MultiSelectInput
                         element={{
@@ -986,6 +990,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         errors={errors}
                         element={element}
                         type="checkbox"
+                        value={values.isHidden}
                       />
                     </div>{" "}
                     {values.isHidden && (
@@ -1014,6 +1019,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                           errors={errors}
                           element={element}
                           type="checkbox"
+                          value={values.isRequired}
                         />
                       </div>{" "}
                       <div className="flex-1">
