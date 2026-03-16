@@ -81,7 +81,7 @@ function DropZone({
         "w-full rounded-md flex items-center justify-center",
         "transition-all duration-150 ease-in-out overflow-hidden",
         over
-          ? "bg-blue-50 border-2 border-blue-400 border-dashed"
+          ? "bg-blue-50 border-2 border-blue-300 border-dashed"
           : isDragging
             ? "border-2 border-blue-200 border-dashed"
             : "border-2 border-transparent",

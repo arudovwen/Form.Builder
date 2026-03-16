@@ -227,9 +227,9 @@ const FormRenderer: React.FC<FormRendererProps> = ({
         onSubmit={handleSubmit(onSubmit)}
         className="container h-full mx-auto"
       >
-        <div className="relative flex flex-col w-full py-4 gap-y-12">
+        <div className="relative flex flex-col w-full min-w-0 py-4 gap-y-12">
           <div
-            className="multi_section__box"
+            className="multi_section__box min-w-0"
             key={filteredFormData?.[current]?.id}
           >
             {renderType === "multi" &&
@@ -269,15 +269,18 @@ const FormRenderer: React.FC<FormRendererProps> = ({
           <footer className="flex items-center justify-end gap-4 footer flex-wrap">
             {renderType === "multi" ? (
               <>
-                <div className="flex gap-x-4 justify-end navigation_container">
-                  {current > 0 && (
-                    <AppButton
-                      type="button"
-                      text="Back"
-                      onClick={handleBack}
-                      btnClass="text-gray-700 back_btn text-sm border-[#98A2B3] !font-medium !py-[10px] px-10 bg-gray-200 rounded-lg"
-                    />
-                  )}
+                <div className="flex gap-x-4 justify-between navigation_container w-full">
+                  <div>
+                    {" "}
+                    {current > 0 && (
+                      <AppButton
+                        type="button"
+                        text="Back"
+                        onClick={handleBack}
+                        btnClass="text-gray-700 back_btn text-sm border-[#98A2B3] !font-medium !py-[10px] px-10 bg-gray-200 rounded-lg"
+                      />
+                    )}
+                  </div>
                   {current < totalSections - 1 && (
                     <AppButton
                       type="button"

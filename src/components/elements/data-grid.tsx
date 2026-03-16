@@ -26,11 +26,13 @@ export default function DataGridInput({
     [element.id, setValue],
   );
   return (
-    <CustomDataGrid
-      value={registeredValue}
-      onChange={handleChange}
-      columns={element?.dataColumns}
-      isReadOnly={isReadOnly}
-    />
+  
+      <CustomDataGrid
+        value={registeredValue}
+        onChange={handleChange}
+        columns={element?.dataColumns}
+        isReadOnly={isReadOnly}
+      />
+ 
   );
 }

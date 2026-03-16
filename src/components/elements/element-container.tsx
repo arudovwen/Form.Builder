@@ -29,7 +29,7 @@ const ElementContainer = memo(
     }, [element.id, element.sectionId, removeElement]);
 
     return (
-      <div className="w-full">
+      <div className="w-full min-w-0">
         {isOpen && (
           <ElementEditorModal
             isOpen={isOpen}

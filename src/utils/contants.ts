@@ -177,14 +177,14 @@ export const Elements: ElementType[] = [
   createElement({
     type: ElementKind.BASIC_TEXT,
     label: "Basic Text",
-    icon: "fluent:text-16-filled",
+    icon: "majesticons:text",
     inputLabel: "",
     inputType: "basicText",
   }),
 
   createElement({
     type: ElementKind.TEXT,
-    label: "Text Field",
+    label: "Text Input",
     icon: "fluent:text-16-filled",
     inputLabel: "Text Label",
     inputType: "text",
@@ -192,7 +192,7 @@ export const Elements: ElementType[] = [
 
   createElement({
     type: ElementKind.LONG_TEXT,
-    label: "Long Text Field",
+    label: "Long Text",
     icon: "dashicons:text",
     inputLabel: "Long Text Label",
     inputType: "text",
@@ -200,7 +200,7 @@ export const Elements: ElementType[] = [
 
   createElement({
     type: ElementKind.SELECT,
-    label: "Select List",
+    label: "List",
     icon: "tabler:select",
     inputLabel: "Select Text Label",
     inputType: "select",
@@ -220,7 +220,7 @@ export const Elements: ElementType[] = [
 
   createElement({
     type: ElementKind.MULTI_SELECT,
-    label: "Multi Select",
+    label: "Multi List",
     icon: "fluent-mdl2:multi-select",
     inputLabel: "Select Text Label",
     inputType: "select",
@@ -229,7 +229,7 @@ export const Elements: ElementType[] = [
 
   createElement({
     type: ElementKind.VALIDATE_INPUT,
-    label: "Validate Input",
+    label: "Validate",
     icon: "iconoir:www",
     inputLabel: "Validate Input Label",
     inputType: "validateInput",
@@ -296,7 +296,7 @@ export const Elements: ElementType[] = [
 
   createElement({
     type: ElementKind.PHONE,
-    label: "Phone Number",
+    label: "Phone",
     icon: "fluent-mdl2:add-phone",
     inputLabel: "Phone Label",
     inputType: "tel",
@@ -305,7 +305,7 @@ export const Elements: ElementType[] = [
 
   createElement({
     type: ElementKind.RADIO,
-    label: "Radio Select",
+    label: "Radio",
     icon: "ri:checkbox-circle-line",
     inputLabel: "Radio Label",
     inputType: "radio",
@@ -322,7 +322,7 @@ export const Elements: ElementType[] = [
 
   createElement({
     type: ElementKind.FILE,
-    label: "File Attachment",
+    label: "File",
     icon: "ion:attach-sharp",
     inputLabel: "File Label",
     inputType: "file",

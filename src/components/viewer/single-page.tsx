@@ -9,18 +9,21 @@ export const getElementOptions = (element: any, options: any) => {
 
 export default function SinglePage({ form_data, options }) {
   const renderGridElement = (element: any, gridChildren: any[]) => (
-    <GridInput
-      key={element.id}
-      element={element}
-      customClass="p-0 min-h-[60px] border-none"
-    >
+    <div key={element.id} className="min-w-0">
+      <GridInput
+        element={element}
+        customClass="p-0 min-h-[60px] border-none"
+      >
       {gridChildren?.map((child: any) => (
         <GridItem
           key={child.id}
           col={child.gridPosition?.col}
           customClass="p-0"
         >
-          {RenderElement(child, getElementOptions(child, options))}
+          <RenderElement
+            element={child}
+            validationData={getElementOptions(child, options)}
+          />
           {options?.errors?.[child.id]?.message && (
             <div className="mt-1 text-xs text-red-600">
               {options.errors[child.id].message}
@@ -28,15 +31,19 @@ export default function SinglePage({ form_data, options }) {
           )}
         </GridItem>
       ))}
-    </GridInput>
+      </GridInput>
+    </div>
   );
 
   const renderStandardElement = (element: any) => (
     <div
       key={element.id}
-      className={clsx("group relative grid gap-y-[6px]", element.elementClass)}
+      className={clsx("group relative grid gap-y-[6px] min-w-0", element.elementClass)}
     >
-      {RenderElement(element, getElementOptions(element, options))}
+      <RenderElement
+        element={element}
+        validationData={getElementOptions(element, options)}
+      />
       {options?.errors?.[element.id]?.message && (
         <div className="mt-1 text-xs text-red-600">
           {options.errors[element.id].message}
@@ -61,7 +68,7 @@ export default function SinglePage({ form_data, options }) {
         });
 
         return (
-          <div key={section.id} className="pb-6 section_box">
+          <div key={section.id} className="pb-6 section_box min-w-0">
             {(section.title || section.description) && (
               <div className="py-4 border-b border-gray-100 mb-7 section_box__title">
                 {section.title && (
@@ -74,7 +81,7 @@ export default function SinglePage({ form_data, options }) {
                 )}
               </div>
             )}
-            <div className="grid gap-y-6 section_box__content">
+            <div className="grid gap-y-6 section_box__content min-w-0">
               {section.questionData?.map((element: any) => {
                 if (element.gridId) return null;
 

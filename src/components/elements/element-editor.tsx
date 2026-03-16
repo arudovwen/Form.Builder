@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useFieldArray, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -646,17 +647,17 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
     }
   }, [values.url, element.type, getDocuments]);
 
-  return (
+  const modalContent = (
     <div
-      className="fixed inset-0 bg-gray-800/40 backdrop-blur-sm flex items-center justify-end z-[999] cursor-default  select-none "
-      draggable="true"
-      onDragStart={(e) => e.preventDefault()}
+      className="fixed inset-0 bg-gray-800/40 backdrop-blur-sm flex items-center justify-end z-[999] cursor-default"
+      onMouseDown={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      onDragStart={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
     >
-      <div
-        className="w-full lg:w-2/3 xl:w-2/5 bg-white h-screen  shadow-xl relative flex flex-col  items-center  select-"
-        draggable="true"
-        onDragStart={(e) => e.preventDefault()}
-      >
+      <div className="w-full lg:w-2/3 xl:w-2/5 bg-white h-screen  shadow-xl relative flex flex-col  items-center">
         <button
           className="bg-white h-10 w-10 flex justify-center items-center absolute top-1 -left-12 rounded-lg hover:bg-gray-50"
           onClick={onClose}
@@ -1163,6 +1164,10 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       </div>
     </div>
   );
+
+  return document.body
+    ? createPortal(modalContent, document.body)
+    : modalContent;
 };
 
 export default ElementEditorModal;

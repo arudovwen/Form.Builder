@@ -38,30 +38,32 @@ export default function Layout({
     <EditorProvider>
       <Toaster position="top-right" richColors closeButton />
       <div className="w-full h-full bg-[#F8F9FC] flex flex-col">
-        <div className="border-b  bg-white  border-[#E4E7EC]">
-          <TopBar
-            title={title}
-            goBackUrl={goBackUrl}
-            onSubmit={onSubmit}
-            onPublish={onPublish}
-            previewLoading={previewLoading}
-            saveLoading={saveLoading}
-            publishLoading={publishLoading}
-            onTitleChange={onTitleChange}
-          />
-        </div>
         <div className="flex flex-1 ">
           <div>
-            <div className="w-[260px]  h-[calc(100vh-64px)]  border-r border-[#E4E7EC] bg-white ">
+            <div className="w-[250px]  h-screen  border-r border-[#E4E7EC] bg-white ">
               <SideBar />
             </div>
           </div>
-          <div className="flex-1 h-full max-h-full z-[1]">
-            {!loading ? (
-              <MainPage questionData={questionData} uploadUrl={uploadUrl} />
-            ) : (
-              <Loader loadingClass="!w-full !h-[800px]" />
-            )}
+          <div className="flex-1 h-full max-h-full z-[1] w-[calc(100%-250px)]">
+            <div className=" h-[70px]">
+              <TopBar
+                title={title}
+                goBackUrl={goBackUrl}
+                onSubmit={onSubmit}
+                onPublish={onPublish}
+                previewLoading={previewLoading}
+                saveLoading={saveLoading}
+                publishLoading={publishLoading}
+                onTitleChange={onTitleChange}
+              />
+            </div>
+            <div className="p-6 h-[calc(100vh-70px)]">
+              {!loading ? (
+                <MainPage questionData={questionData} uploadUrl={uploadUrl} />
+              ) : (
+                <Loader loadingClass="!w-full !h-[800px]" />
+              )}  
+            </div>
           </div>
         </div>
       </div>

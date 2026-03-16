@@ -6,7 +6,7 @@ import { getElementOptions } from "./single-page";
 
 export default function MultiPage({ form_data, options, current }) {
   return (
-    <div className="grid gap-y-3 multi_section__content">
+    <div className="grid gap-y-3 multi_section__content min-w-0">
       {form_data[current].questionData?.map((element: any) => {
         if (element.type === "grid") {
           const gridChildren = form_data[current].questionData.filter(
@@ -14,24 +14,28 @@ export default function MultiPage({ form_data, options, current }) {
           );
 
           return (
-            <GridInput
-              key={element.id}
-              element={element}
-              customClass="p-0 min-h-[60px] border-none"
-            >
-              {gridChildren?.map((child: any) => (
-                <GridItem
-                  key={child.id}
-                  col={child.gridPosition?.col}
-                  customClass="p-0"
-                >
-                  {RenderElement(child, getElementOptions(child, options))}
-                  <div className="mt-1 text-xs text-red-600">
-                    {options?.errors?.[child.id]?.message}
-                  </div>
-                </GridItem>
-              ))}
-            </GridInput>
+            <div key={element.id} className="min-w-0">
+              <GridInput
+                element={element}
+                customClass="p-0 min-h-[60px] border-none"
+              >
+                {gridChildren?.map((child: any) => (
+                  <GridItem
+                    key={child.id}
+                    col={child.gridPosition?.col}
+                    customClass="p-0"
+                  >
+                    <RenderElement
+                      element={child}
+                      validationData={getElementOptions(child, options)}
+                    />
+                    <div className="mt-1 text-xs text-red-600">
+                      {options?.errors?.[child.id]?.message}
+                    </div>
+                  </GridItem>
+                ))}
+              </GridInput>
+            </div>
           );
         }
 
@@ -40,11 +44,14 @@ export default function MultiPage({ form_data, options, current }) {
             <div
               key={element.id}
               className={clsx(
-                "group relative grid gap-y-[6px]",
+                "group relative grid gap-y-[6px] min-w-0",
                 element.elementClass
               )}
             >
-              {RenderElement(element, getElementOptions(element, options))}
+              <RenderElement
+                element={element}
+                validationData={getElementOptions(element, options)}
+              />
               <div className="mt-1 text-xs text-red-600">
                 {options?.errors?.[element.id]?.message}
               </div>

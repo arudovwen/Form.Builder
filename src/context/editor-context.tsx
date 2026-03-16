@@ -7,6 +7,8 @@ interface EditorProviderProps {
 
 const EditorContext = createContext<
   | {
+      showPreview: boolean;
+      setShowPreview: React.Dispatch<React.SetStateAction<boolean>>;
       formData: any;
       setFormData: React.Dispatch<React.SetStateAction<any>>;
       handleDragStop: (e: any, elementId: string) => void;
@@ -60,6 +62,7 @@ const newSection = {
   isHidden: false,
 };
 export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
+  const [showPreview, setShowPreview] = useState(true);
   const [answerData, setAnswerData] = useState({});
   const [elementData, setElementData] = useState({});
   const [formData, setFormData] = useState<any[]>([newSection]);
@@ -442,6 +445,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       setUploadUrl,
       duplicateElement,
       moveElement,
+      showPreview,
+      setShowPreview,
     }),
     [
       formData,
@@ -463,6 +468,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       uploadUrl,
       duplicateElement,
       moveElement,
+      showPreview,
     ],
   );
 

@@ -59,7 +59,7 @@ export default function Viewer({
   }
 
   return (
-    <div id="form" className="w-full h-full">
+    <div className="w-full h-full min-w-0">
       <div id="root-portal"></div>
       <EditorProvider>
         <FormRenderer

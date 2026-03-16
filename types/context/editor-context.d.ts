@@ -3,6 +3,8 @@ interface EditorProviderProps {
     children: React.ReactNode;
 }
 declare const EditorContext: React.Context<{
+    showPreview: boolean;
+    setShowPreview: React.Dispatch<React.SetStateAction<boolean>>;
     formData: any;
     setFormData: React.Dispatch<React.SetStateAction<any>>;
     handleDragStop: (e: any, elementId: string) => void;

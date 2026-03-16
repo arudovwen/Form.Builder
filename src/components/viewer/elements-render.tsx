@@ -2,7 +2,7 @@ import React, { useContext, useMemo } from "react";
 import { elementMap } from "../editor/element-render";
 import EditorContext from "@/context/editor-context";
 
-export const RenderElement = (element: any, validationData?: any) => {
+export const RenderElement = ({ element, validationData }: { element: any; validationData?: any }) => {
   const ElementComponent = elementMap[element.type];
   const { answerData }: any = useContext(EditorContext);
   const acceptedFileLabels = useMemo(
@@ -53,8 +53,8 @@ export const RenderElement = (element: any, validationData?: any) => {
   if (!ElementComponent) return null;
 
   return (
-    <div className={!isVisible ? "invisible h-0" : ""}>
-      <div className="mb-1.5">
+    <div className={`${!isVisible ? "invisible h-0" : ""} min-w-0 w-full`}>
+      <div className="mb-1.5 min-w-0">
         {element.inputLabel && (
           <label className="block text-sm font-medium  input_label">
             {element.inputLabel}{" "}

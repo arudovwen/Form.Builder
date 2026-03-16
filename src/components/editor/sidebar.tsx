@@ -75,8 +75,8 @@ const SideBar = () => {
     .filter((category) => category.elements.length > 0); // remove empty categories
 
   return (
-    <div className="pt-4 pb-6">
-      <div className="px-5 mb-4">
+    <div className="pt-4 flex flex-col gap-y-6">
+      <div className="px-5">
         <input
           className="field-control"
           placeholder="Search"
@@ -86,15 +86,14 @@ const SideBar = () => {
           id="search"
         />
       </div>
-      <hr />
-      <div>
-        <ul className="grid gap-y-5 mt-3 px-5 max-h-[80vh] overflow-y-auto no-scrollbar">
+      <div className="flex-1 overflow-y-auto no-scrollbar max-h-[calc(100vh-100px)]">
+        <ul className="grid gap-y-5 mt-3 px-5 ">
           {categorizedElements?.map((category, index) => (
             <li key={index}>
               <h4 className="mb-2 text-[11px] font-bold text-gray-500 uppercase">
                 {category.title}
               </h4>
-              <ul className="grid gap-y-[6px] mb-3">
+              <ul className="grid grid-cols-2 gap-y-3 gap-x-4 mb-3">
                 {category.elements?.map((element) => (
                   <li
                     key={element.type}
@@ -106,19 +105,19 @@ const SideBar = () => {
 
                       backgroundColor: elementBgColor,
                     }}
-                    className="cursor-move text-[#475467] flex justify-between items-center h-11
-                               border-[1.5px] border-[#98A2B3] rounded-lg py-3 px-[14px] shadow-custom
+                    className="cursor-move text-[#475467] flex justify-between items-center 
+                               border-[1.5px] border-[#98A2B3] rounded-lg py-2 px-2 shadow-custom
                                hover:shadow-lg transition-all duration-200
                                active:opacity-50 element_class"
                     draggable
                   >
-                    <span className="flex flex-row-reverse items-center justify-between w-full gap-x-3">
+                    <span className="flex flex-col items-center justify-center w-full gap-2">
                       <span style={{ color: elementColor }}>
-                        <AppIcon icon={element.icon} iconClass="w-4 h-4" />
+                        <AppIcon icon={element.icon} iconClass="w-6 h-6" />
                       </span>
                       <span
                         style={{ color: elementColor }}
-                        className="text-sm font-medium leading-[0]"
+                        className="text-xs font-medium "
                       >
                         {element.label}
                       </span>

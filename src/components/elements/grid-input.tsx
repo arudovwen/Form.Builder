@@ -33,7 +33,7 @@ interface GridItemProps {
 
 export const GridItem = ({ col, children, customClass }: GridItemProps) => (
   <div
-    className={clsx("w-full bg-white", customClass)}
+    className={clsx("w-full bg-white min-w-0", customClass)}
     style={{ gridColumn: col }}
   >
     {children}
@@ -213,7 +213,7 @@ const GridInput = ({
         : {};
 
     return (
-      <div key={index}>
+      <div key={index} className="min-w-0">
         <div
           id={`grid-cell-${element.id}-${index}`}
           {...cellDragProps}
@@ -222,7 +222,7 @@ const GridInput = ({
           onDragOver={(e) => handleDragOver(e, index)}
           onDragLeave={(e) => handleDragLeave(e, index)}
           className={clsx(
-            "relative border  rounded-lg min-h-[110px]",
+            "relative border  rounded-lg min-h-[110px] min-w-0",
             "flex items-center justify-center",
             "transition-all duration-200 ease-in-out",
             state === "edit" ? "py-3 " : "",
@@ -273,7 +273,7 @@ const GridInput = ({
           {/* Cell content — select-none stops text-selection from blocking drag */}
           <div
             className={clsx(
-              "w-full select-none",
+              "w-full select-none min-w-0",
               isHovered && "opacity-50 pointer-events-none",
             )}
           >
@@ -293,7 +293,7 @@ const GridInput = ({
       <div
         className="grid w-full gap-3  items-center"
         style={{
-          gridTemplateColumns: `repeat(${element.columns}, 1fr)`,
+          gridTemplateColumns: `repeat(${element.columns}, minmax(0, 1fr))`,
         }}
       >
         {gridItems?.map((_, index) =>

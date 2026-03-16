@@ -24,7 +24,7 @@ export default function TopBar({
   publishLoading?: boolean;
   onTitleChange?: (newTitle: string) => void;
 }) {
-  const { formData }: any = useContext(EditorContext);
+  const { formData, setShowPreview, showPreview }: any = useContext(EditorContext);
   const [isOpen, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editableTitle, setEditableTitle] = useState(title || "");
@@ -48,7 +48,7 @@ export default function TopBar({
   }
 
   return (
-    <div className="px-[30px] py-3 flex justify-between items-center bg-[#F9F9FB] top_bar">
+    <div className="px-[30px] py-3 flex justify-between items-center bg-[#F9F9FB] top_bar border-b h-full">
       <span className="flex items-center gap-x-2">
         {goBackUrl && (
           <button
@@ -90,14 +90,14 @@ export default function TopBar({
 
       <div className="flex justify-end text-xs gap-x-3">
         <AppButton
-          onClick={() => setOpen(true)}
-          text="Preview"
+          onClick={() => setShowPreview((prev) => !prev)}
+          text={showPreview ? "Hide Preview" : "Preview"}
           btnClass="px-2  bg-transparent font-medium text-sm form_preview"
-          icon="solar:eye-bold-duotone"
+          icon={showPreview ? "iconamoon:eye-off-duotone" : "solar:eye-bold-duotone"}
           iconClass="text-base"
           style={{ color: config?.buttonColor || "#333" }}
           isDisabled={previewLoading}
-          isLoading={previewLoading}
+          isLoading={previewLoading}  
         />
         <AppButton
           onClick={handleSubmit}
@@ -113,7 +113,7 @@ export default function TopBar({
           onClick={handlePublish}
           text="Publish"
           style={{ background: config?.buttonColor || "#333" }}
-          btnClass="border-[#98A2B3] font-medium text-sm py-[8px] px-6 text-white rounded-lg form_publish__btn"
+          btnClass="border-[#98A2B3] font-medium text-sm py-2 px-6 text-white rounded-lg form_publish__btn"
           isDisabled={publishLoading}
           isLoading={publishLoading}
         />

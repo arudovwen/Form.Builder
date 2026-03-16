@@ -39,7 +39,7 @@ Here’s a quick example of how to use the Form Builder Package:
 ```tsx
 import React, { useState, useEffect } from "react";
 import { FormBuilder, FormViewer } from "@arudovwen/form-builder-react";
-import "@arudovwen/form-builder-react/dist/index.css";
+import '@arudovwen/form-builder-react/style.css';
 
 function App() {
   const [formData, setFormData] = useState(null);
@@ -72,6 +72,7 @@ function App() {
         onSubmit={(form_data: any) => console.log(form_data)}
         config={config}
         title="My Form Title"
+        questionData={formData} // Pass in existing configuration
       />
       <FormViewer
         onSubmit={(e: any) => console.log(e)}
@@ -89,32 +90,49 @@ export default App;
 
 ### Props for `FormBuilder`
 
-| Prop         | Type                  | Description                                                                                                        |
-| ------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `title`      | `string`              | TItle of the form, optional                                                                                        |
-| `form_data`  | `FormElement[]`       | Array of form elements to render in the form.                                                                      |
-| `answerData` | `any[]`               | Array of user-provided answers to the form.                                                                        |
-| `config`     | `object`              | Configuration object (e.g., `buttonColor`, `loaderColor`, `elementColor`, `elementBgColor`, `elementBorderColor`). |
-| `onSubmit`   | `(data: any) => void` | Callback function triggered when the form is submitted.                                                            |
-| `loading`    | `boolean`             | Indicates whether the form is in a loading state.                                                                  |
-| `isReadOnly` | `boolean`             | Determines if the form is rendered in read-only mode.                                                              |
-| `renderType` | `string`              | Determines the style the form is rendered, either `multi` or `single`.                                             |
-| `goBackUrl`  | `function`            | function to navigate back or somewhere on your app |  
-| `previewLoading`  | `boolean`            | Shows loading icon |
-| `saveLoading`  | `boolean`            | Shows loading icon|  
-| `publishLoading`  | `boolean`            | Shows loading icon |  
-| `onTitleChange`  | `function`            | function to navigate back or somewhere on your app |  
+| Prop | Type | Description |
+| ---- | ---- | ----------- |
+| `title` | `string` | Title of the form (optional). |
+| `questionData` | `FormElement[]` | Array of form elements to render initially in the builder. |
+| `config` | `object` | Configuration object (e.g., `buttonColor`, `loaderColor`). |
+| `onSubmit` | `(data: any) => void` | Callback function triggered when the save button is clicked. |
+| `isReadOnly` | `boolean` | Determines if the builder is rendered in read-only mode. |
+| `loading` | `boolean` | Indicates whether the component is in a loading state. |
+| `goBackUrl` | `() => void` | Function triggered by a back button to navigate somewhere locally. |
+| `onPublish` | `(data: any) => void` | Callback function triggered when the publish button is clicked. |
+| `previewLoading` | `boolean` | Shows loading icon on the preview button. |
+| `saveLoading` | `boolean` | Shows loading icon on the save button. |
+| `publishLoading` | `boolean` | Shows loading icon on the publish button. |
+| `onTitleChange` | `(newTitle: string) => void` | Callback function triggered when the form title is renamed. |
+| `uploadUrl` | `string` | Base URL used for uploading files inside the builder/viewer. |
+
+### Props for `FormViewer`
+
+| Prop | Type | Description |
+| ---- | ---- | ----------- |
+| `form_data` | `FormElement[]` | Array of form elements to render for the user to complete. |
+| `answerData` | `any` | Initial answers/state for the form elements. |
+| `config` | `object` | Configuration object (e.g., `buttonColor`, `loaderColor`). |
+| `onSubmit` | `(data: any) => void` | Callback function triggered when the form viewer is submitted. |
+| `ignoreValidation` | `boolean` | Whether form validation rules should be bypassed or enforced. |
+| `isReadOnly` | `boolean` | Determines if the viewer is read-only (fields cannot be interacted with). |
+| `loading` | `boolean` | Indicates whether the form viewer is in a loading state. |
+| `renderType` | `'single' \| 'multi'` | Determines how the form renders (single page or multi-step pages). |
+| `children` | `React.ReactNode` | Children to append inside the form wrapper. |
+| `hideFooter` | `boolean` | Hides the default Submit actions footers when set to true. |
+| `onGetValues` | `(data: any) => void` | Callback triggered to fetch form values dynamically as they change. |
+| `uploadUrl` | `string` | Base URL used for uploading files. |
 
 ### Form Element Types
 
-The `FormElement` type supports the following fields:
+The `FormElement` type supports the following core fields:
 
-| Field         | Type     | Description                                |
-| ------------- | -------- | ------------------------------------------ |
-| `id`          | `string` | Unique identifier for the form element.    |
-| `type`        | `string` | Type of the input (e.g., `text`, `email`). |
-| `label`       | `string` | Label for the form element.                |
-| `placeholder` | `string` | Placeholder text for the input.            |
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `id` | `string` | Unique identifier for the form element. |
+| `type` | `string` | Type of the input (e.g., `text`, `email`, `select`). |
+| `label` | `string` | Label for the form element seen in the sidebar. |
+| `placeholder` | `string` | Placeholder text for the input. |
 
 ## Development
 
