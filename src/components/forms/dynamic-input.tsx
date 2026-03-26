@@ -21,6 +21,7 @@ interface InputProps {
   min?: number;
   max?: number;
   description?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
 export const DynamicInput = ({
@@ -41,8 +42,9 @@ export const DynamicInput = ({
   min,
   max,
   description,
+  onChange,
 }: InputProps) => {
-  const registerProps = register ? { ...register(name) } : {};
+  const registerProps: React.InputHTMLAttributes<HTMLInputElement> & React.TextareaHTMLAttributes<HTMLTextAreaElement> = register ? { ...register(name) } : {};
 
   if (type === "amount") {
     return (
@@ -164,6 +166,10 @@ export const DynamicInput = ({
         </label>
         <textarea
           {...registerProps}
+          onChange={(e) => {
+            registerProps.onChange?.(e as any);
+            onChange?.(e);
+          }}
           className={`field-control ${
             errors?.[name] ? "border-red-300" : "border-[#D0D5DD]"
           } ${className}`}
@@ -179,18 +185,22 @@ export const DynamicInput = ({
     );
   }
   return (
-    <div className="space-y-1.5 relative w-full">
-      <label
-        className={`block text-sm font-medium text-[#344054] font-onest ${
+    <div className=" relative w-full">
+   {label &&   <label
+        className={`block text-sm font-medium text-[#344054] font-onest mb-1.5 ${
           isFloating
             ? "z-[40] absolute block text-[#667085] bg-white  py-[2px] px-1 -top-[12px] left-3"
             : "relative"
         }`}
       >
         {label}
-      </label>
+      </label>}
       <input
         {...registerProps}
+        onChange={(e) => {
+          registerProps.onChange?.(e as any);
+          onChange?.(e);
+        }}
         type={type}
         className={`field-control ${
           errors?.[name] ? "border-red-300" : "border-[#D0D5DD]"

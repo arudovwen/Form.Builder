@@ -100,9 +100,7 @@ const SectionItem = ({
           </div>
         </div>
         {section?.description && activeSections.includes(index) && (
-          <p className="mt-2 text-sm text-gray-600">
-            {section?.description}
-          </p>
+          <p className="mt-2 text-sm text-gray-600">{section?.description}</p>
         )}
         {activeSections.includes(index) && (
           <div
@@ -113,7 +111,7 @@ const SectionItem = ({
             onClick={() => setSelectedSection(section.id)}
           >
             <hr className="group-last:hidden" />
-            <div className="h-full mt-4 gap-y-6 max-h-[600px] overflow-y-auto">
+            <div className="h-full mt-4 gap-y-6 ">
               {
                 <ElementCanvas
                   elementData={section.questionData}
@@ -193,7 +191,7 @@ const FormBuilder = () => {
   return (
     <div
       ref={containerRef} // Attach the ref to the container
-      className="relative flex flex-col h-full pb-5 mx-auto gap-x-4 overflow-y-auto"
+      className="relative flex flex-col h-full pb-5 mx-auto gap-x-4 "
     >
       {isOpen && (
         <SectionEditorModal
@@ -202,7 +200,10 @@ const FormBuilder = () => {
           section={tempSection.current}
         />
       )}
-      <div id="section-container" className="relative flex flex-col flex-1 w-full gap-y-3 container">
+      <div
+        id="section-container"
+        className="relative flex flex-col flex-1 w-full gap-y-3 container overflow-y-auto"
+      >
         {formData?.map(
           (
             section: {

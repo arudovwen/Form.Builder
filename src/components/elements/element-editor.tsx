@@ -534,7 +534,8 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           />
         </div>
       )}
-      {dataFields?.map((field, index) => (
+     <div className="grid gap-y-3">
+       {dataFields?.map((field, index) => (
         <div key={field.id} className="flex items-center gap-x-4 ">
           <div className="min-w-[140px]">
             <CustomSelect
@@ -561,7 +562,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
             />
           </div>
 
-          <div className="flex-1">
+          {/* <div className="flex-1">
             <DynamicInput
               watch={watch}
               label={index === 0 ? "Field key" : ""}
@@ -571,13 +572,22 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               element={element}
               placeholder="fieldKey"
             />
-          </div>
+          </div> */}
           <div className="flex-1">
             <DynamicInput
               watch={watch}
               label={index === 0 ? "Display header" : ""}
               name={`dataColumns.${index}.headerName`}
               register={register}
+              onChange={(e) => {
+                const text = e.target.value;
+                const fieldName = text
+                  .toLowerCase()
+                  .trim()
+                  .replace(/[\s-]+/g, "_")
+                  .replace(/[^a-z0-9_]/g, "");
+                setValue(`dataColumns.${index}.field`, fieldName, { shouldValidate: true, shouldDirty: true });
+              }}
               errors={errors}
               element={element}
               placeholder="header"
@@ -608,6 +618,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           </button>
         </div>
       ))}
+     </div>
       <div>
         {" "}
         <button

@@ -13,16 +13,14 @@ const FormPreview: React.FC = () => {
   const config = getItem("config");
 
   return (
-  
-      <FormViewer
-        form_data={formData}
-        ignoreValidation={true}
-        config={config}
-        uploadUrl={uploadUrl}
-        
-        renderType="multi"
-      />
-
+    <FormViewer
+      form_data={formData}
+      ignoreValidation={true}
+      config={config}
+      uploadUrl={uploadUrl}
+      renderType="multi"
+      onGetValues={(e: any) => console.log(e)}
+    />
   );
 };
 

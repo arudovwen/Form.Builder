@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback, memo } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import CurrencyInput from "react-currency-input-field";
 import AppIcon from "../ui/AppIcon";
 import { v4 as uuidv4 } from "uuid";
+import { config } from "process";
+import { getItem } from "@/utils/localStorageControl";
 
 /* ---------------- TYPES ---------------- */
 
@@ -22,11 +24,6 @@ interface ValidationResult {
   error?: string | null;
 }
 
-interface EditingCell<T> {
-  rowId: string;
-  field: keyof T;
-}
-
 interface CustomDataGridProps<T extends { id: string }> {
   value?: T[];
   onChange?: (rows: T[]) => void;
@@ -41,15 +38,7 @@ interface RowProps<T extends { id: string }> {
   row: T;
   columns: DataGridColumn<T>[];
   isReadOnly: boolean;
-  editingCell: EditingCell<T> | null;
-  setEditingCell: React.Dispatch<React.SetStateAction<EditingCell<T> | null>>;
   handleCellChange: (val: unknown, rowId: string, field: keyof T) => void;
-  debouncedValidate: (
-    val: unknown,
-    rowId: string,
-    field: keyof T,
-    column: DataGridColumn<T>,
-  ) => void;
   getValidationStatus: (
     rowId: string,
     field: keyof T,
@@ -64,26 +53,18 @@ function RowComponent<T extends { id: string }>({
   row,
   columns,
   isReadOnly,
-  editingCell,
-  setEditingCell,
   handleCellChange,
-  debouncedValidate,
   getValidationStatus,
   deleteRow,
 }: RowProps<T>) {
-  const isEditing = (field: keyof T) =>
-    editingCell?.rowId === row.id && editingCell?.field === field;
-
   return (
     <tr>
       {columns.map((col) => {
         const value = row[col.field];
         const editable = col.editable && !isReadOnly;
-        const editing = isEditing(col.field);
         const { isValidating, result } = getValidationStatus(row.id, col.field);
 
         let validationClass = "border-gray-300";
-
         if (col.validate) {
           if (result?.isValid === false)
             validationClass = "border-red-500 bg-red-50";
@@ -91,22 +72,14 @@ function RowComponent<T extends { id: string }>({
             validationClass = "border-green-500 bg-green-50";
         }
 
-        const inputClassName = `w-full px-2 py-1 border rounded outline-none ${validationClass}`;
+        const inputClassName = `w-full py-1 rounded outline-none ${validationClass}`;
 
         return (
           <td
-            title={isReadOnly ? "" : "Double click to edit"}
             key={String(col.id)}
-            className="px-3 py-1 border"
-            onDoubleClick={() =>
-              editable &&
-              setEditingCell({
-                rowId: row.id,
-                field: col.field,
-              })
-            }
+            className="px-3 py-1 border-b border-r last:border-r-0"
           >
-            {editable && editing ? (
+            {editable ? (
               <div className="relative">
                 {col.type === "number" ? (
                   <CurrencyInput
@@ -117,20 +90,12 @@ function RowComponent<T extends { id: string }>({
                     onValueChange={(val) =>
                       handleCellChange(val, row.id, col.field)
                     }
-                    onBlur={() => {
-                      setEditingCell(null);
-                      debouncedValidate(value, row.id, col.field, col);
-                    }}
-                    autoFocus
                   />
                 ) : col.type === "checkbox" ? (
                   <div className="flex items-center gap-x-4">
                     {(["yes", "no"] as const).map((option) => {
                       const isYes = option === "yes";
-                      const radioId = `radio-${row.id}-${String(
-                        col.field,
-                      )}-${option}`;
-
+                      const radioId = `radio-${row.id}-${String(col.field)}-${option}`;
                       return (
                         <label
                           key={option}
@@ -146,9 +111,7 @@ function RowComponent<T extends { id: string }>({
                               handleCellChange(isYes, row.id, col.field)
                             }
                           />
-                          <span className="text-sm">
-                            {isYes ? "Yes" : "No"}
-                          </span>
+                          <span className="text-sm">{isYes ? "Yes" : "No"}</span>
                         </label>
                       );
                     })}
@@ -160,18 +123,13 @@ function RowComponent<T extends { id: string }>({
                     onChange={(e) =>
                       handleCellChange(e.target.value, row.id, col.field)
                     }
-                    onBlur={() => {
-                      setEditingCell(null);
-                      debouncedValidate(value, row.id, col.field, col);
-                    }}
                     className={inputClassName}
-                    autoFocus
                   />
                 )}
 
                 {isValidating && (
                   <div className="absolute right-1 top-1">
-                    <div className="w-4 h-4 border-2 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+                    <div className="w-4 h-4 border-2 border-blue-500 rounded-full border-t-transparent animate-spin" />
                   </div>
                 )}
               </div>
@@ -196,7 +154,7 @@ function RowComponent<T extends { id: string }>({
                 {value === true ? "Yes" : value === false ? "No" : ""}
               </span>
             ) : (
-              <span className="block py-1 text-gray-700 cursor-pointer">
+              <span className="block py-1 text-gray-700">
                 {String(value ?? "")}
               </span>
             )}
@@ -205,7 +163,7 @@ function RowComponent<T extends { id: string }>({
       })}
 
       {!isReadOnly && (
-        <td className="px-3 py-1 text-center border">
+        <td className="px-3 py-1 text-center border sticky right-0 bg-gray-50 z-10">
           <button
             type="button"
             onClick={() => deleteRow(row.id)}
@@ -231,41 +189,19 @@ export default function CustomDataGrid<T extends { id: string }>({
   columns,
 }: CustomDataGridProps<T>) {
   const [rows, setRows] = useState<T[]>(value);
-  const [editingCell, setEditingCell] = useState<EditingCell<T> | null>(null);
-
-  const tableRef = useRef<HTMLDivElement>(null);
-
-
-
-  /* ---- Safe sync external value ---- */
+  const config = getItem("config");
+  /* ---- Sync external value changes ---- */
   useEffect(() => {
-    setRows((prevRows) => {
-      // Only update if value prop is different
-      if (JSON.stringify(prevRows) !== JSON.stringify(value)) {
-        return value;
-      }
-      return prevRows;
+    setRows((prev) => {
+      if (JSON.stringify(prev) !== JSON.stringify(value)) return value;
+      return prev;
     });
   }, [value]);
 
-  /* ---- onChange only called inside user actions ---- */
-  // handleCellChange, addRow, deleteRow already call onChange
-
-  /* ---- Notify parent safely ---- */
+  /* ---- Notify parent on rows change ---- */
   useEffect(() => {
     onChange?.(rows);
   }, [rows, onChange]);
-
-  /* ---- Outside click ---- */
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (tableRef.current && !tableRef.current.contains(e.target as Node)) {
-        setEditingCell(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
 
   const handleCellChange = useCallback(
     (val: unknown, rowId: string, field: keyof T) => {
@@ -281,12 +217,10 @@ export default function CustomDataGrid<T extends { id: string }>({
 
   const addRow = useCallback(() => {
     const id = uuidv4();
-
     const newRow = columns.reduce((acc, col) => {
       (acc as any)[col.field] = col.field === "id" ? id : "";
       return acc;
     }, {} as T);
-
     setRows((prev) => [...prev, { id, ...newRow }]);
   }, [columns]);
 
@@ -295,35 +229,23 @@ export default function CustomDataGrid<T extends { id: string }>({
   }, []);
 
   const getValidationStatus = useCallback(
-    () => ({
+    (_rowId: string, _field: keyof T) => ({
       isValidating: false,
-      result: undefined,
+      result: undefined as ValidationResult | undefined,
     }),
     [],
   );
 
   return (
-    <div className="mt-3 rounded" ref={tableRef}>
-      <div className="flex justify-end">
-        {!isReadOnly && (
-          <button
-            onClick={addRow}
-            type="button"
-            className="px-2 py-1 mb-3 text-xs text-white bg-gray-600 rounded hover:bg-gray-700"
-          >
-            Add Row
-          </button>
-        )}
-      </div>
-
+    <div className="mt-3 rounded">
       <div className="w-full max-w-full overflow-x-auto border rounded-lg">
-        <table className="min-w-max w-full text-sm border-collapse rounded table-auto bg-gray-50">
+        <table className="min-w-max w-full text-sm border-collapse table-auto">
           <thead>
             <tr className="bg-gray-100">
-              {columns.map((col: any, idx) => (
+              {columns.map((col, idx) => (
                 <th
                   key={`${String(col.id)}-${idx}`}
-                  className="px-3 py-2 text-xs font-semibold text-left text-gray-600 border whitespace-nowrap"
+                  className="px-3 py-2 text-xs font-semibold text-left text-gray-600 border-b whitespace-nowrap"
                 >
                   {col.headerName ?? String(col.field)}
                   {col.validate && (
@@ -331,7 +253,9 @@ export default function CustomDataGrid<T extends { id: string }>({
                   )}
                 </th>
               ))}
-              {!isReadOnly && <th className="w-10 px-2 py-2 border"></th>}
+              {!isReadOnly && (
+                <th className="w-10 px-2 py-2 border sticky right-0 bg-gray-100 z-10" />
+              )}
             </tr>
           </thead>
 
@@ -343,10 +267,7 @@ export default function CustomDataGrid<T extends { id: string }>({
                   row={row}
                   columns={columns}
                   isReadOnly={isReadOnly}
-                  editingCell={editingCell}
-                  setEditingCell={setEditingCell}
                   handleCellChange={handleCellChange}
-                  debouncedValidate={() => {}}
                   getValidationStatus={getValidationStatus}
                   deleteRow={deleteRow}
                 />
@@ -364,6 +285,19 @@ export default function CustomDataGrid<T extends { id: string }>({
           </tbody>
         </table>
       </div>
+
+      {!isReadOnly && (
+        <div className="flex justify-center mt-2">
+          <button
+            onClick={addRow}
+            type="button"
+             style={{ color: config?.buttonColor || "#333" }}
+            className="px-2 py-1 mb-3 text-xs text-gray-600 font-medium"
+          >
+            + Add Row
+          </button>
+        </div>
+      )}
     </div>
   );
 }
