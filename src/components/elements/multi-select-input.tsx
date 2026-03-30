@@ -11,16 +11,21 @@ export default function MultiSelectInput({
   validationData: any;
   placeholder?: string;
 }) {
-  const [selectedValues, setSelectedValues] = useState<
-    { label: string; value: any }[]
-  >([]);
-
   const {
     register = () => ({}),
     setValue,
     isReadOnly,
     watch,
+    getValues,
   } = validationData || {};
+
+  // Initialize from the current RHF value so values survive section navigation
+  const [selectedValues, setSelectedValues] = useState<
+    { label: string; value: any }[]
+  >(() => {
+    const current = getValues?.(element.id);
+    return Array.isArray(current) ? current : [];
+  });
 
   const displayValue = useMemo(
     () => selectedValues?.map((i) => i.label).join(", "),
@@ -32,13 +37,16 @@ export default function MultiSelectInput({
     register(element.id);
   }, [element.id, register]);
 
+  // Keep local state in sync when RHF value changes from outside (e.g. answerData hydration)
   useEffect(() => {
-    if (watch) {
-      const subscription = watch((values: { [x: string]: any }) => {
-        setSelectedValues(values[element.id]);
-      });
-      return () => subscription.unsubscribe?.(); // clean up if watch returns a subscription (e.g., react-hook-form)
-    }
+    if (!watch) return;
+    const subscription = watch((values: { [x: string]: any }) => {
+      const val = values[element.id];
+      if (val !== undefined) {
+        setSelectedValues(Array.isArray(val) ? val : []);
+      }
+    });
+    return () => subscription.unsubscribe?.();
   }, [watch, element.id]);
   return (
     <div className="custom-select">

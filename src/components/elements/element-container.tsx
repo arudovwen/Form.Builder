@@ -18,9 +18,11 @@ interface ElementContainerProps {
 const ElementContainer = memo(
   ({ state, element, children }: ElementContainerProps) => {
     const [isOpen, setOpen] = useState(false);
-    const { removeElement, duplicateElement }: any = React.useContext(EditorContext);
+    const { removeElement, duplicateElement }: any =
+      React.useContext(EditorContext);
     const acceptedFileLabels = useMemo(
-      () => element?.acceptedFiles?.map((i: { label: any; }) => i.label).join(", "),
+      () =>
+        element?.acceptedFiles?.map((i: { label: any }) => i.label).join(", "),
       [element],
     );
 
@@ -53,14 +55,18 @@ const ElementContainer = memo(
           </span>
           {state === "edit" && (
             <span className="flex items-center gap-x-3">
-              {!element.gridPosition && <button
-                type="button"
-                className="text-sm outline-none hover:opacity-80 py-1"
-                onClick={() => duplicateElement(element?.id, element.sectionId)}
-                title="Duplicate"
-              >
-                <AppIcon icon="tabler:copy" iconClass="text-base" />
-              </button>}
+              {
+                <button
+                  type="button"
+                  className="text-sm outline-none hover:opacity-80 py-1 text-gray-600"
+                  onClick={() =>
+                    duplicateElement(element?.id, element.sectionId)
+                  }
+                  title="Duplicate"
+                >
+                  <AppIcon icon="tabler:copy" iconClass="text-base" />
+                </button>
+              }
 
               <button
                 type="button"

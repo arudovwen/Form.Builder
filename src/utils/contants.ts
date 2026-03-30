@@ -205,7 +205,7 @@ export const Elements: ElementType[] = [
     inputLabel: "Select Text Label",
     inputType: "select",
     selectType: "list",
-    options: [option("Placeholder 1", "")],
+    options: [option("Placeholder 1", "placeholder_1")],
   }),
 
   // createElement({
@@ -224,7 +224,7 @@ export const Elements: ElementType[] = [
     icon: "fluent-mdl2:multi-select",
     inputLabel: "Select Text Label",
     inputType: "select",
-    options: [option("Placeholder 1", "")],
+    options: [option("Placeholder 1", "placeholder_1")],
   }),
 
   createElement({
@@ -352,7 +352,7 @@ export const Elements: ElementType[] = [
     type: ElementKind.DATA_GRID,
     label: "Table",
     icon: "carbon:data-table",
-    inputLabel: "Data Grid Label",
+    inputLabel: "Table Label",
     inputType: "dataGrid",
     value: [],
     dataColumns: [

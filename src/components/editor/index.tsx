@@ -27,7 +27,7 @@ const SectionItem = ({
   setIsDragging,
 }: any) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const prevLength = useRef(section.questionData.length);
+  const prevLength = useRef(section.questionData?.length);
 
   useEffect(() => {
     // Scroll to bottom when a new input is added
@@ -41,8 +41,8 @@ const SectionItem = ({
         });
       }
     }
-    prevLength.current = section.questionData.length;
-  }, [section.questionData.length]);
+    prevLength.current = section.questionData?.length;
+  }, [section.questionData?.length]);
 
   return (
     <div

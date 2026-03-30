@@ -36,6 +36,7 @@ import ValidateExample from "../ValidateExample";
 import CustomDatePicker from "../CutomDatePicker";
 import VisibilityEditor from "./visibility-editor";
 import MultiSelectInput from "./multi-select-input";
+import { normalizeGridRows, normalizeRows } from "@/utils/normalizeRows";
 
 interface Option {
   label: string;
@@ -176,6 +177,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   onClose,
   element,
 }) => {
+  console.log(element);
   const filteredTabs = tabs.filter(
     (tab) =>
       !noAllowValidation.includes(element.inputType) ||
@@ -270,9 +272,9 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
 
       // Determine where to set the data
       if (element.type?.toLowerCase() === "datagrid") {
-        setValue("dataColumns", options);
+        setValue("dataColumns", normalizeGridRows(options));
       } else {
-        setValue("options", options);
+        setValue("options", normalizeRows(options));
       }
     } catch (error: any) {
       const message =
@@ -342,7 +344,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       {optionTypes === "sheet" && (
         <div className="mb-4">
           <FileReaderComponent
-            isFloating
+            type={element.type}
             label="Load options form sheet (csv, xlsx)"
             setValue={setValue}
             name="options"
@@ -365,6 +367,18 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 errors={errors}
                 element={element}
                 placeholder="Label"
+                onChange={(e) => {
+                  const text = e.target.value;
+                  const slugified = text
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[\s-]+/g, "_")
+                    .replace(/[^a-z0-9_]/g, "");
+                  setValue(`options.${index}.value`, slugified, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  });
+                }}
               />
             </div>
             <div className="flex-1">
@@ -422,6 +436,18 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                     element={element}
                     placeholder="Label"
                     isFloating
+                    onChange={(e) => {
+                      const text = e.target.value;
+                      const slugified = text
+                        .toLowerCase()
+                        .trim()
+                        .replace(/[\s-]+/g, "_")
+                        .replace(/[^a-z0-9_]/g, "");
+                      setValue(`options1.${index}.value`, slugified, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      });
+                    }}
                   />
                 </div>
                 <div className="flex-1">
@@ -506,7 +532,6 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 register={register}
                 className="!w-full"
                 placeholder="https://example.com/columns"
-                isFloating
               />
 
               {optionsLoading && (
@@ -527,42 +552,42 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       {optionTypes === "sheet" && (
         <div className="mb-4">
           <FileReaderComponent
-            isFloating
+            type={element.type}
             label="Load columns form sheet (csv, xlsx)"
             setValue={setValue}
             name="dataColumns"
           />
         </div>
       )}
-     <div className="grid gap-y-3">
-       {dataFields?.map((field, index) => (
-        <div key={field.id} className="flex items-center gap-x-4 ">
-          <div className="min-w-[140px]">
-            <CustomSelect
-              label={index === 0 ? "Type" : ""}
-              options={[
-                {
-                  label: "Text",
-                  value: "text",
-                },
-                {
-                  label: "Number",
-                  value: "number",
-                },
-                {
-                  label: "Checkbox",
-                  value: "checkbox",
-                },
-              ]}
-              register={register}
-              name={`dataColumns.${index}.type`}
-              setValue={setValue}
-              trigger={trigger}
-              value={values.dataColumns[index].type}
-            />
-          </div>
+      <div className="grid gap-y-3">
+        {dataFields?.map((field, index) => (
+          <div key={field.id} className="flex items-center gap-x-4 ">
+            <div className="min-w-[140px]">
+              <CustomSelect
+                label={index === 0 ? "Type" : ""}
+                options={[
+                  {
+                    label: "Text",
+                    value: "text",
+                  },
+                  {
+                    label: "Number",
+                    value: "number",
+                  },
+                  {
+                    label: "Checkbox",
+                    value: "checkbox",
+                  },
+                ]}
+                register={register}
+                name={`dataColumns.${index}.type`}
+                setValue={setValue}
+                trigger={trigger}
+                value={values.dataColumns[index].type}
+              />
+            </div>
 
-          {/* <div className="flex-1">
+            {/* <div className="flex-1">
             <DynamicInput
               watch={watch}
               label={index === 0 ? "Field key" : ""}
@@ -573,27 +598,30 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               placeholder="fieldKey"
             />
           </div> */}
-          <div className="flex-1">
-            <DynamicInput
-              watch={watch}
-              label={index === 0 ? "Display header" : ""}
-              name={`dataColumns.${index}.headerName`}
-              register={register}
-              onChange={(e) => {
-                const text = e.target.value;
-                const fieldName = text
-                  .toLowerCase()
-                  .trim()
-                  .replace(/[\s-]+/g, "_")
-                  .replace(/[^a-z0-9_]/g, "");
-                setValue(`dataColumns.${index}.field`, fieldName, { shouldValidate: true, shouldDirty: true });
-              }}
-              errors={errors}
-              element={element}
-              placeholder="header"
-            />
-          </div>
-          {/* <label className="flex items-center mb-0 gap-x-2">
+            <div className="flex-1">
+              <DynamicInput
+                watch={watch}
+                label={index === 0 ? "Display header" : ""}
+                name={`dataColumns.${index}.headerName`}
+                register={register}
+                onChange={(e) => {
+                  const text = e.target.value;
+                  const fieldName = text
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[\s-]+/g, "_")
+                    .replace(/[^a-z0-9_]/g, "");
+                  setValue(`dataColumns.${index}.field`, fieldName, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  });
+                }}
+                errors={errors}
+                element={element}
+                placeholder="header"
+              />
+            </div>
+            {/* <label className="flex items-center mb-0 gap-x-2">
             <input
               type="checkbox"
               checked={values.dataColumns[index].validate}
@@ -601,24 +629,24 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
             />
             Validate
           </label> */}
-          {/* <div className="flex items-center flex-1 gap-x-3">
+            {/* <div className="flex items-center flex-1 gap-x-3">
             <label>
               {" "}
               <input type="checkbox" name={`dataColumns.${index}.editable`} />{" "}
               <span>Is Editable</span>
             </label>
           </div> */}
-          <button
-            disabled={dataFields.length === 1}
-            type="button"
-            className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
-            onClick={() => columnRemove(index)}
-          >
-            <AppIcon icon="iconamoon:sign-times-fill" />
-          </button>
-        </div>
-      ))}
-     </div>
+            <button
+              disabled={dataFields.length === 1}
+              type="button"
+              className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
+              onClick={() => columnRemove(index)}
+            >
+              <AppIcon icon="iconamoon:sign-times-fill" />
+            </button>
+          </div>
+        ))}
+      </div>
       <div>
         {" "}
         <button

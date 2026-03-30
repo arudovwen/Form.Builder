@@ -175,12 +175,31 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
             ];
 
             return { ...sec, questionData: newQuestionData };
-          } else {
-            // Duplicate a normal element
-            const newElement = deepCloneWithNewId(
-              original,
-              original.gridId ? { gridId: original.gridId } : {},
+          } else if (original.gridId) {
+            // Duplicate a grid child → eject clone to canvas (strip grid bindings)
+            // so we don't have to worry about column capacity.
+            // Insert it right after the last element that belongs to the same grid.
+            const { gridId: _gId, gridPosition: _gPos, ...rest } = original;
+            const newElement = deepCloneWithNewId(rest, {});
+
+            // Find the last index of any element in the same grid group
+            const lastGridSiblingIndex = qd.reduce(
+              (last: number, el: any, i: number) =>
+                el.id === original.gridId || el.gridId === original.gridId
+                  ? i
+                  : last,
+              elementIndex,
             );
+
+            const newQuestionData = [
+              ...qd.slice(0, lastGridSiblingIndex + 1),
+              newElement,
+              ...qd.slice(lastGridSiblingIndex + 1),
+            ];
+            return { ...sec, questionData: newQuestionData };
+          } else {
+            // Duplicate a normal canvas element
+            const newElement = deepCloneWithNewId(original, {});
             const newQuestionData = [
               ...qd.slice(0, elementIndex + 1),
               newElement,
