@@ -31,6 +31,7 @@ export enum ElementKind {
   SPACER = "spacer",
   SECTION = "section",
   GRID = "grid",
+  MATRIX = "matrix",
 }
 
 export interface DataColumnType {
@@ -78,6 +79,7 @@ export interface ElementType {
   maxAmountMessage?: string;
 
   options?: OptionType[];
+  options1?: OptionType[];
   options2?: OptionType[];
 
   columns?: number;
@@ -409,6 +411,24 @@ export const Elements: ElementType[] = [
     inputType: "grid",
     columns: 2,
   }),
+
+  createElement({
+    type: ElementKind.MATRIX,
+    label: "Likert Scale",
+    icon: "pepicons-pop:list",
+    inputLabel: "Matrix Label",
+    inputType: "matrix",
+    options: [
+      { id: "r1", label: "Example Row", value: "row_1" },
+    ],
+    options1: [
+      { id: "c1", label: "Strongly Disagree", value: "strongly_disagree" },
+      { id: "c2", label: "Disagree", value: "disagree" },
+      { id: "c3", label: "Neutral", value: "neutral" },
+      { id: "c4", label: "Agree", value: "agree" },
+      { id: "c5", label: "Strongly Agree", value: "strongly_agree" },
+    ],
+  }),
 ];
 
 /* ---------------------------------- */
@@ -436,6 +456,7 @@ export const CategorizedElements = Object.freeze({
     ElementKind.CHECKBOX,
     ElementKind.COUNTRY,
     ElementKind.RATING,
+    ElementKind.MATRIX,
   ],
   dateAndTime: [ElementKind.DATE],
   fileAndMedia: [ElementKind.FILE],
@@ -487,6 +508,7 @@ export const AllowOptions: string[] = [
   "select",
   "checkbox",
   "multiselect",
+  "matrix",
 ];
 export const AllowApiOptions: string[] = ["validateInput"];
 export const AllowTableOptions: string[] = ["tableInput"];

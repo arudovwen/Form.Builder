@@ -41,7 +41,7 @@ export default function MultiSelectInput({
         <div className="custom-select__wrapper">
           <Listbox.Button className="custom-select__control">
             <span className="custom-select__value">
-              {selectedOptions.length > 0 ? (
+              {selectedOptions?.length > 0 ? (
                 selectedOptions?.map((opt) => opt.label).join(", ")
               ) : (
                 <span className="custom-select__placeholder">

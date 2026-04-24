@@ -177,7 +177,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   onClose,
   element,
 }) => {
-  console.log(element);
+ 
   const filteredTabs = tabs.filter(
     (tab) =>
       !noAllowValidation.includes(element.inputType) ||
@@ -352,7 +352,11 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         </div>
       )}
       <div>
-        <h3 className="mb-4 text-sm text-gray-500">Parent Options </h3>
+        <h3 className="mb-4 text-sm text-gray-500 font-semibold">
+          {element?.type?.toLowerCase() === "matrix"
+            ? "Rows Options"
+            : "Parent Options"}
+        </h3>
         {fields?.map((field, index) => (
           <div
             key={field.id}
@@ -415,12 +419,16 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         </div>
       </div>
 
-      {element.type.toLowerCase() === "cascadeselect" && (
+      {["cascadeselect", "matrix"].includes(element.type.toLowerCase()) && (
         <>
           <hr className="my-5" />
           <div>
             {" "}
-            <h3 className="mb-4 text-sm text-gray-500">Child Options </h3>
+            <h3 className="mb-4 text-sm text-gray-500 font-semibold">
+              {element?.type?.toLowerCase() === "matrix"
+                ? "Columns Options"
+                : "Child Options"}
+            </h3>
             {fields1?.map((field, index) => (
               <div
                 key={field.id}
@@ -429,13 +437,12 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 <div className="flex-1">
                   <DynamicInput
                     watch={watch}
-                    label="Label"
+                    label={index === 0 ? "Label" : ""}
                     name={`options1.${index}.label`}
                     register={register}
                     errors={errors}
                     element={element}
                     placeholder="Label"
-                    isFloating
                     onChange={(e) => {
                       const text = e.target.value;
                       const slugified = text
@@ -453,25 +460,23 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 <div className="flex-1">
                   <DynamicInput
                     watch={watch}
-                    label="Value"
+                    label={index === 0 ? "Value" : ""}
                     name={`options1.${index}.value`}
                     register={register}
                     errors={errors}
                     element={element}
                     placeholder="Value"
-                    isFloating
                   />
                 </div>
                 <div className="flex-1">
                   <DynamicInput
                     watch={watch}
-                    label="Key"
+                    label={index === 0 ? "Key" : ""}
                     name={`options1.${index}.key`}
                     register={register}
                     errors={errors}
                     element={element}
                     placeholder="Key"
-                    isFloating
                   />
                 </div>
                 <button

@@ -81,9 +81,11 @@ const FileReaderComponent = ({
         download
         href={
           type === "dataGrid"
-            ? "/excel/table_sheet.xlsx"
-            : "/excel/list_sheet.xlsx"
+            ? "https://res.cloudinary.com/arudovwen-me/raw/upload/v1775419737/table_sheet_bu7l6g.xlsx"
+            : "https://res.cloudinary.com/arudovwen-me/raw/upload/v1775419737/list_sheet_1_pi6bwv.xlsx"
         }
+        target="_blank"
+        rel="noopener noreferrer"
         style={{ color: config?.buttonColor || "#333" }}
         className="text-xs text-gray-600 mb-2 cursor-pointer font-medium"
       >

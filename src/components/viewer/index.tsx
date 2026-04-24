@@ -78,8 +78,8 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   const config = getItem("config");
 
   const validationSchema = useMemo(
-    () => generateDynamicSchema(filteredFormData),
-    [filteredFormData],
+    () => generateDynamicSchema({formData:filteredFormData, isReadOnly}),
+    [filteredFormData, isReadOnly],
   );
 
   const methods = useForm({
@@ -134,6 +134,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
         type: element.type,
         metaData: {
           prefix: element.prefix,
+          dateFormat: element.dateFormat,
         },
       })),
     );
@@ -166,6 +167,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
           type: element.type,
           metaData: {
             prefix: element.prefix,
+            dateFormat: element.dateFormat,
           },
         })),
       );

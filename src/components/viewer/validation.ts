@@ -11,6 +11,7 @@ interface QuestionData {
     | "checkbox"
     | "email"
     | "date"
+    | "matrix"
     | "url";
   isRequired?: boolean;
   requiredMessage?: string;
@@ -39,7 +40,7 @@ const DEFAULT_MESSAGES = {
   maxAmount: (max: number) => `Maximum amount is ${max}`,
 } as const;
 
-const getBaseSchema = (type: QuestionData["type"]) => {
+const getBaseSchema = (type: QuestionData["type"], isReadOnly: boolean = false) => {
   const schemas = {
     textField: yup.string().nullable(),
     longText: yup.string().nullable(),
@@ -54,6 +55,7 @@ const getBaseSchema = (type: QuestionData["type"]) => {
     selectField: yup.string().nullable(),
     checkbox: yup.mixed().nullable(),
     radio: yup.mixed().nullable(),
+    matrix: yup.mixed().nullable(),
     email: yup
       .string()
       .nullable()
@@ -62,7 +64,14 @@ const getBaseSchema = (type: QuestionData["type"]) => {
         if (!value || value.trim() === "") return true;
         return /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(value);
       }),
-    date: yup.date().typeError("Invalid date").nullable(),
+    date: yup
+      .date()
+      .nullable()
+      .transform((value, originalValue) => {
+        if (isReadOnly && originalValue === "") return null;
+        return value;
+      })
+      .typeError("Invalid date"),
     url: yup
       .string()
       .nullable()
@@ -148,19 +157,19 @@ const addNumberValidations = (
   return updatedSchema;
 };
 
-export function generateDynamicSchema(data: Section[]) {
+export function generateDynamicSchema({formData, isReadOnly}: {formData: Section[], isReadOnly: boolean}) {
   const schemaFields: Record<string, yup.Schema<any>> = {};
 
-  data.forEach(({ questionData }) => {
+  formData.forEach(({ questionData }) => {
     questionData?.forEach((question) => {
       const { id, type, isRequired, requiredMessage, isDisabled } = question;
 
-      let fieldSchema = getBaseSchema(type);
+      let fieldSchema = getBaseSchema(type, isReadOnly);
 
       // Add required validation
       fieldSchema = addRequiredValidation(
         fieldSchema,
-        isDisabled ? false : isRequired,
+        isDisabled ? false : isReadOnly ? false : isRequired,
         requiredMessage,
       );
 

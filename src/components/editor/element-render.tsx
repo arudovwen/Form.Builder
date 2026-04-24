@@ -22,6 +22,7 @@ import BasicText from "../elements/basic-text";
 import DataGridInput from "../elements/data-grid";
 import CascadeDropdown from "../elements/cascade-dropdown";
 import Rating from "../elements/rating-input";
+import MatrixInput from "../elements/matrix-input";
 import CountryBank from "../elements/country-bank";
 import SignDocument from "../elements/document-sign";
 import PhoneNumber from "../elements/phone-input";
@@ -51,6 +52,7 @@ export const elementMap: Record<string, React.ElementType> = {
   phoneField: PhoneNumber,
   cascadeSelect: CascadeDropdown,
   rating: Rating,
+  matrix: MatrixInput,
   country: CountryBank,
   bank: CountryBank,
   document: SignDocument,

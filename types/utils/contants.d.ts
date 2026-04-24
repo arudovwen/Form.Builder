@@ -23,7 +23,8 @@ export declare enum ElementKind {
     DIVIDER = "divider",
     SPACER = "spacer",
     SECTION = "section",
-    GRID = "grid"
+    GRID = "grid",
+    MATRIX = "matrix"
 }
 export interface DataColumnType {
     field: string;
@@ -63,6 +64,7 @@ export interface ElementType {
     minAmountMessage?: string;
     maxAmountMessage?: string;
     options?: OptionType[];
+    options1?: OptionType[];
     options2?: OptionType[];
     columns?: number;
     dataColumns?: DataColumnType[];
