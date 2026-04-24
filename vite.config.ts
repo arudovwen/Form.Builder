@@ -19,6 +19,8 @@ export default defineConfig({
       external: [
         "react",
         "react-dom",
+        "react/jsx-runtime",
+        "react/jsx-dev-runtime",
         "react-router-dom",
         "react-router",
         "react-hook-form",

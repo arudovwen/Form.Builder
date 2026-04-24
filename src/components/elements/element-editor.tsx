@@ -39,13 +39,13 @@ import MultiSelectInput from "./multi-select-input";
 import { normalizeGridRows, normalizeRows } from "@/utils/normalizeRows";
 
 interface Option {
-  label: string;
-  value: string;
+  label?: string;
+  value?: string;
   id?: string;
 }
 
 interface FormInputs {
-  inputLabel: string;
+  inputLabel?: string;
   placeholder?: string;
   description?: string;
   isReadOnly?: boolean;
@@ -77,7 +77,7 @@ interface FormInputs {
   validationUrl?: string;
   signatureLink?: string;
   isMultiple?: boolean;
-  acceptedFiles?: string;
+  acceptedFiles?: any;
 }
 
 const schema = yup.object().shape({
