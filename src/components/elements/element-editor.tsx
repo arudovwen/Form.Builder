@@ -592,17 +592,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               />
             </div>
 
-            {/* <div className="flex-1">
-            <DynamicInput
-              watch={watch}
-              label={index === 0 ? "Field key" : ""}
-              name={`dataColumns.${index}.field`}
-              register={register}
-              errors={errors}
-              element={element}
-              placeholder="fieldKey"
-            />
-          </div> */}
+           
             <div className="flex-1">
               <DynamicInput
                 watch={watch}
@@ -626,6 +616,18 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 placeholder="header"
               />
             </div>
+             <div className="flex-1">
+            <DynamicInput
+              watch={watch}
+              label={index === 0 ? "Field key" : ""}
+              name={`dataColumns.${index}.field`}
+              register={register}
+              errors={errors}
+              element={element}
+              placeholder="fieldKey"
+                disabled
+            />
+          </div>
             {/* <label className="flex items-center mb-0 gap-x-2">
             <input
               type="checkbox"

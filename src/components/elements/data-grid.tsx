@@ -25,26 +25,27 @@ export default function DataGridInput({
     register(element.id);
   }, [element.id, register]);
 
-  // Track the last serialized rows we wrote so we skip no-op updates.
-  // This is what breaks the loop: CustomDataGrid calls onChange → we call
-  // setValue → watch returns a new object reference → value prop changes →
-  // CustomDataGrid syncs rows → onChange fires again. The ref short-circuits
-  // step 3 when the rows data is identical.
+  // Keep latest values in refs so handleChange stays stable across renders.
+  // An unstable handleChange would cascade into DataTable rebuilding all its
+  // callbacks (handleCellChange, addRow, deleteRow) on every keystroke.
   const prevRowsRef = useRef<string>("");
+  const elementIdRef = useRef(element?.id);
+  const dataColumnsRef = useRef(element?.dataColumns);
+  const setValueRef = useRef(setValue);
+  elementIdRef.current = element?.id;
+  dataColumnsRef.current = element?.dataColumns;
+  setValueRef.current = setValue;
 
-  const handleChange = useCallback(
-    (value: any) => {
-      const serialized = JSON.stringify(value);
-      if (serialized === prevRowsRef.current) return; // nothing changed
-      prevRowsRef.current = serialized;
+  const handleChange = useCallback((value: any) => {
+    const serialized = JSON.stringify(value);
+    if (serialized === prevRowsRef.current) return; // nothing changed
+    prevRowsRef.current = serialized;
 
-      setValue?.(element.id, {
-        rows: value,
-        columns: element?.dataColumns,
-      });
-    },
-    [element.id, element?.dataColumns, setValue],
-  );
+    setValueRef.current?.(elementIdRef.current, {
+      rows: value,
+      columns: dataColumnsRef.current,
+    });
+  }, []); // stable — reads latest values via refs
 
   return (
     <CustomDataGrid

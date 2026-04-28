@@ -198,21 +198,18 @@ export default function CustomDataGrid<T extends { id: string }>({
     });
   }, [value]);
 
-  /* ---- Notify parent on rows change ---- */
-  useEffect(() => {
-    onChange?.(rows);
-  }, [rows, onChange]);
 
   const handleCellChange = useCallback(
     (val: unknown, rowId: string, field: keyof T) => {
-      setRows(
-        (prev) =>
-          prev.map((row) =>
-            row.id === rowId ? { ...row, [field]: val } : row,
-          ) as T[],
-      );
+      setRows((prev) => {
+        const next = prev.map((row) =>
+          row.id === rowId ? { ...row, [field]: val } : row,
+        ) as T[];
+        onChange?.(next);
+        return next;
+      });
     },
-    [],
+    [onChange],
   );
 
   const addRow = useCallback(() => {
@@ -221,12 +218,20 @@ export default function CustomDataGrid<T extends { id: string }>({
       (acc as any)[col.field] = col.field === "id" ? id : "";
       return acc;
     }, {} as T);
-    setRows((prev) => [...prev, { id, ...newRow }]);
-  }, [columns]);
+    setRows((prev) => {
+      const next = [...prev, { id, ...newRow }];
+      onChange?.(next);
+      return next;
+    });
+  }, [columns, onChange]);
 
   const deleteRow = useCallback((rowId: string) => {
-    setRows((prev) => prev.filter((r) => r.id !== rowId));
-  }, []);
+    setRows((prev) => {
+      const next = prev.filter((r) => r.id !== rowId);
+      onChange?.(next);
+      return next;
+    });
+  }, [onChange]);
 
   const getValidationStatus = useCallback(
     (_rowId: string, _field: keyof T) => ({
