@@ -24,7 +24,7 @@ export default function TopBar({
   publishLoading?: boolean;
   onTitleChange?: (newTitle: string) => void;
 }) {
-  const { formData, setShowPreview, showPreview }: any = useContext(EditorContext);
+  const { formData, setShowPreview, showPreview, undo, redo, canUndo, canRedo }: any = useContext(EditorContext);
   const [isOpen, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editableTitle, setEditableTitle] = useState(title || "");
@@ -89,6 +89,24 @@ export default function TopBar({
       )}
 
       <div className="flex justify-end text-xs gap-x-3">
+        <AppButton
+          onClick={undo}
+          text=""
+          btnClass={`!px-2 bg-transparent ${!canUndo ? "opacity-50" : ""}`}
+          icon="material-symbols:undo"
+          iconClass="text-xl"
+          style={{ color: config?.buttonColor || "#333" }}
+          isDisabled={!canUndo}
+        />
+        <AppButton
+          onClick={redo}
+          text=""
+          btnClass={`!px-2 bg-transparent ${!canRedo ? "opacity-50" : ""}`}
+          icon="material-symbols:redo"
+          iconClass="text-xl"
+          style={{ color: config?.buttonColor || "#333" }}
+          isDisabled={!canRedo}
+        />
         <AppButton
           onClick={() => setShowPreview((prev) => !prev)}
           text={showPreview ? "Hide Preview" : "Preview"}

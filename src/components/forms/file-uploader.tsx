@@ -62,13 +62,22 @@ export default function FileUpload({
   const getFileUrl = useCallback(
     async (formData: { base64: string; ext: string; fileName: string }) => {
       const token = getItem("token");
+      const orgId = getItem("orgData")?.id || getItem("organizationId");
 
       try {
-        const { data } = await axios.post(uploadUrl, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const { data } = await axios.post(
+          uploadUrl,
+          {
+            ...formData,
+            service: "FORM",
+            organizationId: orgId || "",
           },
-        });
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
 
         return data?.data?.url;
       } catch (error) {

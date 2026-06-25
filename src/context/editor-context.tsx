@@ -1,4 +1,4 @@
-import React, { createContext, useState, useMemo } from "react";
+import React, { createContext, useState, useMemo, useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 interface EditorProviderProps {
@@ -44,6 +44,10 @@ const EditorContext = createContext<
         targetGridId?: string; // grid we're dropping INTO
         targetCol?: number; // column inside that grid (1-based)
       }) => void;
+      undo: () => void;
+      redo: () => void;
+      canUndo: boolean;
+      canRedo: boolean;
     }
   | undefined
 >(undefined);
@@ -65,7 +69,83 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
   const [showPreview, setShowPreview] = useState(true);
   const [answerData, setAnswerData] = useState({});
   const [elementData, setElementData] = useState({});
-  const [formData, setFormData] = useState<any[]>([newSection]);
+  const [formDataState, _setFormDataState] = useState<any[]>([newSection]);
+  const [past, setPast] = useState<any[][]>(() => {
+    try {
+      const saved = sessionStorage.getItem("editor_past");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [future, setFuture] = useState<any[][]>(() => {
+    try {
+      const saved = sessionStorage.getItem("editor_future");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem("editor_past", JSON.stringify(past));
+  }, [past]);
+
+  useEffect(() => {
+    sessionStorage.setItem("editor_future", JSON.stringify(future));
+  }, [future]);
+
+  const lastSaveRef = useRef<number>(Date.now());
+
+  const setFormData = React.useCallback((newValOrUpdater: any) => {
+    _setFormDataState((prev: any[]) => {
+      const nextVal = typeof newValOrUpdater === "function" ? newValOrUpdater(prev) : newValOrUpdater;
+      
+      if (JSON.stringify(prev) !== JSON.stringify(nextVal)) {
+        const now = Date.now();
+        setPast((p) => {
+          if (p.length > 0 && JSON.stringify(p[p.length - 1]) === JSON.stringify(prev)) {
+            return p;
+          }
+          
+          if (now - lastSaveRef.current < 800 && p.length > 0) {
+            lastSaveRef.current = now;
+            return p;
+          }
+
+          lastSaveRef.current = now;
+          return [...p, prev];
+        });
+        setFuture([]); 
+      }
+
+      return nextVal;
+    });
+  }, []);
+
+  const undo = React.useCallback(() => {
+    if (past.length === 0) return;
+    const previous = past[past.length - 1];
+    const newPast = past.slice(0, past.length - 1);
+    
+    setPast(newPast);
+    setFuture([formDataState, ...future]);
+    _setFormDataState(previous);
+  }, [past, future, formDataState]);
+
+  const redo = React.useCallback(() => {
+    if (future.length === 0) return;
+    const next = future[0];
+    const newFuture = future.slice(1);
+
+    setFuture(newFuture);
+    setPast([...past, formDataState]);
+    _setFormDataState(next);
+  }, [past, future, formDataState]);
+
+  const formData = formDataState;
+  const canUndo = past.length > 0;
+  const canRedo = future.length > 0;
   const [isDragging, setIsDragging] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [activeSections, setActiveSections] = useState<Array<string | number>>([
@@ -466,6 +546,10 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       moveElement,
       showPreview,
       setShowPreview,
+      undo,
+      redo,
+      canUndo,
+      canRedo,
     }),
     [
       formData,
@@ -488,6 +572,10 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children }) => {
       duplicateElement,
       moveElement,
       showPreview,
+      undo,
+      redo,
+      canUndo,
+      canRedo,
     ],
   );
 

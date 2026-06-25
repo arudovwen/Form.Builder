@@ -17,7 +17,7 @@ export default function FileInput({ element, validationData }) {
 
   useEffect(() => {
     if (watch) {
-      const subscription = watch((values: { [x: string]: any; }) => {
+      const subscription = watch((values: { [x: string]: any }) => {
         setFileData(values[element.id]);
       });
       return () => subscription.unsubscribe?.(); // clean up if watch returns a subscription (e.g., react-hook-form)
@@ -49,14 +49,32 @@ export default function FileInput({ element, validationData }) {
           accept={element?.acceptedFiles}
         />
       )}
-      {fileData && isReadOnly && (
-        <div className="relative grid gap-y-1 flex-1 w-full">
-          {typeof fileData === 'object'  && fileData?.map((file: { base64: any; name: any; }, index: Key | null | undefined) => (
-            <div key={index}>
-              <UniversalFileViewer fileUrl={file.base64} fileName={file.name} />
+      {isReadOnly && (
+        <>
+          {fileData ? (
+            <div className="relative grid gap-y-1 flex-1 w-full">
+              {typeof fileData === "object" &&
+                Array.isArray(fileData) &&
+                fileData.map(
+                  (
+                    file: { base64: any; name: any },
+                    index: Key | null | undefined,
+                  ) => (
+                    <div key={index}>
+                      <UniversalFileViewer
+                        fileUrl={file.base64}
+                        fileName={file.name}
+                      />
+                    </div>
+                  ),
+                )}
             </div>
-          ))}
-        </div>
+          ) : (
+            <span className="field-control !bg-gray-50 w-full !text-gray-400 !text-sm !italic ">
+              No File Uploaded
+            </span>
+          )}
+        </>
       )}
     </div>
   );
