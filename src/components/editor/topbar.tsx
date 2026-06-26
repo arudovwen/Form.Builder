@@ -92,18 +92,18 @@ export default function TopBar({
         <AppButton
           onClick={undo}
           text=""
-          btnClass={`!px-2 bg-transparent ${!canUndo ? "opacity-50" : ""}`}
+          btnClass={`!px-2 bg-transparent undo ${!canUndo ? "opacity-50" : ""}`}
           icon="material-symbols:undo"
-          iconClass="text-xl"
+           iconClass="text-xl !mr-0"
           style={{ color: config?.buttonColor || "#333" }}
           isDisabled={!canUndo}
         />
         <AppButton
           onClick={redo}
           text=""
-          btnClass={`!px-2 bg-transparent ${!canRedo ? "opacity-50" : ""}`}
+          btnClass={`!px-2 bg-transparent redo ${!canRedo ? "opacity-50" : ""}`}
           icon="material-symbols:redo"
-          iconClass="text-xl"
+          iconClass="text-xl !mr-0"
           style={{ color: config?.buttonColor || "#333" }}
           isDisabled={!canRedo}
         />

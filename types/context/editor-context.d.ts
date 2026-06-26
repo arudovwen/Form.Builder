@@ -33,6 +33,10 @@ declare const EditorContext: React.Context<{
         targetGridId?: string;
         targetCol?: number;
     }) => void;
+    undo: () => void;
+    redo: () => void;
+    canUndo: boolean;
+    canRedo: boolean;
 }>;
 export declare const EditorProvider: React.FC<EditorProviderProps>;
 export default EditorContext;
