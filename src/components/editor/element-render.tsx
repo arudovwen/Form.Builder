@@ -27,8 +27,10 @@ import CountryBank from "../elements/country-bank";
 import SignDocument from "../elements/document-sign";
 import PhoneNumber from "../elements/phone-input";
 import LinkElement from "../elements/link-element";
+import CalculatedField from "../elements/calculated-field";
+import PollingInput from "../elements/polling-input";
 
-export const elementMap: Record<string, React.ElementType> = {
+export const elementMap: Record<string, React.FC<any>> = {
   textField: TextInput,
   longText: LongTextInput, // You may want to use a specific component for long text
   selectField: SelectInput,
@@ -56,7 +58,9 @@ export const elementMap: Record<string, React.ElementType> = {
   country: CountryBank,
   bank: CountryBank,
   document: SignDocument,
-  url: LinkElement
+  url: LinkElement,
+  calculatedField: CalculatedField,
+  polling: PollingInput,
 };
 const state = "edit"; // This can be passed as a prop or context value
 export const RenderElement = (element: any, sectionId: string) => {

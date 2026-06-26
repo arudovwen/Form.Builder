@@ -37,6 +37,8 @@ import CustomDatePicker from "../CutomDatePicker";
 import VisibilityEditor from "./visibility-editor";
 import MultiSelectInput from "./multi-select-input";
 import { normalizeGridRows, normalizeRows } from "@/utils/normalizeRows";
+import FormulaMentionInput from "./formula-mention-input";
+
 
 interface Option {
   label?: string;
@@ -159,6 +161,9 @@ const schema = yup.object().shape({
   isMultiple: yup.boolean(),
   acceptedFiles: yup.array(),
   showState: yup.boolean(),
+  formula: yup.string().nullable(),
+  fetchExternalResults: yup.boolean(),
+  externalApiUrl: yup.string().nullable(),
 });
 
 const tabs = [
@@ -183,10 +188,22 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       !noAllowValidation.includes(element.inputType) ||
       tab.key !== "validation",
   );
-  const { updateElement }: any = React.useContext(EditorContext);
+  const { updateElement, formData }: any = React.useContext(EditorContext);
   const [activeTab, setActiveTab] = useState("basic");
   const [optionsLoading, setOptionsLoading] = useState(false);
   const [optionTypes, setOptionTypes] = useState<optionType>("manual");
+
+  const fieldCount = formData?.flatMap((section: any) => section.questionData || [])?.length || 0;
+
+  const mentionData = React.useMemo(() => {
+    return formData?.flatMap((section: any) => section.questionData || [])
+      .filter((f: any) => f.id !== element?.id && !['spacer', 'divider', 'section', 'grid'].includes(f.type?.toLowerCase()))
+      .map((f: any) => ({
+        id: f.id,
+        display: f.inputLabel || f.label || "Unnamed"
+      })) || [];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fieldCount, element?.id]);
   const config = getItem("config");
   const {
     register,
@@ -1050,6 +1067,45 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                       />
                     )}
                   </div>
+                  {element.type.toLowerCase() === "calculatedfield" && (
+                    <div className="grid gap-y-2 mb-4">
+                      <label className="block text-sm font-medium text-[#344054] font-onest">
+                        Formula
+                      </label>
+                      <FormulaMentionInput
+                        value={watch("formula") || ""}
+                        onChange={(val) => setValue("formula", val, { shouldValidate: true, shouldDirty: true })}
+                        fields={mentionData}
+                        placeholder="Build your formula..."
+                      />
+                    </div>
+                  )}
+
+                  {element.type.toLowerCase() === "polling" && (
+                    <div className="grid gap-y-4 mb-4 mt-2">
+                      <DynamicInput
+                        watch={watch}
+                        label="Fetch results from external API"
+                        name="fetchExternalResults"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="checkbox"
+                        value={values.fetchExternalResults}
+                      />
+                      {values.fetchExternalResults && (
+                        <DynamicInput
+                          watch={watch}
+                          label="External API URL (returns options results)"
+                          name="externalApiUrl"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                          placeholder="https://api.example.com/poll/results"
+                        />
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 

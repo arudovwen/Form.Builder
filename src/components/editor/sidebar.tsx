@@ -117,7 +117,7 @@ const SideBar = () => {
                       </span>
                       <span
                         style={{ color: elementColor }}
-                        className="text-xs font-medium "
+                        className="text-xs font-medium text-center"
                       >
                         {element.label}
                       </span>

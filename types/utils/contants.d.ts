@@ -24,7 +24,9 @@ export declare enum ElementKind {
     SPACER = "spacer",
     SECTION = "section",
     GRID = "grid",
-    MATRIX = "matrix"
+    MATRIX = "matrix",
+    CALCULATED_FIELD = "calculatedField",
+    POLLING = "polling"
 }
 export interface DataColumnType {
     field: string;
@@ -91,6 +93,9 @@ export interface ElementType {
     isMultiple: boolean;
     acceptedFiles: any[];
     showState?: boolean;
+    formula?: string;
+    fetchExternalResults?: boolean;
+    externalApiUrl?: string;
 }
 export declare const countryOptions: OptionType[];
 export declare const Elements: ElementType[];

@@ -32,6 +32,8 @@ export enum ElementKind {
   SECTION = "section",
   GRID = "grid",
   MATRIX = "matrix",
+  CALCULATED_FIELD = "calculatedField",
+  POLLING = "polling",
 }
 
 export interface DataColumnType {
@@ -114,6 +116,9 @@ export interface ElementType {
   acceptedFiles: any[];
 
   showState?: boolean;
+  formula?: string;
+  fetchExternalResults?: boolean;
+  externalApiUrl?: string;
 }
 
 /* ---------------------------------- */
@@ -429,6 +434,26 @@ export const Elements: ElementType[] = [
       { id: "c5", label: "Strongly Agree", value: "strongly_agree" },
     ],
   }),
+
+  createElement({
+    type: ElementKind.CALCULATED_FIELD,
+    label: "Calculated Field",
+    icon: "material-symbols:functions",
+    inputLabel: "Calculated Label",
+    inputType: "calculatedField",
+    formula: "",
+  }),
+
+  createElement({
+    type: ElementKind.POLLING,
+    label: "Polling",
+    icon: "mdi:poll",
+    inputLabel: "Poll Label",
+    inputType: "polling",
+    options: [option("Option 1", "option_1"), option("Option 2", "option_2")],
+    fetchExternalResults: false,
+    externalApiUrl: "",
+  }),
 ];
 
 /* ---------------------------------- */
@@ -457,6 +482,7 @@ export const CategorizedElements = Object.freeze({
     ElementKind.COUNTRY,
     ElementKind.RATING,
     ElementKind.MATRIX,
+    ElementKind.POLLING,
   ],
   dateAndTime: [ElementKind.DATE],
   fileAndMedia: [ElementKind.FILE],
@@ -466,7 +492,7 @@ export const CategorizedElements = Object.freeze({
     ElementKind.GRID,
     ElementKind.SECTION,
   ],
-  advancedData: [ElementKind.DATA_GRID, ElementKind.TABLE_INPUT],
+  advancedData: [ElementKind.DATA_GRID, ElementKind.TABLE_INPUT, ElementKind.CALCULATED_FIELD],
 });
 
 /* ---------------------------------- */
@@ -509,6 +535,7 @@ export const AllowOptions: string[] = [
   "checkbox",
   "multiselect",
   "matrix",
+  "polling",
 ];
 export const AllowApiOptions: string[] = ["validateInput"];
 export const AllowTableOptions: string[] = ["tableInput"];
