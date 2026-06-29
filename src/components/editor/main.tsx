@@ -1,22 +1,28 @@
 import EditorContext from "../../context/editor-context";
 import FormBuilder from ".";
-import { useCallback, useContext, useEffect } from "react";
+import React, { useCallback, useContext, useEffect, Suspense } from "react";
 import FormPreview from "./form-preview";
 import { Transition } from "@headlessui/react";
+import Loader from "../Loader";
+
+// Lazy load the LogicFlow component
+const LogicFlow = React.lazy(() => import("./logic-flow"));
 
 export default function MainPage({
   questionData,
   uploadUrl,
   onAddTemplate,
   templates,
+  viewMode = "canvas",
 }: {
   questionData: any[];
   isReadOnly?: boolean;
   uploadUrl?: string;
   onAddTemplate?: () => void;
   templates?: any[];
+  viewMode?: "canvas" | "flow";
 }) {
-  const { setFormData, addSection, setUploadUrl, showPreview }: any =
+  const { setFormData, addSection, setUploadUrl, showPreview, formData }: any =
     useContext(EditorContext);
 
   useEffect(() => {
@@ -48,23 +54,31 @@ export default function MainPage({
         onDrop={(e) => handleMainDrop(e)}
         className=" h-full overflow-y-auto no-scrollbar max-h-[calc(100vh-80px)] flex-1 form_builder"
       >
-        <FormBuilder onAddTemplate={onAddTemplate} templates={templates} />
+        {viewMode === "canvas" ? (
+          <FormBuilder onAddTemplate={onAddTemplate} templates={templates} />
+        ) : (
+          <Suspense fallback={<Loader loadingClass="!w-full !h-full" />}>
+            <LogicFlow formData={formData} />
+          </Suspense>
+        )}
       </div>
-      <Transition
-        show={showPreview}
-        as="div"
-        enter="transition-all duration-300 ease-in-out origin-right"
-        enterFrom="opacity-0 w-0 translate-x-10 px-0 overflow-hidden border-transparent shadow-none"
-        enterTo="opacity-100 w-2/5 translate-x-0"
-        leave="transition-all duration-300 ease-in-out origin-right"
-        leaveFrom="opacity-100 w-2/5 translate-x-0"
-        leaveTo="opacity-0 w-0 translate-x-10 px-0 overflow-hidden border-transparent shadow-none"
-        className="shrink-0 overflow-y-auto no-scrollbar max-h-[calc(100vh-70px)] form_preview w-2/5 min-w-0"
-      >
-        <div className="px-2 shadow_box min-w-0 bg-white border border-gray-100 rounded-lg container">
-          <FormPreview />
-        </div>
-      </Transition>
+      {viewMode === "canvas" && (
+        <Transition
+          show={showPreview}
+          as="div"
+          enter="transition-all duration-300 ease-in-out origin-right"
+          enterFrom="opacity-0 w-0 translate-x-10 px-0 overflow-hidden border-transparent shadow-none"
+          enterTo="opacity-100 w-2/5 translate-x-0"
+          leave="transition-all duration-300 ease-in-out origin-right"
+          leaveFrom="opacity-100 w-2/5 translate-x-0"
+          leaveTo="opacity-0 w-0 translate-x-10 px-0 overflow-hidden border-transparent shadow-none"
+          className="shrink-0 overflow-y-auto no-scrollbar max-h-[calc(100vh-70px)] form_preview w-2/5 min-w-0"
+        >
+          <div className="px-2 shadow_box min-w-0 bg-white border border-gray-100 rounded-lg container">
+            <FormPreview />
+          </div>
+        </Transition>
+      )}
     </div>
   );
 }

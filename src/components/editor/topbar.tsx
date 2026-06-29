@@ -4,6 +4,20 @@ import EditorContext from "../../context/editor-context";
 import PreviewModalModal from "./preview-modal";
 import { getItem } from "../../utils/localStorageControl";
 import BackSvg from "../../assets/svgs/back";
+import AppIcon from "../ui/AppIcon";
+
+interface TopBarProps {
+  title: string;
+  goBackUrl: () => void;
+  onSubmit?: (e: any) => void;
+  onPublish?: (e: any) => void;
+  previewLoading?: boolean;
+  saveLoading?: boolean;
+  publishLoading?: boolean;
+  onTitleChange?: (newTitle: string) => void;
+  viewMode?: "canvas" | "flow";
+  setViewMode?: (mode: "canvas" | "flow") => void;
+}
 
 export default function TopBar({
   title,
@@ -14,17 +28,18 @@ export default function TopBar({
   saveLoading,
   publishLoading,
   onTitleChange,
-}: {
-  title: string;
-  goBackUrl: () => void;
-  onSubmit?: (e: any) => void;
-  onPublish?: (e: any) => void;
-  previewLoading?: boolean;
-  saveLoading?: boolean;
-  publishLoading?: boolean;
-  onTitleChange?: (newTitle: string) => void;
-}) {
-  const { formData, setShowPreview, showPreview, undo, redo, canUndo, canRedo }: any = useContext(EditorContext);
+  viewMode,
+  setViewMode,
+}: TopBarProps) {
+  const {
+    formData,
+    setShowPreview,
+    showPreview,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+  }: any = useContext(EditorContext);
   const [isOpen, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editableTitle, setEditableTitle] = useState(title || "");
@@ -71,7 +86,7 @@ export default function TopBar({
           />
         ) : (
           <h1
-          title="Click to edit"
+            title="Click to edit"
             className="text-base font-semibold cursor-pointer form_title"
             onClick={() => setEditing(true)}
           >
@@ -88,13 +103,37 @@ export default function TopBar({
         />
       )}
 
-      <div className="flex justify-end text-xs gap-x-3">
+      <div className="flex justify-end text-xs gap-x-3 items-center">
+        {setViewMode && (
+          <div className="flex border border-gray-300 rounded-lg overflow-hidden h-[36px] text-sm font-medium shadow-sm mr-2">
+            <button
+              type="button"
+              style={{ color: config?.buttonColor || "#333" }}
+              className={`px-3 flex items-center gap-1.5 transition-colors canvas_view ${viewMode === "canvas" ? "bg-gray-100  font-medium" : "bg-white text-gray-500 hover:bg-gray-50"}`}
+              onClick={() => setViewMode("canvas")}
+            >
+              <AppIcon
+                icon="mdi:view-dashboard-outline"
+                iconClass="text-base"
+              />{" "}
+              Builder
+            </button>
+            <button
+              type="button"
+              style={{ color: config?.buttonColor || "#333" }}
+              className={`px-3 flex items-center gap-1.5 border-l border-gray-300 transition-colors flow_view ${viewMode === "flow" ? "bg-gray-100  font-medium" : "bg-white text-gray-500 hover:bg-gray-50"}`}
+              onClick={() => setViewMode("flow")}
+            >
+              <AppIcon icon="mdi:sitemap-outline" iconClass="text-base" /> Flow
+            </button>
+          </div>
+        )}
         <AppButton
           onClick={undo}
           text=""
           btnClass={`!px-2 bg-transparent undo ${!canUndo ? "opacity-50" : ""}`}
           icon="material-symbols:undo"
-           iconClass="text-xl !mr-0"
+          iconClass="text-xl !mr-0"
           style={{ color: config?.buttonColor || "#333" }}
           isDisabled={!canUndo}
         />
@@ -111,11 +150,13 @@ export default function TopBar({
           onClick={() => setShowPreview((prev) => !prev)}
           text={showPreview ? "Hide Preview" : "Preview"}
           btnClass="px-2  bg-transparent font-medium text-sm form_preview"
-          icon={showPreview ? "iconamoon:eye-off-duotone" : "solar:eye-bold-duotone"}
+          icon={
+            showPreview ? "iconamoon:eye-off-duotone" : "solar:eye-bold-duotone"
+          }
           iconClass="text-base"
           style={{ color: config?.buttonColor || "#333" }}
           isDisabled={previewLoading}
-          isLoading={previewLoading}  
+          isLoading={previewLoading}
         />
         <AppButton
           onClick={handleSubmit}

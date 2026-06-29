@@ -4,6 +4,7 @@ import TopBar from "./topbar";
 import { EditorProvider } from "../../context/editor-context";
 import Loader from "../Loader";
 import { Toaster } from "sonner";
+import { useState } from "react";
 
 export interface BuilderProps {
   onSubmit?: (e: any) => void; // Function to handle form submission
@@ -38,17 +39,21 @@ export default function Layout({
   onAddTemplate,
   templates,
 }: BuilderProps) {
+  const [viewMode, setViewMode] = useState<"canvas" | "flow">("canvas");
+
   return (
     <EditorProvider>
       <Toaster position="top-right" richColors closeButton />
       <div className="w-full h-full bg-[#F8F9FC] flex flex-col">
         <div className="flex flex-1 ">
-          <div>
-            <div className="w-[250px]  h-screen  border-r border-[#E4E7EC] bg-white ">
-              <SideBar />
+          {viewMode === "canvas" && (
+            <div>
+              <div className="w-[250px] h-screen border-r border-[#E4E7EC] bg-white ">
+                <SideBar />
+              </div>
             </div>
-          </div>
-          <div className="flex-1 h-full max-h-full z-[1] w-[calc(100%-250px)]">
+          )}
+          <div className={`flex-1 h-full max-h-full z-[1] ${viewMode === "canvas" ? "w-[calc(100%-250px)]" : "w-full"}`}>
             <div className=" h-[70px]">
               <TopBar
                 title={title}
@@ -59,11 +64,19 @@ export default function Layout({
                 saveLoading={saveLoading}
                 publishLoading={publishLoading}
                 onTitleChange={onTitleChange}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
               />
             </div>
             <div className="p-6 h-[calc(100vh-70px)]">
               {!loading ? (
-                <MainPage questionData={questionData} uploadUrl={uploadUrl} onAddTemplate={onAddTemplate} templates={templates} />
+                <MainPage 
+                  questionData={questionData} 
+                  uploadUrl={uploadUrl} 
+                  onAddTemplate={onAddTemplate} 
+                  templates={templates} 
+                  viewMode={viewMode}
+                />
               ) : (
                 <Loader loadingClass="!w-full !h-[800px]" />
               )}  

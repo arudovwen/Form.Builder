@@ -12,7 +12,7 @@ export interface RenderProps {
   ignoreValidation?: boolean;
   loading?: boolean;
   config?: any;
-  renderType?: "multi" | "single";
+  renderType?: "multi" | "single" | "conversational";
   children?: ReactNode;
   hideFooter?: boolean;
   onGetValues?: (e: any) => void;

@@ -12,10 +12,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 
 import EditorContext, { EditorProvider } from "@/context/editor-context";
 import AppButton from "../ui/AppButton";
-import { generateDynamicSchema } from "./validation";
+import { generateDynamicSchema, evaluateVisibility } from "./validation";
 import { getItem } from "@/utils/localStorageControl";
 import SinglePage from "./single-page";
 import MultiPage from "./multi-page";
+import ConversationalPage from "./conversational-page";
 import { mapIdToValue } from "@/utils/mapIdToValue";
 import { Toaster } from "sonner";
 
@@ -25,7 +26,7 @@ export interface AnswerElement {
   [key: string]: any;
 }
 
-export type RenderType = "multi" | "single";
+export type RenderType = "multi" | "single" | "conversational";
 
 export interface FormRendererProps {
   form_data: any[];
@@ -54,6 +55,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
 }: FormRendererProps) => {
   const { setAnswerData, setUploadUrl }: any = useContext(EditorContext);
   const [current, setCurrent] = useState(0);
+  const [currentConvIndex, setCurrentConvIndex] = useState(0);
 
   const filteredFormData = useMemo(
     () =>
@@ -117,6 +119,25 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     () => watchedValues,
     [JSON.stringify(watchedValues)],
   );
+
+  // ✅ Compute flattened visible questions for Conversational mode
+  const visibleQuestions = useMemo(() => {
+    if (renderType !== "conversational") return [];
+    const questions: any[] = [];
+    filteredFormData.forEach((section) => {
+      section.questionData?.forEach((element: any) => {
+        if (evaluateVisibility(element, memoizedValues)) {
+          if (element.type === "grid") {
+            const children = section.questionData?.filter((c: any) => c.gridId === element.id);
+            questions.push({ ...element, gridChildren: children });
+          } else if (!element.gridId) {
+            questions.push(element);
+          }
+        }
+      });
+    });
+    return questions;
+  }, [filteredFormData, memoizedValues, renderType]);
 
   // ✅ Memoize callback for parent updates
   const handleGetValues = useCallback(
@@ -188,6 +209,22 @@ const FormRenderer: React.FC<FormRendererProps> = ({
 
   // ✅ Navigation handlers
   const handleProceed = useCallback(async () => {
+    if (renderType === "conversational") {
+       if (!ignoreValidation) {
+         const currentField = visibleQuestions[currentConvIndex];
+         if (!currentField) return;
+         const fieldsToValidate = currentField.gridChildren ? currentField.gridChildren.map((c:any)=>c.id) : [currentField.id];
+         const isValid = await trigger(fieldsToValidate);
+         if (!isValid) return;
+       }
+       if (currentConvIndex < visibleQuestions.length - 1) {
+         setCurrentConvIndex((prev) => prev + 1);
+       } else {
+         handleSubmit(onSubmit)();
+       }
+       return;
+    }
+
     if (!ignoreValidation) {
       const currentFields = filteredFormData?.[current]?.questionData?.map(
         (ele: any) => ele.id,
@@ -196,11 +233,15 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       if (!isValid) return;
     }
     setCurrent((prev) => prev + 1);
-  }, [current, filteredFormData, ignoreValidation, trigger]);
+  }, [current, currentConvIndex, visibleQuestions, filteredFormData, ignoreValidation, trigger, renderType, handleSubmit, onSubmit]);
 
   const handleBack = useCallback(() => {
+    if (renderType === "conversational") {
+       setCurrentConvIndex((prev) => Math.max(0, prev - 1));
+       return;
+    }
     setCurrent((prev) => prev - 1);
-  }, []);
+  }, [renderType]);
 
   const sharedOptions = useMemo(
     () => ({
@@ -239,42 +280,52 @@ const FormRenderer: React.FC<FormRendererProps> = ({
         <div className="relative flex flex-col w-full min-w-0 py-4 gap-y-12">
           <div
             className="multi_section__box min-w-0"
-            key={filteredFormData?.[current]?.id}
+            key={renderType === "conversational" ? `conv-${currentConvIndex}` : filteredFormData?.[current]?.id}
           >
             {renderType === "multi" &&
               (filteredFormData?.[current]?.title ||
                 filteredFormData?.[current]?.description) && (
                 <div className="py-4 mb-4 border-b border-gray-100 multi_section__title">
                   {filteredFormData[current]?.title && (
-                    <h2 className="text-lg font-semibold mb-[6px]">
-                      {filteredFormData[current]?.title}
-                    </h2>
-                  )}
-                  {filteredFormData[current]?.description && (
-                    <p className="text-sm">
-                      {filteredFormData[current]?.description}
-                    </p>
-                  )}
-                </div>
-              )}
+                     <h2 className="text-lg font-semibold mb-[6px]">
+                       {filteredFormData[current]?.title}
+                     </h2>
+                   )}
+                   {filteredFormData[current]?.description && (
+                     <p className="text-sm">
+                       {filteredFormData[current]?.description}
+                     </p>
+                   )}
+                 </div>
+               )}
 
-            {renderType === "multi" ? (
-              <MultiPage
-                form_data={filteredFormData}
-                options={sharedOptions}
-                current={current}
-              />
-            ) : (
-              <SinglePage
-                form_data={filteredFormData}
-                options={sharedOptions}
-              />
-            )}
-          </div>
+             {renderType === "multi" ? (
+               <MultiPage
+                 form_data={filteredFormData}
+                 options={sharedOptions}
+                 current={current}
+               />
+             ) : renderType === "conversational" ? (
+               <ConversationalPage
+                 element={visibleQuestions[currentConvIndex]}
+                 options={sharedOptions}
+                 onNext={handleProceed}
+                 onPrev={handleBack}
+                 isFirst={currentConvIndex === 0}
+                 isLast={currentConvIndex === visibleQuestions.length - 1}
+                 isReadOnly={isReadOnly}
+               />
+             ) : (
+               <SinglePage
+                 form_data={filteredFormData}
+                 options={sharedOptions}
+               />
+             )}
+           </div>
         </div>
 
         {/* ✅ Footer Controls */}
-        {!hideFooter && (
+        {!hideFooter && renderType !== "conversational" && (
           <footer className="flex items-center justify-end gap-4 footer flex-wrap">
             {renderType === "multi" ? (
               <>
@@ -329,6 +380,16 @@ const FormRenderer: React.FC<FormRendererProps> = ({
               ))
             )}
           </footer>
+        )}
+        
+        {/* ✅ Progress bar for Conversational Mode */}
+        {renderType === "conversational" && visibleQuestions.length > 0 && (
+          <div className="fixed bottom-0 left-0 w-full h-1.5 bg-gray-200">
+             <div 
+               className="h-full bg-blue-600 transition-all duration-500 ease-out"
+               style={{ width: `${((currentConvIndex + 1) / visibleQuestions.length) * 100}%`, background: config?.buttonColor || "#2563EB" }}
+             />
+          </div>
         )}
       </form>
     </FormProvider>
