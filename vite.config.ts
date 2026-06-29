@@ -45,7 +45,7 @@ export default defineConfig({
     },
     target: "es2018",
     minify: "esbuild", // Use esbuild to minify for better performance
-    cssCodeSplit: true,
+    cssCodeSplit: false,
     sourcemap: false,
     assetsInlineLimit: 0, // Ensure assets like images aren't inlined
     emptyOutDir: true, // Clear output directory before build

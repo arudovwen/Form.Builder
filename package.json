@@ -1,6 +1,6 @@
 {
   "name": "@arudovwen/form-builder-react",
-  "version": "1.6.6",
+  "version": "1.6.7",
   "description": "A React-based form builder component library.",
   "type": "module",
   "main": "./dist/form-builder.umd.js",
@@ -10,12 +10,12 @@
       "import": "./dist/form-builder.es.js",
       "require": "./dist/form-builder.umd.js"
     },
-    "./style.css": "./dist/index.css"
+    "./style.css": "./dist/form-builder-react.css"
   },
   "types": "./types/index.d.ts",
   "files": [
     "dist",
-    "dist/index.css",
+    "dist/form-builder-react.css",
     "types"
   ],
   "sideEffects": false,
