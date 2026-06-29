@@ -13,6 +13,7 @@ import AppIcon from "../ui/AppIcon";
 import SectionEditorModal from "../elements/section-editor";
 import TemplateSelectorModal from "../elements/template-selector";
 import { getItem } from "../../utils/localStorageControl";
+import { defaultTemplates } from "../../utils/default-templates";
 
 const SectionItem = ({
   section,
@@ -151,6 +152,7 @@ const SectionItem = ({
 };
 
 const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void; templates?: any[] }) => {
+  const allTemplates = [...defaultTemplates, ...(templates || [])];
   const [isOpen, setOpen] = useState(false);
   const [isTemplateModalOpen, setTemplateModalOpen] = useState(false);
   const tempSection = useRef(null);
@@ -328,11 +330,11 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
           >
             + Add section{" "}
           </button>
-          {(onAddTemplate || templates?.length) ? (
+          {(onAddTemplate || allTemplates?.length) ? (
             <button
               type="button"
               onClick={() => {
-                if (templates?.length) {
+                if (allTemplates?.length) {
                   setTemplateModalOpen(true);
                 } else if (onAddTemplate) {
                   onAddTemplate();
@@ -350,7 +352,7 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
         <TemplateSelectorModal
           isOpen={isTemplateModalOpen}
           onClose={() => setTemplateModalOpen(false)}
-          templates={templates || []}
+          templates={allTemplates}
           onSelect={handleTemplateSelect}
         />
       )}

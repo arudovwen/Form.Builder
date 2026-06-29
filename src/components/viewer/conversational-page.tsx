@@ -97,10 +97,10 @@ export default function ConversationalPage({ element, options, onNext, onPrev, i
           <div className="flex items-center gap-4 mt-8">
             <AppButton
               type="button"
-              text={isLast ? "Submit" : "OK"}
+              text={isLast ? (options?.isSubmitting ? "Submitting..." : "Submit") : "OK"}
               onClick={onNext}
-                style={{ background: config?.buttonColor || "#333" }}
-                  btnClass="text-gray-700 border-[#98A2B3] submit_btn !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
+              style={{ background: config?.buttonColor || "#333" }}
+              btnClass={`text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg ${isLast ? 'submit_btn' : 'continue_btn next_btn text-sm'}`}
             />
             {!isLast && <span className="text-xs text-gray-400 font-medium hidden sm:inline-block">press Enter ↵</span>}
             

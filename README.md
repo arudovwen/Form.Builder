@@ -8,6 +8,8 @@ The **Form Builder Package** is a reusable library designed to simplify the crea
 
 - **Drag-and-Drop Support**: Easily add and arrange form elements.
 - **Customizable Components**: Modify form elements to suit your needs.
+- **Form Templates**: Built-in and customizable form templates.
+- **Conversational View**: Provide a modern, interactive, one-question-at-a-time form filling experience (similar to Typeform).
 - **Dynamic Rendering**: Automatically update forms based on user input or configuration.
 - **TypeScript Support**: Fully typed for better developer experience.
 - **Lightweight and Fast**: Built with modern tools for optimal performance.
@@ -105,6 +107,8 @@ export default App;
 | `publishLoading` | `boolean` | Shows loading icon on the publish button. |
 | `onTitleChange` | `(newTitle: string) => void` | Callback function triggered when the form title is renamed. |
 | `uploadUrl` | `string` | Base URL used for uploading files inside the builder/viewer. |
+| `templates` | `any[]` | Array of predefined templates available in the builder (default templates are included automatically). |
+| `onAddTemplate` | `() => void` | Callback function triggered when adding an external template. |
 
 ### Props for `FormViewer`
 
@@ -117,7 +121,7 @@ export default App;
 | `ignoreValidation` | `boolean` | Whether form validation rules should be bypassed or enforced. |
 | `isReadOnly` | `boolean` | Determines if the viewer is read-only (fields cannot be interacted with). |
 | `loading` | `boolean` | Indicates whether the form viewer is in a loading state. |
-| `renderType` | `'single' \| 'multi'` | Determines how the form renders (single page or multi-step pages). |
+| `renderType` | `'single' \| 'multi' \| 'conversational'` | Determines how the form renders (single page, multi-step, or one-question-at-a-time). |
 | `children` | `React.ReactNode` | Children to append inside the form wrapper. |
 | `hideFooter` | `boolean` | Hides the default Submit actions footers when set to true. |
 | `onGetValues` | `(data: any) => void` | Callback triggered to fetch form values dynamically as they change. |
