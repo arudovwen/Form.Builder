@@ -12,6 +12,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 
 import EditorContext, { EditorProvider } from "@/context/editor-context";
 import AppButton from "../ui/AppButton";
+import AppIcon from "../ui/AppIcon";
 import { generateDynamicSchema, evaluateVisibility } from "./validation";
 import { getItem } from "@/utils/localStorageControl";
 import SinglePage from "./single-page";
@@ -333,12 +334,14 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                   <div>
                     {" "}
                     {current > 0 && (
-                      <AppButton
-                        type="button"
-                        text="Back"
-                        onClick={handleBack}
-                        btnClass="text-gray-700 back_btn text-sm border-[#98A2B3] !font-medium !py-[10px] px-10 bg-gray-200 rounded-lg"
-                      />
+                      <button 
+                        type="button" 
+                        onClick={handleBack} 
+                        className="text-gray-400 hover:text-gray-600 font-medium text-sm flex items-center gap-1 transition-colors back_btn"
+                      >
+                        <AppIcon icon="material-symbols:arrow-upward-rounded" iconClass="text-lg" />
+                        Back
+                      </button>
                     )}
                   </div>
                   {current < totalSections - 1 && (

@@ -9,7 +9,7 @@ const FormPreview: React.FC = () => {
   const { formData, uploadUrl } = useContext(
     EditorContext,
   ) as unknown as EditorContextType;
-  const [previewMode, setPreviewMode] = useState<"multi" | "conversational">("conversational");
+  const [previewMode, setPreviewMode] = useState<"multi" | "conversational">("multi");
 
   const config = getItem("config");
 
