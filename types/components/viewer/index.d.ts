@@ -4,7 +4,7 @@ export interface AnswerElement {
     value: any;
     [key: string]: any;
 }
-export type RenderType = "multi" | "single";
+export type RenderType = "multi" | "single" | "conversational";
 export interface FormRendererProps {
     form_data: any[];
     answerData?: any[];
