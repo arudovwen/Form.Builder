@@ -7,10 +7,14 @@ import { Transition } from "@headlessui/react";
 export default function MainPage({
   questionData,
   uploadUrl,
+  onAddTemplate,
+  templates,
 }: {
   questionData: any[];
   isReadOnly?: boolean;
   uploadUrl?: string;
+  onAddTemplate?: () => void;
+  templates?: any[];
 }) {
   const { setFormData, addSection, setUploadUrl, showPreview }: any =
     useContext(EditorContext);
@@ -44,7 +48,7 @@ export default function MainPage({
         onDrop={(e) => handleMainDrop(e)}
         className=" h-full overflow-y-auto no-scrollbar max-h-[calc(100vh-80px)] flex-1 form_builder"
       >
-        <FormBuilder />
+        <FormBuilder onAddTemplate={onAddTemplate} templates={templates} />
       </div>
       <Transition
         show={showPreview}

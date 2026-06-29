@@ -19,6 +19,8 @@ export interface BuilderProps {
   publishLoading?: boolean;
   onTitleChange?: (string) => void;
   uploadUrl?: string;
+  onAddTemplate?: () => void;
+  templates?: any[];
 }
 
 export default function Layout({
@@ -33,6 +35,8 @@ export default function Layout({
   publishLoading,
   onTitleChange,
   uploadUrl,
+  onAddTemplate,
+  templates,
 }: BuilderProps) {
   return (
     <EditorProvider>
@@ -59,7 +63,7 @@ export default function Layout({
             </div>
             <div className="p-6 h-[calc(100vh-70px)]">
               {!loading ? (
-                <MainPage questionData={questionData} uploadUrl={uploadUrl} />
+                <MainPage questionData={questionData} uploadUrl={uploadUrl} onAddTemplate={onAddTemplate} templates={templates} />
               ) : (
                 <Loader loadingClass="!w-full !h-[800px]" />
               )}  

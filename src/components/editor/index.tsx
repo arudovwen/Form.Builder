@@ -8,9 +8,10 @@ import {
 } from "react";
 import EditorContext from "../../context/editor-context";
 import ElementCanvas from "./element-canvas";
-// import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import AppIcon from "../ui/AppIcon";
 import SectionEditorModal from "../elements/section-editor";
+import TemplateSelectorModal from "../elements/template-selector";
 import { getItem } from "../../utils/localStorageControl";
 
 const SectionItem = ({
@@ -126,8 +127,9 @@ const SectionItem = ({
   );
 };
 
-const FormBuilder = () => {
+const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void; templates?: any[] }) => {
   const [isOpen, setOpen] = useState(false);
+  const [isTemplateModalOpen, setTemplateModalOpen] = useState(false);
   const tempSection = useRef(null);
   const containerRef = useRef<HTMLDivElement>(null); // Ref for the container
   const {
@@ -140,6 +142,7 @@ const FormBuilder = () => {
     selectedSection,
     activeSections,
     setActiveSections,
+    setFormData,
   }: any = useContext(EditorContext);
 
   const prevFormDataLength = useRef(formData?.length || 0);
@@ -187,6 +190,55 @@ const FormBuilder = () => {
     tempSection.current = section;
     setOpen(true);
   }
+
+  const handleTemplateSelect = (template: any) => {
+    const deepCloneWithNewId = (obj: any, overrides: any = {}) => ({
+      ...JSON.parse(JSON.stringify(obj)),
+      ...overrides,
+    });
+    
+    if (template.sections && Array.isArray(template.sections)) {
+      const validSections = template.sections.filter(Boolean);
+      const newSections = validSections.map((sec: any) => {
+        const secId = uuidv4();
+        const newQuestions = sec.questionData?.map((q: any) => {
+           const newQ = deepCloneWithNewId(q, { id: uuidv4(), sectionId: secId });
+           return newQ;
+        });
+
+        // Let's make sure the grid children have the correct new gridId if they are part of a grid.
+        // It's a bit complex, but for simple templates, this is a good start.
+        if (newQuestions) {
+           const idMap = new Map();
+           sec.questionData.forEach((q: any, i: number) => {
+             idMap.set(q.id, newQuestions[i].id);
+           });
+           newQuestions.forEach((q: any) => {
+             if (q.gridId && idMap.has(q.gridId)) {
+                q.gridId = idMap.get(q.gridId);
+             }
+           });
+        }
+
+        return deepCloneWithNewId(sec, { id: secId, questionData: newQuestions || [] });
+      });
+      
+      const isInitialBlank = formData.length === 1 && 
+                             formData[0].title === "" && 
+                             formData[0].description === "" && 
+                             (!formData[0].questionData || formData[0].questionData.length === 0);
+
+      if (isInitialBlank) {
+        setFormData(newSections);
+        if (newSections.length > 0) {
+          setSelectedSection(newSections[0].id);
+        }
+      } else {
+        setFormData((prev: any[]) => [...prev, ...newSections]);
+      }
+    }
+  };
+
   const config = getItem("config");
   return (
     <div
@@ -230,7 +282,7 @@ const FormBuilder = () => {
             />
           ),
         )}
-        <div className="flex justify-center">
+        <div className="flex justify-center gap-x-4">
           <button
             type="button"
             onClick={() => addSection()}
@@ -239,8 +291,32 @@ const FormBuilder = () => {
           >
             + Add section{" "}
           </button>
+          {(onAddTemplate || templates?.length) ? (
+            <button
+              type="button"
+              onClick={() => {
+                if (templates?.length) {
+                  setTemplateModalOpen(true);
+                } else if (onAddTemplate) {
+                  onAddTemplate();
+                }
+              }}
+              style={{ color: config?.buttonColor || "#333" }}
+              className="text-sm font-medium"
+            >
+              + Add existing template
+            </button>
+          ) : null}
         </div>
       </div>
+      {isTemplateModalOpen && (
+        <TemplateSelectorModal
+          isOpen={isTemplateModalOpen}
+          onClose={() => setTemplateModalOpen(false)}
+          templates={templates || []}
+          onSelect={handleTemplateSelect}
+        />
+      )}
     </div>
   );
 };

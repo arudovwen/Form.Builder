@@ -18,6 +18,8 @@ const HomePage = ({
   publishLoading,
   onTitleChange,
   uploadUrl,
+  onAddTemplate,
+  templates,
 }: BuilderProps) => {
   useEffect(() => {
     if (config) {
@@ -38,6 +40,8 @@ const HomePage = ({
       publishLoading={publishLoading}
       onTitleChange={onTitleChange}
       uploadUrl={uploadUrl}
+      onAddTemplate={onAddTemplate}
+      templates={templates}
     />
   );
 };
