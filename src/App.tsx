@@ -25,7 +25,7 @@ function App() {
           questionData: [
             { id: "q-name", type: "textField", label: "Text Field", inputLabel: "Full Name", inputType: "text" },
             { id: "q-email", type: "textField", label: "Text Field", inputLabel: "Email Address", inputType: "email" },
-            { id: "q-phone", type: "phoneNumber", label: "Phone Number", inputLabel: "Phone Number" }
+            { id: "q-phone", type: "phoneField", label: "Phone Number", inputLabel: "Phone Number" }
           ]
         }
       ]
@@ -74,7 +74,7 @@ function App() {
             { id: "q-applicant", type: "textField", label: "Text Field", inputLabel: "Full Name", inputType: "text" },
             { id: "q-portfolio", type: "textField", label: "Text Field", inputLabel: "Portfolio URL", inputType: "url" },
             { id: "q-cover", type: "longText", label: "Long Text Field", inputLabel: "Cover Letter", inputType: "text" },
-            { id: "q-resume", type: "fileUpload", label: "File Upload", inputLabel: "Upload Resume" }
+            { id: "q-resume", type: "file", label: "File Upload", inputLabel: "Upload Resume" }
           ]
         }
       ]
@@ -105,7 +105,7 @@ function App() {
           questionData: [
             { id: "q-maint-loc", type: "textField", label: "Text Field", inputLabel: "Location / Room", inputType: "text" },
             { id: "q-maint-desc", type: "longText", label: "Long Text Field", inputLabel: "Issue Description", inputType: "text" },
-            { id: "q-maint-urgency", type: "select", label: "Select", inputLabel: "Urgency Level", options: [{ label: "Low", value: "low" }, { label: "Medium", value: "medium" }, { label: "High", value: "high" }] }
+            { id: "q-maint-urgency", type: "selectField", label: "Select", inputLabel: "Urgency Level", options: [{ label: "Low", value: "low" }, { label: "Medium", value: "medium" }, { label: "High", value: "high" }] }
           ]
         }
       ]
@@ -143,7 +143,7 @@ function App() {
           title: "Employee Details",
           questionData: [
             { id: "q-emp-name", type: "textField", label: "Text Field", inputLabel: "Legal Name", inputType: "text" },
-            { id: "q-emp-start", type: "datePicker", label: "Date Picker", inputLabel: "Start Date" },
+            { id: "q-emp-start", type: "date", label: "Date Picker", inputLabel: "Start Date" },
             { id: "q-emp-dept", type: "textField", label: "Text Field", inputLabel: "Department", inputType: "text" }
           ]
         }
@@ -160,7 +160,7 @@ function App() {
           questionData: [
             { id: "q-sup-subject", type: "textField", label: "Text Field", inputLabel: "Subject", inputType: "text" },
             { id: "q-sup-body", type: "longText", label: "Long Text Field", inputLabel: "Description", inputType: "text" },
-            { id: "q-sup-file", type: "fileUpload", label: "File Upload", inputLabel: "Attach Screenshot" }
+            { id: "q-sup-file", type: "file", label: "File Upload", inputLabel: "Attach Screenshot" }
           ]
         }
       ]

@@ -18,7 +18,7 @@ interface ElementContainerProps {
 const ElementContainer = memo(
   ({ state, element, children }: ElementContainerProps) => {
     const [isOpen, setOpen] = useState(false);
-    const { removeElement, duplicateElement }: any =
+    const { removeElement, duplicateElement, updateElement }: any =
       React.useContext(EditorContext);
     const acceptedFileLabels = useMemo(
       () =>
@@ -55,6 +55,22 @@ const ElementContainer = memo(
           </span>
           {state === "edit" && (
             <span className="flex items-center gap-x-3">
+              {element.type?.toLowerCase() !== "spacer" && element.type?.toLowerCase() !== "divider" && (
+                <label className="flex items-center gap-1 text-xs cursor-pointer text-gray-500 mr-2 hover:text-gray-700 select-none">
+                  <input
+                    type="checkbox"
+                    checked={element.isRequired || false}
+                    onChange={(e) =>
+                      updateElement(
+                        { ...element, isRequired: e.target.checked },
+                        element.sectionId
+                      )
+                    }
+                    className="cursor-pointer"
+                  />
+                  <span className="mt-0.5">Required</span>
+                </label>
+              )}
               {
                 <button
                   type="button"

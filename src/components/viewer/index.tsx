@@ -77,13 +77,20 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   const totalSections = filteredFormData?.length ?? 0;
   const config = getItem("config");
 
-  const validationSchema = useMemo(
-    () => generateDynamicSchema({formData:filteredFormData, isReadOnly}),
+  const resolver = useCallback(
+    async (data: any, context: any, options: any) => {
+      const dynamicSchema = generateDynamicSchema({
+        formData: filteredFormData,
+        isReadOnly,
+        answerData: data, // use current form data to evaluate visibility
+      });
+      return yupResolver(dynamicSchema)(data, context, options);
+    },
     [filteredFormData, isReadOnly],
   );
 
   const methods = useForm({
-    resolver: yupResolver(validationSchema),
+    resolver,
     mode: "onSubmit",
     defaultValues: {},
   });

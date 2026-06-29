@@ -157,11 +157,45 @@ const addNumberValidations = (
   return updatedSchema;
 };
 
-export function generateDynamicSchema({formData, isReadOnly}: {formData: Section[], isReadOnly: boolean}) {
+export const evaluateVisibility = (question: any, answerData: any) => {
+  if (!question.isHidden) return true;
+  const fields = question.visibilityDependentFields || [];
+  if (!fields.length) return true;
+
+  return fields.every((field: any) => {
+    const value = answerData?.[field.id];
+    const valA = field.fieldValue;
+    const valB = value;
+
+    switch (field.operator) {
+      case "equals":
+        return String(valA).toLowerCase() === String(valB).toLowerCase();
+      case "not_equals":
+        return String(valA).toLowerCase() !== String(valB).toLowerCase();
+      case "greater":
+        return Number(valB) > Number(valA);
+      case "less":
+        return Number(valB) < Number(valA);
+      case "contains":
+        return String(valB).toLowerCase().includes(String(valA).toLowerCase());
+      case "not_contains":
+        return !String(valB).toLowerCase().includes(String(valA).toLowerCase());
+      default:
+        return true;
+    }
+  });
+};
+
+export function generateDynamicSchema({formData, isReadOnly, answerData}: {formData: Section[], isReadOnly: boolean, answerData?: any}) {
   const schemaFields: Record<string, yup.Schema<any>> = {};
 
   formData.forEach(({ questionData }) => {
-    questionData?.forEach((question) => {
+    questionData?.forEach((question: any) => {
+      // If the field is conditionally hidden, skip validating it
+      if (!evaluateVisibility(question, answerData)) {
+        return;
+      }
+
       const { id, type, isRequired, requiredMessage, isDisabled } = question;
 
       let fieldSchema = getBaseSchema(type, isReadOnly);

@@ -26,6 +26,7 @@ const SectionItem = ({
   formDataLength,
   onDragOver,
   setIsDragging,
+  onReorderSection,
 }: any) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const prevLength = useRef(section.questionData?.length);
@@ -49,6 +50,19 @@ const SectionItem = ({
     <div
       ref={scrollRef}
       key={section.id}
+      onDragOver={(e) => {
+        if (e.dataTransfer.types.includes("sectionid")) {
+          e.preventDefault();
+        }
+      }}
+      onDrop={(e) => {
+        const draggedId = e.dataTransfer.getData("sectionid");
+        if (draggedId) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (onReorderSection) onReorderSection(draggedId, section.id);
+        }
+      }}
       className={`bg-white group cursor-pointer rounded-lg  shadow-[rgba(149,157,165,0.2)_0px_2px_2px] transition-colors duration-200`}
     >
       <div
@@ -61,9 +75,18 @@ const SectionItem = ({
       >
         <div className="flex items-center justify-between">
           <div
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.setData("sectionid", section.id);
+              e.dataTransfer.effectAllowed = "move";
+              setIsDragging(true);
+            }}
+            onDragEnd={() => setIsDragging(false)}
             onClick={() => setSelectedSection(section.id)}
-            className="flex-1 h-full py-4 cursor-pointer"
+            className="flex-1 h-full py-4 cursor-grab active:cursor-grabbing flex items-center gap-2"
+            title="Drag to reorder section"
           >
+            <AppIcon icon="material-symbols:drag-indicator" iconClass="text-gray-400 text-lg" />
             <h2 className="font-medium">{section.title || "Section title"}</h2>
           </div>
 
@@ -176,6 +199,19 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
     }
   }, []);
 
+  const handleReorderSection = useCallback((draggedId: string, targetId: string) => {
+    setFormData((prev: any[]) => {
+      const draggedIndex = prev.findIndex((s) => s.id === draggedId);
+      const targetIndex = prev.findIndex((s) => s.id === targetId);
+      if (draggedIndex === -1 || targetIndex === -1 || draggedIndex === targetIndex) return prev;
+      
+      const newArr = [...prev];
+      const [draggedItem] = newArr.splice(draggedIndex, 1);
+      newArr.splice(targetIndex, 0, draggedItem);
+      return newArr;
+    });
+  }, [setFormData]);
+
   function toggleSection(index: number) {
     if (activeSections.includes(index)) {
       setActiveSections((prevSections: any[]) =>
@@ -279,6 +315,7 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
               formDataLength={formData.length}
               onDragOver={onDragOver}
               setIsDragging={setIsDragging}
+              onReorderSection={handleReorderSection}
             />
           ),
         )}
