@@ -14,13 +14,13 @@ import "@xyflow/react/dist/style.css";
 import dagre from "dagre";
 import AppIcon from "../ui/AppIcon";
 
-const dagreGraph = new dagre.graphlib.Graph();
-dagreGraph.setDefaultEdgeLabel(() => ({}));
-
 const nodeWidth = 280;
 const nodeHeight = 80;
 
 const getLayoutedElements = (nodes: any[], edges: any[], direction = "TB") => {
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
+  
   const isHorizontal = direction === "LR";
   dagreGraph.setGraph({ rankdir: direction });
 
