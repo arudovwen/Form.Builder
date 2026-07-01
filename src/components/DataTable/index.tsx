@@ -129,7 +129,7 @@ function RowComponent<T extends { id: string }>({
                     onGetValue={(_name, option) =>
                       handleCellChange(option?.value || "", row.id, col.field)
                     }
-                    customClass="!border-none"
+                    customClass="!border-none !p-0"
                   />
                 ) : (
                   <input
@@ -164,6 +164,16 @@ function RowComponent<T extends { id: string }>({
                   </span>
                 )}
               </div>
+            ) : col.type === "select" ? (
+              <CustomSearchSelect
+                name={String(col.field)}
+                options={col.options || []}
+                apiUrl={col.optionsUrl}
+                value={value as string}
+                onGetValue={() => {}}
+                readOnly={true}
+                customClass="!border-none !bg-transparent !p-0 !text-gray-700 pointer-events-none"
+              />
             ) : col.type === "checkbox" ? (
               <span className="block py-1 text-gray-700">
                 {value === true ? "Yes" : value === false ? "No" : ""}

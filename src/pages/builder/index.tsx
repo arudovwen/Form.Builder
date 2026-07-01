@@ -4,6 +4,8 @@ import { setItem } from "../../utils/localStorageControl";
 
 const HomePage = ({
   onSubmit,
+  onChange,
+  onLogAction,
   questionData,
   isReadOnly,
   config = {
@@ -29,6 +31,8 @@ const HomePage = ({
   return (
     <Layout
       onSubmit={onSubmit}
+      onChange={onChange}
+      onLogAction={onLogAction}
       onPublish={onPublish}
       questionData={questionData}
       isReadOnly={isReadOnly}

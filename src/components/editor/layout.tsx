@@ -8,6 +8,8 @@ import { useState } from "react";
 
 export interface BuilderProps {
   onSubmit?: (e: any) => void; // Function to handle form submission
+  onChange?: (data: any) => void; // Function to stream form data updates
+  onLogAction?: (action: string, value: any) => void; // Logger for user actions
   questionData?: any; // Data for the questions in the form
   isReadOnly?: boolean; // Flag to indicate if the form is read-only
   config?: any; // Configuration for the form
@@ -26,6 +28,8 @@ export interface BuilderProps {
 
 export default function Layout({
   onSubmit,
+  onChange,
+  onLogAction,
   questionData,
   title,
   goBackUrl,
@@ -42,7 +46,7 @@ export default function Layout({
   const [viewMode, setViewMode] = useState<"canvas" | "flow">("canvas");
 
   return (
-    <EditorProvider>
+    <EditorProvider onChange={onChange} onLogAction={onLogAction}>
       <Toaster position="top-right" richColors closeButton />
       <div className="w-full h-full bg-[#F8F9FC] flex flex-col">
         <div className="flex flex-1 ">

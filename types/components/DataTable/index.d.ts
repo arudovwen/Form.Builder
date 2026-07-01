@@ -1,4 +1,4 @@
-export type ColumnType = "text" | "number" | "checkbox";
+export type ColumnType = "text" | "number" | "checkbox" | "select";
 export interface DataGridColumn<T> {
     field: keyof T;
     headerName?: string;
@@ -6,6 +6,11 @@ export interface DataGridColumn<T> {
     type?: ColumnType;
     validate?: boolean;
     id: string;
+    optionsUrl?: string;
+    options?: {
+        label: string;
+        value: string;
+    }[];
 }
 interface CustomDataGridProps<T extends {
     id: string;

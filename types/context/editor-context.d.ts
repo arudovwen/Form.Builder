@@ -1,6 +1,8 @@
 import React from "react";
 interface EditorProviderProps {
     children: React.ReactNode;
+    onChange?: (data: any) => void;
+    onLogAction?: (action: string, value: any) => void;
 }
 declare const EditorContext: React.Context<{
     showPreview: boolean;
