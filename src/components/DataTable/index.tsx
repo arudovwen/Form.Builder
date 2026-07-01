@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useCallback, memo } from "react";
+import React, { useState, useEffect, useCallback, memo, useRef } from "react";
 import CurrencyInput from "react-currency-input-field";
 import AppIcon from "../ui/AppIcon";
 import { v4 as uuidv4 } from "uuid";
-import { config } from "process";
 import { getItem } from "@/utils/localStorageControl";
+import CustomSearchSelect from "../CustomSearchSelect";
 
 /* ---------------- TYPES ---------------- */
 
-export type ColumnType = "text" | "number" | "checkbox";
+export type ColumnType = "text" | "number" | "checkbox" | "select";
 
 export interface DataGridColumn<T> {
   field: keyof T;
@@ -16,6 +16,8 @@ export interface DataGridColumn<T> {
   type?: ColumnType;
   validate?: boolean;
   id: string;
+  optionsUrl?: string;
+  options?: { label: string; value: string }[];
 }
 
 interface ValidationResult {
@@ -111,11 +113,24 @@ function RowComponent<T extends { id: string }>({
                               handleCellChange(isYes, row.id, col.field)
                             }
                           />
-                          <span className="text-sm">{isYes ? "Yes" : "No"}</span>
+                          <span className="text-sm">
+                            {isYes ? "Yes" : "No"}
+                          </span>
                         </label>
                       );
                     })}
                   </div>
+                ) : col.type === "select" ? (
+                  <CustomSearchSelect
+                    name={String(col.field)}
+                    options={col.options || []}
+                    apiUrl={col.optionsUrl}
+                    value={value as string}
+                    onGetValue={(_name, option) =>
+                      handleCellChange(option?.value || "", row.id, col.field)
+                    }
+                    customClass="!border-none"
+                  />
                 ) : (
                   <input
                     type="text"
@@ -190,6 +205,10 @@ export default function CustomDataGrid<T extends { id: string }>({
 }: CustomDataGridProps<T>) {
   const [rows, setRows] = useState<T[]>(value);
   const config = getItem("config");
+  
+  const rowsRef = useRef<T[]>(rows);
+  rowsRef.current = rows;
+
   /* ---- Sync external value changes ---- */
   useEffect(() => {
     setRows((prev) => {
@@ -198,16 +217,13 @@ export default function CustomDataGrid<T extends { id: string }>({
     });
   }, [value]);
 
-
   const handleCellChange = useCallback(
     (val: unknown, rowId: string, field: keyof T) => {
-      setRows((prev) => {
-        const next = prev.map((row) =>
-          row.id === rowId ? { ...row, [field]: val } : row,
-        ) as T[];
-        onChange?.(next);
-        return next;
-      });
+      const next = rowsRef.current.map((row) =>
+        row.id === rowId ? { ...row, [field]: val } : row,
+      ) as T[];
+      setRows(next);
+      onChange?.(next);
     },
     [onChange],
   );
@@ -218,23 +234,22 @@ export default function CustomDataGrid<T extends { id: string }>({
       (acc as any)[col.field] = col.field === "id" ? id : "";
       return acc;
     }, {} as T);
-    setRows((prev) => {
-      const next = [...prev, { id, ...newRow }];
-      onChange?.(next);
-      return next;
-    });
+    const next = [...rowsRef.current, { id, ...newRow }];
+    setRows(next);
+    onChange?.(next);
   }, [columns, onChange]);
 
-  const deleteRow = useCallback((rowId: string) => {
-    setRows((prev) => {
-      const next = prev.filter((r) => r.id !== rowId);
+  const deleteRow = useCallback(
+    (rowId: string) => {
+      const next = rowsRef.current.filter((r) => r.id !== rowId);
+      setRows(next);
       onChange?.(next);
-      return next;
-    });
-  }, [onChange]);
+    },
+    [onChange],
+  );
 
   const getValidationStatus = useCallback(
-    (_rowId: string, _field: keyof T) => ({
+    () => ({
       isValidating: false,
       result: undefined as ValidationResult | undefined,
     }),
@@ -296,7 +311,7 @@ export default function CustomDataGrid<T extends { id: string }>({
           <button
             onClick={addRow}
             type="button"
-             style={{ color: config?.buttonColor || "#333" }}
+            style={{ color: config?.buttonColor || "#333" }}
             className="px-2 py-1 mb-3 text-xs text-gray-600 font-medium"
           >
             + Add Row

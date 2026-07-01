@@ -583,91 +583,99 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       )}
       <div className="grid gap-y-3">
         {dataFields?.map((field, index) => (
-          <div key={field.id} className="flex items-center gap-x-4 ">
-            <div className="min-w-[140px]">
-              <CustomSelect
-                label={index === 0 ? "Type" : ""}
-                options={[
-                  {
-                    label: "Text",
-                    value: "text",
-                  },
-                  {
-                    label: "Number",
-                    value: "number",
-                  },
-                  {
-                    label: "Checkbox",
-                    value: "checkbox",
-                  },
-                ]}
-                register={register}
-                name={`dataColumns.${index}.type`}
-                setValue={setValue}
-                trigger={trigger}
-                value={values.dataColumns[index].type}
-              />
+          <div key={field.id} className="flex flex-col gap-2 border-b border-gray-100 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0">
+            <div className="flex items-center gap-x-4">
+              <div className="min-w-[140px]">
+                <CustomSelect
+                  label={index === 0 ? "Type" : ""}
+                  options={[
+                    {
+                      label: "Text",
+                      value: "text",
+                    },
+                    {
+                      label: "Number",
+                      value: "number",
+                    },
+                    {
+                      label: "Checkbox",
+                      value: "checkbox",
+                    },
+                    {
+                      label: "Select",
+                      value: "select",
+                    },
+                  ]}
+                  register={register}
+                  name={`dataColumns.${index}.type`}
+                  setValue={setValue}
+                  trigger={trigger}
+                  value={values.dataColumns[index].type}
+                />
+              </div>
+
+              <div className="flex-1">
+                <DynamicInput
+                  watch={watch}
+                  label={index === 0 ? "Display header" : ""}
+                  name={`dataColumns.${index}.headerName`}
+                  register={register}
+                  onChange={(e) => {
+                    const text = e.target.value;
+                    const fieldName = text
+                      .toLowerCase()
+                      .trim()
+                      .replace(/[\s-]+/g, "_")
+                      .replace(/[^a-z0-9_]/g, "");
+                    setValue(`dataColumns.${index}.field`, fieldName, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    });
+                  }}
+                  errors={errors}
+                  element={element}
+                  placeholder="header"
+                />
+              </div>
+              
+              <div className="flex-1">
+                <DynamicInput
+                  watch={watch}
+                  label={index === 0 ? "Field key" : ""}
+                  name={`dataColumns.${index}.field`}
+                  register={register}
+                  errors={errors}
+                  element={element}
+                  placeholder="fieldKey"
+                  disabled
+                />
+              </div>
+              
+              <button
+                disabled={dataFields.length === 1}
+                type="button"
+                className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
+                onClick={() => columnRemove(index)}
+              >
+                <AppIcon icon="iconamoon:sign-times-fill" />
+              </button>
             </div>
 
-           
-            <div className="flex-1">
-              <DynamicInput
-                watch={watch}
-                label={index === 0 ? "Display header" : ""}
-                name={`dataColumns.${index}.headerName`}
-                register={register}
-                onChange={(e) => {
-                  const text = e.target.value;
-                  const fieldName = text
-                    .toLowerCase()
-                    .trim()
-                    .replace(/[\s-]+/g, "_")
-                    .replace(/[^a-z0-9_]/g, "");
-                  setValue(`dataColumns.${index}.field`, fieldName, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  });
-                }}
-                errors={errors}
-                element={element}
-                placeholder="header"
-              />
-            </div>
-             <div className="flex-1">
-            <DynamicInput
-              watch={watch}
-              label={index === 0 ? "Field key" : ""}
-              name={`dataColumns.${index}.field`}
-              register={register}
-              errors={errors}
-              element={element}
-              placeholder="fieldKey"
-                disabled
-            />
-          </div>
-            {/* <label className="flex items-center mb-0 gap-x-2">
-            <input
-              type="checkbox"
-              checked={values.dataColumns[index].validate}
-              {...register(`dataColumns.${index}.validate`)}
-            />
-            Validate
-          </label> */}
-            {/* <div className="flex items-center flex-1 gap-x-3">
-            <label>
-              {" "}
-              <input type="checkbox" name={`dataColumns.${index}.editable`} />{" "}
-              <span>Is Editable</span>
-            </label>
-          </div> */}
-            <button
-              disabled={dataFields.length === 1}
-              type="button"
-              className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
-              onClick={() => columnRemove(index)}
-            >
-              <AppIcon icon="iconamoon:sign-times-fill" />
-            </button>
+            {values.dataColumns?.[index]?.type === "select" && (
+              <div className="flex items-center gap-x-4">
+                <div className="flex-1">
+                  <DynamicInput
+                    watch={watch}
+                    label="Options API URL"
+                    name={`dataColumns.${index}.optionsUrl`}
+                    register={register}
+                    errors={errors}
+                    element={element}
+                    placeholder="https://api.example.com/options"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
