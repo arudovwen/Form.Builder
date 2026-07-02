@@ -17,6 +17,7 @@ interface TopBarProps {
   onTitleChange?: (newTitle: string) => void;
   viewMode?: "canvas" | "flow";
   setViewMode?: (mode: "canvas" | "flow") => void;
+  onShowVersion?: () => void;
 }
 
 export default function TopBar({
@@ -30,6 +31,7 @@ export default function TopBar({
   onTitleChange,
   viewMode,
   setViewMode,
+  onShowVersion,
 }: TopBarProps) {
   const {
     formData,
@@ -109,7 +111,7 @@ export default function TopBar({
             <button
               type="button"
               style={{ color: config?.buttonColor || "#333" }}
-              className={`px-3 flex items-center gap-1.5 transition-colors canvas_view ${viewMode === "canvas" ? "bg-gray-100  font-medium" : "bg-white text-gray-500 hover:bg-gray-50"}`}
+              className={`px-3 flex items-center gap-1.5 transition-colors canvas_view ${viewMode === "canvas" ? "bg-white   font-medium" : "bg-gray-100 text-gray-500 hover:bg-gray-50"}`}
               onClick={() => setViewMode("canvas")}
             >
               <AppIcon
@@ -121,7 +123,7 @@ export default function TopBar({
             <button
               type="button"
               style={{ color: config?.buttonColor || "#333" }}
-              className={`px-3 flex items-center gap-1.5 border-l border-gray-300 transition-colors flow_view ${viewMode === "flow" ? "bg-gray-100  font-medium" : "bg-white text-gray-500 hover:bg-gray-50"}`}
+              className={`px-3 flex items-center gap-1.5 border-l border-gray-300 transition-colors flow_view ${viewMode === "flow" ? " bg-white  font-medium" : "bg-gray-100  text-gray-500 hover:bg-gray-50"}`}
               onClick={() => setViewMode("flow")}
             >
               <AppIcon icon="mdi:sitemap-outline" iconClass="text-base" /> Flow
@@ -146,6 +148,16 @@ export default function TopBar({
           style={{ color: config?.buttonColor || "#333" }}
           isDisabled={!canRedo}
         />
+        {onShowVersion && (
+          <AppButton
+            onClick={onShowVersion}
+            text="Versions"
+            btnClass="px-2  bg-transparent font-medium text-sm"
+            icon="tabler:history"
+            iconClass="text-xl"
+            style={{ color: config?.buttonColor || "#333" }}
+          />
+        )}
         <AppButton
           onClick={() => setShowPreview((prev) => !prev)}
           text={showPreview ? "Hide Preview" : "Preview"}

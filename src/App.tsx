@@ -45,6 +45,7 @@ function App() {
                 title="Form Title"
                 goBackUrl={() => undefined}
                 onAddTemplate={() => alert("Add template clicked!")}
+                onShowVersion={() => alert(" teonShowVersionmplate clicked!")}
               />
             </div>
           }

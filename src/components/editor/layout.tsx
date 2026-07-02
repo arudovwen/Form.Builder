@@ -24,6 +24,7 @@ export interface BuilderProps {
   uploadUrl?: string;
   onAddTemplate?: () => void;
   templates?: any[];
+  onShowVersion?: () => void;
 }
 
 export default function Layout({
@@ -42,6 +43,7 @@ export default function Layout({
   uploadUrl,
   onAddTemplate,
   templates,
+  onShowVersion,
 }: BuilderProps) {
   const [viewMode, setViewMode] = useState<"canvas" | "flow">("canvas");
 
@@ -70,6 +72,7 @@ export default function Layout({
                 onTitleChange={onTitleChange}
                 viewMode={viewMode}
                 setViewMode={setViewMode}
+                onShowVersion={onShowVersion}
               />
             </div>
             <div className="p-6 h-[calc(100vh-70px)]">

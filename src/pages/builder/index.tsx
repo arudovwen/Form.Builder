@@ -22,6 +22,7 @@ const HomePage = ({
   uploadUrl,
   onAddTemplate,
   templates,
+  onShowVersion,
 }: BuilderProps) => {
   useEffect(() => {
     if (config) {
@@ -46,6 +47,7 @@ const HomePage = ({
       uploadUrl={uploadUrl}
       onAddTemplate={onAddTemplate}
       templates={templates}
+      onShowVersion={onShowVersion}
     />
   );
 };
