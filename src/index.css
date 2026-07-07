@@ -121,3 +121,27 @@ input[type="number"] {
 .shadow_box {
   box-shadow: 0px 1px 2px 0px #0a0d120d;
 }
+
+/* Scrollbar Handle */
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 130, 226, 0.1);
+  border-radius: 8px;
+}
+
+html:hover::-webkit-scrollbar-thumb,
+body:hover::-webkit-scrollbar-thumb,
+*:hover::-webkit-scrollbar-thumb {
+  background: #9c82e2;
+}
+
+/* Horizontal Scrollbar Handle */
+::-webkit-scrollbar-thumb:horizontal {
+  background: rgba(156, 130, 226, 0.1);
+  border-radius: 8px;
+}
+
+html:hover::-webkit-scrollbar-thumb:horizontal,
+body:hover::-webkit-scrollbar-thumb:horizontal,
+*:hover::-webkit-scrollbar-thumb:horizontal {
+  background: #9c82e2;
+}

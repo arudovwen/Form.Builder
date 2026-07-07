@@ -37,7 +37,7 @@ export interface FormRendererProps {
   onGetValues?: (data: any[]) => void;
   isReadOnly?: boolean;
   renderType?: RenderType;
-  children?: ReactNode;
+  children?: ReactNode | ((options: { isUploading: boolean; isSubmitting: boolean; hasErrors: boolean }) => ReactNode);
   hideFooter?: boolean;
   uploadUrl?: string;
 }
@@ -380,7 +380,9 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                 </div>
                 {(current === totalSections - 1 || isReadOnly) &&
                   !ignoreValidation &&
-                  (children ?? (
+                  ((typeof children === 'function' 
+                    ? children({ isUploading: apiActivityCount > 0, isSubmitting, hasErrors: Object.keys(errors).length > 0 }) 
+                    : children) ?? (
                     <AppButton
                       isDisabled={
                         isSubmitting ||
@@ -397,7 +399,9 @@ const FormRenderer: React.FC<FormRendererProps> = ({
               </>
             ) : (
               !ignoreValidation &&
-              (children ?? (
+              ((typeof children === 'function' 
+                ? children({ isUploading: apiActivityCount > 0, isSubmitting, hasErrors: Object.keys(errors).length > 0 }) 
+                : children) ?? (
                 <AppButton
                   isDisabled={
                     isSubmitting ||
