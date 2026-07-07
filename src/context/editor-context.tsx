@@ -1,4 +1,10 @@
-import React, { createContext, useState, useMemo, useEffect, useRef } from "react";
+import React, {
+  createContext,
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+} from "react";
 import { v4 as uuidv4 } from "uuid";
 
 interface EditorProviderProps {
@@ -31,6 +37,8 @@ const EditorContext = createContext<
       isDragging: boolean;
       uploadUrl: string;
       setUploadUrl: (e: string) => void;
+      apiActivityCount: number;
+      setApiActivityCount: React.Dispatch<React.SetStateAction<number>>;
       /**
        * Universal element move:
        *  - canvas  → canvas  (reorder by index)
@@ -67,7 +75,11 @@ const newSection = {
   disabled: false,
   isHidden: false,
 };
-export const EditorProvider: React.FC<EditorProviderProps> = ({ children, onChange, onLogAction }) => {
+export const EditorProvider: React.FC<EditorProviderProps> = ({
+  children,
+  onChange,
+  onLogAction,
+}) => {
   const [showPreview, setShowPreview] = useState(true);
   const [answerData, setAnswerData] = useState({});
   const [elementData, setElementData] = useState({});
@@ -107,15 +119,21 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children, onChan
 
   const setFormData = React.useCallback((newValOrUpdater: any) => {
     _setFormDataState((prev: any[]) => {
-      const nextVal = typeof newValOrUpdater === "function" ? newValOrUpdater(prev) : newValOrUpdater;
-      
+      const nextVal =
+        typeof newValOrUpdater === "function"
+          ? newValOrUpdater(prev)
+          : newValOrUpdater;
+
       if (JSON.stringify(prev) !== JSON.stringify(nextVal)) {
         const now = Date.now();
         setPast((p) => {
-          if (p.length > 0 && JSON.stringify(p[p.length - 1]) === JSON.stringify(prev)) {
+          if (
+            p.length > 0 &&
+            JSON.stringify(p[p.length - 1]) === JSON.stringify(prev)
+          ) {
             return p;
           }
-          
+
           if (now - lastSaveRef.current < 800 && p.length > 0) {
             lastSaveRef.current = now;
             return p;
@@ -124,7 +142,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children, onChan
           lastSaveRef.current = now;
           return [...p, prev];
         });
-        setFuture([]); 
+        setFuture([]);
       }
 
       return nextVal;
@@ -135,7 +153,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children, onChan
     if (past.length === 0) return;
     const previous = past[past.length - 1];
     const newPast = past.slice(0, past.length - 1);
-    
+
     setPast(newPast);
     setFuture([formDataState, ...future]);
     _setFormDataState(previous);
@@ -162,6 +180,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children, onChan
     0,
   ]);
   const [uploadUrl, setUploadUrl] = useState<string>("");
+  const [apiActivityCount, setApiActivityCount] = useState<number>(0);
   const handleDragStop = React.useCallback(() => {
     // Handle drag stop (implementation depends on requirements)
   }, []);
@@ -173,14 +192,17 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children, onChan
     setActiveSections([formData.length]);
     onLogAction?.("ADD_SECTION", { sectionId: id });
   }, [formData, onLogAction, setFormData]);
-  const removeSection = React.useCallback((sectionId: string) => {
-    setFormData((prevFormData) =>
-      prevFormData.filter((i) => i.id !== sectionId),
-    );
+  const removeSection = React.useCallback(
+    (sectionId: string) => {
+      setFormData((prevFormData) =>
+        prevFormData.filter((i) => i.id !== sectionId),
+      );
 
-    setSelectedSection(null);
-    onLogAction?.("REMOVE_SECTION", { sectionId });
-  }, [onLogAction, setFormData]);
+      setSelectedSection(null);
+      onLogAction?.("REMOVE_SECTION", { sectionId });
+    },
+    [onLogAction, setFormData],
+  );
   const removeElement = React.useCallback(
     (elementId: string, sectionId: string) => {
       const section = formData.find((section) => section.id === sectionId);
@@ -195,7 +217,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children, onChan
           section.id === sectionId
             ? {
                 ...section,
-                questionData: section.questionData.filter((element: any) => {
+                questionData: section?.questionData.filter((element: any) => {
                   if (elementData.type === "grid") {
                     // remove both the grid and its children
                     return (
@@ -219,12 +241,12 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children, onChan
       const section = formData.find((sec) => sec.id === sectionId);
       if (!section) return;
 
-      const elementIndex = section.questionData.findIndex(
+      const elementIndex = section?.questionData.findIndex(
         (el: any) => el.id === elementId,
       );
       if (elementIndex === -1) return;
 
-      const original = section.questionData[elementIndex];
+      const original = section?.questionData[elementIndex];
 
       const deepCloneWithNewId = (obj: any, overrides: any = {}) => ({
         ...JSON.parse(JSON.stringify(obj)),
@@ -320,19 +342,22 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children, onChan
     [setFormData, onLogAction],
   );
 
-  const addElement = React.useCallback((element: any, sectionId: string) => {
-    setFormData((prevFormData) =>
-      prevFormData?.map((section) =>
-        section.id === sectionId
-          ? {
-              ...section,
-              questionData: [...section.questionData, element],
-            }
-          : section,
-      ),
-    );
-    onLogAction?.("ADD_ELEMENT", { sectionId, element });
-  }, [setFormData, onLogAction]);
+  const addElement = React.useCallback(
+    (element: any, sectionId: string) => {
+      setFormData((prevFormData) =>
+        prevFormData?.map((section) =>
+          section.id === sectionId
+            ? {
+                ...section,
+                questionData: [...section?.questionData, element],
+              }
+            : section,
+        ),
+      );
+      onLogAction?.("ADD_ELEMENT", { sectionId, element });
+    },
+    [setFormData, onLogAction],
+  );
   const addElementInPosition = React.useCallback(
     (element: any, sectionId: string, index: any) => {
       setFormData((prevFormData) =>
@@ -341,9 +366,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children, onChan
             ? {
                 ...section,
                 questionData: [
-                  ...section.questionData.slice(0, index),
+                  ...section?.questionData.slice(0, index),
                   element,
-                  ...section.questionData.slice(index),
+                  ...section?.questionData.slice(index),
                 ],
               }
             : section,
@@ -360,7 +385,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children, onChan
           section.id === sectionId
             ? {
                 ...section,
-                questionData: section.questionData?.map((question: any) =>
+                questionData: section?.questionData?.map((question: any) =>
                   question.type === "grid" && question.gridData
                     ? {
                         ...question,
@@ -389,21 +414,24 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children, onChan
     },
     [setFormData, onLogAction],
   );
-  const updateElement = React.useCallback((value: any, sectionId: string) => {
-    setFormData((prevFormData) =>
-      prevFormData?.map((section) =>
-        section.id === sectionId
-          ? {
-              ...section,
-              questionData: section.questionData?.map((ele: any) =>
-                ele.id === value.id ? { ...ele, ...value } : ele,
-              ),
-            }
-          : section,
-      ),
-    );
-    onLogAction?.("UPDATE_ELEMENT", { sectionId, value });
-  }, [setFormData, onLogAction]);
+  const updateElement = React.useCallback(
+    (value: any, sectionId: string) => {
+      setFormData((prevFormData) =>
+        prevFormData?.map((section) =>
+          section.id === sectionId
+            ? {
+                ...section,
+                questionData: section?.questionData?.map((ele: any) =>
+                  ele.id === value.id ? { ...ele, ...value } : ele,
+                ),
+              }
+            : section,
+        ),
+      );
+      onLogAction?.("UPDATE_ELEMENT", { sectionId, value });
+    },
+    [setFormData, onLogAction],
+  );
 
   /**
    * moveElement — handles all four cross-context drag scenarios:
@@ -434,7 +462,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children, onChan
         prevFormData.map((section) => {
           if (section.id !== sectionId) return section;
 
-          const qd: any[] = [...section.questionData];
+          const qd: any[] = [...section?.questionData];
           const draggedIdx = qd.findIndex((el: any) => el.id === draggedId);
           if (draggedIdx === -1) return section;
 
@@ -523,19 +551,22 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children, onChan
     [setFormData, onLogAction],
   );
 
-  const updateSection = React.useCallback((value: any, sectionId: string) => {
-    setFormData((prevFormData) =>
-      prevFormData?.map((section) =>
-        section.id === sectionId
-          ? {
-              ...section,
-              ...value,
-            }
-          : section,
-      ),
-    );
-    onLogAction?.("UPDATE_SECTION", { sectionId, value });
-  }, [setFormData, onLogAction]);
+  const updateSection = React.useCallback(
+    (value: any, sectionId: string) => {
+      setFormData((prevFormData) =>
+        prevFormData?.map((section) =>
+          section.id === sectionId
+            ? {
+                ...section,
+                ...value,
+              }
+            : section,
+        ),
+      );
+      onLogAction?.("UPDATE_SECTION", { sectionId, value });
+    },
+    [setFormData, onLogAction],
+  );
 
   const value = useMemo(
     () => ({
@@ -563,6 +594,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children, onChan
       setAnswerData,
       uploadUrl,
       setUploadUrl,
+      apiActivityCount,
+      setApiActivityCount,
       duplicateElement,
       moveElement,
       showPreview,
@@ -590,6 +623,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({ children, onChan
       updateGridElement,
       answerData,
       uploadUrl,
+      apiActivityCount,
       duplicateElement,
       moveElement,
       showPreview,

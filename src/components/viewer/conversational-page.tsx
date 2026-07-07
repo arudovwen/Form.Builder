@@ -101,6 +101,7 @@ export default function ConversationalPage({ element, options, onNext, onPrev, i
               onClick={onNext}
               style={{ background: config?.buttonColor || "#333" }}
               btnClass={`text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg ${isLast ? 'submit_btn' : 'continue_btn next_btn text-sm'}`}
+              isDisabled={options?.apiActivityCount > 0 || (isLast && options?.isSubmitting)}
             />
             {!isLast && <span className="text-xs text-gray-400 font-medium hidden sm:inline-block">press Enter ↵</span>}
             

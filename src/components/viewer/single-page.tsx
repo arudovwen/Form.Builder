@@ -10,27 +10,24 @@ export const getElementOptions = (element: any, options: any) => {
 export default function SinglePage({ form_data, options }) {
   const renderGridElement = (element: any, gridChildren: any[]) => (
     <div key={element.id} className="min-w-0">
-      <GridInput
-        element={element}
-        customClass="p-0 min-h-[60px] border-none"
-      >
-      {gridChildren?.map((child: any) => (
-        <GridItem
-          key={child.id}
-          col={child.gridPosition?.col}
-          customClass="p-0"
-        >
-          <RenderElement
-            element={child}
-            validationData={getElementOptions(child, options)}
-          />
-          {options?.errors?.[child.id]?.message && (
-            <div className="mt-1 text-xs text-red-600">
-              {options.errors[child.id].message}
-            </div>
-          )}
-        </GridItem>
-      ))}
+      <GridInput element={element} customClass="p-0 min-h-[60px] border-none">
+        {gridChildren?.map((child: any) => (
+          <GridItem
+            key={child.id}
+            col={child.gridPosition?.col}
+            customClass="p-0"
+          >
+            <RenderElement
+              element={child}
+              validationData={getElementOptions(child, options)}
+            />
+            {options?.errors?.[child.id]?.message && (
+              <div className="mt-1 text-xs text-red-600">
+                {options.errors[child.id].message}
+              </div>
+            )}
+          </GridItem>
+        ))}
       </GridInput>
     </div>
   );
@@ -38,7 +35,10 @@ export default function SinglePage({ form_data, options }) {
   const renderStandardElement = (element: any) => (
     <div
       key={element.id}
-      className={clsx("group relative grid gap-y-[6px] min-w-0", element.elementClass)}
+      className={clsx(
+        "group relative grid gap-y-[6px] min-w-0",
+        element.elementClass,
+      )}
     >
       <RenderElement
         element={element}
@@ -58,7 +58,7 @@ export default function SinglePage({ form_data, options }) {
         const gridChildren = new Map<string, any[]>();
 
         // Pre-group grid children for efficient lookup
-        section.questionData?.forEach((el: any) => {
+        section?.questionData?.forEach((el: any) => {
           if (el.gridId) {
             if (!gridChildren.has(el.gridId)) {
               gridChildren.set(el.gridId, []);
@@ -82,7 +82,7 @@ export default function SinglePage({ form_data, options }) {
               </div>
             )}
             <div className="grid gap-y-6 section_box__content min-w-0">
-              {section.questionData?.map((element: any) => {
+              {section?.questionData?.map((element: any) => {
                 if (element.gridId) return null;
 
                 if (element.type === "grid") {

@@ -9,6 +9,7 @@ interface TopBarProps {
     onTitleChange?: (newTitle: string) => void;
     viewMode?: "canvas" | "flow";
     setViewMode?: (mode: "canvas" | "flow") => void;
+    onShowVersion?: () => void;
 }
-export default function TopBar({ title, goBackUrl, onSubmit, onPublish, previewLoading, saveLoading, publishLoading, onTitleChange, viewMode, setViewMode, }: TopBarProps): import("react/jsx-runtime").JSX.Element;
+export default function TopBar({ title, goBackUrl, onSubmit, onPublish, previewLoading, saveLoading, publishLoading, onTitleChange, viewMode, setViewMode, onShowVersion, }: TopBarProps): import("react/jsx-runtime").JSX.Element;
 export {};

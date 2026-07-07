@@ -30,11 +30,11 @@ const SectionItem = ({
   onReorderSection,
 }: any) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const prevLength = useRef(section.questionData?.length);
+  const prevLength = useRef(section?.questionData?.length);
 
   useEffect(() => {
     // Scroll to bottom when a new input is added
-    if (section.questionData.length > prevLength.current) {
+    if (section?.questionData?.length > prevLength.current) {
       if (scrollRef.current) {
         requestAnimationFrame(() => {
           scrollRef.current?.scrollTo({
@@ -44,13 +44,13 @@ const SectionItem = ({
         });
       }
     }
-    prevLength.current = section.questionData?.length;
-  }, [section.questionData?.length]);
+    prevLength.current = section?.questionData?.length;
+  }, [section?.questionData?.length]);
 
   return (
     <div
       ref={scrollRef}
-      key={section.id}
+      key={section?.id}
       onDragOver={(e) => {
         if (e.dataTransfer.types.includes("sectionid")) {
           e.preventDefault();
@@ -139,8 +139,8 @@ const SectionItem = ({
             <div className="h-full mt-4 gap-y-6 ">
               {
                 <ElementCanvas
-                  elementData={section.questionData}
-                  sectionId={section.id}
+                  elementData={section?.questionData}
+                  sectionId={section?.id}
                 />
               }
             </div>
@@ -264,12 +264,12 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
       const isInitialBlank = formData.length === 1 && 
                              formData[0].title === "" && 
                              formData[0].description === "" && 
-                             (!formData[0].questionData || formData[0].questionData.length === 0);
+                             (!formData[0]?.questionData || formData[0]?.questionData?.length === 0);
 
       if (isInitialBlank) {
         setFormData(newSections);
         if (newSections.length > 0) {
-          setSelectedSection(newSections[0].id);
+          setSelectedSection(newSections[0]?.id);
         }
       } else {
         setFormData((prev: any[]) => [...prev, ...newSections]);

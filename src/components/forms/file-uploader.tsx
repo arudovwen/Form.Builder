@@ -38,7 +38,7 @@ export default function FileUpload({
   list = null,
   accept = [],
 }: FileUploadProps) {
-  const { uploadUrl }: any = useContext(EditorContext);
+  const { uploadUrl, setApiActivityCount }: any = useContext(EditorContext);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [fileData, setFileData] = useState<FileItem[] | null>(list);
@@ -174,6 +174,7 @@ export default function FileUpload({
 
       try {
         setIsUploading(true);
+        setApiActivityCount?.((prev: number) => prev + 1);
 
         const uploaded = await Promise.all(files?.map(uploadFile));
 
@@ -188,13 +189,14 @@ export default function FileUpload({
         toast.error("Failed to upload file(s). Please try again.");
       } finally {
         setIsUploading(false);
+        setApiActivityCount?.((prev: number) => Math.max(0, prev - 1));
         // Reset input to allow re-uploading the same file
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
       }
     },
-    [isUploading, validateFiles, uploadFile, onFileLoaded, multiple, fileData],
+    [isUploading, validateFiles, uploadFile, onFileLoaded, multiple, fileData, setApiActivityCount],
   );
 
   const removeFile = useCallback(

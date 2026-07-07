@@ -7,9 +7,9 @@ import { getElementOptions } from "./single-page";
 export default function MultiPage({ form_data, options, current }) {
   return (
     <div className="grid gap-y-3 multi_section__content min-w-0">
-      {form_data[current].questionData?.map((element: any) => {
+      {form_data[current]?.questionData?.map((element: any) => {
         if (element.type === "grid") {
-          const gridChildren = form_data[current].questionData.filter(
+          const gridChildren = form_data[current]?.questionData?.filter(
             (child: any) => child.gridId === element.id
           );
 

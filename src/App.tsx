@@ -7,7 +7,46 @@ import "./assets/scss/style.scss";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const answerData = [];
 
-const questionDa = [];
+const questionDa = [
+    {
+        "title": "",
+        "description": "",
+        "id": "b8843b62-d71d-4ce9-8ff8-dd831d4e0763",
+        "questionData": [
+            {
+                "required": false,
+                "description": "",
+                "value": null,
+                "isReadOnly": false,
+                "isDisabled": false,
+                "isRequired": false,
+                "customClass": "",
+                "elementClass": "",
+                "gridPosition": null,
+                "gridId": null,
+                "isHidden": false,
+                "visibilityDependentFields": [],
+                "maxLength": null,
+                "minLength": null,
+                "placeholder": "Type here",
+                "requiredMessage": "Field is required",
+                "minLengthMessage": "",
+                "maxLengthMessage": "",
+                "type": "file",
+                "label": "File",
+                "icon": "ion:attach-sharp",
+                "inputLabel": "File Label",
+                "inputType": "file",
+                "isMultiple": false,
+                "acceptedFiles": [],
+                "id": "163781e2-96e2-45dd-b85d-f754420b11b8",
+                "sectionId": "b8843b62-d71d-4ce9-8ff8-dd831d4e0763"
+            }
+        ],
+        "disabled": false,
+        "isHidden": false
+    }
+];
 
 function App() {
   const config = {
@@ -65,6 +104,7 @@ function App() {
               onGetValues={(val: any) => {
                 console.log(val);
               }}
+              uploadUrl="https://beta.api.gateway.thetaskforge.co/edms/v1/fileupload/upload-document"
             >
               {/* <div className="text-center w-full">
                 <p>This is a child component</p>

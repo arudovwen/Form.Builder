@@ -6,5 +6,5 @@ type Section = {
 };
 
 export function getAllQuestionData(sections: Section[]): any[] {
-  return sections.flatMap(section => section.questionData ?? []);
+  return sections.flatMap((section) => section?.questionData ?? []);
 }

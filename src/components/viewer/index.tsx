@@ -54,7 +54,8 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   hideFooter = false,
   uploadUrl,
 }: FormRendererProps) => {
-  const { setAnswerData, setUploadUrl }: any = useContext(EditorContext);
+  const { setAnswerData, setUploadUrl, apiActivityCount }: any =
+    useContext(EditorContext);
   const [current, setCurrent] = useState(0);
   const [currentConvIndex, setCurrentConvIndex] = useState(0);
 
@@ -67,7 +68,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
           if (isSectionDisabled) {
             return {
               ...section,
-              questionData: section.questionData?.map((q: any) => ({
+              questionData: section?.questionData?.map((q: any) => ({
                 ...q,
                 isDisabled: true,
               })),
@@ -126,10 +127,12 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     if (renderType !== "conversational") return [];
     const questions: any[] = [];
     filteredFormData.forEach((section) => {
-      section.questionData?.forEach((element: any) => {
+      section?.questionData?.forEach((element: any) => {
         if (evaluateVisibility(element, memoizedValues)) {
           if (element.type === "grid") {
-            const children = section.questionData?.filter((c: any) => c.gridId === element.id);
+            const children = section?.questionData?.filter(
+              (c: any) => c.gridId === element.id,
+            );
             questions.push({ ...element, gridChildren: children });
           } else if (!element.gridId) {
             questions.push(element);
@@ -156,7 +159,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     if (!filteredFormData?.length || !onGetValues) return;
 
     const updatedData = filteredFormData.flatMap((section) =>
-      section.questionData?.map((element: any) => ({
+      section?.questionData?.map((element: any) => ({
         id: element.id,
         value: memoizedValues[element.id] || "",
         sectionId: section.id,
@@ -189,7 +192,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   const onSubmit = useCallback(
     (data: Record<string, any>) => {
       const updatedData = filteredFormData.flatMap((section) =>
-        section.questionData?.map((element: any) => ({
+        section?.questionData?.map((element: any) => ({
           id: element.id,
           value: data[element.id] || "",
           sectionId: section.id,
@@ -211,19 +214,21 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   // ✅ Navigation handlers
   const handleProceed = useCallback(async () => {
     if (renderType === "conversational") {
-       if (!ignoreValidation) {
-         const currentField = visibleQuestions[currentConvIndex];
-         if (!currentField) return;
-         const fieldsToValidate = currentField.gridChildren ? currentField.gridChildren.map((c:any)=>c.id) : [currentField.id];
-         const isValid = await trigger(fieldsToValidate);
-         if (!isValid) return;
-       }
-       if (currentConvIndex < visibleQuestions.length - 1) {
-         setCurrentConvIndex((prev) => prev + 1);
-       } else {
-         handleSubmit(onSubmit)();
-       }
-       return;
+      if (!ignoreValidation) {
+        const currentField = visibleQuestions[currentConvIndex];
+        if (!currentField) return;
+        const fieldsToValidate = currentField.gridChildren
+          ? currentField.gridChildren.map((c: any) => c.id)
+          : [currentField.id];
+        const isValid = await trigger(fieldsToValidate);
+        if (!isValid) return;
+      }
+      if (currentConvIndex < visibleQuestions.length - 1) {
+        setCurrentConvIndex((prev) => prev + 1);
+      } else {
+        handleSubmit(onSubmit)();
+      }
+      return;
     }
 
     if (!ignoreValidation) {
@@ -234,12 +239,22 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       if (!isValid) return;
     }
     setCurrent((prev) => prev + 1);
-  }, [current, currentConvIndex, visibleQuestions, filteredFormData, ignoreValidation, trigger, renderType, handleSubmit, onSubmit]);
+  }, [
+    current,
+    currentConvIndex,
+    visibleQuestions,
+    filteredFormData,
+    ignoreValidation,
+    trigger,
+    renderType,
+    handleSubmit,
+    onSubmit,
+  ]);
 
   const handleBack = useCallback(() => {
     if (renderType === "conversational") {
-       setCurrentConvIndex((prev) => Math.max(0, prev - 1));
-       return;
+      setCurrentConvIndex((prev) => Math.max(0, prev - 1));
+      return;
     }
     setCurrent((prev) => prev - 1);
   }, [renderType]);
@@ -256,6 +271,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       getValues,
       setError,
       clearErrors,
+      apiActivityCount,
     }),
     [
       register,
@@ -268,6 +284,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       getValues,
       setError,
       clearErrors,
+      apiActivityCount,
     ],
   );
 
@@ -281,48 +298,52 @@ const FormRenderer: React.FC<FormRendererProps> = ({
         <div className="relative flex flex-col w-full min-w-0 py-4 gap-y-12">
           <div
             className="multi_section__box min-w-0"
-            key={renderType === "conversational" ? `conv-${currentConvIndex}` : filteredFormData?.[current]?.id}
+            key={
+              renderType === "conversational"
+                ? `conv-${currentConvIndex}`
+                : filteredFormData?.[current]?.id
+            }
           >
             {renderType === "multi" &&
               (filteredFormData?.[current]?.title ||
                 filteredFormData?.[current]?.description) && (
                 <div className="py-4 mb-4 border-b border-gray-100 multi_section__title">
                   {filteredFormData[current]?.title && (
-                     <h2 className="text-lg font-semibold mb-[6px]">
-                       {filteredFormData[current]?.title}
-                     </h2>
-                   )}
-                   {filteredFormData[current]?.description && (
-                     <p className="text-sm">
-                       {filteredFormData[current]?.description}
-                     </p>
-                   )}
-                 </div>
-               )}
+                    <h2 className="text-lg font-semibold mb-[6px]">
+                      {filteredFormData[current]?.title}
+                    </h2>
+                  )}
+                  {filteredFormData[current]?.description && (
+                    <p className="text-sm">
+                      {filteredFormData[current]?.description}
+                    </p>
+                  )}
+                </div>
+              )}
 
-             {renderType === "multi" ? (
-               <MultiPage
-                 form_data={filteredFormData}
-                 options={sharedOptions}
-                 current={current}
-               />
-             ) : renderType === "conversational" ? (
-               <ConversationalPage
-                 element={visibleQuestions[currentConvIndex]}
-                 options={sharedOptions}
-                 onNext={handleProceed}
-                 onPrev={handleBack}
-                 isFirst={currentConvIndex === 0}
-                 isLast={currentConvIndex === visibleQuestions.length - 1}
-                 isReadOnly={isReadOnly}
-               />
-             ) : (
-               <SinglePage
-                 form_data={filteredFormData}
-                 options={sharedOptions}
-               />
-             )}
-           </div>
+            {renderType === "multi" ? (
+              <MultiPage
+                form_data={filteredFormData}
+                options={sharedOptions}
+                current={current}
+              />
+            ) : renderType === "conversational" ? (
+              <ConversationalPage
+                element={visibleQuestions[currentConvIndex]}
+                options={sharedOptions}
+                onNext={handleProceed}
+                onPrev={handleBack}
+                isFirst={currentConvIndex === 0}
+                isLast={currentConvIndex === visibleQuestions.length - 1}
+                isReadOnly={isReadOnly}
+              />
+            ) : (
+              <SinglePage
+                form_data={filteredFormData}
+                options={sharedOptions}
+              />
+            )}
+          </div>
         </div>
 
         {/* ✅ Footer Controls */}
@@ -334,12 +355,15 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                   <div>
                     {" "}
                     {current > 0 && (
-                      <button 
-                        type="button" 
-                        onClick={handleBack} 
+                      <button
+                        type="button"
+                        onClick={handleBack}
                         className="text-gray-400 hover:text-gray-600 font-medium text-sm flex items-center gap-1 transition-colors back_btn"
                       >
-                        <AppIcon icon="material-symbols:arrow-upward-rounded" iconClass="text-lg" />
+                        <AppIcon
+                          icon="material-symbols:arrow-upward-rounded"
+                          iconClass="text-lg"
+                        />
                         Back
                       </button>
                     )}
@@ -359,7 +383,9 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                   (children ?? (
                     <AppButton
                       isDisabled={
-                        isSubmitting || Object.keys(errors).length > 0
+                        isSubmitting ||
+                        Object.keys(errors).length > 0 ||
+                        apiActivityCount > 0
                       }
                       isLoading={isSubmitting}
                       type="submit"
@@ -373,7 +399,11 @@ const FormRenderer: React.FC<FormRendererProps> = ({
               !ignoreValidation &&
               (children ?? (
                 <AppButton
-                  isDisabled={isSubmitting || Object.keys(errors).length > 0}
+                  isDisabled={
+                    isSubmitting ||
+                    Object.keys(errors).length > 0 ||
+                    apiActivityCount > 0
+                  }
                   isLoading={isSubmitting}
                   type="submit"
                   text="Submit"
@@ -384,14 +414,17 @@ const FormRenderer: React.FC<FormRendererProps> = ({
             )}
           </footer>
         )}
-        
+
         {/* ✅ Progress bar for Conversational Mode */}
         {renderType === "conversational" && visibleQuestions.length > 0 && (
           <div className="fixed bottom-0 left-0 w-full h-1.5 bg-gray-200">
-             <div 
-               className="h-full bg-blue-600 transition-all duration-500 ease-out"
-               style={{ width: `${((currentConvIndex + 1) / visibleQuestions.length) * 100}%`, background: config?.buttonColor || "#2563EB" }}
-             />
+            <div
+              className="h-full bg-blue-600 transition-all duration-500 ease-out"
+              style={{
+                width: `${((currentConvIndex + 1) / visibleQuestions.length) * 100}%`,
+                background: config?.buttonColor || "#2563EB",
+              }}
+            />
           </div>
         )}
       </form>

@@ -152,7 +152,7 @@ export default function TopBar({
           <AppButton
             onClick={onShowVersion}
             text="Versions"
-            btnClass="px-2  bg-transparent font-medium text-sm"
+            btnClass="px-2  bg-transparent font-medium text-sm version_btn"
             icon="tabler:history"
             iconClass="text-xl"
             style={{ color: config?.buttonColor || "#333" }}

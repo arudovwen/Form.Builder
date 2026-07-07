@@ -20,6 +20,8 @@ declare const EditorContext: React.Context<{
     isDragging: boolean;
     uploadUrl: string;
     setUploadUrl: (e: string) => void;
+    apiActivityCount: number;
+    setApiActivityCount: React.Dispatch<React.SetStateAction<number>>;
     /**
      * Universal element move:
      *  - canvas  → canvas  (reorder by index)

@@ -16,5 +16,6 @@ export interface BuilderProps {
     uploadUrl?: string;
     onAddTemplate?: () => void;
     templates?: any[];
+    onShowVersion?: () => void;
 }
-export default function Layout({ onSubmit, onChange, onLogAction, questionData, title, goBackUrl, loading, onPublish, previewLoading, saveLoading, publishLoading, onTitleChange, uploadUrl, onAddTemplate, templates, }: BuilderProps): import("react/jsx-runtime").JSX.Element;
+export default function Layout({ onSubmit, onChange, onLogAction, questionData, title, goBackUrl, loading, onPublish, previewLoading, saveLoading, publishLoading, onTitleChange, uploadUrl, onAddTemplate, templates, onShowVersion, }: BuilderProps): import("react/jsx-runtime").JSX.Element;

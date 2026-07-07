@@ -39,7 +39,6 @@ import MultiSelectInput from "./multi-select-input";
 import { normalizeGridRows, normalizeRows } from "@/utils/normalizeRows";
 import FormulaMentionInput from "./formula-mention-input";
 
-
 interface Option {
   label?: string;
   value?: string;
@@ -182,7 +181,6 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   onClose,
   element,
 }) => {
- 
   const filteredTabs = tabs.filter(
     (tab) =>
       !noAllowValidation.includes(element.inputType) ||
@@ -193,16 +191,27 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   const [optionsLoading, setOptionsLoading] = useState(false);
   const [optionTypes, setOptionTypes] = useState<optionType>("manual");
 
-  const fieldCount = formData?.flatMap((section: any) => section.questionData || [])?.length || 0;
+  const fieldCount =
+    formData?.flatMap((section: any) => section?.questionData || [])?.length ||
+    0;
 
   const mentionData = React.useMemo(() => {
-    return formData?.flatMap((section: any) => section.questionData || [])
-      .filter((f: any) => f.id !== element?.id && !['spacer', 'divider', 'section', 'grid'].includes(f.type?.toLowerCase()))
-      .map((f: any) => ({
-        id: f.id,
-        display: f.inputLabel || f.label || "Unnamed"
-      })) || [];
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return (
+      formData
+        ?.flatMap((section: any) => section?.questionData || [])
+        .filter(
+          (f: any) =>
+            f.id !== element?.id &&
+            !["spacer", "divider", "section", "grid"].includes(
+              f.type?.toLowerCase(),
+            ),
+        )
+        .map((f: any) => ({
+          id: f.id,
+          display: f.inputLabel || f.label || "Unnamed",
+        })) || []
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldCount, element?.id]);
   const config = getItem("config");
   const {
@@ -583,7 +592,10 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       )}
       <div className="grid gap-y-3">
         {dataFields?.map((field, index) => (
-          <div key={field.id} className="flex flex-col gap-2 border-b border-gray-100 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0">
+          <div
+            key={field.id}
+            className="flex flex-col gap-2 border-b border-gray-100 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0"
+          >
             <div className="flex items-center gap-x-4">
               <div className="min-w-[140px]">
                 <CustomSelect
@@ -637,7 +649,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   placeholder="header"
                 />
               </div>
-              
+
               <div className="flex-1">
                 <DynamicInput
                   watch={watch}
@@ -650,7 +662,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   disabled
                 />
               </div>
-              
+
               <button
                 disabled={dataFields.length === 1}
                 type="button"
@@ -1082,7 +1094,12 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                       </label>
                       <FormulaMentionInput
                         value={watch("formula") || ""}
-                        onChange={(val) => setValue("formula", val, { shouldValidate: true, shouldDirty: true })}
+                        onChange={(val) =>
+                          setValue("formula", val, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          })
+                        }
                         fields={mentionData}
                         placeholder="Build your formula..."
                       />
