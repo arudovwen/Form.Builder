@@ -13,7 +13,11 @@ export interface FormRendererProps {
     onGetValues?: (data: any[]) => void;
     isReadOnly?: boolean;
     renderType?: RenderType;
-    children?: ReactNode;
+    children?: ReactNode | ((options: {
+        isUploading: boolean;
+        isSubmitting: boolean;
+        hasErrors: boolean;
+    }) => ReactNode);
     hideFooter?: boolean;
     uploadUrl?: string;
 }

@@ -8,7 +8,11 @@ export interface RenderProps {
     loading?: boolean;
     config?: any;
     renderType?: "multi" | "single" | "conversational";
-    children?: ReactNode;
+    children?: ReactNode | ((options: {
+        isUploading: boolean;
+        isSubmitting: boolean;
+        hasErrors: boolean;
+    }) => ReactNode);
     hideFooter?: boolean;
     onGetValues?: (e: any) => void;
     uploadUrl?: string;
