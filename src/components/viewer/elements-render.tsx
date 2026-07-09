@@ -21,7 +21,7 @@ export const RenderElement = ({ element, validationData }: { element: any; valid
   if (!ElementComponent) return null;
 
   return (
-    <div className={`${!isVisible ? "invisible h-0" : ""} min-w-0 w-full`}>
+    <div className={`${!isVisible ? "hidden" : ""} min-w-0 w-full`}>
       <div className="mb-1.5 min-w-0">
         {element.inputLabel && (
           <label className="block text-sm font-medium  input_label">
@@ -33,12 +33,6 @@ export const RenderElement = ({ element, validationData }: { element: any; valid
             )}
           </label>
         )}
-        {element.description && (
-          <small className="block text-gray-400 mt-0.5 text-xs">
-            {" "}
-            {element.description}
-          </small>
-        )}
       </div>
       <ElementComponent
         element={element}
@@ -48,6 +42,11 @@ export const RenderElement = ({ element, validationData }: { element: any; valid
           isReadOnly: validationData.isReadOnly || element.isDisabled,
         }}
       />
+      {element.description && (
+        <small className="block text-gray-400 mt-0.5 text-xs">
+          {element.description}
+        </small>
+      )}
     </div>
   );
 };

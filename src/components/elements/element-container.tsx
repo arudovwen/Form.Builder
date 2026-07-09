@@ -106,6 +106,11 @@ const ElementContainer = memo(
         </div>
         
         {children}
+        {element.description && (
+          <small className="block text-gray-400 mt-1 text-xs">
+            {element.description}
+          </small>
+        )}
       </div>
     );
   },

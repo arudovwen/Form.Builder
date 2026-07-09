@@ -35,10 +35,11 @@ const SectionItem = ({
   useEffect(() => {
     // Scroll to bottom when a new input is added
     if (section?.questionData?.length > prevLength.current) {
-      if (scrollRef.current) {
+      const container = document.getElementById("section-container");
+      if (container) {
         requestAnimationFrame(() => {
-          scrollRef.current?.scrollTo({
-            top: scrollRef.current.scrollHeight,
+          container.scrollTo({
+            top: container.scrollHeight,
             behavior: "smooth",
           });
         });
@@ -280,7 +281,6 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
   const config = getItem("config");
   return (
     <div
-      ref={containerRef} // Attach the ref to the container
       className="relative flex flex-col h-full pb-5 mx-auto gap-x-4 "
     >
       {isOpen && (
@@ -292,6 +292,7 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
       )}
       <div
         id="section-container"
+        ref={containerRef} // Attach the ref to the container
         className="relative flex flex-col flex-1 w-full gap-y-3 container overflow-y-auto"
       >
         {formData?.map(
