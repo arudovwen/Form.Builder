@@ -28,13 +28,19 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   maxDate,
   showYearDropdown,
 }) => {
-  const initialDate = value ? new Date(value) : null;
+  const getValidDate = (val: any) => {
+    if (!val) return null;
+    const date = new Date(val);
+    return isNaN(date.getTime()) ? null : date;
+  };
+
+  const initialDate = getValidDate(value);
 
   const [startDate, setStartDate] = useState<Date | null>(initialDate);
 
   // 🔥 Watch for external value changes
   useEffect(() => {
-    const newDate = value ? new Date(value) : null;
+    const newDate = getValidDate(value);
 
     // Only update if the value actually changed
     if (
