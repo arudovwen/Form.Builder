@@ -149,7 +149,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
 
           lastSaveRef.current = now;
           const newPast = [...p, prev];
-          return newPast.length > 50 ? newPast.slice(newPast.length - 50) : newPast;
+          return newPast.length > 20 ? newPast.slice(newPast.length - 20) : newPast;
         });
         setFuture([]);
       }
