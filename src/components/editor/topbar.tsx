@@ -48,12 +48,20 @@ export default function TopBar({
   const config = getItem("config");
 
   function handleSubmit() {
-    localStorage.setItem("formData", JSON.stringify(formData));
+    try {
+      localStorage.setItem("formData", JSON.stringify(formData));
+    } catch (e) {
+      console.warn("Could not save formData to localStorage", e);
+    }
     onSubmit?.(formData);
   }
 
   function handlePublish() {
-    localStorage.setItem("formData", JSON.stringify(formData));
+    try {
+      localStorage.setItem("formData", JSON.stringify(formData));
+    } catch (e) {
+      console.warn("Could not save formData to localStorage", e);
+    }
     onPublish?.(formData);
   }
 

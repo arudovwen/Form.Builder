@@ -7,20 +7,26 @@ import { getItem } from "../../utils/localStorageControl";
 
 type Props = {
   onSubmit: (e: any) => void;
+  saveLoading?: boolean;
 };
 
-export default function BottomBar({ onSubmit }: Props) {
+export default function BottomBar({ onSubmit, saveLoading }: Props) {
   const { formData } = useContext(
     EditorContext
   ) as unknown as EditorContextType;
   const config = getItem("config");
   function handleSubmit() {
-    localStorage.setItem("formData", JSON.stringify(formData));
-    onSubmit(formData);
+    try {
+      localStorage.setItem("formData", JSON.stringify(formData));
+    } catch (e) {
+      console.warn("Could not save formData to localStorage", e);
+    }
+    onSubmit?.(formData);
   }
   return (
     <div className="px-[30px] py-3 flex justify-end items-center  w-full">
       <AppButton
+        loading={saveLoading}
         onClick={() => handleSubmit()}
         text="Save Form"
         style={{ background: config?.buttonColor || "#333" }}

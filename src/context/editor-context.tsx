@@ -108,11 +108,19 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   }, [formDataState, onChange]);
 
   useEffect(() => {
-    sessionStorage.setItem("editor_past", JSON.stringify(past));
+    try {
+      sessionStorage.setItem("editor_past", JSON.stringify(past));
+    } catch (e) {
+      console.warn("Could not save editor_past to sessionStorage", e);
+    }
   }, [past]);
 
   useEffect(() => {
-    sessionStorage.setItem("editor_future", JSON.stringify(future));
+    try {
+      sessionStorage.setItem("editor_future", JSON.stringify(future));
+    } catch (e) {
+      console.warn("Could not save editor_future to sessionStorage", e);
+    }
   }, [future]);
 
   const lastSaveRef = useRef<number>(Date.now());
@@ -140,7 +148,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
           }
 
           lastSaveRef.current = now;
-          return [...p, prev];
+          const newPast = [...p, prev];
+          return newPast.length > 50 ? newPast.slice(newPast.length - 50) : newPast;
         });
         setFuture([]);
       }
