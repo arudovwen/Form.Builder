@@ -26,7 +26,7 @@ export default function BottomBar({ onSubmit, saveLoading }: Props) {
   return (
     <div className="px-[30px] py-3 flex justify-end items-center  w-full">
       <AppButton
-        loading={saveLoading}
+        isLoading={saveLoading}
         onClick={() => handleSubmit()}
         text="Save Form"
         style={{ background: config?.buttonColor || "#333" }}
