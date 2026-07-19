@@ -70,7 +70,7 @@ const SectionEditorModal: React.FC<{
         </div>
 
         {/* Form Content */}
-        <form onSubmit={handleSubmit(onSubmit)} className="w-full">
+        <form onSubmit={handleSubmit(onSubmit)} className="w-full" autoComplete="off">
           <div className="w-full px-6 flex flex-col gap-5 z-10">
             <DynamicInput
               label="Title"

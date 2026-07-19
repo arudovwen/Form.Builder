@@ -79,6 +79,8 @@ interface FormInputs {
   signatureLink?: string;
   isMultiple?: boolean;
   acceptedFiles?: any;
+  minChecked?: number;
+  requireAllChecked?: boolean;
 }
 
 const schema = yup.object().shape({
@@ -91,8 +93,10 @@ const schema = yup.object().shape({
   requiredMessage: yup.string().nullable(),
   minLengthMessage: yup.string().nullable(),
   maxLengthMessage: yup.string().nullable(),
-  maxLength: yup.number().typeError("Expecting a number").nullable(),
-  minLength: yup.number().typeError("Expecting a number").nullable(),
+  maxLength: yup.number().transform((value, originalValue) => String(originalValue).trim() === '' ? null : value).typeError("Expecting a number").nullable(),
+  minLength: yup.number().transform((value, originalValue) => String(originalValue).trim() === '' ? null : value).typeError("Expecting a number").nullable(),
+  minChecked: yup.number().transform((value, originalValue) => String(originalValue).trim() === '' ? null : value).typeError("Expecting a number").nullable(),
+  requireAllChecked: yup.boolean(),
   inputType: yup.string().nullable(),
   maxAmountMessage: yup.string().nullable(),
   maxAmount: yup.string().nullable(),
@@ -774,6 +778,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="w-full flex-1 flex flex-col"
+          autoComplete="off"
         >
           <div className="flex-1">
             {" "}
@@ -986,6 +991,31 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                       trigger={trigger}
                       value={watch("selectType")}
                     />
+                  )}
+                  {["multiselect", "checkbox"].includes(element.type.toLowerCase()) && (
+                    <>
+                      <DynamicInput
+                        watch={watch}
+                        label="Minimum Options Checked"
+                        name="minChecked"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="number"
+                      />
+                      <div className="w-[250px]">
+                        <DynamicInput
+                          watch={watch}
+                          label="Require All Checked"
+                          name="requireAllChecked"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                          type="checkbox"
+                          value={values.requireAllChecked}
+                        />
+                      </div>
+                    </>
                   )}
                   {element.type.toLowerCase() === "grid" && (
                     <DynamicInput

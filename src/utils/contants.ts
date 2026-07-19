@@ -112,6 +112,10 @@ export interface ElementType {
   visibilityDependentFields?: string;
   visibilityDependentFieldsValue?: any;
 
+  minChecked?: number | null;
+  allowCheckAll?: boolean;
+  requireAllChecked?: boolean;
+
   isMultiple: boolean;
   acceptedFiles: any[];
 
@@ -231,6 +235,8 @@ export const Elements: ElementType[] = [
     icon: "fluent-mdl2:multi-select",
     inputLabel: "Select Text Label",
     inputType: "select",
+    minChecked: 1,
+    requireAllChecked: false,
     options: [option("Placeholder 1", "placeholder_1")],
   }),
 
@@ -298,7 +304,9 @@ export const Elements: ElementType[] = [
     icon: "mingcute:checkbox-line",
     inputLabel: "Checkbox Label",
     inputType: "checkbox",
-    options: [option("Checkbox Option", "")],
+    minChecked: 1,
+    requireAllChecked: false,
+    options: [option("Checkbox Option", "option")],
   }),
 
   createElement({

@@ -20,6 +20,8 @@ declare const EditorContext: React.Context<{
     isDragging: boolean;
     uploadUrl: string;
     setUploadUrl: (e: string) => void;
+    copyElement: (elementId: string, sectionId: string) => void;
+    pasteElement: (sectionId: string, targetIndex?: number) => void;
     apiActivityCount: number;
     setApiActivityCount: React.Dispatch<React.SetStateAction<number>>;
     /**

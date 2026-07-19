@@ -6,6 +6,7 @@ import React, {
   useRef,
 } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { toast } from "sonner";
 
 interface EditorProviderProps {
   children: React.ReactNode;
@@ -37,6 +38,8 @@ const EditorContext = createContext<
       isDragging: boolean;
       uploadUrl: string;
       setUploadUrl: (e: string) => void;
+      copyElement: (elementId: string, sectionId: string) => void;
+      pasteElement: (sectionId: string, targetIndex?: number) => void;
       apiActivityCount: number;
       setApiActivityCount: React.Dispatch<React.SetStateAction<number>>;
       /**
@@ -337,6 +340,163 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
     },
     [formData, setFormData, onLogAction],
   );
+
+  const copyElement = React.useCallback(
+    (elementId: string, sectionId: string) => {
+      const section = formData.find((sec) => sec.id === sectionId);
+      if (!section) return;
+
+      const elementIndex = section?.questionData.findIndex(
+        (el: any) => el.id === elementId,
+      );
+      if (elementIndex === -1) return;
+
+      const original = section?.questionData[elementIndex];
+      let copiedData = null;
+
+      if (original.type === "grid") {
+        const children = section.questionData.filter(
+          (e: any) => e.gridId === original.id
+        );
+        copiedData = {
+          type: "FORM_BUILDER_CLIPBOARD",
+          element: original,
+          children: children,
+          timestamp: Date.now(),
+        };
+      } else if (original.gridId) {
+        const { gridId: _gId, gridPosition: _gPos, ...rest } = original;
+        copiedData = {
+          type: "FORM_BUILDER_CLIPBOARD",
+          element: rest,
+          timestamp: Date.now(),
+        };
+      } else {
+        copiedData = {
+          type: "FORM_BUILDER_CLIPBOARD",
+          element: original,
+          timestamp: Date.now(),
+        };
+      }
+
+      if (copiedData) {
+        const payloadString = JSON.stringify(copiedData);
+        try {
+          localStorage.setItem("form_builder_clipboard", payloadString);
+          
+          // Also try to write to system clipboard
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(payloadString).catch(() => {
+              // Silently ignore if browser denies write permission
+            });
+          }
+
+          toast.success("Element copied to clipboard");
+          onLogAction?.("COPY_ELEMENT", { sectionId, elementId });
+        } catch (e) {
+          console.warn("Could not copy element to clipboard", e);
+          toast.error("Failed to copy element");
+        }
+      }
+    },
+    [formData, onLogAction],
+  );
+
+  const pasteElement = React.useCallback(
+    async (sectionId: string, targetIndex?: number, directClipboardText?: string) => {
+      let clipboardString = "";
+
+      if (directClipboardText && directClipboardText.includes("FORM_BUILDER_CLIPBOARD")) {
+        clipboardString = directClipboardText;
+      }
+
+      // Try system clipboard if no valid direct text was provided
+      if (!clipboardString && navigator.clipboard && navigator.clipboard.readText) {
+        try {
+          const sysClipboard = await navigator.clipboard.readText();
+          if (sysClipboard && sysClipboard.includes("FORM_BUILDER_CLIPBOARD")) {
+            clipboardString = sysClipboard;
+          }
+        } catch (err) {
+          // Ignore read errors (e.g. user denied permission) and fallback
+        }
+      }
+
+      // Fallback to localStorage if system clipboard is empty or denied
+      if (!clipboardString) {
+        clipboardString = localStorage.getItem("form_builder_clipboard") || "";
+      }
+
+      if (!clipboardString) {
+        toast.error("Nothing to paste. Copy an element first.");
+        return;
+      }
+
+      try {
+        const copiedData = JSON.parse(clipboardString);
+        if (copiedData?.type !== "FORM_BUILDER_CLIPBOARD" || !copiedData?.element) {
+          toast.error("Invalid clipboard data.");
+          return;
+        }
+
+        // Check timestamp for 1-minute expiration
+        if (copiedData.timestamp) {
+          const isExpired = Date.now() - copiedData.timestamp > 60000;
+          if (isExpired) {
+            toast.error("Copied element has expired (1 minute limit).");
+            localStorage.removeItem("form_builder_clipboard"); // Clean up
+            return;
+          }
+        }
+
+        const deepCloneWithNewId = (obj: any, overrides: any = {}) => ({
+          ...JSON.parse(JSON.stringify(obj)),
+          id: uuidv4(),
+          ...overrides,
+        });
+
+        setFormData((prevFormData) =>
+          prevFormData?.map((sec: any) => {
+            if (sec.id !== sectionId) return sec;
+
+            const qd = [...sec.questionData];
+            let newQuestionData = [...qd];
+
+            if (copiedData.element.type === "grid") {
+              const newGridId = uuidv4();
+              const newGrid = deepCloneWithNewId(copiedData.element, { id: newGridId, sectionId });
+              
+              const newChildren = (copiedData.children || []).map((child: any) =>
+                deepCloneWithNewId(child, { gridId: newGridId, sectionId })
+              );
+
+              if (targetIndex !== undefined) {
+                newQuestionData.splice(targetIndex, 0, newGrid, ...newChildren);
+              } else {
+                newQuestionData.push(newGrid, ...newChildren);
+              }
+            } else {
+              const newElement = deepCloneWithNewId(copiedData.element, { sectionId });
+              if (targetIndex !== undefined) {
+                newQuestionData.splice(targetIndex, 0, newElement);
+              } else {
+                newQuestionData.push(newElement);
+              }
+            }
+
+            return { ...sec, questionData: newQuestionData };
+          })
+        );
+        toast.success("Element pasted successfully");
+        onLogAction?.("PASTE_ELEMENT", { sectionId });
+      } catch (e) {
+        console.warn("Could not paste element from clipboard", e);
+        toast.error("Failed to paste element");
+      }
+    },
+    [setFormData, onLogAction],
+  );
+
   const updateElementPosition = React.useCallback(
     (updatedQuestionData: any[], sectionId: string) => {
       setFormData((prevFormData) =>
@@ -467,94 +627,187 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
         targetCol,
       } = opts;
 
-      setFormData((prevFormData: any[]) =>
-        prevFormData.map((section) => {
-          if (section.id !== sectionId) return section;
+      setFormData((prevFormData: any[]) => {
+        let dragged: any = null;
+        let sourceSectionId: string | null = null;
+        let sourceDraggedIdx = -1;
 
-          const qd: any[] = [...section?.questionData];
-          const draggedIdx = qd.findIndex((el: any) => el.id === draggedId);
-          if (draggedIdx === -1) return section;
+        for (const section of prevFormData) {
+          const idx = section.questionData?.findIndex(
+            (el: any) => el.id === draggedId,
+          );
+          if (idx !== -1) {
+            dragged = section.questionData[idx];
+            sourceSectionId = section.id;
+            sourceDraggedIdx = idx;
+            break;
+          }
+        }
 
-          const dragged = { ...qd[draggedIdx] };
+        if (!dragged) return prevFormData;
 
-          // ── Scenario 3 & 4: drop INTO a grid cell ──────────────────────────
-          if (targetGridId !== undefined && targetCol !== undefined) {
-            // Block: a grid cannot be nested inside another grid
-            if (dragged.type === "grid") return section;
+        // Block: a grid cannot be nested inside another grid
+        if (targetGridId !== undefined && dragged.type === "grid") {
+          return prevFormData;
+        }
 
-            // Find any element currently occupying the target cell
-            const occupantIdx = qd.findIndex(
-              (el: any) =>
-                el.id !== draggedId &&
-                el.gridId === targetGridId &&
-                el.gridPosition?.col === targetCol,
-            );
+        const movedElement = { ...dragged, sectionId };
 
-            let newQd = qd.map((el: any) =>
-              el.id === draggedId
-                ? {
-                    ...el,
-                    gridId: targetGridId,
-                    gridPosition: { col: targetCol },
-                  }
-                : el,
-            );
+        return prevFormData.map((section) => {
+          let qd: any[] = [...(section.questionData || [])];
 
-            // Eject occupant back to canvas (strip grid bindings)
-            if (occupantIdx !== -1) {
-              newQd = newQd.map((el: any, i: number) => {
-                if (i !== occupantIdx) return el;
-                const ejected = { ...el };
-                delete ejected.gridId;
-                delete ejected.gridPosition;
-                return ejected;
-              });
+          if (section.id !== sourceSectionId && section.id !== sectionId) {
+            return section;
+          }
+
+          // Same section move
+          if (sourceSectionId === sectionId && section.id === sectionId) {
+            const draggedIdx = sourceDraggedIdx;
+
+            // ── Scenario 3 & 4: drop INTO a grid cell ──────────────────────────
+            if (targetGridId !== undefined && targetCol !== undefined) {
+              const occupantIdx = qd.findIndex(
+                (el: any) =>
+                  el.id !== draggedId &&
+                  el.gridId === targetGridId &&
+                  el.gridPosition?.col === targetCol,
+              );
+
+              let newQd = qd.map((el: any) =>
+                el.id === draggedId
+                  ? {
+                      ...movedElement,
+                      gridId: targetGridId,
+                      gridPosition: { col: targetCol },
+                    }
+                  : el,
+              );
+
+              if (occupantIdx !== -1) {
+                newQd = newQd.map((el: any, i: number) => {
+                  if (i !== occupantIdx) return el;
+                  const ejected = { ...el };
+                  delete ejected.gridId;
+                  delete ejected.gridPosition;
+                  return ejected;
+                });
+              }
+
+              return { ...section, questionData: newQd };
             }
 
-            return { ...section, questionData: newQd };
+            // ── Scenario 2: eject from grid → canvas at targetIndex ────────────
+            if (
+              movedElement.gridId &&
+              targetIndex !== undefined &&
+              targetGridId === undefined
+            ) {
+              const stripped = { ...movedElement };
+              delete stripped.gridId;
+              delete stripped.gridPosition;
+              const without = qd.filter((el: any) => el.id !== draggedId);
+              const insertAt = Math.min(targetIndex, without.length);
+              without.splice(insertAt, 0, stripped);
+              return { ...section, questionData: without };
+            }
+
+            // ── Scenario 1a: canvas → canvas reorder by targetIndex ──────────
+            if (
+              !movedElement.gridId &&
+              targetIndex !== undefined &&
+              targetGridId === undefined &&
+              !targetId
+            ) {
+              qd.splice(draggedIdx, 1);
+              const insertAt = Math.min(targetIndex, qd.length);
+              qd.splice(insertAt, 0, movedElement);
+              return { ...section, questionData: qd };
+            }
+
+            // ── Scenario 1b: canvas → canvas reorder by targetId ───────────────
+            if (targetId) {
+              const toIdx = qd.findIndex((el: any) => el.id === targetId);
+              if (toIdx === -1) return section;
+              qd.splice(draggedIdx, 1);
+              qd.splice(toIdx, 0, movedElement);
+              return { ...section, questionData: qd };
+            }
+
+            return section;
           }
 
-          // ── Scenario 2: eject from grid → canvas at targetIndex ────────────
-          if (
-            dragged.gridId &&
-            targetIndex !== undefined &&
-            targetGridId === undefined
-          ) {
-            const stripped = { ...dragged };
-            delete stripped.gridId;
-            delete stripped.gridPosition;
-
-            const without = qd.filter((el: any) => el.id !== draggedId);
-            const insertAt = Math.min(targetIndex, without.length);
-            without.splice(insertAt, 0, stripped);
-            return { ...section, questionData: without };
-          }
-
-          // ── Scenario 1a: canvas → canvas reorder by targetIndex ──────────
-          if (
-            !dragged.gridId &&
-            targetIndex !== undefined &&
-            targetGridId === undefined &&
-            !targetId
-          ) {
-            qd.splice(draggedIdx, 1);
-            const insertAt = Math.min(targetIndex, qd.length);
-            qd.splice(insertAt, 0, dragged);
+          // Different section move - Remove from source
+          if (section.id === sourceSectionId && section.id !== sectionId) {
+            qd.splice(sourceDraggedIdx, 1);
             return { ...section, questionData: qd };
           }
 
-          // ── Scenario 1b: canvas → canvas reorder by targetId ───────────────
-          if (targetId) {
-            const toIdx = qd.findIndex((el: any) => el.id === targetId);
-            if (toIdx === -1) return section;
-            qd.splice(draggedIdx, 1);
-            qd.splice(toIdx, 0, dragged);
+          // Different section move - Insert into target
+          if (section.id === sectionId && section.id !== sourceSectionId) {
+            // ── Scenario 3 & 4
+            if (targetGridId !== undefined && targetCol !== undefined) {
+              const occupantIdx = qd.findIndex(
+                (el: any) =>
+                  el.gridId === targetGridId &&
+                  el.gridPosition?.col === targetCol,
+              );
+              const newMovedElement = {
+                ...movedElement,
+                gridId: targetGridId,
+                gridPosition: { col: targetCol },
+              };
+
+              if (occupantIdx !== -1) {
+                const ejected = { ...qd[occupantIdx] };
+                delete ejected.gridId;
+                delete ejected.gridPosition;
+                qd[occupantIdx] = ejected;
+                qd.push(newMovedElement);
+              } else {
+                qd.push(newMovedElement);
+              }
+              return { ...section, questionData: qd };
+            }
+
+            // ── Scenario 2 & 1a
+            if (
+              targetIndex !== undefined &&
+              targetGridId === undefined &&
+              !targetId
+            ) {
+              const stripped = { ...movedElement };
+              delete stripped.gridId;
+              delete stripped.gridPosition;
+              const insertAt = Math.min(targetIndex, qd.length);
+              qd.splice(insertAt, 0, stripped);
+              return { ...section, questionData: qd };
+            }
+
+            // ── Scenario 1b
+            if (targetId) {
+              const stripped = { ...movedElement };
+              delete stripped.gridId;
+              delete stripped.gridPosition;
+              const toIdx = qd.findIndex((el: any) => el.id === targetId);
+              if (toIdx !== -1) {
+                qd.splice(toIdx, 0, stripped);
+              } else {
+                qd.push(stripped);
+              }
+              return { ...section, questionData: qd };
+            }
+
+            // Fallback
+            const stripped = { ...movedElement };
+            delete stripped.gridId;
+            delete stripped.gridPosition;
+            qd.push(stripped);
             return { ...section, questionData: qd };
           }
 
           return section;
-        }),
-      );
+        });
+      });
       onLogAction?.("MOVE_ELEMENT", opts);
     },
     [setFormData, onLogAction],
@@ -613,6 +866,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       redo,
       canUndo,
       canRedo,
+      copyElement,
+      pasteElement,
     }),
     [
       formData,
@@ -640,6 +895,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       redo,
       canUndo,
       canRedo,
+      copyElement,
+      pasteElement,
     ],
   );
 

@@ -175,6 +175,7 @@ export const DynamicInput = ({
           } ${className}`}
           placeholder={placeholder}
           disabled={disabled}
+          autoComplete="off"
         />
         {errors?.[name] && (
           <p className="mt-1 text-sm text-red-600">
@@ -209,6 +210,8 @@ export const DynamicInput = ({
         disabled={disabled}
         min={min}
         max={max}
+        autoComplete="off"
+        data-1p-ignore
       />
       {errors?.[name] && (
         <p className="mt-1 text-sm text-red-600">

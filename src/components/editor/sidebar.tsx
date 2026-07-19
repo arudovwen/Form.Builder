@@ -1,4 +1,4 @@
-import { useCallback, DragEvent, memo, useContext, useState } from "react";
+import { useCallback, DragEvent, memo, useContext, useState, useEffect } from "react";
 import { CategorizedElements, Elements } from "../../utils/contants";
 import AppIcon from "../ui/AppIcon";
 import EditorContext from "../../context/editor-context";
@@ -25,8 +25,39 @@ const categoryTitles = [
 
 const SideBar = () => {
   const [query, setQuery] = useState("");
-  const { setIsDragging, addElement, selectedSection }: any =
+  const [canPaste, setCanPaste] = useState(false);
+  const { setIsDragging, addElement, selectedSection, pasteElement }: any =
     useContext(EditorContext);
+
+  useEffect(() => {
+    const checkClipboard = () => {
+      try {
+        const clipboardString = localStorage.getItem("form_builder_clipboard");
+        if (clipboardString) {
+          const copiedData = JSON.parse(clipboardString);
+          if (copiedData?.type === "FORM_BUILDER_CLIPBOARD" && copiedData?.timestamp) {
+            const isExpired = Date.now() - copiedData.timestamp > 60000;
+            if (isExpired) {
+              localStorage.removeItem("form_builder_clipboard");
+              setCanPaste(false);
+            } else {
+              setCanPaste(true);
+            }
+          } else {
+            setCanPaste(false);
+          }
+        } else {
+          setCanPaste(false);
+        }
+      } catch (e) {
+        setCanPaste(false);
+      }
+    };
+
+    checkClipboard();
+    const interval = setInterval(checkClipboard, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleDragStart = useCallback(
     (event: DragEvent<HTMLLIElement>, element: ElementType) => {
@@ -84,7 +115,26 @@ const SideBar = () => {
           onChange={(e) => setQuery(e.target.value)}
           name="search"
           id="search"
+          autoComplete="off"
         />
+        {canPaste && (
+          <button
+            className="w-full mt-3 flex items-center justify-center gap-2 py-2 px-3 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-sm font-medium transition-colors"
+            onClick={() => {
+              if (!selectedSection) {
+                toast.error("Please select a section to paste the element.");
+                return;
+              }
+              if (typeof pasteElement === 'function') {
+                pasteElement(selectedSection);
+              }
+            }}
+            title="Paste copied element"
+          >
+            <AppIcon icon="lucide:clipboard-paste" />
+            Paste Element (Ctrl+V)
+          </button>
+        )}
       </div>
       <div className="flex-1 overflow-y-auto no-scrollbar max-h-[calc(100vh-100px)]">
         <ul className="grid gap-y-5 mt-3 px-5 ">

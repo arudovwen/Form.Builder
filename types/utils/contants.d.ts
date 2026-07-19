@@ -90,6 +90,9 @@ export interface ElementType {
     isHidden: boolean;
     visibilityDependentFields?: string;
     visibilityDependentFieldsValue?: any;
+    minChecked?: number | null;
+    allowCheckAll?: boolean;
+    requireAllChecked?: boolean;
     isMultiple: boolean;
     acceptedFiles: any[];
     showState?: boolean;

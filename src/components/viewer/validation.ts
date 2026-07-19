@@ -224,6 +224,36 @@ export function generateDynamicSchema({formData, isReadOnly, answerData}: {formD
           question,
         );
       }
+      
+      // Add array/multi-select validation for minChecked or requireAllChecked
+      if (question.requireAllChecked) {
+        fieldSchema = fieldSchema.test(
+          "require-all-checked",
+          "All options must be selected",
+          (value) => {
+            const isEmpty = value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
+            if (isEmpty) {
+              return !!isRequired ? false : true;
+            }
+            const allOptionsCount = question.options?.length || 0;
+            if (Array.isArray(value)) return value.length >= allOptionsCount;
+            return allOptionsCount <= 1;
+          }
+        );
+      } else if (question.minChecked) {
+        fieldSchema = fieldSchema.test(
+          "min-checked",
+          `Please select at least ${question.minChecked} option(s)`,
+          (value) => {
+            const isEmpty = value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
+            if (isEmpty) {
+              return !!isRequired ? false : true;
+            }
+            if (Array.isArray(value)) return value.length >= question.minChecked;
+            return 1 >= question.minChecked;
+          }
+        );
+      }
 
       schemaFields[id] = fieldSchema;
     });

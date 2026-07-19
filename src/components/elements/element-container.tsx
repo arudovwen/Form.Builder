@@ -18,7 +18,7 @@ interface ElementContainerProps {
 const ElementContainer = memo(
   ({ state, element, children }: ElementContainerProps) => {
     const [isOpen, setOpen] = useState(false);
-    const { removeElement, duplicateElement, updateElement }: any =
+    const { removeElement, duplicateElement, updateElement, copyElement }: any =
       React.useContext(EditorContext);
     const acceptedFileLabels = useMemo(
       () =>
@@ -71,16 +71,36 @@ const ElementContainer = memo(
                   <span className="mt-0.5">Required</span>
                 </label>
               )}
+
+
               {
                 <button
                   type="button"
                   className="text-sm outline-none hover:opacity-80 py-1 text-gray-600"
-                  onClick={() =>
-                    duplicateElement(element?.id, element.sectionId)
-                  }
+                  onClick={() => {
+                    if (typeof duplicateElement === 'function') {
+                      duplicateElement(element?.id, element.sectionId);
+                    }
+                  }}
                   title="Duplicate"
                 >
-                  <AppIcon icon="tabler:copy" iconClass="text-base" />
+                  <AppIcon icon="solar:copy-outline" iconClass="text-base" />
+                </button>
+              }
+
+              {
+                <button
+                  type="button"
+                  className="text-sm outline-none hover:opacity-80 py-1 text-gray-600"
+                  onClick={() => {
+                    if (typeof copyElement === 'function') {
+                      copyElement(element?.id, element.sectionId);
+                      // Optional: simple toast or visual feedback could go here
+                    }
+                  }}
+                  title="Copy to Clipboard"
+                >
+                  <AppIcon icon="lucide:clipboard-copy" iconClass="text-base" />
                 </button>
               }
 

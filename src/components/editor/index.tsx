@@ -27,26 +27,35 @@ const SectionItem = ({
   formDataLength,
   onDragOver,
   setIsDragging,
+  isDragging,
   onReorderSection,
 }: any) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const prevLength = useRef(section?.questionData?.length);
 
+  const wasDragging = useRef(isDragging);
+
   useEffect(() => {
     // Scroll to bottom when a new input is added
     if (section?.questionData?.length > prevLength.current) {
-      const container = document.getElementById("section-container");
-      if (container) {
-        requestAnimationFrame(() => {
-          container.scrollTo({
-            top: container.scrollHeight,
-            behavior: "smooth",
+      if (!isDragging && !wasDragging.current) {
+        const container = document.getElementById("section-container");
+        if (container) {
+          requestAnimationFrame(() => {
+            container.scrollTo({
+              top: container.scrollHeight,
+              behavior: "smooth",
+            });
           });
-        });
+        }
       }
     }
     prevLength.current = section?.questionData?.length;
-  }, [section?.questionData?.length]);
+  }, [section?.questionData?.length, isDragging]);
+
+  useEffect(() => {
+    wasDragging.current = isDragging;
+  }, [isDragging]);
 
   return (
     <div
@@ -169,7 +178,30 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
     activeSections,
     setActiveSections,
     setFormData,
+    isDragging,
+    pasteElement,
   }: any = useContext(EditorContext);
+
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      // Prevent pasting if the user is typing in an input/textarea
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
+
+      if (selectedSection) {
+        // Pass clipboard text directly to bypass async permission prompts
+        const clipboardText = e.clipboardData?.getData('text') || "";
+        pasteElement(selectedSection, undefined, clipboardText);
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+    return () => {
+      window.removeEventListener('paste', handlePaste);
+    };
+  }, [selectedSection, pasteElement]);
 
   const prevFormDataLength = useRef(formData?.length || 0);
 
@@ -195,11 +227,6 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
   const onDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
-
-    // Scroll to the bottom of the container
-    if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
-    }
   }, []);
 
   const handleReorderSection = useCallback((draggedId: string, targetId: string) => {
@@ -318,6 +345,7 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
               formDataLength={formData.length}
               onDragOver={onDragOver}
               setIsDragging={setIsDragging}
+              isDragging={isDragging}
               onReorderSection={handleReorderSection}
             />
           ),

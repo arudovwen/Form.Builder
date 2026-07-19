@@ -8,7 +8,13 @@ export default function CheckBoxInput({
   element: any;
   validationData: any;
 }) {
-  const { register = () => ({}), watch } = validationData || {};
+  const { register = () => ({}), watch, setValue, getValues } = validationData || {};
+  
+  const currentValues = watch ? watch(element.id) : getValues?.(element.id) || [];
+  const selectedValues = Array.isArray(currentValues) ? currentValues : (currentValues ? [currentValues] : []);
+  const allValues = element?.options?.map((o: any) => o.value) || [];
+  const isAllSelected = selectedValues.length === allValues.length && allValues.length > 0;
+
   return (
     <div className={clsx("grid gap-y-[6px]", element.customClass)}>
       {element?.options?.map(

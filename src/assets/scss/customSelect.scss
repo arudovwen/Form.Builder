@@ -226,7 +226,7 @@
 
 .listbox-options {
   width: var(--button-width);
-  z-index: 10;
+  z-index: 9999;
   margin-top: 0.25rem;
   background-color: #fff;
   border: 1px solid #d1d5db;
