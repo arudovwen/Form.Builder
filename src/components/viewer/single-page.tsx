@@ -2,10 +2,7 @@ import clsx from "clsx";
 import GridInput, { GridItem } from "../elements/grid-input";
 import { RenderElement } from "./elements-render";
 
-export const getElementOptions = (element: any, options: any) => {
-  if (!element?.allowEdit) return options;
-  return { ...options, isReadOnly: false };
-};
+import { getElementOptions } from "./utils";
 
 export default function SinglePage({ form_data, options }) {
   const renderGridElement = (element: any, gridChildren: any[]) => (

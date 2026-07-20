@@ -1,4 +1,4 @@
-declare const FileReaderComponent: ({ setValue, name, isFloating, label, type, }: {
+declare const FileReaderComponent: ({ setValue, name, label, type, }: {
     setValue: (e: string, n: any) => void;
     name: string;
     isFloating?: boolean;

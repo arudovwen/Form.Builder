@@ -2,7 +2,7 @@ import clsx from "clsx";
 import React from "react";
 import GridInput, { GridItem } from "../elements/grid-input";
 import { RenderElement } from "./elements-render";
-import { getElementOptions } from "./single-page";
+import { getElementOptions } from "./utils";
 import { Transition } from "@headlessui/react";
 import AppButton from "../ui/AppButton";
 import AppIcon from "../ui/AppIcon";

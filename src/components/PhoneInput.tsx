@@ -34,7 +34,7 @@ export default function PhoneInput({
   readOnly,
   horizontal,
   description,
-  validate,
+
   onChange,
   onError,
 }: PhoneInputProps) {

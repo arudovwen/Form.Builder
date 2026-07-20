@@ -9,7 +9,6 @@ import { getItem } from "@/utils/localStorageControl";
 const FileReaderComponent = ({
   setValue,
   name,
-  isFloating,
   label,
   type,
 }: {

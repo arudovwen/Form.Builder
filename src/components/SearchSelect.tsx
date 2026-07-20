@@ -88,7 +88,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       register(name);
       trigger?.(name);
     }
-  }, [name, selected]);
+  }, [name, selected, register, setValue, trigger]);
 
   return (
     <div className="custom-select">

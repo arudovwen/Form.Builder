@@ -62,7 +62,7 @@ const getBaseSchema = (type: QuestionData["type"], isReadOnly: boolean = false) 
       .test("email-format", DEFAULT_MESSAGES.email, (value) => {
         // Skip validation if no value is entered
         if (!value || value.trim() === "") return true;
-        return /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(value);
+        return /^[A-Za-z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value);
       }),
     date: yup
       .date()
@@ -233,7 +233,7 @@ export function generateDynamicSchema({formData, isReadOnly, answerData}: {formD
           (value) => {
             const isEmpty = value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
             if (isEmpty) {
-              return !!isRequired ? false : true;
+              return !isRequired;
             }
             const allOptionsCount = question.options?.length || 0;
             if (Array.isArray(value)) return value.length >= allOptionsCount;
@@ -247,7 +247,7 @@ export function generateDynamicSchema({formData, isReadOnly, answerData}: {formD
           (value) => {
             const isEmpty = value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
             if (isEmpty) {
-              return !!isRequired ? false : true;
+              return !isRequired;
             }
             if (Array.isArray(value)) return value.length >= question.minChecked;
             return 1 >= question.minChecked;

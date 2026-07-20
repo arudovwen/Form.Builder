@@ -2,7 +2,7 @@ import clsx from "clsx";
 import React from "react";
 import GridInput, { GridItem } from "../elements/grid-input";
 import { RenderElement } from "./elements-render";
-import { getElementOptions } from "./single-page";
+import { getElementOptions } from "./utils";
 
 export default function MultiPage({ form_data, options, current }) {
   return (

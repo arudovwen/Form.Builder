@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import CustomDatePicker from "../CutomDatePicker";
 import { useEffect } from "react";
 
@@ -23,7 +22,7 @@ export default function DateInput({
 
   useEffect(() => {
     register(element.id);
-  }, [element.id]);
+  }, [element.id, register]);
   return (
     <CustomDatePicker
       name={element.id}

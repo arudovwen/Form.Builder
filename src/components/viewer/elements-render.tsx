@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from "react";
-import { elementMap } from "../editor/element-render";
+import { elementMap } from "../elements/element-map";
 import EditorContext from "@/context/editor-context";
 
 import { evaluateVisibility } from "./validation";

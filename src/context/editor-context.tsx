@@ -83,7 +83,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   onChange,
   onLogAction,
 }) => {
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
   const [answerData, setAnswerData] = useState({});
   const [elementData, setElementData] = useState({});
   const [formDataState, _setFormDataState] = useState<any[]>([newSection]);
@@ -306,7 +306,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
             // Duplicate a grid child → eject clone to canvas (strip grid bindings)
             // so we don't have to worry about column capacity.
             // Insert it right after the last element that belongs to the same grid.
-            const { gridId: _gId, gridPosition: _gPos, ...rest } = original;
+            const rest = { ...original };
+            delete rest.gridId;
+            delete rest.gridPosition;
             const newElement = deepCloneWithNewId(rest, {});
 
             // Find the last index of any element in the same grid group
@@ -365,7 +367,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
           timestamp: Date.now(),
         };
       } else if (original.gridId) {
-        const { gridId: _gId, gridPosition: _gPos, ...rest } = original;
+        const rest = { ...original };
+        delete rest.gridId;
+        delete rest.gridPosition;
         copiedData = {
           type: "FORM_BUILDER_CLIPBOARD",
           element: rest,
@@ -418,6 +422,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
             clipboardString = sysClipboard;
           }
         } catch (err) {
+          console.warn("Could not parse clipboard data", err);
           // Ignore read errors (e.g. user denied permission) and fallback
         }
       }
@@ -460,7 +465,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
             if (sec.id !== sectionId) return sec;
 
             const qd = [...sec.questionData];
-            let newQuestionData = [...qd];
+            const newQuestionData = [...qd];
 
             if (copiedData.element.type === "grid") {
               const newGridId = uuidv4();
@@ -518,7 +523,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
           section.id === sectionId
             ? {
                 ...section,
-                questionData: [...section?.questionData, element],
+                questionData: [...(section?.questionData || []), element],
               }
             : section,
         ),
@@ -528,16 +533,16 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
     [setFormData, onLogAction],
   );
   const addElementInPosition = React.useCallback(
-    (element: any, sectionId: string, index: any) => {
+    (element: any, sectionId: string, index: number) => {
       setFormData((prevFormData) =>
         prevFormData?.map((section) =>
           section.id === sectionId
             ? {
                 ...section,
                 questionData: [
-                  ...section?.questionData.slice(0, index),
+                  ...(section?.questionData || []).slice(0, index),
                   element,
-                  ...section?.questionData.slice(index),
+                  ...(section?.questionData || []).slice(index),
                 ],
               }
             : section,
@@ -711,7 +716,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
               const stripped = { ...movedElement };
               delete stripped.gridId;
               delete stripped.gridPosition;
-              const without = qd.filter((el: any) => el.id !== draggedId);
+              const without = prevFormData.find(
+                (s: any) => s.id === sectionId,
+              )?.questionData?.filter((el: any) => el.gridId !== draggedId) || [];
               const insertAt = Math.min(targetIndex, without.length);
               without.splice(insertAt, 0, stripped);
               return { ...section, questionData: without };

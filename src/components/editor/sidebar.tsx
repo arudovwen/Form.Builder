@@ -49,7 +49,7 @@ const SideBar = () => {
         } else {
           setCanPaste(false);
         }
-      } catch (e) {
+      } catch {
         setCanPaste(false);
       }
     };
