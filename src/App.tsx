@@ -5,49 +5,75 @@ import ViewerPage from "./pages/viewer";
 import "./assets/scss/style.scss";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const answerData = [];
-
-const questionDa = [
-    {
-        "title": "",
-        "description": "",
-        "id": "b8843b62-d71d-4ce9-8ff8-dd831d4e0763",
-        "questionData": [
-            {
-                "required": false,
-                "description": "",
-                "value": null,
-                "isReadOnly": false,
-                "isDisabled": false,
-                "isRequired": false,
-                "customClass": "",
-                "elementClass": "",
-                "gridPosition": null,
-                "gridId": null,
-                "isHidden": false,
-                "visibilityDependentFields": [],
-                "maxLength": null,
-                "minLength": null,
-                "placeholder": "Type here",
-                "requiredMessage": "Field is required",
-                "minLengthMessage": "",
-                "maxLengthMessage": "",
-                "type": "file",
-                "label": "File",
-                "icon": "ion:attach-sharp",
-                "inputLabel": "File Label",
-                "inputType": "file",
-                "isMultiple": false,
-                "acceptedFiles": [],
-                "id": "163781e2-96e2-45dd-b85d-f754420b11b8",
-                "sectionId": "b8843b62-d71d-4ce9-8ff8-dd831d4e0763"
-            }
-        ],
-        "disabled": false,
-        "isHidden": false
-    }
+const answerData = [
+  {
+    id: "f67b5247-f19d-42fb-84e0-5531ee26baa2",
+    value: "placeholder",
+    sectionId: "b8843b62-d71d-4ce9-8ff8-dd831d4e0763",
+    type: "selectField",
+    metaData: {},
+  },
 ];
 
+const questionDa = [
+  {
+    title: "",
+    description: "",
+    id: "b8843b62-d71d-4ce9-8ff8-dd831d4e0763",
+    questionData: [
+      {
+        required: false,
+        description: "",
+        value: null,
+        isReadOnly: false,
+        isDisabled: false,
+        isRequired: false,
+        customClass: "",
+        elementClass: "",
+        gridPosition: null,
+        gridId: null,
+        isHidden: false,
+        visibilityDependentFields: [],
+        maxLength: null,
+        minLength: null,
+        placeholder: "Type here",
+        requiredMessage: "Field is required",
+        minLengthMessage: "",
+        maxLengthMessage: "",
+        type: "selectField",
+        label: "List",
+        icon: "tabler:select",
+        inputLabel: "Select Text Label",
+        inputType: "select",
+        selectType: "list",
+        options: [
+          {
+            label: "Placeholder 1",
+            value: "placeholder_1",
+            id: "55bc597a-0383-46c5-a4d4-2a641fe2a955",
+          },
+          {
+            label: "ugt97880i",
+            value: "ugt97880i",
+            id: "1e919332-ca11-47bc-b457-19220f6078eb",
+          },
+          {
+            label: "utfy8ufgviuy",
+            value: "utfy8ufgviuy",
+            id: "f0901772-20da-40af-92bf-1811ea261b50",
+          },
+        ],
+        id: "f67b5247-f19d-42fb-84e0-5531ee26baa2",
+        sectionId: "b8843b62-d71d-4ce9-8ff8-dd831d4e0763",
+        dateType: "basic",
+        options1: [],
+        dataColumns: [],
+      },
+    ],
+    disabled: false,
+    isHidden: false,
+  },
+];
 function App() {
   const config = {
     buttonColor: "blue",

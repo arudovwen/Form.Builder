@@ -629,6 +629,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
 
       setFormData((prevFormData: any[]) => {
         let dragged: any = null;
+        let draggedChildren: any[] = [];
         let sourceSectionId: string | null = null;
         let sourceDraggedIdx = -1;
 
@@ -640,6 +641,11 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
             dragged = section.questionData[idx];
             sourceSectionId = section.id;
             sourceDraggedIdx = idx;
+            if (dragged.type === "grid") {
+              draggedChildren = section.questionData.filter(
+                (el: any) => el.gridId === dragged.id,
+              );
+            }
             break;
           }
         }
@@ -739,11 +745,19 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
           // Different section move - Remove from source
           if (section.id === sourceSectionId && section.id !== sectionId) {
             qd.splice(sourceDraggedIdx, 1);
+            if (draggedChildren.length > 0) {
+              qd = qd.filter((el: any) => el.gridId !== dragged.id);
+            }
             return { ...section, questionData: qd };
           }
 
           // Different section move - Insert into target
           if (section.id === sectionId && section.id !== sourceSectionId) {
+            const newChildren = draggedChildren.map((c: any) => ({
+              ...c,
+              sectionId,
+            }));
+
             // ── Scenario 3 & 4
             if (targetGridId !== undefined && targetCol !== undefined) {
               const occupantIdx = qd.findIndex(
@@ -762,9 +776,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
                 delete ejected.gridId;
                 delete ejected.gridPosition;
                 qd[occupantIdx] = ejected;
-                qd.push(newMovedElement);
+                qd.push(newMovedElement, ...newChildren);
               } else {
-                qd.push(newMovedElement);
+                qd.push(newMovedElement, ...newChildren);
               }
               return { ...section, questionData: qd };
             }
@@ -779,7 +793,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
               delete stripped.gridId;
               delete stripped.gridPosition;
               const insertAt = Math.min(targetIndex, qd.length);
-              qd.splice(insertAt, 0, stripped);
+              qd.splice(insertAt, 0, stripped, ...newChildren);
               return { ...section, questionData: qd };
             }
 
@@ -790,9 +804,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
               delete stripped.gridPosition;
               const toIdx = qd.findIndex((el: any) => el.id === targetId);
               if (toIdx !== -1) {
-                qd.splice(toIdx, 0, stripped);
+                qd.splice(toIdx, 0, stripped, ...newChildren);
               } else {
-                qd.push(stripped);
+                qd.push(stripped, ...newChildren);
               }
               return { ...section, questionData: qd };
             }
@@ -801,7 +815,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
             const stripped = { ...movedElement };
             delete stripped.gridId;
             delete stripped.gridPosition;
-            qd.push(stripped);
+            qd.push(stripped, ...newChildren);
             return { ...section, questionData: qd };
           }
 

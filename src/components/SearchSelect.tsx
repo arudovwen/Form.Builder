@@ -61,6 +61,27 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
     setSelected(selectedOption || null);
   }, [value, options]);
 
+  const hasUnmatchedValue = useMemo(() => {
+    if (value === undefined || value === null || value === "") return false;
+    if (!options || options.length === 0) return false;
+
+    if (isMultiple && Array.isArray(value)) {
+      return Array.isArray(selected) && selected.length < value.length;
+    }
+
+    const matched = options.some((option) => {
+      if (typeof option.value === "string" && typeof value === "string") {
+        return option.value.toLowerCase() === value.toLowerCase();
+      }
+      if (typeof option.value === "object" && typeof value === "object") {
+        return option.value?.id === value?.id;
+      }
+      return option.value === value;
+    });
+
+    return !matched;
+  }, [value, options, selected, isMultiple]);
+
   useEffect(() => {
     if (selected && setValue && register) {
       setValue(name, selected?.value);
@@ -90,9 +111,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         <div className="custom-select__wrapper">
           <Listbox.Button className={mergedClassNames} disabled={disabled}>
             {loading ? (
-              <span className="custom-select__loading">
-                Fetching data...
-              </span>
+              <span className="custom-select__loading">Fetching data...</span>
             ) : (
               <span className="custom-select__value">
                 {selected?.label || (
@@ -107,11 +126,8 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             </span>
           </Listbox.Button>
 
-          <Transition
-            as={React.Fragment}
-            leave="custom-select__transition"
-          >
-            <Listbox.Options className="custom-select__options"  anchor="bottom">
+          <Transition as={React.Fragment} leave="custom-select__transition">
+            <Listbox.Options className="custom-select__options" anchor="bottom">
               {memoizedOptions?.map((option, idx) => (
                 <Listbox.Option
                   key={idx}
@@ -119,7 +135,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                   className={({ active }) =>
                     clsx(
                       "custom-select__option",
-                      active && "custom-select__option--active"
+                      active && "custom-select__option--active",
                     )
                   }
                 >
@@ -127,7 +143,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                     <span
                       className={clsx(
                         "custom-select__option-label",
-                        selected && "custom-select__option--selected"
+                        selected && "custom-select__option--selected",
                       )}
                     >
                       {option.label}
@@ -144,11 +160,17 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         <p className="custom-select__subtext">{subText}</p>
       )}
 
-      {errors && (
-        <span className="custom-select__error">
-          {errors.message}
-        </span>
+      {hasUnmatchedValue && (
+        <p className="text-[12px] text-red-500 mt-[6px]">
+          <span className="font-medium"> Selected value is not available.</span>{" "}
+          <span>
+            Ensure the source and destination dropdown fields contain matching
+            values
+          </span>
+        </p>
       )}
+
+      {errors && <span className="custom-select__error">{errors.message}</span>}
     </div>
   );
 };

@@ -75,7 +75,7 @@ const CascadeDropdown: React.FC<CascadeDropdownProps> = ({
 
   const secondOptions = useMemo(
     () => element.options1?.filter((option) => option.key === selectedFirst),
-    [element.options1, selectedFirst]
+    [element.options1, selectedFirst],
   );
 
   if (!element.options || !element.options1) return null; // If options are missing, we return early.
