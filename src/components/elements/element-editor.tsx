@@ -782,7 +782,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         >
           <div className="flex-1">
             {" "}
-            <div className=" max-h-[70vh] overflow-y-auto flex-1">
+            <div className=" max-h-[83vh] overflow-y-auto flex-1">
               {activeTab === "basic" && (
                 <div className="z-10 flex flex-col w-full gap-5 px-6">
                   {allowValue.includes(element.inputType) && (
@@ -1296,7 +1296,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
             </div>
           </div>
           {/* Actions */}
-          <div className="sticky flex w-full gap-3 px-6 pt-8 pb-10 mt-10 border-t">
+          <div className="sticky flex w-full gap-3 px-6 pt-8 pb-10 border-t">
             <button
               type="button"
               onClick={onClose}
