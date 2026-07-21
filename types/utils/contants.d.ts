@@ -9,6 +9,7 @@ export declare enum ElementKind {
     NUMBER = "numberField",
     AMOUNT = "amountField",
     DATE = "date",
+    TIME = "time",
     URL = "url",
     PASSWORD = "password",
     CHECKBOX = "checkbox",
@@ -80,6 +81,7 @@ export interface ElementType {
     maxDate?: string | null;
     canHaveDateRange?: boolean;
     allowYearPicker?: boolean;
+    is24Hour?: boolean;
     url?: string;
     method?: string;
     responseType?: string;

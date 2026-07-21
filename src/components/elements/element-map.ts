@@ -1,5 +1,6 @@
 import React from "react";
 import DateInput from "./date-input";
+import TimeInput from "./time-input";
 import TextInput from "./text-input";
 import MultiSelectInput from "./multi-select-input";
 import FileInput from "./file-input";
@@ -35,6 +36,7 @@ export const elementMap: Record<string, React.FC<any>> = {
   numberField: TextInput,
   amountField: AmountInput,
   date: DateInput,
+  time: TimeInput,
   password: PasswordInput,
   checkbox: CheckBoxInput,
   radio: RadioInput,

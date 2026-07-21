@@ -16,6 +16,7 @@ export enum ElementKind {
   NUMBER = "numberField",
   AMOUNT = "amountField",
   DATE = "date",
+  TIME = "time",
   URL = "url",
   PASSWORD = "password",
   CHECKBOX = "checkbox",
@@ -98,6 +99,7 @@ export interface ElementType {
   maxDate?: string | null;
   canHaveDateRange?: boolean;
   allowYearPicker?: boolean;
+  is24Hour?: boolean;
 
   url?: string;
   method?: string;
@@ -280,6 +282,15 @@ export const Elements: ElementType[] = [
     maxDate: null,
     canHaveDateRange: false,
     allowYearPicker: false,
+  }),
+
+  createElement({
+    type: ElementKind.TIME,
+    label: "Time",
+    icon: "mdi:clock-outline",
+    inputLabel: "Time Label",
+    inputType: "time",
+    is24Hour: false,
   }),
 
   createElement({
@@ -492,7 +503,7 @@ export const CategorizedElements = Object.freeze({
     ElementKind.MATRIX,
     ElementKind.POLLING,
   ],
-  dateAndTime: [ElementKind.DATE],
+  dateAndTime: [ElementKind.DATE, ElementKind.TIME],
   fileAndMedia: [ElementKind.FILE],
   layoutAndDisplay: [
     ElementKind.DIVIDER,
@@ -527,6 +538,7 @@ export const AllowValidationPlaceholder: string[] = [
   "number",
   "amount",
   "date",
+  "time",
   "password",
 ];
 export const AllowValidationAmount: string[] = ["amount"];

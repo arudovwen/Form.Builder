@@ -159,6 +159,7 @@ const schema = yup.object().shape({
   maxDate: yup.string().nullable(),
   canHaveDateRange: yup.boolean(),
   allowYearPicker: yup.boolean(),
+  is24Hour: yup.boolean(),
   isHidden: yup.boolean(),
   visibilityDependentFields: yup.array().nullable(),
   isMultiple: yup.boolean(),
@@ -959,6 +960,18 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         value={values.allowYearPicker}
                       />
                     </>
+                  )}
+                  {element.type.toLowerCase() === "time" && (
+                    <DynamicInput
+                      watch={watch}
+                      label="24 Hour Format"
+                      name="is24Hour"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                      type="checkbox"
+                      value={values.is24Hour}
+                    />
                   )}
                   {element.type.toLowerCase() === "country" && (
                     <DynamicInput
