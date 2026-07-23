@@ -22,7 +22,7 @@ import CascadeDropdown from "./cascade-dropdown";
 import Rating from "./rating-input";
 import MatrixInput from "./matrix-input";
 import CountryBank from "./country-bank";
-import SignDocument from "./document-sign";
+
 import PhoneNumber from "./phone-input";
 import LinkElement from "./link-element";
 import CalculatedField from "./calculated-field";
@@ -56,7 +56,7 @@ export const elementMap: Record<string, React.FC<any>> = {
   matrix: MatrixInput,
   country: CountryBank,
   bank: CountryBank,
-  document: SignDocument,
+
   url: LinkElement,
   calculatedField: CalculatedField,
   polling: PollingInput,

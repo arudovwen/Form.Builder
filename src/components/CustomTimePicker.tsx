@@ -82,7 +82,7 @@ const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
               disabled={readOnly}
               className={clsx(
                 " !flex items-center justify-between field-control w-full text-left bg-white transition-all",
-                readOnly ? "opacity-60 cursor-not-allowed bg-gray-50" : "hover:border-purple-300",
+                readOnly ? "cursor-not-allowed bg-[f8fafc]" : "hover:border-purple-300",
                 !selectedTime && "text-gray-400"
               )}
             >

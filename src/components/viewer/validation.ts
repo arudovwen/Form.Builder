@@ -40,7 +40,7 @@ const DEFAULT_MESSAGES = {
   maxAmount: (max: number) => `Maximum amount is ${max}`,
 } as const;
 
-const getBaseSchema = (type: QuestionData["type"], isReadOnly: boolean = false) => {
+const getBaseSchema = (type: QuestionData["type"]) => {
   const schemas = {
     textField: yup.string().nullable(),
     longText: yup.string().nullable(),
@@ -68,7 +68,7 @@ const getBaseSchema = (type: QuestionData["type"], isReadOnly: boolean = false) 
       .date()
       .nullable()
       .transform((value, originalValue) => {
-        if (isReadOnly && originalValue === "") return null;
+        if (originalValue === "" || originalValue === null) return null;
         return value;
       })
       .typeError("Invalid date"),
@@ -198,7 +198,7 @@ export function generateDynamicSchema({formData, isReadOnly, answerData}: {formD
 
       const { id, type, isRequired, requiredMessage, isDisabled } = question;
 
-      let fieldSchema = getBaseSchema(type, isReadOnly);
+      let fieldSchema = getBaseSchema(type);
 
       // Add required validation
       fieldSchema = addRequiredValidation(

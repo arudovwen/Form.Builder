@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import AppIcon from "../ui/AppIcon";
 import { isValidImage } from "../../utils/isValidImage";
 import ImageViewer from "../ImageViewer";
@@ -31,18 +31,32 @@ export default function ValidateInput({
   }, [element.id, register]);
 
   const { url, method, responseType } = element || {};
-  const token = getItem("token");
-  const axiosconfig = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const validateInput = useCallback(
     async (value: string) => {
       if (!url || !method) return;
+
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       setLoading(true);
+      setMessage("");
+      setIsValid(false);
+
       try {
         let response;
+        const axiosconfig = {
+          headers: {
+            Authorization: `Bearer ${getItem("token")}`,
+          },
+          signal: controller.signal,
+        };
+
         if (method.toLowerCase() === "get") {
           const mappedUrl = `${url}?value=${value}`;
           response = await axios.get(mappedUrl, axiosconfig);
@@ -77,14 +91,18 @@ export default function ValidateInput({
             setIsValid(false);
           }
         }
-      } catch (error) {
-        console.error("Error validating input:", error);
-        setMessage(
-          error?.response?.data?.message || "Unable to validate input"
-        );
-        setIsValid(false);
+      } catch (error: any) {
+        if (!axios.isCancel(error)) {
+          console.error("Error validating input:", error);
+          setMessage(
+            error?.response?.data?.message || "Unable to validate input"
+          );
+          setIsValid(false);
+        }
       } finally {
-        setLoading(false);
+        if (abortControllerRef.current === controller) {
+          setLoading(false);
+        }
       }
     },
     [method, responseType, url]

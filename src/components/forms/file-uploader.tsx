@@ -76,13 +76,14 @@ export default function FileUpload({
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          },
+            defaultMessage: "Failed to upload file(s). Please try again.",
+          } as any,
         );
 
         return data?.data?.url;
       } catch (error) {
         console.error("File upload error:", error);
-        throw new Error("Failed to upload file to server");
+        throw error;
       }
     },
     [uploadUrl],
@@ -186,7 +187,6 @@ export default function FileUpload({
         toast.success(`Successfully uploaded ${files.length} file(s)`);
       } catch (error) {
         console.error("Upload error:", error);
-        toast.error("Failed to upload file(s). Please try again.");
       } finally {
         setIsUploading(false);
         setApiActivityCount?.((prev: number) => Math.max(0, prev - 1));

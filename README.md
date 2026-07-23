@@ -98,6 +98,7 @@ export default App;
 | `questionData` | `FormElement[]` | Array of form elements to render initially in the builder. |
 | `config` | `object` | Configuration object (e.g., `buttonColor`, `loaderColor`). |
 | `onSubmit` | `(data: any) => void` | Callback function triggered when the save button is clicked. |
+| `onChange` | `(data: any) => void` | Callback function triggered whenever the form schema is modified. |
 | `isReadOnly` | `boolean` | Determines if the builder is rendered in read-only mode. |
 | `loading` | `boolean` | Indicates whether the component is in a loading state. |
 | `goBackUrl` | `() => void` | Function triggered by a back button to navigate somewhere locally. |
@@ -109,6 +110,8 @@ export default App;
 | `uploadUrl` | `string` | Base URL used for uploading files inside the builder/viewer. |
 | `templates` | `any[]` | Array of predefined templates available in the builder (default templates are included automatically). |
 | `onAddTemplate` | `() => void` | Callback function triggered when adding an external template. |
+| `onLogAction` | `(action: string, data?: any) => void` | Callback to log specific actions or events within the builder. |
+| `onShowVersion` | `() => void` | Callback function triggered to show or toggle version history. |
 
 ### Props for `FormViewer`
 
@@ -122,21 +125,49 @@ export default App;
 | `isReadOnly` | `boolean` | Determines if the viewer is read-only (fields cannot be interacted with). |
 | `loading` | `boolean` | Indicates whether the form viewer is in a loading state. |
 | `renderType` | `'single' \| 'multi' \| 'conversational'` | Determines how the form renders (single page, multi-step, or one-question-at-a-time). |
-| `children` | `React.ReactNode` | Children to append inside the form wrapper. |
+| `children` | `ReactNode \| (({isUploading, isSubmitting, hasErrors}) => ReactNode)` | Standard children, OR a render prop giving access to internal state like uploading/submitting status. |
 | `hideFooter` | `boolean` | Hides the default Submit actions footers when set to true. |
 | `onGetValues` | `(data: any) => void` | Callback triggered to fetch form values dynamically as they change. |
 | `uploadUrl` | `string` | Base URL used for uploading files. |
 
 ### Form Element Types
 
-The `FormElement` type supports the following core fields:
+The `FormElement` type supports over 30 core fields and custom widgets, including:
+
+| Field Types | Examples |
+| ----------- | -------- |
+| **Standard Inputs** | `textField`, `longText`, `numberField`, `amountField`, `password`, `email`, `phoneField` |
+| **Selections** | `selectField`, `multiSelect`, `checkbox`, `radio`, `cascadeSelect` |
+| **Pickers & Files** | `date`, `time`, `file` |
+| **Advanced Data** | `dataGrid`, `tableInput`, `matrix`, `rating`, `polling`, `calculatedField` |
+| **UI & Layout** | `section`, `spacer`, `divider`, `header`, `basicText`, `url` |
+
+General element structure includes:
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | `id` | `string` | Unique identifier for the form element. |
-| `type` | `string` | Type of the input (e.g., `text`, `email`, `select`). |
-| `label` | `string` | Label for the form element seen in the sidebar. |
+| `type` | `string` | Type of the input (from the lists above). |
+| `label` | `string` | Label for the form element seen in the UI. |
 | `placeholder` | `string` | Placeholder text for the input. |
+
+## Advanced Configuration
+
+### Custom API Error Messages
+The Form Builder includes robust global error handling for API requests using Axios interceptors and `sonner` toast notifications. To provide a fallback error message for specific requests, you can inject a `defaultMessage` property directly into your Axios config:
+
+```typescript
+import axios from "axios";
+
+// The global interceptor will catch this and display your custom message
+// if the server doesn't provide a specific error description.
+await axios.get(apiUrl, {
+  defaultMessage: "Unable to load options",
+} as any);
+```
+
+### Optimized API Requests
+Internal API requests inside the builder (such as dynamic options fetching and input validation) are heavily optimized using `AbortController`. This prevents race conditions and automatically cancels stale requests during rapid user input or component unmounting, ensuring optimal performance and accurate UI state.
 
 ## Development
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useFieldArray, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -271,20 +271,32 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   };
 
   // Fetch options from api
-  const token = getItem("token");
-  const axiosconfig = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const fetchOptions = useCallback(async () => {
     if (!values.apiUrl || !/^https?:\/\//.test(values.apiUrl)) {
       toast.info("Please provide a valid API URL");
       return;
     }
 
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       setOptionsLoading(true);
+
+      const token = getItem("token");
+      const axiosconfig = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        signal: controller.signal,
+        defaultMessage: "Unable to load options",
+      } as any;
 
       const { status, data } = await axios.get(values.apiUrl, axiosconfig);
 
@@ -308,13 +320,13 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         setValue("options", normalizeRows(options));
       }
     } catch (error: any) {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Unable to load options";
-      toast.error(message);
+      if (!axios.isCancel(error)) {
+        console.error(error);
+      }
     } finally {
-      setOptionsLoading(false);
+      if (abortControllerRef.current === controller) {
+        setOptionsLoading(false);
+      }
     }
   }, [element.type, setValue, values.apiUrl]);
 
@@ -717,23 +729,6 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       </div>
     </div>
   );
-  const getDocuments = useCallback(async () => {
-    const token = getItem("token");
-    const { status, data } = await axios.get(values.url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (status === 200) {
-      setValue("options", data?.data || data);
-    }
-  }, [setValue, values.url]);
-
-  useEffect(() => {
-    if (element.type === "document" && values.url) {
-      getDocuments();
-    }
-  }, [values.url, element.type, getDocuments]);
 
   const modalContent = (
     <div

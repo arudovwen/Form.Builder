@@ -42,15 +42,18 @@ export default function CustomSearchSelect({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchOptions = async () => {
       if (!apiUrl) return;
 
       setLoading(true);
       try {
         const token = getItem("token");
-        const axiosconfig = token
-          ? { headers: { Authorization: `Bearer ${token}` } }
-          : {};
+        const axiosconfig = {
+          ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
+          signal: controller.signal,
+        } as any;
         const response = await axios.get(apiUrl, axiosconfig);
         let data = response.data;
 
@@ -79,14 +82,22 @@ export default function CustomSearchSelect({
           });
           setFetchedOptions(mapped);
         }
-      } catch (err) {
-        console.error("Failed to fetch options", err);
+      } catch (err: any) {
+        if (!axios.isCancel(err)) {
+          console.error("Failed to fetch options", err);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchOptions();
+
+    return () => {
+      controller.abort();
+    };
   }, [apiUrl]);
 
   const activeOptions = apiUrl ? fetchedOptions : options;
