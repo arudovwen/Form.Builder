@@ -29,7 +29,7 @@ export default function MultiPage({ form_data, options, current }) {
                       element={child}
                       validationData={getElementOptions(child, options)}
                     />
-                    <div className="mt-1 text-xs text-red-600">
+                    <div className="mt-1 text-xs text-red-600 min-h-[1rem]">
                       {options?.errors?.[child.id]?.message}
                     </div>
                   </GridItem>
@@ -52,7 +52,7 @@ export default function MultiPage({ form_data, options, current }) {
                 element={element}
                 validationData={getElementOptions(element, options)}
               />
-              <div className="mt-1 text-xs text-red-600">
+              <div className="mt-1 text-xs text-red-600 min-h-[1rem]">
                 {options?.errors?.[element.id]?.message}
               </div>
             </div>

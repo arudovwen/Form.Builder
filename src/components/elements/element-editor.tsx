@@ -79,6 +79,7 @@ interface FormInputs {
   signatureLink?: string;
   isMultiple?: boolean;
   acceptedFiles?: any;
+  maxFileSize?: number;
   minChecked?: number;
   requireAllChecked?: boolean;
 }
@@ -164,6 +165,7 @@ const schema = yup.object().shape({
   visibilityDependentFields: yup.array().nullable(),
   isMultiple: yup.boolean(),
   acceptedFiles: yup.array(),
+  maxFileSize: yup.number().transform((value, originalValue) => String(originalValue).trim() === '' ? null : value).typeError("Expecting a number").nullable(),
   showState: yup.boolean(),
   formula: yup.string().nullable(),
   fetchExternalResults: yup.boolean(),
@@ -1096,6 +1098,15 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         }}
                         validationData={{ register, setValue, trigger, watch }}
                         placeholder="Choose file types"
+                      />
+                      <DynamicInput
+                        watch={watch}
+                        label="Max File Size (MB)"
+                        name="maxFileSize"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="number"
                       />
                     </>
                   )}

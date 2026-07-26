@@ -26,9 +26,8 @@ interface FileUploadProps {
   multiple?: boolean;
   list?: FileItem[] | null;
   accept?: { value: string; label: string }[];
+  maxFileSize?: number;
 }
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export default function FileUpload({
   onFileLoaded,
@@ -37,6 +36,7 @@ export default function FileUpload({
   multiple = false,
   list = null,
   accept = [],
+  maxFileSize = 5,
 }: FileUploadProps) {
   const { uploadUrl, setApiActivityCount }: any = useContext(EditorContext);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -130,11 +130,12 @@ export default function FileUpload({
       const allowedTypes = acceptedFiles
         ? acceptedFiles.split(",")?.map((t) => t.trim())
         : [];
+      const limitBytes = maxFileSize * 1024 * 1024;
 
       for (const file of files) {
-        if (file.size > MAX_FILE_SIZE) {
+        if (file.size > limitBytes) {
           toast.error(
-            `File "${file.name}" exceeds 5MB limit (${(file.size / 1024 / 1024).toFixed(2)}MB)`,
+            `File "${file.name}" exceeds ${maxFileSize}MB limit (${(file.size / 1024 / 1024).toFixed(2)}MB)`,
           );
           return false;
         }
@@ -156,7 +157,7 @@ export default function FileUpload({
 
       return true;
     },
-    [acceptedFiles, acceptedFileLabels],
+    [acceptedFiles, acceptedFileLabels, maxFileSize],
   );
 
   const handleFileChange = useCallback(
@@ -256,12 +257,12 @@ export default function FileUpload({
         </div>
       )}
 
-      {hasFiles && (
-        <div className="relative grid gap-y-1 flex-1 w-full">
+      {(hasFiles || isUploading) && (
+        <div className="relative grid gap-y-1 flex-1 w-full min-h-[40px]">
           {isUploading && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 rounded">
-              <div className="flex items-center gap-2 text-sm text-blue-600 font-medium">
-                <span className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full" />
+            <div className={`z-10 flex items-center justify-center bg-white/60 rounded ${hasFiles ? 'absolute inset-0' : 'p-1 border border-dashed border-gray-300'}`}>
+              <div className="flex items-center gap-x-2 text-xs text-blue-600 font-medium">
+                <span className="animate-spin h-3 w-3 border-2 border-blue-500 border-t-transparent rounded-full" />
                 Uploading...
               </div>
             </div>

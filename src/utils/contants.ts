@@ -120,6 +120,7 @@ export interface ElementType {
 
   isMultiple: boolean;
   acceptedFiles: any[];
+  maxFileSize?: number;
 
   showState?: boolean;
   formula?: string;
@@ -354,6 +355,7 @@ export const Elements: ElementType[] = [
     inputType: "file",
     isMultiple: false,
     acceptedFiles: [],
+    maxFileSize: 5,
   }),
 
   createElement({

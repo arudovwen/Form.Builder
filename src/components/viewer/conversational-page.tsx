@@ -42,11 +42,9 @@ export default function ConversationalPage({ element, options, onNext, onPrev, i
             element={child}
             validationData={getElementOptions(child, options)}
           />
-          {options?.errors?.[child.id]?.message && (
-            <div className="mt-1 text-xs text-red-600">
-              {options.errors[child.id].message}
-            </div>
-          )}
+          <div className="mt-1 text-xs text-red-600 min-h-[1rem]">
+            {options?.errors?.[child.id]?.message}
+          </div>
         </GridItem>
       ))}
       </GridInput>
@@ -62,11 +60,9 @@ export default function ConversationalPage({ element, options, onNext, onPrev, i
         element={el}
         validationData={getElementOptions(el, options)}
       />
-      {options?.errors?.[el.id]?.message && (
-        <div className="mt-1 text-xs text-red-600">
-          {options.errors[el.id].message}
-        </div>
-      )}
+      <div className="mt-1 text-xs text-red-600 min-h-[1rem]">
+        {options?.errors?.[el.id]?.message}
+      </div>
     </div>
   );
 

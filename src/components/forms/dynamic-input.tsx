@@ -78,7 +78,7 @@ export const DynamicInput = ({
           disabled={disabled}
         />
         {errors?.[name] && (
-          <p className="mt-1 text-sm text-red-600">
+          <p className="absolute -bottom-[18px] left-0 text-xs text-red-600 whitespace-nowrap">
             {errors[name]?.message as string}
           </p>
         )}
@@ -99,7 +99,7 @@ export const DynamicInput = ({
     }
 
     return (
-      <div className="space-y-1">
+      <div className="space-y-1 relative">
         <label
           className={`flex  gap-3 cursor-pointer select-none ${description ? "items-start" : "items-center"}`}
         >
@@ -144,7 +144,7 @@ export const DynamicInput = ({
         </label>
 
         {errors?.[name] && (
-          <p className="ml-8 text-sm text-red-600">
+          <p className="absolute -bottom-[18px] left-8 text-xs text-red-600 whitespace-nowrap">
             {errors[name]?.message as string}
           </p>
         )}
@@ -178,7 +178,7 @@ export const DynamicInput = ({
           autoComplete="off"
         />
         {errors?.[name] && (
-          <p className="mt-1 text-sm text-red-600">
+          <p className="absolute -bottom-[18px] left-0 text-xs text-red-600 whitespace-nowrap">
             {errors[name]?.message as string}
           </p>
         )}
@@ -214,7 +214,7 @@ export const DynamicInput = ({
         data-1p-ignore
       />
       {errors?.[name] && (
-        <p className="mt-1 text-sm text-red-600">
+        <p className="absolute -bottom-[18px] left-0 text-xs text-red-600 whitespace-nowrap">
           {errors[name]?.message as string}
         </p>
       )}

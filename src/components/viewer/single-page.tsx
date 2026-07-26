@@ -12,14 +12,14 @@ export default function SinglePage({ form_data, options }) {
           <GridItem
             key={child.id}
             col={child.gridPosition?.col}
-            customClass="p-0"
+            customClass="p-0 relative"
           >
             <RenderElement
               element={child}
               validationData={getElementOptions(child, options)}
             />
             {options?.errors?.[child.id]?.message && (
-              <div className="mt-1 text-xs text-red-600">
+              <div className="absolute -bottom-[18px] left-0 text-xs text-red-600 whitespace-nowrap">
                 {options.errors[child.id].message}
               </div>
             )}
@@ -42,7 +42,7 @@ export default function SinglePage({ form_data, options }) {
         validationData={getElementOptions(element, options)}
       />
       {options?.errors?.[element.id]?.message && (
-        <div className="mt-1 text-xs text-red-600">
+        <div className="absolute -bottom-[18px] left-0 text-xs text-red-600 whitespace-nowrap">
           {options.errors[element.id].message}
         </div>
       )}

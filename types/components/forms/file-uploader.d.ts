@@ -13,6 +13,7 @@ interface FileUploadProps {
         value: string;
         label: string;
     }[];
+    maxFileSize?: number;
 }
-export default function FileUpload({ onFileLoaded, disabled, handleDeleteFile, multiple, list, accept, }: FileUploadProps): import("react/jsx-runtime").JSX.Element;
+export default function FileUpload({ onFileLoaded, disabled, handleDeleteFile, multiple, list, accept, maxFileSize, }: FileUploadProps): import("react/jsx-runtime").JSX.Element;
 export {};

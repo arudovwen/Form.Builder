@@ -47,6 +47,7 @@ export default function FileInput({ element, validationData }) {
           handleDeleteFile={handleDeleteFile}
           list={fileData}
           accept={element?.acceptedFiles}
+          maxFileSize={element?.maxFileSize || 5}
         />
       )}
       {isReadOnly && (

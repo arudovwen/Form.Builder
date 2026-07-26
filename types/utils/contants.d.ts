@@ -97,6 +97,7 @@ export interface ElementType {
     requireAllChecked?: boolean;
     isMultiple: boolean;
     acceptedFiles: any[];
+    maxFileSize?: number;
     showState?: boolean;
     formula?: string;
     fetchExternalResults?: boolean;
