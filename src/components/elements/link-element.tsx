@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { useEffect } from "react";
 
 export default function LinkElement({
   element,
@@ -8,8 +9,17 @@ export default function LinkElement({
   validationData: any;
   state?: string;
 }) {
-  const { register = () => ({}), watch } = validationData || {};
+  const { register = () => ({}), watch, setValue } = validationData || {};
   let selectedValue: string = "";
+
+  const isFieldSource = element.valueSource === "field" && element.sourceFieldId;
+  const sourceValue = isFieldSource && typeof watch === 'function' ? watch(element.sourceFieldId) : undefined;
+
+  useEffect(() => {
+    if (isFieldSource && typeof setValue === 'function') {
+      setValue(element.id, sourceValue);
+    }
+  }, [sourceValue, isFieldSource, element.id, setValue]);
   if (watch) {
     const values = watch();
     selectedValue = values[element.id] ?? "";
@@ -47,9 +57,11 @@ export default function LinkElement({
               "field-control",
               showPrefix && "!pl-16",
               element?.customClass,
+              element.valueSource === "field" && "bg-[#faf8fc]"
             )}
             {...register(element?.id)}
-            disabled={validationData?.isReadOnly}
+            disabled={validationData?.isReadOnly || element.valueSource === "field"}
+            readOnly={element.valueSource === "field"}
           />
         </div>
       )}

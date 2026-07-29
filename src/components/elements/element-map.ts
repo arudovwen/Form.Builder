@@ -11,7 +11,7 @@ import CheckBoxInput from "./checkbox-input";
 import SelectInput from "./select-input";
 import LongTextInput from "./long-text";
 import AmountInput from "./amount-input";
-import ValidateInput from "./validate-input";
+import DataLookup from "./data-lookup";
 import TableInput from "./table-input";
 import Spacer from "./spacer";
 import Divider from "./divider";
@@ -44,7 +44,7 @@ export const elementMap: Record<string, React.FC<any>> = {
   file: FileInput,
   dataGrid: DataGridInput,
   section: SectionInput,
-  validateInput: ValidateInput,
+  dataLookup: DataLookup,
   tableInput: TableInput,
   spacer: Spacer,
   divider: Divider,

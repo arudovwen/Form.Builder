@@ -12,7 +12,7 @@ export enum ElementKind {
   SELECT = "selectField",
   CASCADE_SELECT = "cascadeSelect",
   MULTI_SELECT = "multiSelect",
-  VALIDATE_INPUT = "validateInput",
+  DATA_LOOKUP = "dataLookup",
   NUMBER = "numberField",
   AMOUNT = "amountField",
   DATE = "date",
@@ -244,12 +244,12 @@ export const Elements: ElementType[] = [
   }),
 
   createElement({
-    type: ElementKind.VALIDATE_INPUT,
-    label: "Validate",
+    type: ElementKind.DATA_LOOKUP,
+    label: "Data Lookup",
     icon: "iconoir:www",
-    inputLabel: "Validate Input Label",
-    inputType: "validateInput",
-    url: "https://api.example.com/validate?value={value}",
+    inputLabel: "Data Lookup Label",
+    inputType: "dataLookup",
+    url: "",
     method: "GET",
     responseType: "string",
   }),
@@ -444,9 +444,7 @@ export const Elements: ElementType[] = [
     icon: "pepicons-pop:list",
     inputLabel: "Matrix Label",
     inputType: "matrix",
-    options: [
-      { id: "r1", label: "Example Row", value: "row_1" },
-    ],
+    options: [{ id: "r1", label: "Example Row", value: "row_1" }],
     options1: [
       { id: "c1", label: "Strongly Disagree", value: "strongly_disagree" },
       { id: "c2", label: "Disagree", value: "disagree" },
@@ -491,7 +489,7 @@ export const CategorizedElements = Object.freeze({
     ElementKind.PASSWORD,
     ElementKind.PHONE,
     ElementKind.EMAIL,
-    ElementKind.VALIDATE_INPUT,
+    ElementKind.DATA_LOOKUP,
     ElementKind.URL,
   ],
   selectionFields: [
@@ -513,7 +511,11 @@ export const CategorizedElements = Object.freeze({
     ElementKind.GRID,
     ElementKind.SECTION,
   ],
-  advancedData: [ElementKind.DATA_GRID, ElementKind.TABLE_INPUT, ElementKind.CALCULATED_FIELD],
+  advancedData: [
+    ElementKind.DATA_GRID,
+    ElementKind.TABLE_INPUT,
+    ElementKind.CALCULATED_FIELD,
+  ],
 });
 
 /* ---------------------------------- */
@@ -559,11 +561,22 @@ export const AllowOptions: string[] = [
   "matrix",
   "polling",
 ];
-export const AllowApiOptions: string[] = ["validateInput"];
+export const AllowApiOptions: string[] = ["dataLookup"];
 export const AllowTableOptions: string[] = ["tableInput"];
 export const AllowTextOptions: string[] = ["text"];
 export const noAllowEdit: string[] = ["divider", "spacer"];
 export const allowValue: string[] = ["basicText"];
+export const AllowValueSource: string[] = [
+  "text",
+  "basicText",
+  "number",
+  "amount",
+  "url",
+  "password",
+  "tel",
+  "email",
+  "dataLookup",
+];
 
 export const FileTypes = [
   {

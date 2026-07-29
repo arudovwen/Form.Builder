@@ -87,12 +87,18 @@ export const DynamicInput = ({
   }
 
   if (["checkbox", "radio"].includes(type)) {
-    const checkedValue = watch?.(name) || null;
+    const checkedValue = watch?.(name);
     let isChecked = false;
 
-    if (checkedValue) {
-      if (checkedValue?.length && type === "checkbox") {
-        isChecked = checkedValue?.includes(value);
+    if (checkedValue !== undefined && checkedValue !== null) {
+      if (type === "checkbox") {
+        if (Array.isArray(checkedValue)) {
+          isChecked = checkedValue.includes(value);
+        } else if (typeof checkedValue === "boolean") {
+          isChecked = checkedValue;
+        } else {
+          isChecked = checkedValue == value;
+        }
       } else {
         isChecked = checkedValue == value;
       }
@@ -124,8 +130,8 @@ export const DynamicInput = ({
           >
             {isChecked && (
               <AppIcon
-                icon="meteor-icons:check"
-                iconClass="w-3.5 h-3.5 text-white"
+                icon="bi:check-lg"
+                iconClass="w-4 h-4 text-white"
               />
             )}
           </div>

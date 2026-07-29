@@ -6,7 +6,18 @@ import ImageViewer from "../ImageViewer";
 import clsx from "clsx";
 import { getItem } from "../../utils/localStorageControl";
 
-export default function ValidateInput({
+const formatKey = (str: string) => {
+  return str
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[_-]/g, " ")
+    .replace(/[:,;]/g, " ")
+    .trim()
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};
+
+export default function DataLookup({
   element,
   validationData,
 }: {
@@ -21,9 +32,23 @@ export default function ValidateInput({
 
   const registeredValue = watch && watch(element?.id);
 
+  const sourceValue =
+    element.valueSource === "field" &&
+    element.sourceFieldId &&
+    typeof watch === "function"
+      ? watch(element.sourceFieldId)
+      : undefined;
+
   useEffect(() => {
-    setValueState(registeredValue);
-  }, [registeredValue]);
+    if (element.valueSource === "field") {
+      setValueState(sourceValue);
+      if (typeof setValue === "function") {
+        setValue(element.id, sourceValue);
+      }
+    } else {
+      setValueState(registeredValue);
+    }
+  }, [registeredValue, sourceValue, element.valueSource, element.id, setValue]);
 
   const [result, setResult] = useState<any>("");
   useEffect(() => {
@@ -33,9 +58,9 @@ export default function ValidateInput({
   const { url, method, responseType } = element || {};
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const validateInput = useCallback(
+  const dataLookup = useCallback(
     async (value: string) => {
-      if (!url || !method) return;
+      if (!url || typeof url !== "string" || !url.trim() || !method) return;
 
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -67,23 +92,37 @@ export default function ValidateInput({
         }
 
         if (response.status === 200) {
-          if (
-            (response?.data?.data?.status || response?.data?.status) === true
-          ) {
+          const hasExplicitFalseStatus =
+            response?.data?.data?.status === false ||
+            response?.data?.status === false;
+
+          if (!hasExplicitFalseStatus) {
             setIsValid(true);
 
             if (responseType === "string") {
-              setMessage(
+              let msg =
                 response?.data?.data?.description ||
-                  response?.data?.description ||
-                  "Validation successful"
-              );
+                response?.data?.description ||
+                response?.data?.data ||
+                response?.data ||
+                "Validation successful";
+              if (typeof msg === "object" && msg !== null) {
+                msg = JSON.stringify(msg);
+              }
+              setMessage(msg);
             } else {
-              setResult(
+              const resData =
                 response?.data?.data?.description ||
-                  response?.data?.description ||
-                  {}
-              );
+                response?.data?.description ||
+                response?.data?.data ||
+                response?.data ||
+                {};
+              setResult(resData);
+              if (typeof resData === "object" && resData !== null) {
+                if (typeof setValue === "function") {
+                  setValue(`${element?.id}_metaData`, resData);
+                }
+              }
             }
           } else {
             console.error("Invalid input:", value);
@@ -94,9 +133,14 @@ export default function ValidateInput({
       } catch (error: any) {
         if (!axios.isCancel(error)) {
           console.error("Error validating input:", error);
-          setMessage(
-            error?.response?.data?.message || "Unable to validate input"
-          );
+          let errMsg =
+            error?.response?.data?.message ||
+            error?.response?.data ||
+            "Unable to validate input";
+          if (typeof errMsg === "object" && errMsg !== null) {
+            errMsg = JSON.stringify(errMsg);
+          }
+          setMessage(errMsg);
           setIsValid(false);
         }
       } finally {
@@ -111,24 +155,33 @@ export default function ValidateInput({
   useEffect(() => {
     if (value) {
       const timeoutId = setTimeout(() => {
-        validateInput(value);
+        dataLookup(value);
       }, 700);
       return () => clearTimeout(timeoutId);
     }
-  }, [validateInput, value]);
+  }, [dataLookup, value]);
   return (
     <div>
       <div className="relative flex items-center">
         <input
           placeholder={element?.placeholder || ""}
           type={element?.inputType || "text"}
-          className={clsx("field-control", element?.customClass)}
+          className={clsx("field-control", element?.customClass, {
+            "bg-gray-100 text-gray-500": element.valueSource === "field",
+          })}
           {...register(element?.id)}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setValueState(e.target.value);
-            setValue(element?.id, e.target.value);
+            if (element.valueSource !== "field") {
+              setValueState(e.target.value);
+              if (typeof setValue === "function") {
+                setValue(element?.id, e.target.value);
+              }
+            }
           }}
-          disabled={validationData?.isReadOnly}
+          readOnly={element.valueSource === "field"}
+          disabled={
+            validationData?.isReadOnly || element.valueSource === "field"
+          }
         />
 
         <span className="absolute right-0">
@@ -173,15 +226,20 @@ export default function ValidateInput({
         </span>
       )}
 
-      {responseType === "object" && (
-        <div className="grid grid-cols-2 gap-6 mt-2 text-sm text-gray-600">
+      {responseType === "object" && result && (
+        <div className="grid grid-cols-2 gap-6 mt-6 text-sm text-gray-600">
           {Object.entries(result)?.map(([key, value]) => (
-            <div key={key} className="flex items-center gap-x-2">
-              <span className="font-semibold">{key}:</span>
+            <div key={key} className="flex flex-col gap-y-1">
+              <span className="font-semibold">{formatKey(key)}</span>
               {isValidImage(value) ? (
                 <ImageViewer imageUrl={value} />
               ) : (
-                <span>{String(value)}</span>
+                <input
+                  type="text"
+                  readOnly
+                  className="field-control"
+                  value={String(value)}
+                />
               )}
             </div>
           ))}

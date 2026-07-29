@@ -173,6 +173,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
         metaData: {
           prefix: element.prefix,
           dateFormat: element.dateFormat,
+          ...(memoizedValues[`${element.id}_metaData`] ? { responseObject: memoizedValues[`${element.id}_metaData`] } : {}),
         },
       })),
     );
@@ -206,6 +207,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
           metaData: {
             prefix: element.prefix,
             dateFormat: element.dateFormat,
+            ...(data[`${element.id}_metaData`] ? { responseObject: data[`${element.id}_metaData`] } : {}),
           },
         })),
       );

@@ -18,6 +18,8 @@ import {
   AllowApiOptions,
   AllowTableOptions,
   allowValue,
+  AllowTextOptions,
+  AllowValueSource,
   dateFormats,
   FileTypes,
 } from "../../utils/contants";
@@ -170,6 +172,8 @@ const schema = yup.object().shape({
   formula: yup.string().nullable(),
   fetchExternalResults: yup.boolean(),
   externalApiUrl: yup.string().nullable(),
+  valueSource: yup.string().nullable(),
+  sourceFieldId: yup.string().nullable(),
 });
 
 const tabs = [
@@ -838,6 +842,33 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                       errors={errors}
                       element={element}
                     />
+                  )}
+                  {AllowValueSource.includes(element.inputType) && (
+                    <div className="grid gap-y-4">
+                      <CustomSelect
+                        label="Value Source"
+                        options={[
+                          { label: "Manual Input", value: "manual" },
+                          { label: "From Another Field", value: "field" },
+                        ]}
+                        register={register}
+                        name={"valueSource"}
+                        setValue={setValue}
+                        trigger={trigger}
+                        value={watch("valueSource") || "manual"}
+                      />
+                      {watch("valueSource") === "field" && (
+                       <CustomSelect
+                        label="Source Field"
+                        options={mentionData.map((m: any) => ({ label: m.display, value: m.id }))}
+                        register={register}
+                        name={"sourceFieldId"}
+                        setValue={setValue}
+                        trigger={trigger}
+                        value={watch("sourceFieldId")}
+                      />
+                      )}
+                    </div>
                   )}
                   {AllowApiOptions.includes(element.inputType) && (
                     <div className="grid gap-y-4">
