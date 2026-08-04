@@ -1,121 +1,121 @@
 export declare enum ElementKind {
-  BASIC_TEXT = "basicText",
-  TEXT = "textField",
-  LONG_TEXT = "longText",
-  SELECT = "selectField",
-  CASCADE_SELECT = "cascadeSelect",
-  MULTI_SELECT = "multiSelect",
-  VALIDATE_INPUT = "dataLookup",
-  NUMBER = "numberField",
-  AMOUNT = "amountField",
-  DATE = "date",
-  TIME = "time",
-  URL = "url",
-  PASSWORD = "password",
-  CHECKBOX = "checkbox",
-  PHONE = "phoneField",
-  RADIO = "radio",
-  EMAIL = "email",
-  FILE = "file",
-  COUNTRY = "country",
-  RATING = "rating",
-  DATA_GRID = "dataGrid",
-  TABLE_INPUT = "tableInput",
-  DIVIDER = "divider",
-  SPACER = "spacer",
-  SECTION = "section",
-  GRID = "grid",
-  MATRIX = "matrix",
-  CALCULATED_FIELD = "calculatedField",
-  POLLING = "polling",
+    BASIC_TEXT = "basicText",
+    TEXT = "textField",
+    LONG_TEXT = "longText",
+    SELECT = "selectField",
+    CASCADE_SELECT = "cascadeSelect",
+    MULTI_SELECT = "multiSelect",
+    DATA_LOOKUP = "dataLookup",
+    NUMBER = "numberField",
+    AMOUNT = "amountField",
+    DATE = "date",
+    TIME = "time",
+    URL = "url",
+    PASSWORD = "password",
+    CHECKBOX = "checkbox",
+    PHONE = "phoneField",
+    RADIO = "radio",
+    EMAIL = "email",
+    FILE = "file",
+    COUNTRY = "country",
+    RATING = "rating",
+    DATA_GRID = "dataGrid",
+    TABLE_INPUT = "tableInput",
+    DIVIDER = "divider",
+    SPACER = "spacer",
+    SECTION = "section",
+    GRID = "grid",
+    MATRIX = "matrix",
+    CALCULATED_FIELD = "calculatedField",
+    POLLING = "polling"
 }
 export interface DataColumnType {
-  field: string;
-  headerName: string;
-  width?: number;
-  editable?: boolean;
-  type?: string;
-  validate?: boolean;
-  id: string;
+    field: string;
+    headerName: string;
+    width?: number;
+    editable?: boolean;
+    type?: string;
+    validate?: boolean;
+    id: string;
 }
 export interface OptionType {
-  label: string;
-  value: any;
-  id: string;
-  key?: string;
+    label: string;
+    value: any;
+    id: string;
+    key?: string;
 }
 export interface ElementType {
-  type: ElementKind;
-  label: string;
-  icon: string;
-  inputLabel: string;
-  inputType: string;
-  required?: boolean;
-  placeholder?: string;
-  description?: string;
-  value?: any;
-  maxLength?: number | null;
-  minLength?: number | null;
-  maxAmount?: number | null;
-  minAmount?: number | null;
-  isReadOnly?: boolean;
-  isDisabled?: boolean;
-  isRequired?: boolean;
-  requiredMessage?: string;
-  minLengthMessage?: string;
-  maxLengthMessage?: string;
-  minAmountMessage?: string;
-  maxAmountMessage?: string;
-  options?: OptionType[];
-  options1?: OptionType[];
-  options2?: OptionType[];
-  columns?: number;
-  dataColumns?: DataColumnType[];
-  prefix?: string | null;
-  inputMode?: string;
-  pattern?: string;
-  selectType?: string;
-  dateType?: string;
-  dateFormat?: string;
-  minDate?: string | null;
-  maxDate?: string | null;
-  canHaveDateRange?: boolean;
-  allowYearPicker?: boolean;
-  is24Hour?: boolean;
-  url?: string;
-  method?: string;
-  responseType?: string;
-  customClass?: string | null;
-  elementClass?: string;
-  gridPosition?: any;
-  gridId?: string | null;
-  isHidden: boolean;
-  visibilityDependentFields?: string;
-  visibilityDependentFieldsValue?: any;
-  minChecked?: number | null;
-  allowCheckAll?: boolean;
-  requireAllChecked?: boolean;
-  isMultiple: boolean;
-  acceptedFiles: any[];
-  maxFileSize?: number;
-  showState?: boolean;
-  formula?: string;
-  fetchExternalResults?: boolean;
-  externalApiUrl?: string;
+    type: ElementKind;
+    label: string;
+    icon: string;
+    inputLabel: string;
+    inputType: string;
+    required?: boolean;
+    placeholder?: string;
+    description?: string;
+    value?: any;
+    maxLength?: number | null;
+    minLength?: number | null;
+    maxAmount?: number | null;
+    minAmount?: number | null;
+    isReadOnly?: boolean;
+    isDisabled?: boolean;
+    isRequired?: boolean;
+    requiredMessage?: string;
+    minLengthMessage?: string;
+    maxLengthMessage?: string;
+    minAmountMessage?: string;
+    maxAmountMessage?: string;
+    options?: OptionType[];
+    options1?: OptionType[];
+    options2?: OptionType[];
+    columns?: number;
+    dataColumns?: DataColumnType[];
+    prefix?: string | null;
+    inputMode?: string;
+    pattern?: string;
+    selectType?: string;
+    dateType?: string;
+    dateFormat?: string;
+    minDate?: string | null;
+    maxDate?: string | null;
+    canHaveDateRange?: boolean;
+    allowYearPicker?: boolean;
+    is24Hour?: boolean;
+    url?: string;
+    method?: string;
+    responseType?: string;
+    customClass?: string | null;
+    elementClass?: string;
+    gridPosition?: any;
+    gridId?: string | null;
+    isHidden: boolean;
+    visibilityDependentFields?: string;
+    visibilityDependentFieldsValue?: any;
+    minChecked?: number | null;
+    allowCheckAll?: boolean;
+    requireAllChecked?: boolean;
+    isMultiple: boolean;
+    acceptedFiles: any[];
+    maxFileSize?: number;
+    showState?: boolean;
+    formula?: string;
+    fetchExternalResults?: boolean;
+    externalApiUrl?: string;
 }
 export declare const countryOptions: OptionType[];
 export declare const Elements: ElementType[];
 export declare const CategorizedElements: Readonly<{
-  textFields: ElementKind[];
-  selectionFields: ElementKind[];
-  dateAndTime: ElementKind[];
-  fileAndMedia: ElementKind[];
-  layoutAndDisplay: ElementKind[];
-  advancedData: ElementKind[];
+    textFields: ElementKind[];
+    selectionFields: ElementKind[];
+    dateAndTime: ElementKind[];
+    fileAndMedia: ElementKind[];
+    layoutAndDisplay: ElementKind[];
+    advancedData: ElementKind[];
 }>;
 export declare const dateFormats: {
-  label: string;
-  value: string;
+    label: string;
+    value: string;
 }[];
 export declare const AllowValidationPrefix: string[];
 export declare const AllowValidationMaxMin: string[];
@@ -128,7 +128,8 @@ export declare const AllowTableOptions: string[];
 export declare const AllowTextOptions: string[];
 export declare const noAllowEdit: string[];
 export declare const allowValue: string[];
+export declare const AllowValueSource: string[];
 export declare const FileTypes: {
-  value: string;
-  label: string;
+    value: string;
+    label: string;
 }[];

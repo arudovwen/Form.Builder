@@ -14,11 +14,12 @@ interface InputProps {
     trigger?: any;
     prefix?: string;
     disabled?: boolean;
+    readOnly?: boolean;
     watch?: any;
     min?: number;
     max?: number;
     description?: string;
     onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
-export declare const DynamicInput: ({ label, name, register, errors, className, type, placeholder, isFloating, setValue, value, trigger, prefix, disabled, watch, min, max, description, onChange, }: InputProps) => import("react/jsx-runtime").JSX.Element;
+export declare const DynamicInput: ({ label, name, register, errors, className, type, placeholder, isFloating, setValue, value, trigger, prefix, disabled, watch, min, max, description, onChange, readOnly, }: InputProps) => import("react/jsx-runtime").JSX.Element;
 export {};

@@ -17,6 +17,7 @@ interface InputProps {
   trigger?: any;
   prefix?: string;
   disabled?: boolean;
+  readOnly?: boolean;
   watch?: any;
   min?: number;
   max?: number;
@@ -43,6 +44,7 @@ export const DynamicInput = ({
   max,
   description,
   onChange,
+  readOnly,
 }: InputProps) => {
   const registerProps: React.InputHTMLAttributes<HTMLInputElement> & React.TextareaHTMLAttributes<HTMLTextAreaElement> = register ? { ...register(name) } : {};
 
@@ -76,6 +78,7 @@ export const DynamicInput = ({
           value={value}
           prefix={prefix}
           disabled={disabled}
+          readOnly={readOnly}
         />
         {errors?.[name] && (
           <p className="absolute -bottom-[18px] left-0 text-xs text-red-600 whitespace-nowrap">
@@ -114,6 +117,7 @@ export const DynamicInput = ({
             type={type}
             value={value || ""}
             disabled={disabled}
+            readOnly={readOnly}
             className="peer sr-only"
           />
 
@@ -181,6 +185,7 @@ export const DynamicInput = ({
           } ${className}`}
           placeholder={placeholder}
           disabled={disabled}
+          readOnly={readOnly}
           autoComplete="off"
         />
         {errors?.[name] && (
@@ -214,6 +219,7 @@ export const DynamicInput = ({
         } ${className}`}
         placeholder={isFloating ? "" : placeholder}
         disabled={disabled}
+        readOnly={readOnly}
         min={min}
         max={max}
         autoComplete="off"

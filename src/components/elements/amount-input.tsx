@@ -44,7 +44,7 @@ export default function AmountInput({
       disabled={isReadOnly || element.valueSource === "field"}
       readOnly={element.valueSource === "field"}
       watch={watch}
-      customClass={element.valueSource === "field" ? "bg-[#faf8fc]" : undefined}
+      className={element.valueSource === "field" ? "bg-[#faf8fc]" : undefined}
     />
   );
 }
