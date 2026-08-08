@@ -18,7 +18,6 @@ import {
   AllowApiOptions,
   AllowTableOptions,
   allowValue,
-  AllowTextOptions,
   AllowValueSource,
   dateFormats,
   FileTypes,
@@ -40,6 +39,7 @@ import VisibilityEditor from "./visibility-editor";
 import MultiSelectInput from "./multi-select-input";
 import { normalizeGridRows, normalizeRows } from "@/utils/normalizeRows";
 import FormulaMentionInput from "./formula-mention-input";
+import FileUpload from "../forms/file-uploader";
 
 interface Option {
   label?: string;
@@ -84,10 +84,14 @@ interface FormInputs {
   maxFileSize?: number;
   minChecked?: number;
   requireAllChecked?: boolean;
+  minLabel?: string;
+  maxLabel?: string;
 }
 
 const schema = yup.object().shape({
   inputLabel: yup.string().nullable(),
+  minLabel: yup.string().nullable(),
+  maxLabel: yup.string().nullable(),
   placeholder: yup.string().nullable(),
   description: yup.string().nullable(),
   isReadOnly: yup.boolean(),
@@ -445,6 +449,40 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 placeholder="Value"
               />
             </div>
+
+            {element.inputType === "imageChoice" && (
+              <div className="flex-1 flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">{index === 0 ? "Image Upload" : ""}</label>
+                <div className="flex gap-2">
+                  <FileUpload
+                    multiple={false}
+                    accept={[{ value: "image/*", label: "Images" }]}
+                    onFileLoaded={(files) => {
+                      if (files && files.length > 0) {
+                        setValue(`options.${index}.imageUrl`, files[0].base64, { shouldDirty: true, shouldValidate: true });
+                      } else {
+                        setValue(`options.${index}.imageUrl`, "", { shouldDirty: true, shouldValidate: true });
+                      }
+                    }}
+                    list={
+                      watch(`options.${index}.imageUrl`) 
+                        ? [{ base64: watch(`options.${index}.imageUrl`), name: 'Uploaded Image', type: 'image' }] 
+                        : []
+                    }
+                  />
+                  <div className="flex-1 hidden">
+                    <DynamicInput
+                      watch={watch}
+                      label=""
+                      name={`options.${index}.imageUrl`}
+                      register={register}
+                      errors={errors}
+                      element={element}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             <button
               disabled={fields.length === 1}
@@ -820,6 +858,28 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                             errors={errors}
                             element={element}
                           />
+                        )}
+                        {element.inputType === "nps" && (
+                          <>
+                            <DynamicInput
+                              watch={watch}
+                              label="Low Rating Label (e.g. Not at all likely)"
+                              name="minLabel"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                              placeholder="Not at all likely"
+                            />
+                            <DynamicInput
+                              watch={watch}
+                              label="High Rating Label (e.g. Extremely likely)"
+                              name="maxLabel"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                              placeholder="Extremely likely"
+                            />
+                          </>
                         )}
                       </>
                     )}

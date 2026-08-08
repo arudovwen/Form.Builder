@@ -27,6 +27,9 @@ import PhoneNumber from "./phone-input";
 import LinkElement from "./link-element";
 import CalculatedField from "./calculated-field";
 import PollingInput from "./polling-input";
+import NpsInput from "./nps-input";
+import RankingInput from "./ranking-input";
+import ImageChoiceInput from "./image-choice-input";
 
 export const elementMap: Record<string, React.FC<any>> = {
   textField: TextInput,
@@ -60,4 +63,7 @@ export const elementMap: Record<string, React.FC<any>> = {
   url: LinkElement,
   calculatedField: CalculatedField,
   polling: PollingInput,
+  nps: NpsInput,
+  ranking: RankingInput,
+  imageChoice: ImageChoiceInput,
 };

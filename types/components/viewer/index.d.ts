@@ -20,6 +20,8 @@ export interface FormRendererProps {
     }) => ReactNode);
     hideFooter?: boolean;
     uploadUrl?: string;
+    pollResults?: Record<string, any>;
+    showResults?: boolean;
 }
 declare const _default: React.NamedExoticComponent<FormRendererProps>;
 export default _default;

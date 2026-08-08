@@ -46,6 +46,8 @@ export interface FormRendererProps {
       }) => ReactNode);
   hideFooter?: boolean;
   uploadUrl?: string;
+  pollResults?: Record<string, any>; // Add pollResults
+  showResults?: boolean; // Toggle for showing results
 }
 
 const FormRenderer: React.FC<FormRendererProps> = ({
@@ -59,6 +61,8 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   children,
   hideFooter = false,
   uploadUrl,
+  pollResults,
+  showResults,
 }: FormRendererProps) => {
   const { setAnswerData, setUploadUrl, apiActivityCount }: any =
     useContext(EditorContext);
@@ -280,6 +284,8 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       setError,
       clearErrors,
       apiActivityCount,
+      pollResults,
+      showResults,
     }),
     [
       register,
@@ -293,6 +299,8 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       setError,
       clearErrors,
       apiActivityCount,
+      pollResults,
+      showResults,
     ],
   );
 

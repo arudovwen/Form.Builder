@@ -23,6 +23,8 @@ export interface RenderProps {
   hideFooter?: boolean;
   onGetValues?: (e: any) => void;
   uploadUrl?: string;
+  pollResults?: Record<string, any>; // Add pollResults
+  showResults?: boolean; // Toggle for showing results
 }
 
 export default function Viewer({
@@ -38,6 +40,8 @@ export default function Viewer({
   hideFooter,
   onGetValues,
   uploadUrl,
+  pollResults,
+  showResults,
 }: RenderProps) {
   // ✅ Store config in localStorage only when it changes
   useEffect(() => {
@@ -78,6 +82,8 @@ export default function Viewer({
           hideFooter={hideFooter}
           onGetValues={stableOnGetValues} // ✅ stable reference
           uploadUrl={uploadUrl}
+          pollResults={pollResults}
+          showResults={showResults}
         >
           {children}
         </FormRenderer>

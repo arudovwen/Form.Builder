@@ -16,5 +16,7 @@ export interface RenderProps {
     hideFooter?: boolean;
     onGetValues?: (e: any) => void;
     uploadUrl?: string;
+    pollResults?: Record<string, any>;
+    showResults?: boolean;
 }
-export default function Viewer({ answerData, form_data, ignoreValidation, onSubmit, isReadOnly, loading, config, renderType, children, hideFooter, onGetValues, uploadUrl, }: RenderProps): import("react/jsx-runtime").JSX.Element;
+export default function Viewer({ answerData, form_data, ignoreValidation, onSubmit, isReadOnly, loading, config, renderType, children, hideFooter, onGetValues, uploadUrl, pollResults, showResults, }: RenderProps): import("react/jsx-runtime").JSX.Element;

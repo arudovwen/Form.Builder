@@ -23,6 +23,7 @@ const HomePage = ({
   onAddTemplate,
   templates,
   onShowVersion,
+  formType,
 }: BuilderProps) => {
   useEffect(() => {
     if (config) {
@@ -48,6 +49,7 @@ const HomePage = ({
       onAddTemplate={onAddTemplate}
       templates={templates}
       onShowVersion={onShowVersion}
+      formType={formType}
     />
   );
 };

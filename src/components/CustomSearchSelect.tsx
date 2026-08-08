@@ -44,61 +44,65 @@ export default function CustomSearchSelect({
   useEffect(() => {
     const controller = new AbortController();
 
-    const fetchOptions = async () => {
-      if (!apiUrl) return;
+    const handler = setTimeout(() => {
+      const fetchOptions = async () => {
+        if (!apiUrl) return;
 
-      setLoading(true);
-      try {
-        const token = getItem("token");
-        const axiosconfig = {
-          ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
-          signal: controller.signal,
-        } as any;
-        const response = await axios.get(apiUrl, axiosconfig);
-        let data = response.data;
+        setLoading(true);
+        try {
+          const token = getItem("token");
+          const axiosconfig = {
+            ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
+            signal: controller.signal,
+            params: query ? { search: query } : {},
+          } as any;
+          const response = await axios.get(apiUrl, axiosconfig);
+          let data = response.data;
 
-        // Normalize nested data structures like { data: [...] } or { data: { data: [...] } }
-        if (data && !Array.isArray(data)) {
-          if (data.data && Array.isArray(data.data)) {
-            data = data.data;
-          } else if (data.data?.data && Array.isArray(data.data.data)) {
-            data = data.data.data;
-          } else if (data.results && Array.isArray(data.results)) {
-            data = data.results;
-          } else if (data.data?.results && Array.isArray(data.data.results)) {
-            data = data.data.results;
-          } else if (data.items && Array.isArray(data.items)) {
-            data = data.items;
+          // Normalize nested data structures like { data: [...] } or { data: { data: [...] } }
+          if (data && !Array.isArray(data)) {
+            if (data.data && Array.isArray(data.data)) {
+              data = data.data;
+            } else if (data.data?.data && Array.isArray(data.data.data)) {
+              data = data.data.data;
+            } else if (data.results && Array.isArray(data.results)) {
+              data = data.results;
+            } else if (data.data?.results && Array.isArray(data.data.results)) {
+              data = data.data.results;
+            } else if (data.items && Array.isArray(data.items)) {
+              data = data.items;
+            }
+          }
+
+          if (Array.isArray(data)) {
+            const mapped = data.map((item) => {
+              if (typeof item === "string") return { label: item, value: item };
+              return {
+                label: item.label || item.name || String(item.id || item.value),
+                value: String(item.value || item.id || item.name),
+              };
+            });
+            setFetchedOptions(mapped);
+          }
+        } catch (err: any) {
+          if (!axios.isCancel(err)) {
+            console.error("Failed to fetch options", err);
+          }
+        } finally {
+          if (!controller.signal.aborted) {
+            setLoading(false);
           }
         }
+      };
 
-        if (Array.isArray(data)) {
-          const mapped = data.map((item) => {
-            if (typeof item === "string") return { label: item, value: item };
-            return {
-              label: item.label || item.name || String(item.id || item.value),
-              value: String(item.value || item.id || item.name),
-            };
-          });
-          setFetchedOptions(mapped);
-        }
-      } catch (err: any) {
-        if (!axios.isCancel(err)) {
-          console.error("Failed to fetch options", err);
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchOptions();
+      fetchOptions();
+    }, 500);
 
     return () => {
+      clearTimeout(handler);
       controller.abort();
     };
-  }, [apiUrl]);
+  }, [apiUrl, query]);
 
   const activeOptions = apiUrl ? fetchedOptions : options;
 

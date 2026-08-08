@@ -18,7 +18,7 @@ export default function PollingInput({
   const [totalVotes, setTotalVotes] = useState(0);
 
   const currentValue = watch ? watch(element.id) : null;
-  const hasVoted = Boolean(currentValue || (state && state !== "edit"));
+  const hasVoted = Boolean(currentValue || validationData?.showResults);
 
   // Poll external API for results
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function PollingInput({
   }, [currentValue, element.fetchExternalResults]);
 
   const handleSelect = (val: string) => {
-    if (validationData?.isReadOnly) return; // Prevent changing vote when readonly
+    if (validationData?.isReadOnly || state === "edit") return; // Prevent changing vote when readonly or editing
     if (setValue) {
       setValue(element.id, val, { shouldValidate: true, shouldDirty: true });
     }

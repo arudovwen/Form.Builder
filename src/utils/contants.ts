@@ -35,7 +35,12 @@ export enum ElementKind {
   MATRIX = "matrix",
   CALCULATED_FIELD = "calculatedField",
   POLLING = "polling",
+  NPS = "nps",
+  RANKING = "ranking",
+  IMAGE_CHOICE = "imageChoice",
 }
+
+export type FormType = "default" | "poll";
 
 export interface DataColumnType {
   field: string;
@@ -126,6 +131,8 @@ export interface ElementType {
   formula?: string;
   fetchExternalResults?: boolean;
   externalApiUrl?: string;
+  minLabel?: string;
+  maxLabel?: string;
 }
 
 /* ---------------------------------- */
@@ -473,6 +480,34 @@ export const Elements: ElementType[] = [
     fetchExternalResults: false,
     externalApiUrl: "",
   }),
+
+  createElement({
+    type: ElementKind.NPS,
+    label: "NPS Score (0-10)",
+    icon: "tabler:hash",
+    inputLabel: "NPS Label",
+    inputType: "nps",
+    minLabel: "Not at all likely",
+    maxLabel: "Extremely likely",
+  }),
+
+  createElement({
+    type: ElementKind.RANKING,
+    label: "Ranking Poll",
+    icon: "fluent:re-order-16-regular",
+    inputLabel: "Ranking Label",
+    inputType: "ranking",
+    options: [option("Option 1", "option_1"), option("Option 2", "option_2")],
+  }),
+
+  createElement({
+    type: ElementKind.IMAGE_CHOICE,
+    label: "Image Choice",
+    icon: "ic:outline-image",
+    inputLabel: "Image Choice Label",
+    inputType: "imageChoice",
+    options: [option("Image 1", "image_1"), option("Image 2", "image_2")],
+  }),
 ];
 
 /* ---------------------------------- */
@@ -518,6 +553,27 @@ export const CategorizedElements = Object.freeze({
   ],
 });
 
+export const CategorizedPollElements = Object.freeze({
+  pollComponents: [
+    ElementKind.RADIO,          // Single Choice
+    ElementKind.CHECKBOX,       // Multiple Choice
+    ElementKind.RATING,         // Rating Scale
+    ElementKind.SELECT,         // Dropdown Poll
+    ElementKind.POLLING,        // Yes / No Poll
+    ElementKind.NPS,            // NPS Score
+    ElementKind.RANKING,        // Ranking Poll
+    ElementKind.MATRIX,         // Matrix Grid
+    ElementKind.IMAGE_CHOICE,   // Image Choice
+    ElementKind.DATE,           // Date Selection
+    ElementKind.TIME,           // Time Selection
+    ElementKind.FILE,           // File Upload Poll
+  ],
+  layoutAndInfo: [
+    ElementKind.BASIC_TEXT,     // Info Block (Assuming BASIC_TEXT is used as Info)
+    ElementKind.DIVIDER,        // Divider
+  ],
+});
+
 /* ---------------------------------- */
 /* Date Formats */
 /* ---------------------------------- */
@@ -560,6 +616,8 @@ export const AllowOptions: string[] = [
   "multiselect",
   "matrix",
   "polling",
+  "ranking",
+  "imageChoice",
 ];
 export const AllowApiOptions: string[] = ["dataLookup"];
 export const AllowTableOptions: string[] = ["tableInput"];

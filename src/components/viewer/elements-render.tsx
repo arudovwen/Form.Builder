@@ -3,6 +3,7 @@ import { elementMap } from "../elements/element-map";
 import EditorContext from "@/context/editor-context";
 
 import { evaluateVisibility } from "./validation";
+import { PollResultsBreakdown } from "./poll-results";
 
 export const RenderElement = ({ element, validationData }: { element: any; validationData?: any }) => {
   const ElementComponent = elementMap[element.type];
@@ -36,7 +37,7 @@ export const RenderElement = ({ element, validationData }: { element: any; valid
       </div>
       <ElementComponent
         element={element}
-        state="edit"
+        state="view"
         validationData={{
           ...validationData,
           isReadOnly: validationData.isReadOnly || element.isDisabled,
@@ -46,6 +47,11 @@ export const RenderElement = ({ element, validationData }: { element: any; valid
         <small className="block text-gray-400 mt-0.5 text-xs">
           {element.description}
         </small>
+      )}
+      
+      {/* Poll Results Rendering */}
+      {validationData?.showResults && validationData?.pollResults?.[element.id] && (
+        <PollResultsBreakdown results={validationData.pollResults[element.id]} />
       )}
     </div>
   );

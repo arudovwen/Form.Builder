@@ -1,5 +1,5 @@
 import { useCallback, DragEvent, memo, useContext, useState, useEffect } from "react";
-import { CategorizedElements, Elements } from "../../utils/contants";
+import { CategorizedElements, CategorizedPollElements, Elements, FormType } from "../../utils/contants";
 import AppIcon from "../ui/AppIcon";
 import EditorContext from "../../context/editor-context";
 import { v4 as uuidv4 } from "uuid";
@@ -23,7 +23,12 @@ const categoryTitles = [
   { key: "advancedData", title: "Advanced / Data" },
 ];
 
-const SideBar = () => {
+const pollCategoryTitles = [
+  { key: "pollComponents", title: "Poll Components" },
+  { key: "layoutAndInfo", title: "Layout & Info" },
+];
+
+const SideBar = ({ formType = "default" }: { formType?: FormType }) => {
   const [query, setQuery] = useState("");
   const [canPaste, setCanPaste] = useState(false);
   const { setIsDragging, addElement, selectedSection, pasteElement }: any =
@@ -94,12 +99,15 @@ const SideBar = () => {
     element.label.toLowerCase().includes(query.toLowerCase()),
   );
 
-  const categorizedElements = categoryTitles
+  const activeCategories = formType === "poll" ? pollCategoryTitles : categoryTitles;
+  const activeCategorizedElements = formType === "poll" ? CategorizedPollElements : CategorizedElements;
+
+  const categorizedElements = activeCategories
     ?.map((category) => ({
       title: category.title,
       elements: filteredElements.filter((e) =>
-        CategorizedElements[
-          category.key as keyof typeof CategorizedElements
+        (activeCategorizedElements as Record<string, readonly string[]>)[
+          category.key
         ]?.includes(e.type),
       ),
     }))

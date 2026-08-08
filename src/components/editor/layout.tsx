@@ -25,6 +25,7 @@ export interface BuilderProps {
   onAddTemplate?: () => void;
   templates?: any[];
   onShowVersion?: () => void;
+  formType?: "default" | "poll"; // Type of form being built
 }
 
 export default function Layout({
@@ -44,6 +45,7 @@ export default function Layout({
   onAddTemplate,
   templates,
   onShowVersion,
+  formType = "default",
 }: BuilderProps) {
   const [viewMode, setViewMode] = useState<"canvas" | "flow">("canvas");
 
@@ -54,8 +56,8 @@ export default function Layout({
         <div className="flex flex-1 ">
           {viewMode === "canvas" && (
             <div>
-              <div className="w-[250px] h-screen border-r border-[#E4E7EC] bg-white ">
-                <SideBar />
+              <div className="w-[290px] h-screen border-r border-[#E4E7EC] bg-white ">
+                <SideBar formType={formType} />
               </div>
             </div>
           )}

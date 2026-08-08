@@ -27,8 +27,12 @@ export declare enum ElementKind {
     GRID = "grid",
     MATRIX = "matrix",
     CALCULATED_FIELD = "calculatedField",
-    POLLING = "polling"
+    POLLING = "polling",
+    NPS = "nps",
+    RANKING = "ranking",
+    IMAGE_CHOICE = "imageChoice"
 }
+export type FormType = "default" | "poll";
 export interface DataColumnType {
     field: string;
     headerName: string;
@@ -102,6 +106,8 @@ export interface ElementType {
     formula?: string;
     fetchExternalResults?: boolean;
     externalApiUrl?: string;
+    minLabel?: string;
+    maxLabel?: string;
 }
 export declare const countryOptions: OptionType[];
 export declare const Elements: ElementType[];
@@ -112,6 +118,10 @@ export declare const CategorizedElements: Readonly<{
     fileAndMedia: ElementKind[];
     layoutAndDisplay: ElementKind[];
     advancedData: ElementKind[];
+}>;
+export declare const CategorizedPollElements: Readonly<{
+    pollComponents: ElementKind[];
+    layoutAndInfo: ElementKind[];
 }>;
 export declare const dateFormats: {
     label: string;
