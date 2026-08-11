@@ -383,15 +383,21 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 <div className="absolute w-4 h-4 mt-1 border-2 border-blue-500 rounded-full border-t-transparent animate-spin right-3 top-1/2"></div>
               )}
             </div>
-            <button
-              onClick={loadApi}
-              className="px-3 py-1 text-xs text-white bg-gray-600 rounded"
-              type="button"
-            >
-              Load
-            </button>
+            {!(element.type === "multiSelect" || element.type === "selectField") && (
+              <button
+                onClick={loadApi}
+                className="px-3 py-1 text-xs text-white bg-gray-600 rounded"
+                type="button"
+              >
+                Load
+              </button>
+            )}
           </div>
-          <OptionsExample />
+          {element.type === "multiSelect" || element.type === "selectField" ? (
+            <p className="text-xs text-blue-500 mb-2">Options will be loaded dynamically at runtime.</p>
+          ) : (
+            <OptionsExample />
+          )}
         </div>
       )}
       {optionTypes === "sheet" && (

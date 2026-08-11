@@ -1,12 +1,13 @@
 {
   "name": "@arudovwen/form-builder-react",
-  "version": "1.9.3",
+  "version": "1.9.7",
   "description": "A React-based form builder component library.",
   "type": "module",
   "main": "./dist/form-builder.umd.js",
   "module": "./dist/form-builder.es.js",
   "exports": {
     ".": {
+      "types": "./types/index.d.ts",
       "import": "./dist/form-builder.es.js",
       "require": "./dist/form-builder.umd.js"
     },

@@ -206,6 +206,7 @@ export default function CustomSearchSelect({
         <ComboboxOptions
           anchor="bottom start"
           className="select-options__combo"
+          style={{ maxHeight: "400px", overflowY: "auto" }}
         >
           {loading ? (
             <div className="px-3 py-2 text-sm text-gray-500">Loading...</div>

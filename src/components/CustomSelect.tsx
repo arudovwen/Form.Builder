@@ -219,6 +219,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             <Listbox.Options
               anchor="bottom start"
               className="select-button-options"
+              style={{ maxHeight: "400px", overflowY: "auto" }}
             >
               {options.length === 0 ? (
                 <div className="px-3 py-2 text-sm text-gray-500">

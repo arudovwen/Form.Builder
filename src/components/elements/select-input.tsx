@@ -16,6 +16,7 @@ export default function SelectInput({
     trigger,
     setValue,
     watch,
+    isViewer,
   } = validationData || {};
   let selectedValue;
   if (watch) {
@@ -26,9 +27,11 @@ export default function SelectInput({
     register(element.id);
   }, [element.id, register]);
 
+  const apiUrl = isViewer ? element.apiUrl : undefined;
+
   return (
     <>
-      {element.selectType === "list" ? (
+      {element.selectType === "list" && !isViewer ? (
         <CustomSelect
           options={element?.options ?? []}
           register={register}
@@ -43,8 +46,12 @@ export default function SelectInput({
         <CustomSearchSelect
           name={element.id}
           options={element?.options ?? []}
-          defaultValue={selectedValue}
-          onGetValue={setValue}
+          apiUrl={apiUrl}
+          value={selectedValue}
+          onGetValue={(name, option) => {
+            setValue?.(name, option?.value ?? "");
+            if (trigger) trigger(name);
+          }}
           readOnly={validationData?.isReadOnly}
         />
       )}

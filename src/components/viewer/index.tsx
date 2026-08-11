@@ -286,6 +286,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       apiActivityCount,
       pollResults,
       showResults,
+      isViewer: true,
     }),
     [
       register,

@@ -9,7 +9,7 @@ export default function PhoneNumber({
   validationData: any;
 }) {
   const {
-    register = () => ({}),
+    register,
     setValue,
     watch,
     isReadOnly,
@@ -19,12 +19,13 @@ export default function PhoneNumber({
   let selectedValue;
 
   useEffect(() => {
-    register(element.id);
+    if (register) {
+      register(element.id);
+    }
   }, [element.id, register]);
 
   if (watch) {
-    const values = watch();
-    selectedValue = values[element.id];
+    selectedValue = watch(element.id);
   }
   return (
     <PhoneInput

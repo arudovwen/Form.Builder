@@ -68,7 +68,7 @@ export default function PhoneInput({
     number ? `${selectedCountry?.phone || "+234"}-${number}` : "";
 
   const parsePhone = (val: string) => {
-    if (!val) return { code: "+234", number: "" };
+    if (!val || typeof val !== "string") return { code: "+234", number: "" };
     const parts = val.split(/[-\s]/);
     return { code: parts[0], number: parts.slice(1).join(" ") };
   };
@@ -76,11 +76,14 @@ export default function PhoneInput({
   // Handle incoming value
   useEffect(() => {
     if (value) {
-      const parsed = parsePhone(value);
-      setSelectedCountry(
-        countryList.find((c) => c.phone === parsed.code) || countryList[0]
-      );
-      setNumber(parsed.number);
+      const formatted = formatPhone();
+      if (value !== formatted) {
+        const parsed = parsePhone(value);
+        setSelectedCountry(
+          countryList.find((c) => c.phone === parsed.code) || countryList[0]
+        );
+        setNumber(parsed.number);
+      }
     }
   }, [value, countryList]);
 
@@ -97,11 +100,18 @@ export default function PhoneInput({
     return "";
   }, [error, number, min, max, isRequired]);
 
-  // Sync with parent
+  // Sync value with parent
   useEffect(() => {
-    onChange?.(formatPhone());
+    const formatted = formatPhone();
+    if (formatted !== value) {
+      onChange?.(formatted);
+    }
+  }, [number, selectedCountry]); // Only trigger when user changes local state
+
+  // Sync error with parent
+  useEffect(() => {
     onError?.(phoneError || null);
-  }, [number, selectedCountry, phoneError]);
+  }, [phoneError]); // Only trigger when the error string itself changes
 
   return (
     <div
