@@ -116,24 +116,38 @@ export const PollResultsBreakdown: React.FC<PollResultsProps> = ({ results }) =>
 
             {/* RANKING */}
             {results.type === "ranking" && results.responsesData?.rankings && (
-              results.responsesData.rankings.map((rank: any, idx: number) => (
-                <div key={idx} className="w-full">
-                  <div className="flex justify-between items-center mb-1.5 text-sm font-semibold text-gray-800">
-                    <span className="truncate pr-2" title={parseRankingLabel(rank.label)}>
-                      {parseRankingLabel(rank.label)}
-                    </span>
-                    <span className="shrink-0">
-                      {Math.round(rank.percentage)}% ({rank.count})
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                    <div
-                      className="bg-purple-600 h-1.5 rounded-full transition-all duration-700 ease-out"
-                      style={{ width: `${rank.percentage}%` }}
-                    ></div>
-                  </div>
+              <>
+                <div className="flex items-center justify-between mb-1 text-xs text-gray-500">
+                  <span className="font-medium">Rankings</span>
+                  <span>{results.totalResponses} total responses</span>
                 </div>
-              ))
+                {[...results.responsesData.rankings]
+                  .sort((a: any, b: any) => (a.averageRank ?? Infinity) - (b.averageRank ?? Infinity))
+                  .map((rank: any, idx: number) => (
+                    <div key={idx} className="w-full flex items-center gap-3">
+                      <span className="shrink-0 w-6 h-6 rounded-full bg-purple-100 text-purple-700 text-xs font-bold flex items-center justify-center">
+                        {rank.averageRank ?? idx + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-center mb-1.5 text-sm font-semibold text-gray-800">
+                          <span className="truncate pr-2" title={parseRankingLabel(rank.label)}>
+                            {parseRankingLabel(rank.label)}
+                          </span>
+                          <span className="shrink-0 text-xs text-gray-500 font-normal">
+                            {rank.points != null ? `${rank.points} pts` : ""} · {rank.count} responses
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                          <div
+                            className="bg-purple-600 h-1.5 rounded-full transition-all duration-700 ease-out"
+                            style={{ width: `${rank.pointsPercentage ?? rank.percentage}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                }
+              </>
             )}
 
             {/* NPS */}
