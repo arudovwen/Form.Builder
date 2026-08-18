@@ -18,9 +18,10 @@ interface Section {
     questionData: QuestionData[];
 }
 export declare const evaluateVisibility: (question: any, answerData: any) => any;
-export declare function generateDynamicSchema({ formData, isReadOnly, answerData }: {
+export declare function generateDynamicSchema({ formData, isReadOnly, ignoreValidation, answerData, }: {
     formData: Section[];
     isReadOnly: boolean;
+    ignoreValidation?: boolean;
     answerData?: any;
 }): yup.ObjectSchema<{
     [x: string]: any;

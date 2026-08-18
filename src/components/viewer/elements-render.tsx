@@ -40,7 +40,16 @@ export const RenderElement = ({ element, validationData }: { element: any; valid
         state="view"
         validationData={{
           ...validationData,
-          isReadOnly: validationData.isReadOnly || element.isDisabled,
+          isReadOnly:
+            validationData?.isReadOnly ||
+            element.isReadOnly ||
+            element.readOnly ||
+            element.isDisabled ||
+            element.disabled,
+          isDisabled:
+            validationData?.isDisabled ||
+            element.isDisabled ||
+            element.disabled,
         }}
       />
       {element.description && (

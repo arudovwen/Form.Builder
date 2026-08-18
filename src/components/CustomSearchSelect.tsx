@@ -21,17 +21,22 @@ interface CustomSearchSelectProps {
   apiUrl?: string;
   value?: string;
   defaultValue?: string;
+  selectedLabel?: string;
   onGetValue: (name: string, option: Option | null) => void;
   readOnly?: boolean;
   name: string;
   customClass?: string;
 }
 
+const isGuid = (val: any) =>
+  typeof val === "string" && /^[0-9a-fA-F-]{20,}$/.test(val);
+
 export default function CustomSearchSelect({
   options = [],
   apiUrl,
   value,
   defaultValue,
+  selectedLabel,
   onGetValue,
   readOnly,
   name,
@@ -86,9 +91,21 @@ export default function CustomSearchSelect({
         if (Array.isArray(data)) {
           const mapped = data.map((item) => {
             if (typeof item === "string") return { label: item, value: item };
+            const label =
+              item.label ??
+              item.name ??
+              item.title ??
+              item.productName ??
+              item.description ??
+              item.text ??
+              item.displayName ??
+              String(item.id ?? item.value ?? "");
+            const val = String(
+              item.value ?? item.id ?? item.key ?? item.code ?? item.name ?? "",
+            );
             return {
-              label: item.label || item.name || String(item.id || item.value),
-              value: String(item.value || item.id || item.name),
+              label: String(label),
+              value: String(val),
             };
           });
           setFetchedOptions(mapped);
@@ -129,8 +146,11 @@ export default function CustomSearchSelect({
         String(opt.label) === String(val),
     );
     if (found) return found;
-    return { label: String(val), value: String(val) };
-  }, [value, defaultValue, activeOptions]);
+    return {
+      label: selectedLabel || (isGuid(val) ? "" : String(val)),
+      value: String(val),
+    };
+  }, [value, defaultValue, selectedLabel, activeOptions]);
 
   const [selectedOption, setSelected] = useState<Option | null>(initialOption);
 
@@ -155,14 +175,21 @@ export default function CustomSearchSelect({
               (String(prev.value) === String(val) ||
                 String(prev.label) === String(val))
             ) {
-              return prev;
+              const currentLabel = selectedLabel || (prev.label && !isGuid(prev.label) ? prev.label : isGuid(val) ? "" : String(val));
+              return {
+                label: currentLabel,
+                value: String(val),
+              };
             }
-            return { label: String(val), value: String(val) };
+            return {
+              label: selectedLabel || (isGuid(val) ? "" : String(val)),
+              value: String(val),
+            };
           });
         }
       }
     }
-  }, [value, defaultValue, activeOptions]);
+  }, [value, defaultValue, selectedLabel, activeOptions]);
 
   // Memoized filtered options
   const filteredOptions = useMemo(() => {
@@ -211,12 +238,14 @@ export default function CustomSearchSelect({
         <div className="relative">
           <ComboboxInput
             className={`field-control ${customClass}`}
-            displayValue={(option: Option | null) =>
-              option?.label ||
-              (typeof (value ?? defaultValue) === "string"
-                ? String(value ?? defaultValue)
-                : "")
-            }
+            displayValue={(option: Option | null) => {
+              if (option?.label && !isGuid(option.label)) return option.label;
+              if (selectedLabel) return selectedLabel;
+              if (option?.label) return option.label;
+              const rawVal = value ?? defaultValue;
+              if (rawVal && !isGuid(rawVal)) return String(rawVal);
+              return "";
+            }}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={
               loading ? "Loading..." : readOnly ? "" : "Select an option..."

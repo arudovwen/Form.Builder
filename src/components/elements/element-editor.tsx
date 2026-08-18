@@ -1276,6 +1276,38 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   )}
                   {AllowOptions.includes(element.inputType) &&
                     renderOptionsFields()}
+
+                  {!["spacer", "divider", "section", "grid"].includes(
+                    element.type?.toLowerCase(),
+                  ) && (
+                    <div className="flex items-center gap-x-6 mb-4">
+                      <div className="w-[150px]">
+                        <DynamicInput
+                          watch={watch}
+                          label="Disabled"
+                          name="isDisabled"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                          type="checkbox"
+                          value={values.isDisabled}
+                        />
+                      </div>
+                      <div className="w-[150px]">
+                        <DynamicInput
+                          watch={watch}
+                          label="Read Only"
+                          name="isReadOnly"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                          type="checkbox"
+                          value={values.isReadOnly}
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {/* VisibilityEditor  */}
                   <div>
                     <div className="w-[150px] mb-4">

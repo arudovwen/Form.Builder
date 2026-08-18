@@ -101,11 +101,12 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       const dynamicSchema = generateDynamicSchema({
         formData: filteredFormData,
         isReadOnly,
+        ignoreValidation,
         answerData: data, // use current form data to evaluate visibility
       });
       return yupResolver(dynamicSchema)(data, context, options);
     },
-    [filteredFormData, isReadOnly],
+    [filteredFormData, isReadOnly, ignoreValidation],
   );
 
   const methods = useForm({

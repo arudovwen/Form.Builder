@@ -19,9 +19,12 @@ export default function SelectInput({
     isViewer,
   } = validationData || {};
   let selectedValue;
+  let selectedLabel;
   if (watch) {
     const values = watch();
     selectedValue = values[element.id];
+    const metaData = values[`${element.id}_metaData`];
+    selectedLabel = metaData?.label || metaData?.name || element?.metaData?.responseObject?.label;
   }
   useEffect(() => {
     register(element.id);
@@ -48,8 +51,12 @@ export default function SelectInput({
           options={element?.options ?? []}
           apiUrl={apiUrl}
           value={selectedValue}
+          selectedLabel={selectedLabel}
           onGetValue={(name, option) => {
             setValue?.(name, option?.value ?? "");
+            if (option) {
+              setValue?.(`${name}_metaData`, option);
+            }
             if (trigger) trigger(name);
           }}
           readOnly={validationData?.isReadOnly}

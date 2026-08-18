@@ -56,20 +56,32 @@ const ElementContainer = memo(
           {state === "edit" && (
             <span className="flex items-center gap-x-3">
               {element.type?.toLowerCase() !== "spacer" && element.type?.toLowerCase() !== "divider" && (
-                <label className="flex items-center gap-1 text-xs cursor-pointer text-gray-500 mr-2 hover:text-gray-700 select-none">
-                  <input
-                    type="checkbox"
-                    checked={element.isRequired || false}
-                    onChange={(e) =>
-                      updateElement(
-                        { ...element, isRequired: e.target.checked },
-                        element.sectionId
-                      )
-                    }
-                    className="cursor-pointer"
-                  />
-                  <span className="mt-0.5">Required</span>
-                </label>
+                <>
+                  {element.isDisabled && (
+                    <span className="px-1.5 py-0.5 text-[10px] font-medium bg-gray-100 text-gray-600 rounded border border-gray-200">
+                      Disabled
+                    </span>
+                  )}
+                  {element.isReadOnly && (
+                    <span className="px-1.5 py-0.5 text-[10px] font-medium bg-amber-50 text-amber-700 rounded border border-amber-200">
+                      Read Only
+                    </span>
+                  )}
+                  <label className="flex items-center gap-1 text-xs cursor-pointer text-gray-500 mr-2 hover:text-gray-700 select-none">
+                    <input
+                      type="checkbox"
+                      checked={element.isRequired || false}
+                      onChange={(e) =>
+                        updateElement(
+                          { ...element, isRequired: e.target.checked },
+                          element.sectionId
+                        )
+                      }
+                      className="cursor-pointer"
+                    />
+                    <span className="mt-0.5">Required</span>
+                  </label>
+                </>
               )}
 
 

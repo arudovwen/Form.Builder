@@ -187,7 +187,17 @@ export const evaluateVisibility = (question: any, answerData: any) => {
   });
 };
 
-export function generateDynamicSchema({formData, isReadOnly, answerData}: {formData: Section[], isReadOnly: boolean, answerData?: any}) {
+export function generateDynamicSchema({
+  formData,
+  isReadOnly,
+  ignoreValidation = false,
+  answerData,
+}: {
+  formData: Section[];
+  isReadOnly: boolean;
+  ignoreValidation?: boolean;
+  answerData?: any;
+}) {
   const schemaFields: Record<string, yup.Schema<any>> = {};
 
   formData.forEach((section: any) => {
@@ -199,14 +209,25 @@ export function generateDynamicSchema({formData, isReadOnly, answerData}: {formD
         return;
       }
 
-      const { id, type, isRequired, requiredMessage, isDisabled } = question;
+      const { id, type, isRequired, requiredMessage } = question;
+
+      const isFieldDisabled = Boolean(question.isDisabled || question.disabled);
+      const isFieldReadOnly = Boolean(
+        isReadOnly || question.isReadOnly || question.readOnly,
+      );
+
+      // If the field is disabled, readonly, or validation is ignored, bypass all validation rules
+      if (isFieldDisabled || isFieldReadOnly || ignoreValidation) {
+        schemaFields[id] = yup.mixed().notRequired().nullable();
+        return;
+      }
 
       let fieldSchema = getBaseSchema(type);
 
       // Add required validation
       fieldSchema = addRequiredValidation(
         fieldSchema,
-        isDisabled ? false : isReadOnly ? false : isRequired,
+        isRequired,
         requiredMessage,
       );
 
