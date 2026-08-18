@@ -158,6 +158,7 @@ const addNumberValidations = (
 };
 
 export const evaluateVisibility = (question: any, answerData: any) => {
+  if (question?.isDeleted) return false;
   if (!question.isHidden) return true;
   const fields = question.visibilityDependentFields || [];
   if (!fields.length) return true;
@@ -189,8 +190,10 @@ export const evaluateVisibility = (question: any, answerData: any) => {
 export function generateDynamicSchema({formData, isReadOnly, answerData}: {formData: Section[], isReadOnly: boolean, answerData?: any}) {
   const schemaFields: Record<string, yup.Schema<any>> = {};
 
-  formData.forEach(({ questionData }) => {
-    questionData?.forEach((question: any) => {
+  formData.forEach((section: any) => {
+    if (section?.isDeleted) return;
+    section?.questionData?.forEach((question: any) => {
+      if (question?.isDeleted) return;
       // If the field is conditionally hidden, skip validating it
       if (!evaluateVisibility(question, answerData)) {
         return;

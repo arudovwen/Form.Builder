@@ -8,14 +8,18 @@ import React, {
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
 
+export type DeleteMode = "remove" | "isDeleted" | "soft" | "hard";
+
 interface EditorProviderProps {
   children: React.ReactNode;
   onChange?: (data: any) => void;
   onLogAction?: (action: string, value: any) => void;
+  deleteMode?: DeleteMode;
 }
 
 const EditorContext = createContext<
   | {
+      deleteMode?: DeleteMode;
       showPreview: boolean;
       setShowPreview: React.Dispatch<React.SetStateAction<boolean>>;
       formData: any;
@@ -82,6 +86,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   children,
   onChange,
   onLogAction,
+  deleteMode = "remove",
 }) => {
   const [showPreview, setShowPreview] = useState(false);
   const [answerData, setAnswerData] = useState({});
@@ -206,14 +211,31 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   }, [formData, onLogAction, setFormData]);
   const removeSection = React.useCallback(
     (sectionId: string) => {
-      setFormData((prevFormData) =>
-        prevFormData.filter((i) => i.id !== sectionId),
-      );
+      if (deleteMode === "isDeleted" || deleteMode === "soft") {
+        setFormData((prevFormData) =>
+          prevFormData.map((sec) =>
+            sec.id === sectionId
+              ? {
+                  ...sec,
+                  isDeleted: true,
+                  questionData: sec?.questionData?.map((q: any) => ({
+                    ...q,
+                    isDeleted: true,
+                  })),
+                }
+              : sec,
+          ),
+        );
+      } else {
+        setFormData((prevFormData) =>
+          prevFormData.filter((i) => i.id !== sectionId),
+        );
+      }
 
       setSelectedSection(null);
       onLogAction?.("REMOVE_SECTION", { sectionId });
     },
-    [onLogAction, setFormData],
+    [deleteMode, onLogAction, setFormData],
   );
   const removeElement = React.useCallback(
     (elementId: string, sectionId: string) => {
@@ -225,28 +247,47 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       if (!elementData) return;
 
       setFormData((prevFormData) =>
-        prevFormData?.map((section) =>
-          section.id === sectionId
-            ? {
-                ...section,
-                questionData: section?.questionData.filter((element: any) => {
-                  if (elementData.type === "grid") {
-                    // remove both the grid and its children
-                    return (
-                      element.gridId !== elementData.id &&
-                      element.id !== elementData.id
-                    );
+        prevFormData?.map((section) => {
+          if (section.id !== sectionId) return section;
+
+          if (deleteMode === "isDeleted" || deleteMode === "soft") {
+            return {
+              ...section,
+              questionData: section?.questionData?.map((element: any) => {
+                if (elementData.type === "grid") {
+                  if (
+                    element.gridId === elementData.id ||
+                    element.id === elementData.id
+                  ) {
+                    return { ...element, isDeleted: true };
                   }
-                  // normal element removal
-                  return element.id !== elementId;
-                }),
+                } else if (element.id === elementId) {
+                  return { ...element, isDeleted: true };
+                }
+                return element;
+              }),
+            };
+          }
+
+          return {
+            ...section,
+            questionData: section?.questionData.filter((element: any) => {
+              if (elementData.type === "grid") {
+                // remove both the grid and its children
+                return (
+                  element.gridId !== elementData.id &&
+                  element.id !== elementData.id
+                );
               }
-            : section,
-        ),
+              // normal element removal
+              return element.id !== elementId;
+            }),
+          };
+        }),
       );
       onLogAction?.("REMOVE_ELEMENT", { sectionId, elementId });
     },
-    [formData, setFormData, onLogAction],
+    [formData, deleteMode, setFormData, onLogAction],
   );
   const duplicateElement = React.useCallback(
     (elementId: string, sectionId: string) => {
@@ -853,6 +894,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
 
   const value = useMemo(
     () => ({
+      deleteMode,
       formData,
       setFormData,
       handleDragStop,
@@ -891,6 +933,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       pasteElement,
     }),
     [
+      deleteMode,
       formData,
       handleDragStop,
       removeElement,

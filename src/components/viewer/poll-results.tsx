@@ -15,7 +15,7 @@ const parseRankingLabel = (labelStr: string) => {
     if (Array.isArray(arr)) {
       return arr.map(item => item.label).join(" > ");
     }
-  } catch (e) {
+  } catch {
     // Ignore error and fall back to returning the original string
   }
   return labelStr;
@@ -37,8 +37,8 @@ export const PollResultsBreakdown: React.FC<PollResultsProps> = ({ results }) =>
           </div>
 
           <div className="space-y-4">
-            {/* MULTI-CHOICE OPTIONS (Polling, Checkbox, Radio, ImageChoice) */}
-            {["polling", "checkbox", "radio", "imageChoice"].includes(results.type) && results.responsesData?.options && (
+            {/* MULTI-CHOICE OPTIONS (Polling, Checkbox, Radio, ImageChoice, SelectField) */}
+            {["polling", "checkbox", "radio", "imageChoice", "selectField"].includes(results.type) && results.responsesData?.options && (
               results.responsesData.options.map((opt: any, idx: number) => (
                 <div key={idx} className="w-full">
                   <div className="flex justify-between items-center mb-1.5 text-sm font-semibold text-gray-800">

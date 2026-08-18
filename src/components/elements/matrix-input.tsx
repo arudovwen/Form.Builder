@@ -33,14 +33,19 @@ export default function MatrixInput({
               key={row.id || row.value}
               className="border-b last:border-0 hover:bg-gray-50/30"
             >
-              <td className="p-3 text-gray-700 min-w-[150px] text-sm">{row.label}</td>
+              <td className="p-3 text-gray-700 min-w-[150px] text-sm">
+                {row.label}
+              </td>
               {columns.map((col: any) => (
-                <td key={col.id || col.value} className="p-3 text-center align-middle">
+                <td
+                  key={col.id || col.value}
+                  className="p-3 text-center align-middle"
+                >
                   <input
                     type="radio"
                     value={col.value}
                     disabled={element.isDisabled || validationData?.isReadOnly}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 cursor-pointer disabled:opacity-50"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 cursor-pointer disabled:opacity-80"
                     {...register(`${element.id}.${row.value}`)}
                   />
                 </td>

@@ -70,7 +70,11 @@ const SectionEditorModal: React.FC<{
         </div>
 
         {/* Form Content */}
-        <form onSubmit={handleSubmit(onSubmit)} className="w-full" autoComplete="off">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="w-full"
+          autoComplete="off"
+        >
           <div className="w-full px-6 flex flex-col gap-5 z-10">
             <DynamicInput
               label="Title"
@@ -126,7 +130,7 @@ const SectionEditorModal: React.FC<{
                 !isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#2563EB]"
               } ${
                 !isValid || isSubmitting ? "text-[#98A2B3]" : "text-white"
-              } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-50`}
+              } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-80`}
             >
               {isSubmitting ? "Saving..." : "Save"}
             </button>

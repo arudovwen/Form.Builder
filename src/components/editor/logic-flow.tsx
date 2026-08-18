@@ -143,78 +143,86 @@ export default function LogicFlow({ formData }: { formData: any[] }) {
     let previousNodeId: string | null = null;
 
     // First pass: create all nodes and sequential edges
-    formData?.forEach((section: any, sIndex: number) => {
-      const colorScheme = sectionColors[sIndex % sectionColors.length];
-      
-      const sectionX = sIndex * 400; // Layout left to right horizontally
-      const sectionY = 0;
-      const sectionWidth = 320;
-      const sectionHeight = 60 + (section?.questionData?.length || 0) * 110;
+    formData
+      ?.filter((section: any) => !section?.isDeleted)
+      ?.forEach((section: any, sIndex: number) => {
+        const colorScheme = sectionColors[sIndex % sectionColors.length];
+        const activeFields =
+          section?.questionData?.filter((f: any) => !f?.isDeleted) || [];
 
-      // Create Section Group Node
-      nodes.push({
-        id: section.id,
-        type: 'sectionGroup',
-        data: { title: section.title || `Section ${sIndex + 1}` },
-        position: { x: sectionX, y: sectionY },
-        style: {
-          width: sectionWidth,
-          height: sectionHeight,
-          backgroundColor: 'rgba(248, 250, 252, 0.4)',
-          border: '2px dashed #cbd5e1',
-          borderRadius: '16px',
-        }
-      });
+        const sectionX = sIndex * 400; // Layout left to right horizontally
+        const sectionY = 0;
+        const sectionWidth = 320;
+        const sectionHeight = 60 + activeFields.length * 110;
 
-      section?.questionData?.forEach((field: any, fIndex: number) => {
-        const nodeId = field.id;
-
-        // Create Node
+        // Create Section Group Node
         nodes.push({
-          id: nodeId,
-          type: "customField",
-          parentId: section.id,
-          extent: 'parent',
-          targetPosition: Position.Top,
-          sourcePosition: Position.Bottom,
-          data: {
-            label: field.inputLabel || field.label,
-            type: field.type,
-            sectionTitle: section.title || "Untitled Section",
-            isHidden: field.isHidden,
-            colorScheme,
+          id: section.id,
+          type: "sectionGroup",
+          data: { title: section.title || `Section ${sIndex + 1}` },
+          position: { x: sectionX, y: sectionY },
+          style: {
+            width: sectionWidth,
+            height: sectionHeight,
+            backgroundColor: "rgba(248, 250, 252, 0.4)",
+            border: "2px dashed #cbd5e1",
+            borderRadius: "16px",
           },
-          position: { x: 20, y: 40 + fIndex * 110 },
         });
 
-        // Create Sequential Edge (only if it's not a conditionally hidden field)
-        // Hidden fields break the direct linear flow, they branch off instead.
-        if (previousNodeId && !field.isHidden) {
-          edges.push({
-            id: `e-${previousNodeId}-${nodeId}`,
-            source: previousNodeId,
-            target: nodeId,
-            type: "smoothstep",
-            animated: true,
-            style: { stroke: "#cbd5e1", strokeWidth: 2 },
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              width: 20,
-              height: 20,
-              color: "#cbd5e1",
-            },
-          });
-        }
+        activeFields.forEach((field: any, fIndex: number) => {
+          const nodeId = field.id;
 
-        if (!field.isHidden) {
-          previousNodeId = nodeId;
-        }
+          // Create Node
+          nodes.push({
+            id: nodeId,
+            type: "customField",
+            parentId: section.id,
+            extent: "parent",
+            targetPosition: Position.Top,
+            sourcePosition: Position.Bottom,
+            data: {
+              label: field.inputLabel || field.label,
+              type: field.type,
+              sectionTitle: section.title || "Untitled Section",
+              isHidden: field.isHidden,
+              colorScheme,
+            },
+            position: { x: 20, y: 40 + fIndex * 110 },
+          });
+
+          // Create Sequential Edge (only if it's not a conditionally hidden field)
+          // Hidden fields break the direct linear flow, they branch off instead.
+          if (previousNodeId && !field.isHidden) {
+            edges.push({
+              id: `e-${previousNodeId}-${nodeId}`,
+              source: previousNodeId,
+              target: nodeId,
+              type: "smoothstep",
+              animated: true,
+              style: { stroke: "#cbd5e1", strokeWidth: 2 },
+              markerEnd: {
+                type: MarkerType.ArrowClosed,
+                width: 20,
+                height: 20,
+                color: "#cbd5e1",
+              },
+            });
+          }
+
+          if (!field.isHidden) {
+            previousNodeId = nodeId;
+          }
+        });
       });
-    });
 
     // Second pass: Create conditional edges for hidden fields
-    formData?.forEach((section: any) => {
-      section?.questionData?.forEach((field: any) => {
+    formData
+      ?.filter((section: any) => !section?.isDeleted)
+      ?.forEach((section: any) => {
+        section?.questionData
+          ?.filter((field: any) => !field?.isDeleted)
+          ?.forEach((field: any) => {
         if (field.isHidden && field.visibilityDependentFields?.length > 0) {
           field.visibilityDependentFields.forEach((dep: any) => {
             edges.push({

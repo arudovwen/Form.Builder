@@ -246,7 +246,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
   const gridChildrenMap = useMemo(() => {
     return (
       elementData?.reduce((acc: Record<string, any[]>, el: any) => {
-        if (el.gridId) {
+        if (el.gridId && !el.isDeleted) {
           acc[el.gridId] = acc[el.gridId] || [];
           acc[el.gridId].push(el);
         }
@@ -255,8 +255,14 @@ function ElementCanvas({ elementData, sectionId }: any) {
     );
   }, [elementData]);
 
+  // ── Active elements ─────────────────────────────────────────────────────────
+  const activeElements = useMemo(
+    () => elementData?.filter((el: any) => !el.isDeleted) || [],
+    [elementData],
+  );
+
   // ── Empty canvas ─────────────────────────────────────────────────────────────
-  if (!elementData?.length) {
+  if (!activeElements.length) {
     return (
       <div
         onDragOver={(e) => e.preventDefault()}
@@ -272,7 +278,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
   // ── Element list ──────────────────────────────────────────────────────────────
   // We interleave a DropZone before every top-level element, plus one after the
   // last one, so there are always valid insertion targets everywhere.
-  const topLevelElements = elementData.filter((el: any) => !el.gridId);
+  const topLevelElements = activeElements.filter((el: any) => !el.gridId);
 
   return (
     <div className="relative flex flex-col w-full h-full gap-2">

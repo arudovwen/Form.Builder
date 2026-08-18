@@ -322,34 +322,39 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
         ref={containerRef} // Attach the ref to the container
         className="relative flex flex-col flex-1 w-full gap-y-3 container overflow-y-auto"
       >
-        {formData?.map(
-          (
-            section: {
-              id: string;
-              title: string;
-              description?: string;
-              questionData: any;
-            },
-            index: number,
-          ) => (
-            <SectionItem
-              key={section.id}
-              section={section}
-              index={index}
-              selectedSection={selectedSection}
-              setSelectedSection={setSelectedSection}
-              activeSections={activeSections}
-              toggleSection={toggleSection}
-              handleSectionEdit={handleSectionEdit}
-              removeSection={removeSection}
-              formDataLength={formData.length}
-              onDragOver={onDragOver}
-              setIsDragging={setIsDragging}
-              isDragging={isDragging}
-              onReorderSection={handleReorderSection}
-            />
-          ),
-        )}
+        {formData
+          ?.filter((section: any) => !section?.isDeleted)
+          ?.map(
+            (
+              section: {
+                id: string;
+                title: string;
+                description?: string;
+                questionData: any;
+                isDeleted?: boolean;
+              },
+              index: number,
+            ) => (
+              <SectionItem
+                key={section.id}
+                section={section}
+                index={index}
+                selectedSection={selectedSection}
+                setSelectedSection={setSelectedSection}
+                activeSections={activeSections}
+                toggleSection={toggleSection}
+                handleSectionEdit={handleSectionEdit}
+                removeSection={removeSection}
+                formDataLength={
+                  formData?.filter((s: any) => !s?.isDeleted)?.length || 0
+                }
+                onDragOver={onDragOver}
+                setIsDragging={setIsDragging}
+                isDragging={isDragging}
+                onReorderSection={handleReorderSection}
+              />
+            ),
+          )}
         <div className="flex justify-center gap-x-4">
           <button
             type="button"

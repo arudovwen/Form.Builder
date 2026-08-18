@@ -142,11 +142,16 @@ export default function FileUpload({
 
         if (
           allowedTypes.length &&
-          !allowedTypes.some(
-            (type) =>
+          !allowedTypes.some((type) => {
+            if (type.endsWith("/*")) {
+              const baseType = type.split("/")[0];
+              return file.type.startsWith(`${baseType}/`);
+            }
+            return (
               file.type === type ||
-              file.name.toLowerCase().endsWith(type.replace("*", "")),
-          )
+              file.name.toLowerCase().endsWith(type.replace("*", ""))
+            );
+          })
         ) {
           toast.error(
             `File "${file.name}" is not an allowed type. Allowed: ${acceptedFileLabels || "any"}`,
@@ -197,7 +202,15 @@ export default function FileUpload({
         }
       }
     },
-    [isUploading, validateFiles, uploadFile, onFileLoaded, multiple, fileData, setApiActivityCount],
+    [
+      isUploading,
+      validateFiles,
+      uploadFile,
+      onFileLoaded,
+      multiple,
+      fileData,
+      setApiActivityCount,
+    ],
   );
 
   const removeFile = useCallback(
@@ -227,8 +240,8 @@ export default function FileUpload({
 
   return (
     <div className="flex flex-col items-start gap-2">
-      {!disabled && (
-        <div className="!flex field-control !py-0 !px-0 relative">
+      {!disabled && !(hasFiles && !multiple) && (
+        <div className="!flex field-control !py-0 !px-0 relative w-full">
           <input
             ref={fileInputRef}
             type="file"
@@ -240,13 +253,13 @@ export default function FileUpload({
                      file:rounded-[6px] file:py-[6px] file:border-0
                      file:text-sm file:font-semibold
                      file:bg-blue-50 file:text-blue-700
-                     hover:file:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                     hover:file:bg-blue-100 disabled:opacity-80 disabled:cursor-not-allowed"
           />
 
           {hasFiles && (
             <button
               type="button"
-              className="p-2 text-lg text-red-500 hover:text-red-600 transition-colors disabled:opacity-50"
+              className="p-2 text-lg text-red-500 hover:text-red-600 transition-colors disabled:opacity-80"
               onClick={() => removeFile()}
               disabled={isUploading}
               aria-label="Remove all files"
@@ -260,7 +273,9 @@ export default function FileUpload({
       {(hasFiles || isUploading) && (
         <div className="relative grid gap-y-1 flex-1 w-full min-h-[40px]">
           {isUploading && (
-            <div className={`z-10 flex items-center justify-center bg-white/60 rounded ${hasFiles ? 'absolute inset-0' : 'p-1 border border-dashed border-gray-300'}`}>
+            <div
+              className={`z-10 flex items-center justify-center bg-white/60 rounded ${hasFiles ? "absolute inset-0" : "p-1 border border-dashed border-gray-300"}`}
+            >
               <div className="flex items-center gap-x-2 text-xs text-blue-600 font-medium">
                 <span className="animate-spin h-3 w-3 border-2 border-blue-500 border-t-transparent rounded-full" />
                 Uploading...

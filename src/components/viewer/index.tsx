@@ -72,19 +72,24 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   const filteredFormData = useMemo(
     () =>
       form_data
-        .filter((i) => !i.isHidden)
+        .filter((i) => !i.isHidden && !i.isDeleted)
         .map((section) => {
           const isSectionDisabled = section.isDisabled || section.disabled;
+          const activeQuestions =
+            section?.questionData?.filter((q: any) => !q.isDeleted) || [];
           if (isSectionDisabled) {
             return {
               ...section,
-              questionData: section?.questionData?.map((q: any) => ({
+              questionData: activeQuestions.map((q: any) => ({
                 ...q,
                 isDisabled: true,
               })),
             };
           }
-          return section;
+          return {
+            ...section,
+            questionData: activeQuestions,
+          };
         }),
     [form_data],
   );

@@ -141,7 +141,9 @@ const GridInput = ({
         const section = formData.find((s: any) => s.id === sectionId);
         const occupant = section?.questionData?.find(
           (el: any) =>
-            el.gridId === element.id && el.gridPosition?.col === currentCol,
+            !el.isDeleted &&
+            el.gridId === element.id &&
+            el.gridPosition?.col === currentCol,
         );
 
         // If a different element already occupies this cell, remove it first
@@ -180,7 +182,9 @@ const GridInput = ({
       .find((s: any) => s.id === sectionId)
       ?.questionData?.find(
         (el: any) =>
-          el.gridId === element.id && el.gridPosition?.col === currentCol,
+          !el.isDeleted &&
+          el.gridId === element.id &&
+          el.gridPosition?.col === currentCol,
       );
     const childId: string | null = childData?.id ?? null;
 

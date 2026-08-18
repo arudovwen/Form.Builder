@@ -1,10 +1,13 @@
 import React from "react";
+export type DeleteMode = "remove" | "isDeleted" | "soft" | "hard";
 interface EditorProviderProps {
     children: React.ReactNode;
     onChange?: (data: any) => void;
     onLogAction?: (action: string, value: any) => void;
+    deleteMode?: DeleteMode;
 }
 declare const EditorContext: React.Context<{
+    deleteMode?: DeleteMode;
     showPreview: boolean;
     setShowPreview: React.Dispatch<React.SetStateAction<boolean>>;
     formData: any;

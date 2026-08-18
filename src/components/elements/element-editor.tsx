@@ -100,9 +100,27 @@ const schema = yup.object().shape({
   requiredMessage: yup.string().nullable(),
   minLengthMessage: yup.string().nullable(),
   maxLengthMessage: yup.string().nullable(),
-  maxLength: yup.number().transform((value, originalValue) => String(originalValue).trim() === '' ? null : value).typeError("Expecting a number").nullable(),
-  minLength: yup.number().transform((value, originalValue) => String(originalValue).trim() === '' ? null : value).typeError("Expecting a number").nullable(),
-  minChecked: yup.number().transform((value, originalValue) => String(originalValue).trim() === '' ? null : value).typeError("Expecting a number").nullable(),
+  maxLength: yup
+    .number()
+    .transform((value, originalValue) =>
+      String(originalValue).trim() === "" ? null : value,
+    )
+    .typeError("Expecting a number")
+    .nullable(),
+  minLength: yup
+    .number()
+    .transform((value, originalValue) =>
+      String(originalValue).trim() === "" ? null : value,
+    )
+    .typeError("Expecting a number")
+    .nullable(),
+  minChecked: yup
+    .number()
+    .transform((value, originalValue) =>
+      String(originalValue).trim() === "" ? null : value,
+    )
+    .typeError("Expecting a number")
+    .nullable(),
   requireAllChecked: yup.boolean(),
   inputType: yup.string().nullable(),
   maxAmountMessage: yup.string().nullable(),
@@ -171,7 +189,13 @@ const schema = yup.object().shape({
   visibilityDependentFields: yup.array().nullable(),
   isMultiple: yup.boolean(),
   acceptedFiles: yup.array(),
-  maxFileSize: yup.number().transform((value, originalValue) => String(originalValue).trim() === '' ? null : value).typeError("Expecting a number").nullable(),
+  maxFileSize: yup
+    .number()
+    .transform((value, originalValue) =>
+      String(originalValue).trim() === "" ? null : value,
+    )
+    .typeError("Expecting a number")
+    .nullable(),
   showState: yup.boolean(),
   formula: yup.string().nullable(),
   fetchExternalResults: yup.boolean(),
@@ -207,15 +231,19 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   const [optionTypes, setOptionTypes] = useState<optionType>("manual");
 
   const fieldCount =
-    formData?.flatMap((section: any) => section?.questionData || [])?.length ||
-    0;
+    formData
+      ?.filter((section: any) => !section?.isDeleted)
+      ?.flatMap((section: any) => section?.questionData || [])
+      ?.filter((f: any) => !f?.isDeleted)?.length || 0;
 
   const mentionData = React.useMemo(() => {
     return (
       formData
+        ?.filter((section: any) => !section?.isDeleted)
         ?.flatMap((section: any) => section?.questionData || [])
         .filter(
           (f: any) =>
+            !f?.isDeleted &&
             f.id !== element?.id &&
             !["spacer", "divider", "section", "grid"].includes(
               f.type?.toLowerCase(),
@@ -383,7 +411,9 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 <div className="absolute w-4 h-4 mt-1 border-2 border-blue-500 rounded-full border-t-transparent animate-spin right-3 top-1/2"></div>
               )}
             </div>
-            {!(element.type === "multiSelect" || element.type === "selectField") && (
+            {!(
+              element.type === "multiSelect" || element.type === "selectField"
+            ) && (
               <button
                 onClick={loadApi}
                 className="px-3 py-1 text-xs text-white bg-gray-600 rounded"
@@ -394,7 +424,9 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
             )}
           </div>
           {element.type === "multiSelect" || element.type === "selectField" ? (
-            <p className="text-xs text-blue-500 mb-2">Options will be loaded dynamically at runtime.</p>
+            <p className="text-xs text-blue-500 mb-2">
+              Options will be loaded dynamically at runtime.
+            </p>
           ) : (
             <OptionsExample />
           )}
@@ -419,60 +451,99 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         {fields?.map((field, index) => (
           <div
             key={field.id}
-            className="flex items-center mb-1 gap-x-4 last:mb-0"
+            className="mb-6 pb-6 border-b border-gray-200 last:mb-0 last:pb-0 last:border-0"
           >
-            <div className="flex-1">
-              <DynamicInput
-                watch={watch}
-                label={index === 0 ? "Label" : ""}
-                name={`options.${index}.label`}
-                register={register}
-                errors={errors}
-                element={element}
-                placeholder="Label"
-                onChange={(e) => {
-                  const text = e.target.value;
-                  const slugified = text
-                    .toLowerCase()
-                    .trim()
-                    .replace(/[\s-]+/g, "_")
-                    .replace(/[^a-z0-9_]/g, "");
-                  setValue(`options.${index}.value`, slugified, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  });
-                }}
-              />
-            </div>
-            <div className="flex-1">
-              <DynamicInput
-                watch={watch}
-                label={index === 0 ? "Value" : ""}
-                name={`options.${index}.value`}
-                register={register}
-                errors={errors}
-                element={element}
-                placeholder="Value"
-              />
+            <div className="flex items-start gap-x-4">
+              <div className="flex-1">
+                <DynamicInput
+                  watch={watch}
+                  label={index === 0 ? "Label" : ""}
+                  name={`options.${index}.label`}
+                  register={register}
+                  errors={errors}
+                  element={element}
+                  placeholder="Label"
+                  onChange={(e) => {
+                    const text = e.target.value;
+                    const slugified = text
+                      .toLowerCase()
+                      .trim()
+                      .replace(/[\s-]+/g, "_")
+                      .replace(/[^a-z0-9_]/g, "");
+                    setValue(`options.${index}.value`, slugified, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    });
+                  }}
+                />
+              </div>
+              <div className="flex-1">
+                <DynamicInput
+                  watch={watch}
+                  label={index === 0 ? "Value" : ""}
+                  name={`options.${index}.value`}
+                  register={register}
+                  errors={errors}
+                  element={element}
+                  placeholder="Value"
+                />
+              </div>
+
+              <button
+                disabled={fields.length === 1}
+                type="button"
+                className={`outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed ${
+                  index === 0 ? "mt-[34px]" : "mt-[10px]"
+                }`}
+                onClick={() => remove(index)}
+              >
+                <AppIcon
+                  icon="iconamoon:sign-times-fill"
+                  iconClass="text-gray-400 hover:text-red-500 text-lg transition-colors"
+                />
+              </button>
             </div>
 
             {element.inputType === "imageChoice" && (
-              <div className="flex-1 flex flex-col gap-1">
-                <label className="text-sm font-medium text-gray-700">{index === 0 ? "Image Upload" : ""}</label>
+              <div className="mt-3 pr-[36px]">
+                {index === 0 && (
+                  <label className="block text-sm font-medium text-[#344054] font-onest mb-1.5">
+                    Image Upload
+                  </label>
+                )}
                 <div className="flex gap-2">
                   <FileUpload
                     multiple={false}
-                    accept={[{ value: "image/*", label: "Images" }]}
+                    accept={[
+                      { value: "image/*", label: "All Images" },
+                      { value: "image/jpeg", label: "JPEG" },
+                      { value: "image/png", label: "PNG" },
+                      { value: "image/gif", label: "GIF" },
+                      { value: "image/webp", label: "WebP" },
+                      { value: "image/svg+xml", label: "SVG" },
+                    ]}
                     onFileLoaded={(files) => {
                       if (files && files.length > 0) {
-                        setValue(`options.${index}.imageUrl`, files[0].base64, { shouldDirty: true, shouldValidate: true });
+                        setValue(`options.${index}.imageUrl`, files[0].base64, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        });
                       } else {
-                        setValue(`options.${index}.imageUrl`, "", { shouldDirty: true, shouldValidate: true });
+                        setValue(`options.${index}.imageUrl`, "", {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        });
                       }
                     }}
                     list={
-                      watch(`options.${index}.imageUrl`) 
-                        ? [{ base64: watch(`options.${index}.imageUrl`), name: 'Uploaded Image', type: 'image' }] 
+                      watch(`options.${index}.imageUrl`)
+                        ? [
+                            {
+                              base64: watch(`options.${index}.imageUrl`),
+                              name: "Uploaded Image",
+                              type: "image",
+                            },
+                          ]
                         : []
                     }
                   />
@@ -489,15 +560,6 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 </div>
               </div>
             )}
-
-            <button
-              disabled={fields.length === 1}
-              type="button"
-              className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
-              onClick={() => remove(index)}
-            >
-              <AppIcon icon="iconamoon:sign-times-fill" />
-            </button>
           </div>
         ))}{" "}
         <div>
@@ -924,15 +986,18 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         value={watch("valueSource") || "manual"}
                       />
                       {watch("valueSource") === "field" && (
-                       <CustomSelect
-                        label="Source Field"
-                        options={mentionData.map((m: any) => ({ label: m.display, value: m.id }))}
-                        register={register}
-                        name={"sourceFieldId"}
-                        setValue={setValue}
-                        trigger={trigger}
-                        value={watch("sourceFieldId")}
-                      />
+                        <CustomSelect
+                          label="Source Field"
+                          options={mentionData.map((m: any) => ({
+                            label: m.display,
+                            value: m.id,
+                          }))}
+                          register={register}
+                          name={"sourceFieldId"}
+                          setValue={setValue}
+                          trigger={trigger}
+                          value={watch("sourceFieldId")}
+                        />
                       )}
                     </div>
                   )}
@@ -1099,7 +1164,9 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                       value={watch("selectType")}
                     />
                   )}
-                  {["multiselect", "checkbox"].includes(element.type.toLowerCase()) && (
+                  {["multiselect", "checkbox"].includes(
+                    element.type.toLowerCase(),
+                  ) && (
                     <>
                       <DynamicInput
                         watch={watch}
@@ -1428,7 +1495,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 !isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#2563EB]"
               } ${
                 !isValid || isSubmitting ? "text-[#98A2B3]" : "text-white"
-              } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-50 editor_option__save`}
+              } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-80 editor_option__save`}
             >
               {isSubmitting ? "Saving..." : "Save"}
             </button>

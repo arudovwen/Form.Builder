@@ -1,7 +1,7 @@
 import MainPage from "./main";
 import SideBar from "./sidebar";
 import TopBar from "./topbar";
-import { EditorProvider } from "../../context/editor-context";
+import { EditorProvider, DeleteMode } from "../../context/editor-context";
 import Loader from "../Loader";
 import { Toaster } from "sonner";
 import { useState } from "react";
@@ -13,6 +13,7 @@ export interface BuilderProps {
   questionData?: any; // Data for the questions in the form
   isReadOnly?: boolean; // Flag to indicate if the form is read-only
   config?: any; // Configuration for the form
+  deleteMode?: DeleteMode; // Setting for removing deleted fields or marking them as isDeleted ("remove" | "isDeleted")
   title?: string;
   loading?: boolean;
   goBackUrl?: () => void;
@@ -33,6 +34,8 @@ export default function Layout({
   onChange,
   onLogAction,
   questionData,
+  deleteMode,
+  config,
   title,
   goBackUrl,
   loading,
@@ -50,7 +53,11 @@ export default function Layout({
   const [viewMode, setViewMode] = useState<"canvas" | "flow">("canvas");
 
   return (
-    <EditorProvider onChange={onChange} onLogAction={onLogAction}>
+    <EditorProvider
+      onChange={onChange}
+      onLogAction={onLogAction}
+      deleteMode={deleteMode || config?.deleteMode || "remove"}
+    >
       <Toaster position="top-right" richColors closeButton />
       <div className="w-full h-full bg-[#F8F9FC] flex flex-col">
         <div className="flex flex-1 ">

@@ -8,6 +8,7 @@ const HomePage = ({
   onLogAction,
   questionData,
   isReadOnly,
+  deleteMode,
   config = {
     buttonColor: "#333",
   },
@@ -38,6 +39,8 @@ const HomePage = ({
       onPublish={onPublish}
       questionData={questionData}
       isReadOnly={isReadOnly}
+      deleteMode={deleteMode}
+      config={config}
       title={title}
       goBackUrl={goBackUrl}
       loading={loading}

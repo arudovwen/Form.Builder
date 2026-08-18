@@ -555,6 +555,9 @@ export const CategorizedElements = Object.freeze({
 
 export const CategorizedPollElements = Object.freeze({
   pollComponents: [
+    ElementKind.TEXT,
+    ElementKind.PHONE,
+    ElementKind.EMAIL,
     ElementKind.RADIO,          // Single Choice
     ElementKind.CHECKBOX,       // Multiple Choice
     ElementKind.RATING,         // Rating Scale
