@@ -6,45 +6,170 @@ import "./assets/scss/style.scss";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const answerData = [
-  {
-    id: "a807ba99-9585-4bb5-8a52-6f2e3766bd1f",
-    value: "placeholder_1",
-    sectionId: "7f1e6c3c-220d-4b6f-9756-baf328e6798b",
-    type: "selectField",
-    metaData: {},
-  },
-  {
-    id: "2320bfc3-1515-4c5b-806a-1c4b10304846",
-    value: 2,
-    sectionId: "7f1e6c3c-220d-4b6f-9756-baf328e6798b",
-    type: "numberField",
-    metaData: {},
-  },
-  {
-    id: "fd208b91-d289-47fd-a1fd-b9dbeab09aa3",
-    value: "g",
-    sectionId: "7f1e6c3c-220d-4b6f-9756-baf328e6798b",
-    type: "selectField",
-    metaData: {},
-  },
-  {
-    id: "88f038e8-68a8-4c94-bb15-45d7a670d5be",
-    value: "true",
-    sectionId: "7f1e6c3c-220d-4b6f-9756-baf328e6798b",
-    type: "selectField",
-    metaData: {},
-  },
-  {
-    id: "de98882d-a3c4-4c0c-b621-76bac995d517",
-    value: ["placeholder_1", "fdbhdth", "shedrthjetjetjnet"],
-    sectionId: "7f1e6c3c-220d-4b6f-9756-baf328e6798b",
-    type: "multiSelect",
-    metaData: {},
-  },
-];
+    {
+        "id": "8db0ab19-6747-44ea-879f-ae1af2d14cd6",
+        "value": "Samsung Galaxy A06 6.7\" 4GB RAM/128GB ROM Android 14 - Black",
+        "sectionId": "3da74f65-4a2d-4bec-90e6-db1736fb5663",
+        "type": "selectField",
+        "metaData": {}
+    }
+]
 import { demoPollApiResponse, demoQuestionDa } from "./demo-data";
 
-const questionDa = demoQuestionDa;
+const questionDa = [
+    {
+        "title": "",
+        "description": "",
+        "id": "3da74f65-4a2d-4bec-90e6-db1736fb5663",
+        "questionData": [
+            {
+                "required": false,
+                "description": "",
+                "value": null,
+                "isReadOnly": false,
+                "isDisabled": false,
+                "isRequired": false,
+                "customClass": "",
+                "elementClass": "",
+                "gridPosition": null,
+                "gridId": null,
+                "isHidden": false,
+                "visibilityDependentFields": [],
+                "maxLength": null,
+                "minLength": null,
+                "placeholder": "Type here",
+                "requiredMessage": "Field is required",
+                "minLengthMessage": "",
+                "maxLengthMessage": "",
+                "type": "matrix",
+                "label": "Likert Scale",
+                "icon": "pepicons-pop:list",
+                "inputLabel": "Matrix Label",
+                "inputType": "matrix",
+                "options": [
+                    {
+                        "id": "r1",
+                        "label": "Example Row",
+                        "value": "row_1"
+                    }
+                ],
+                "options1": [
+                    {
+                        "id": "c1",
+                        "label": "Strongly Disagree",
+                        "value": "strongly_disagree"
+                    },
+                    {
+                        "id": "c2",
+                        "label": "Disagree",
+                        "value": "disagree"
+                    },
+                    {
+                        "id": "c3",
+                        "label": "Neutral",
+                        "value": "neutral"
+                    },
+                    {
+                        "id": "c4",
+                        "label": "Agree",
+                        "value": "agree"
+                    },
+                    {
+                        "id": "c5",
+                        "label": "Strongly Agree",
+                        "value": "strongly_agree"
+                    }
+                ],
+                "id": "5bf51a77-a598-490b-8aa6-0086e4049de7",
+                "sectionId": "3da74f65-4a2d-4bec-90e6-db1736fb5663",
+                "isDeleted": true
+            },
+            {
+                "required": false,
+                "description": "",
+                "value": null,
+                "isReadOnly": false,
+                "isDisabled": false,
+                "isRequired": false,
+                "customClass": "",
+                "elementClass": "",
+                "gridPosition": null,
+                "gridId": null,
+                "isHidden": false,
+                "visibilityDependentFields": [],
+                "maxLength": null,
+                "minLength": null,
+                "placeholder": "Type here",
+                "requiredMessage": "Field is required",
+                "minLengthMessage": "",
+                "maxLengthMessage": "",
+                "type": "polling",
+                "label": "Polling",
+                "icon": "mdi:poll",
+                "inputLabel": "Poll Label",
+                "inputType": "polling",
+                "options": [
+                    {
+                        "label": "Option 1",
+                        "value": "option_1",
+                        "id": "ad8c944d-bbbc-4a42-8af8-687ff94a39cf"
+                    },
+                    {
+                        "label": "Option 2",
+                        "value": "option_2",
+                        "id": "fee30fdd-6c99-4ad0-9db6-353a9ce767c9"
+                    }
+                ],
+                "fetchExternalResults": false,
+                "externalApiUrl": "",
+                "id": "aaf9c332-72ff-42b3-a246-5701c375020f",
+                "sectionId": "3da74f65-4a2d-4bec-90e6-db1736fb5663",
+                "isDeleted": true
+            },
+            {
+                "required": false,
+                "description": "",
+                "value": null,
+                "isReadOnly": false,
+                "isDisabled": false,
+                "isRequired": false,
+                "customClass": "",
+                "elementClass": "",
+                "gridPosition": null,
+                "gridId": null,
+                "isHidden": false,
+                "visibilityDependentFields": [],
+                "maxLength": null,
+                "minLength": null,
+                "placeholder": "Type here",
+                "requiredMessage": "Field is required",
+                "minLengthMessage": "",
+                "maxLengthMessage": "",
+                "type": "selectField",
+                "label": "List",
+                "icon": "tabler:select",
+                "inputLabel": "Select Text Label",
+                "inputType": "select",
+                "selectType": "list",
+                "options": [
+                    {
+                        "label": "Placeholder 1",
+                        "value": "placeholder_1",
+                        "id": "d05b209a-9408-4daf-ae92-7ece1799170a"
+                    }
+                ],
+                "id": "8db0ab19-6747-44ea-879f-ae1af2d14cd6",
+                "sectionId": "3da74f65-4a2d-4bec-90e6-db1736fb5663",
+                "dateType": "basic",
+                "apiUrl": "https://dev.gateway.matta.trade/market/v1/External/product-list-dropdown?PageNumber=1&PageSize=10",
+                "options1": [],
+                "dataColumns": []
+            }
+        ],
+        "disabled": false,
+        "isHidden": false
+    }
+];
 const pollApiResponse = demoPollApiResponse;
 const pollResultsMap = pollApiResponse.data.submissionsData.reduce(
   (acc, curr) => {
@@ -112,8 +237,8 @@ function App() {
               onGetValues={(val: any) => {
                 console.log(val);
               }}
-              showResults={true}
-              pollResults={pollResultsMap}
+              // showResults={true}
+              // pollResults={pollResultsMap}
               uploadUrl="https://beta.api.gateway.thetaskforge.co/edms/v1/fileupload/upload-document"
             >
               {/* <div className="text-center w-full">

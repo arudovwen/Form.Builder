@@ -442,7 +442,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           />
         </div>
       )}
-      <div>
+   {optionTypes === "manual" &&   <div>
         <h3 className="mb-4 text-sm text-gray-500 font-semibold">
           {element?.type?.toLowerCase() === "matrix"
             ? "Rows Options"
@@ -573,7 +573,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           </button>
         </div>
       </div>
-
+}
       {["cascadeselect", "matrix"].includes(element.type.toLowerCase()) && (
         <>
           <hr className="my-5" />

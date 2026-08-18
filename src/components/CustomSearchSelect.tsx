@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import axios from "axios";
 import { getItem } from "@/utils/localStorageControl";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
   Combobox,
   ComboboxInput,
@@ -37,72 +37,85 @@ export default function CustomSearchSelect({
   name,
   customClass,
 }: CustomSearchSelectProps) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState<string | null>(null);
   const [fetchedOptions, setFetchedOptions] = useState<Option[]>([]);
   const [loading, setLoading] = useState(false);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
     const controller = new AbortController();
+    const currentVal = value ?? defaultValue;
 
-    const handler = setTimeout(() => {
-      const fetchOptions = async () => {
-        if (!apiUrl) return;
+    // If the user has typed a query, search for it; on initial load, use preloaded value to search
+    let searchTerm = "";
+    if (query !== null) {
+      searchTerm = query;
+    } else if (currentVal) {
+      searchTerm = String(currentVal);
+    }
 
-        setLoading(true);
-        try {
-          const token = getItem("token");
-          const axiosconfig = {
-            ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
-            signal: controller.signal,
-            params: query ? { search: query } : {},
-          } as any;
-          const response = await axios.get(apiUrl, axiosconfig);
-          let data = response.data;
+    const fetchOptions = async () => {
+      if (!apiUrl) return;
 
-          // Normalize nested data structures like { data: [...] } or { data: { data: [...] } }
-          if (data && !Array.isArray(data)) {
-            if (data.data && Array.isArray(data.data)) {
-              data = data.data;
-            } else if (data.data?.data && Array.isArray(data.data.data)) {
-              data = data.data.data;
-            } else if (data.results && Array.isArray(data.results)) {
-              data = data.results;
-            } else if (data.data?.results && Array.isArray(data.data.results)) {
-              data = data.data.results;
-            } else if (data.items && Array.isArray(data.items)) {
-              data = data.items;
-            }
-          }
+      setLoading(true);
+      try {
+        const token = getItem("token");
+        const axiosconfig = {
+          ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
+          signal: controller.signal,
+          params: searchTerm ? { search: searchTerm } : {},
+        } as any;
+        const response = await axios.get(apiUrl, axiosconfig);
+        let data = response.data;
 
-          if (Array.isArray(data)) {
-            const mapped = data.map((item) => {
-              if (typeof item === "string") return { label: item, value: item };
-              return {
-                label: item.label || item.name || String(item.id || item.value),
-                value: String(item.value || item.id || item.name),
-              };
-            });
-            setFetchedOptions(mapped);
-          }
-        } catch (err: any) {
-          if (!axios.isCancel(err)) {
-            console.error("Failed to fetch options", err);
-          }
-        } finally {
-          if (!controller.signal.aborted) {
-            setLoading(false);
+        // Normalize nested data structures like { data: [...] } or { data: { data: [...] } }
+        if (data && !Array.isArray(data)) {
+          if (data.data && Array.isArray(data.data)) {
+            data = data.data;
+          } else if (data.data?.data && Array.isArray(data.data.data)) {
+            data = data.data.data;
+          } else if (data.results && Array.isArray(data.results)) {
+            data = data.results;
+          } else if (data.data?.results && Array.isArray(data.data.results)) {
+            data = data.data.results;
+          } else if (data.items && Array.isArray(data.items)) {
+            data = data.items;
           }
         }
-      };
 
+        if (Array.isArray(data)) {
+          const mapped = data.map((item) => {
+            if (typeof item === "string") return { label: item, value: item };
+            return {
+              label: item.label || item.name || String(item.id || item.value),
+              value: String(item.value || item.id || item.name),
+            };
+          });
+          setFetchedOptions(mapped);
+        }
+      } catch (err: any) {
+        if (!axios.isCancel(err)) {
+          console.error("Failed to fetch options", err);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    const delay = isInitialMount.current && currentVal ? 0 : 400;
+    isInitialMount.current = false;
+
+    const handler = setTimeout(() => {
       fetchOptions();
-    }, 500);
+    }, delay);
 
     return () => {
       clearTimeout(handler);
       controller.abort();
     };
-  }, [apiUrl, query]);
+  }, [apiUrl, query, value, defaultValue]);
 
   const activeOptions = apiUrl ? fetchedOptions : options;
 
@@ -110,43 +123,68 @@ export default function CustomSearchSelect({
   const initialOption = useMemo(() => {
     const val = value ?? defaultValue;
     if (val == null || val === "") return null;
-    return (
-      activeOptions.find(
-        (opt) =>
-          String(opt.value) === String(val) ||
-          String(opt.label) === String(val),
-      ) || null
+    const found = activeOptions.find(
+      (opt) =>
+        String(opt.value) === String(val) ||
+        String(opt.label) === String(val),
     );
+    if (found) return found;
+    return { label: String(val), value: String(val) };
   }, [value, defaultValue, activeOptions]);
 
   const [selectedOption, setSelected] = useState<Option | null>(initialOption);
 
-  // Update selected option when value prop changes (controlled component)
+  // Update selected option when value/defaultValue prop changes (controlled component)
   useEffect(() => {
-    if (value !== undefined) {
-      if (value === null || value === "") {
+    const val = value !== undefined ? value : defaultValue;
+    if (val !== undefined) {
+      if (val === null || val === "") {
         setSelected(null);
       } else {
-        const option =
-          activeOptions.find(
-            (opt) =>
-              String(opt.value) === String(value) ||
-              String(opt.label) === String(value),
-          ) || null;
-        setSelected(option);
+        const option = activeOptions.find(
+          (opt) =>
+            String(opt.value) === String(val) ||
+            String(opt.label) === String(val),
+        );
+        if (option) {
+          setSelected(option);
+        } else {
+          setSelected((prev) => {
+            if (
+              prev &&
+              (String(prev.value) === String(val) ||
+                String(prev.label) === String(val))
+            ) {
+              return prev;
+            }
+            return { label: String(val), value: String(val) };
+          });
+        }
       }
     }
-  }, [value, activeOptions]);
+  }, [value, defaultValue, activeOptions]);
 
   // Memoized filtered options
   const filteredOptions = useMemo(() => {
-    if (query === "") return activeOptions;
+    let list = activeOptions;
+    if (
+      selectedOption &&
+      !list.some(
+        (opt) =>
+          String(opt.value) === String(selectedOption.value) ||
+          String(opt.label) === String(selectedOption.label),
+      )
+    ) {
+      list = [selectedOption, ...list];
+    }
+
+    if (!query) return list;
 
     const lowerQuery = query.toLowerCase();
-    return activeOptions.filter((option) =>
+    return list.filter((option) =>
       option.label.toLowerCase().includes(lowerQuery),
     );
-  }, [query, activeOptions]);
+  }, [query, activeOptions, selectedOption]);
 
   // Handle selection change - call parent callback directly
   const handleChange = useCallback(
@@ -163,11 +201,22 @@ export default function CustomSearchSelect({
         value={selectedOption}
         onChange={handleChange}
         disabled={readOnly}
+        by={(a: any, b: any) =>
+          a && b
+            ? String(a.value) === String(b.value) ||
+              String(a.label) === String(b.label)
+            : a === b
+        }
       >
         <div className="relative">
           <ComboboxInput
             className={`field-control ${customClass}`}
-            displayValue={(option: Option | null) => option?.label || ""}
+            displayValue={(option: Option | null) =>
+              option?.label ||
+              (typeof (value ?? defaultValue) === "string"
+                ? String(value ?? defaultValue)
+                : "")
+            }
             onChange={(event) => setQuery(event.target.value)}
             placeholder={
               loading ? "Loading..." : readOnly ? "" : "Select an option..."
@@ -215,9 +264,9 @@ export default function CustomSearchSelect({
               No results found.
             </div>
           ) : (
-            filteredOptions?.map((option) => (
+            filteredOptions?.map((option, index) => (
               <ComboboxOption
-                key={option.value}
+                key={`${option.value}-${index}`}
                 value={option}
                 className={({ active, selected }) =>
                   clsx("select-option", { active, selected })

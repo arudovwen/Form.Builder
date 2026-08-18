@@ -536,7 +536,6 @@ export const CategorizedElements = Object.freeze({
     ElementKind.COUNTRY,
     ElementKind.RATING,
     ElementKind.MATRIX,
-    ElementKind.POLLING,
   ],
   dateAndTime: [ElementKind.DATE, ElementKind.TIME],
   fileAndMedia: [ElementKind.FILE],

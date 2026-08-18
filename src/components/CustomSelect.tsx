@@ -228,7 +228,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
               ) : (
                 options?.map((option, idx) => (
                   <Listbox.Option
-                    key={option.value?.id || option.value || idx}
+                    key={`${option.value?.id || option.value}-${idx}`}
                     value={option}
                     className={({ active }) =>
                       clsx("select-option", { active })
