@@ -225,7 +225,8 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       !noAllowValidation.includes(element.inputType) ||
       tab.key !== "validation",
   );
-  const { updateElement, formData }: any = React.useContext(EditorContext);
+  const { updateElement, formData, deleteMode }: any =
+    React.useContext(EditorContext);
   const [activeTab, setActiveTab] = useState("basic");
   const [optionsLoading, setOptionsLoading] = useState(false);
   const [optionTypes, setOptionTypes] = useState<optionType>("manual");
@@ -720,105 +721,142 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         </div>
       )}
       <div className="grid gap-y-3">
-        {dataFields?.map((field, index) => (
-          <div
-            key={field.id}
-            className="flex flex-col gap-2 border-b border-gray-100 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0"
-          >
-            <div className="flex items-center gap-x-4">
-              <div className="min-w-[140px]">
-                <CustomSelect
-                  label={index === 0 ? "Type" : ""}
-                  options={[
-                    {
-                      label: "Text",
-                      value: "text",
-                    },
-                    {
-                      label: "Number",
-                      value: "number",
-                    },
-                    {
-                      label: "Checkbox",
-                      value: "checkbox",
-                    },
-                    {
-                      label: "Select",
-                      value: "select",
-                    },
-                  ]}
-                  register={register}
-                  name={`dataColumns.${index}.type`}
-                  setValue={setValue}
-                  trigger={trigger}
-                  value={values.dataColumns[index].type}
-                />
-              </div>
+        {dataFields?.map((field, index) => {
+          const isDeleted =
+            values.dataColumns?.[index]?.isColumnDeleted ||
+            values.dataColumns?.[index]?.isDeleted ||
+            (field as any)?.isColumnDeleted ||
+            (field as any)?.isDeleted;
 
-              <div className="flex-1">
-                <DynamicInput
-                  watch={watch}
-                  label={index === 0 ? "Display header" : ""}
-                  name={`dataColumns.${index}.headerName`}
-                  register={register}
-                  onChange={(e) => {
-                    const text = e.target.value;
-                    const fieldName = text
-                      .toLowerCase()
-                      .trim()
-                      .replace(/[\s-]+/g, "_")
-                      .replace(/[^a-z0-9_]/g, "");
-                    setValue(`dataColumns.${index}.field`, fieldName, {
-                      shouldValidate: true,
-                      shouldDirty: true,
-                    });
-                  }}
-                  errors={errors}
-                  element={element}
-                  placeholder="header"
-                />
-              </div>
+          if (isDeleted) return null;
 
-              <div className="flex-1">
-                <DynamicInput
-                  watch={watch}
-                  label={index === 0 ? "Field key" : ""}
-                  name={`dataColumns.${index}.field`}
-                  register={register}
-                  errors={errors}
-                  element={element}
-                  placeholder="fieldKey"
-                  disabled
-                />
-              </div>
+          const firstVisibleIndex = dataFields.findIndex((f, idx) => {
+            const isDel =
+              values.dataColumns?.[idx]?.isColumnDeleted ||
+              values.dataColumns?.[idx]?.isDeleted ||
+              (f as any)?.isColumnDeleted ||
+              (f as any)?.isDeleted;
+            return !isDel;
+          });
 
-              <button
-                disabled={dataFields.length === 1}
-                type="button"
-                className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
-                onClick={() => columnRemove(index)}
-              >
-                <AppIcon icon="iconamoon:sign-times-fill" />
-              </button>
-            </div>
+          const activeDataFieldsCount = dataFields.filter((f, idx) => {
+            const isDel =
+              values.dataColumns?.[idx]?.isColumnDeleted ||
+              values.dataColumns?.[idx]?.isDeleted ||
+              (f as any)?.isColumnDeleted ||
+              (f as any)?.isDeleted;
+            return !isDel;
+          }).length;
 
-            {values.dataColumns?.[index]?.type === "select" && (
+          return (
+            <div
+              key={field.id}
+              className="flex flex-col gap-2 border-b border-gray-100 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0"
+            >
               <div className="flex items-center gap-x-4">
+                <div className="min-w-[140px]">
+                  <CustomSelect
+                    label={index === firstVisibleIndex ? "Type" : ""}
+                    options={[
+                      {
+                        label: "Text",
+                        value: "text",
+                      },
+                      {
+                        label: "Number",
+                        value: "number",
+                      },
+                      {
+                        label: "Checkbox",
+                        value: "checkbox",
+                      },
+                      {
+                        label: "Select",
+                        value: "select",
+                      },
+                    ]}
+                    register={register}
+                    name={`dataColumns.${index}.type`}
+                    setValue={setValue}
+                    trigger={trigger}
+                    value={values.dataColumns?.[index]?.type}
+                  />
+                </div>
+
                 <div className="flex-1">
                   <DynamicInput
                     watch={watch}
-                    label="Options API URL"
-                    name={`dataColumns.${index}.optionsUrl`}
+                    label={index === firstVisibleIndex ? "Display header" : ""}
+                    name={`dataColumns.${index}.headerName`}
+                    register={register}
+                    onChange={(e) => {
+                      const text = e.target.value;
+                      const fieldName = text
+                        .toLowerCase()
+                        .trim()
+                        .replace(/[\s-]+/g, "_")
+                        .replace(/[^a-z0-9_]/g, "");
+                      setValue(`dataColumns.${index}.field`, fieldName, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      });
+                    }}
+                    errors={errors}
+                    element={element}
+                    placeholder="header"
+                  />
+                </div>
+
+                <div className="flex-1">
+                  <DynamicInput
+                    watch={watch}
+                    label={index === firstVisibleIndex ? "Field key" : ""}
+                    name={`dataColumns.${index}.field`}
                     register={register}
                     errors={errors}
                     element={element}
-                    placeholder="https://api.example.com/options"
+                    placeholder="fieldKey"
+                    disabled
                   />
                 </div>
+
+                <button
+                  disabled={activeDataFieldsCount <= 1}
+                  type="button"
+                  className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
+                  onClick={() => {
+                    if (deleteMode === "isDeleted" || deleteMode === "soft") {
+                      setValue(`dataColumns.${index}.isColumnDeleted`, true, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      });
+                    } else {
+                      columnRemove(index);
+                    }
+                  }}
+                >
+                  <AppIcon icon="iconamoon:sign-times-fill" />
+                </button>
               </div>
-            )}
-          </div>
-        ))}
+
+              {values.dataColumns?.[index]?.type === "select" && (
+                <div className="flex items-center gap-x-4">
+                  <div className="flex-1">
+                    <DynamicInput
+                      watch={watch}
+                      label="Options API URL"
+                      name={`dataColumns.${index}.optionsUrl`}
+                      register={register}
+                      errors={errors}
+                      element={element}
+                      placeholder="https://api.example.com/options"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
       <div>
         {" "}

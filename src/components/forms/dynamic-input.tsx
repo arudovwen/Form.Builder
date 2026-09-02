@@ -1,6 +1,6 @@
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import CurrencyInput from "react-currency-input-field";
-import AppIcon from "../ui/AppIcon";
+import CheckSvg from "@/assets/svgs/check";
 
 interface InputProps {
   label: string;
@@ -95,12 +95,19 @@ export const DynamicInput = ({
 
     if (checkedValue !== undefined && checkedValue !== null) {
       if (type === "checkbox") {
-        if (Array.isArray(checkedValue)) {
-          isChecked = checkedValue.includes(value);
-        } else if (typeof checkedValue === "boolean") {
-          isChecked = checkedValue;
+        let normalizedCheckVal = checkedValue;
+        if (typeof checkedValue === "string" && checkedValue.trim().startsWith("[")) {
+          try {
+            normalizedCheckVal = JSON.parse(checkedValue);
+          } catch {}
+        }
+
+        if (Array.isArray(normalizedCheckVal)) {
+          isChecked = normalizedCheckVal.includes(value);
+        } else if (typeof normalizedCheckVal === "boolean") {
+          isChecked = normalizedCheckVal;
         } else {
-          isChecked = checkedValue == value;
+          isChecked = normalizedCheckVal == value;
         }
       } else {
         isChecked = checkedValue == value;
@@ -133,9 +140,7 @@ export const DynamicInput = ({
           `}
           >
             {isChecked && (
-              <AppIcon
-                icon="bi:check-lg"
-                iconClass="w-4 h-4 text-white"
+              <CheckSvg className="text-white z-10"
               />
             )}
           </div>

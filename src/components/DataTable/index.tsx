@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, memo, useRef } from "react";
+import React, { useState, useEffect, useCallback, useMemo, memo, useRef } from "react";
 import CurrencyInput from "react-currency-input-field";
 import AppIcon from "../ui/AppIcon";
 import { v4 as uuidv4 } from "uuid";
@@ -18,6 +18,7 @@ export interface DataGridColumn<T> {
   id: string;
   optionsUrl?: string;
   options?: { label: string; value: string }[];
+  isColumnDeleted?: boolean;
 }
 
 interface ValidationResult {
@@ -219,6 +220,15 @@ export default function CustomDataGrid<T extends { id: string }>({
   const rowsRef = useRef<T[]>(rows);
   rowsRef.current = rows;
 
+  const visibleColumns = useMemo(
+    () =>
+      columns?.filter(
+        (col: any) =>
+          !col?.isColumnDeleted && !col?.iscolumnDeleted && !col?.isDeleted,
+      ) || [],
+    [columns],
+  );
+
   /* ---- Sync external value changes ---- */
   useEffect(() => {
     setRows((prev) => {
@@ -240,14 +250,14 @@ export default function CustomDataGrid<T extends { id: string }>({
 
   const addRow = useCallback(() => {
     const id = uuidv4();
-    const newRow = columns.reduce((acc, col) => {
+    const newRow = visibleColumns.reduce((acc, col) => {
       (acc as any)[col.field] = col.field === "id" ? id : "";
       return acc;
     }, {} as T);
     const next = [...rowsRef.current, { id, ...newRow }];
     setRows(next);
     onChange?.(next);
-  }, [columns, onChange]);
+  }, [visibleColumns, onChange]);
 
   const deleteRow = useCallback(
     (rowId: string) => {
@@ -272,7 +282,7 @@ export default function CustomDataGrid<T extends { id: string }>({
         <table className="min-w-max w-full text-sm border-collapse table-auto">
           <thead>
             <tr className="bg-gray-100">
-              {columns.map((col, idx) => (
+              {visibleColumns.map((col, idx) => (
                 <th
                   key={`${String(col.id)}-${idx}`}
                   className="px-3 py-2 text-xs font-semibold text-left text-gray-600 border-b whitespace-nowrap"
@@ -295,7 +305,7 @@ export default function CustomDataGrid<T extends { id: string }>({
                 <MemoRow
                   key={row.id}
                   row={row}
-                  columns={columns}
+                  columns={visibleColumns}
                   isReadOnly={isReadOnly}
                   handleCellChange={handleCellChange}
                   getValidationStatus={getValidationStatus}
@@ -305,7 +315,7 @@ export default function CustomDataGrid<T extends { id: string }>({
             ) : (
               <tr>
                 <td
-                  colSpan={columns.length + (isReadOnly ? 0 : 1)}
+                  colSpan={visibleColumns.length + (isReadOnly ? 0 : 1)}
                   className="p-2 text-xs text-center text-gray-400"
                 >
                   No data available

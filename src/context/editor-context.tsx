@@ -44,6 +44,9 @@ const EditorContext = createContext<
       setUploadUrl: (e: string) => void;
       copyElement: (elementId: string, sectionId: string) => void;
       pasteElement: (sectionId: string, targetIndex?: number) => void;
+      copySection: (sectionId: string) => void;
+      pasteSection: (targetIndex?: number, directClipboardText?: string) => void;
+      duplicateSection: (sectionId: string) => void;
       apiActivityCount: number;
       setApiActivityCount: React.Dispatch<React.SetStateAction<number>>;
       /**
@@ -543,6 +546,203 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
     [setFormData, onLogAction],
   );
 
+  const copySection = React.useCallback(
+    (sectionId: string) => {
+      const section = formData.find((sec: any) => sec.id === sectionId);
+      if (!section) return;
+
+      const copiedData = {
+        type: "FORM_BUILDER_SECTION_CLIPBOARD",
+        section: {
+          title: section.title,
+          description: section.description,
+          disabled: section.disabled,
+          isDisabled: section.isDisabled,
+          isHidden: section.isHidden,
+          questionData: section.questionData || [],
+        },
+        timestamp: Date.now(),
+      };
+
+      const payloadString = JSON.stringify(copiedData);
+      try {
+        localStorage.setItem("form_builder_section_clipboard", payloadString);
+        localStorage.setItem("form_builder_clipboard", payloadString);
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(payloadString).catch(() => {
+            // Ignore clipboard write permission errors
+          });
+        }
+
+        toast.success("Section copied to clipboard");
+        onLogAction?.("COPY_SECTION", { sectionId });
+      } catch (e) {
+        console.warn("Could not copy section to clipboard", e);
+        toast.error("Failed to copy section");
+      }
+    },
+    [formData, onLogAction],
+  );
+
+  const duplicateSection = React.useCallback(
+    (sectionId: string) => {
+      const sectionIndex = formData.findIndex((sec: any) => sec.id === sectionId);
+      if (sectionIndex === -1) return;
+
+      const original = formData[sectionIndex];
+      const deepCloneWithNewId = (obj: any, overrides: any = {}) => ({
+        ...JSON.parse(JSON.stringify(obj)),
+        ...overrides,
+      });
+
+      const newSecId = uuidv4();
+      const oldQuestions = original.questionData || [];
+      const idMap = new Map();
+      const newQuestions = oldQuestions.map((q: any) => {
+        const newId = uuidv4();
+        idMap.set(q.id, newId);
+        return deepCloneWithNewId(q, { id: newId, sectionId: newSecId });
+      });
+
+      newQuestions.forEach((q: any) => {
+        if (q.gridId && idMap.has(q.gridId)) {
+          q.gridId = idMap.get(q.gridId);
+        }
+      });
+
+      const newSectionObj = deepCloneWithNewId(original, {
+        id: newSecId,
+        title: original.title ? `${original.title} (Copy)` : "Section (Copy)",
+        questionData: newQuestions,
+      });
+
+      setFormData((prev: any[]) => {
+        const arr = [...prev];
+        arr.splice(sectionIndex + 1, 0, newSectionObj);
+        return arr;
+      });
+
+      setSelectedSection(newSecId);
+      setActiveSections((prev: any[]) => {
+        return Array.from(new Set([...prev, sectionIndex + 1]));
+      });
+
+      toast.success("Section duplicated");
+      onLogAction?.("DUPLICATE_SECTION", { sectionId, newSectionId: newSecId });
+    },
+    [formData, onLogAction, setActiveSections, setFormData, setSelectedSection],
+  );
+
+  const pasteSection = React.useCallback(
+    async (targetIndex?: number, directClipboardText?: string) => {
+      let clipboardString = "";
+
+      if (
+        directClipboardText &&
+        directClipboardText.includes("FORM_BUILDER_SECTION_CLIPBOARD")
+      ) {
+        clipboardString = directClipboardText;
+      }
+
+      if (
+        !clipboardString &&
+        navigator.clipboard &&
+        navigator.clipboard.readText
+      ) {
+        try {
+          const sysClipboard = await navigator.clipboard.readText();
+          if (
+            sysClipboard &&
+            sysClipboard.includes("FORM_BUILDER_SECTION_CLIPBOARD")
+          ) {
+            clipboardString = sysClipboard;
+          }
+        } catch (err) {
+          console.warn("Could not read system clipboard", err);
+        }
+      }
+
+      if (!clipboardString) {
+        clipboardString =
+          localStorage.getItem("form_builder_section_clipboard") ||
+          localStorage.getItem("form_builder_clipboard") ||
+          "";
+      }
+
+      if (!clipboardString) {
+        toast.error("Nothing to paste. Copy a section first.");
+        return;
+      }
+
+      try {
+        const copiedData = JSON.parse(clipboardString);
+        if (
+          copiedData?.type !== "FORM_BUILDER_SECTION_CLIPBOARD" ||
+          !copiedData?.section
+        ) {
+          toast.error("Invalid section clipboard data.");
+          return;
+        }
+
+        const deepCloneWithNewId = (obj: any, overrides: any = {}) => ({
+          ...JSON.parse(JSON.stringify(obj)),
+          ...overrides,
+        });
+
+        const newSecId = uuidv4();
+        const rawSec = copiedData.section;
+
+        const oldQuestions = rawSec.questionData || [];
+        const idMap = new Map();
+        const newQuestions = oldQuestions.map((q: any) => {
+          const newId = uuidv4();
+          idMap.set(q.id, newId);
+          return deepCloneWithNewId(q, { id: newId, sectionId: newSecId });
+        });
+
+        newQuestions.forEach((q: any) => {
+          if (q.gridId && idMap.has(q.gridId)) {
+            q.gridId = idMap.get(q.gridId);
+          }
+        });
+
+        const newSectionObj = deepCloneWithNewId(rawSec, {
+          id: newSecId,
+          title: rawSec.title ? `${rawSec.title} (Copy)` : "Section (Copy)",
+          questionData: newQuestions,
+        });
+
+        setFormData((prevFormData: any[]) => {
+          const prev = [...prevFormData];
+          if (
+            targetIndex !== undefined &&
+            targetIndex >= 0 &&
+            targetIndex <= prev.length
+          ) {
+            prev.splice(targetIndex, 0, newSectionObj);
+            return prev;
+          }
+          return [...prev, newSectionObj];
+        });
+
+        setSelectedSection(newSecId);
+        setActiveSections((prev: any[]) => {
+          const newIndex =
+            targetIndex !== undefined ? targetIndex : formData.length;
+          return Array.from(new Set([...prev, newIndex]));
+        });
+
+        toast.success("Section pasted successfully");
+        onLogAction?.("PASTE_SECTION", { sectionId: newSecId });
+      } catch (e) {
+        console.error("Failed to paste section", e);
+        toast.error("Failed to paste section.");
+      }
+    },
+    [formData.length, onLogAction, setActiveSections, setFormData, setSelectedSection],
+  );
+
   const updateElementPosition = React.useCallback(
     (updatedQuestionData: any[], sectionId: string) => {
       setFormData((prevFormData) =>
@@ -931,6 +1131,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       canRedo,
       copyElement,
       pasteElement,
+      copySection,
+      pasteSection,
+      duplicateSection,
     }),
     [
       deleteMode,
@@ -961,6 +1164,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       canRedo,
       copyElement,
       pasteElement,
+      copySection,
+      pasteSection,
+      duplicateSection,
     ],
   );
 

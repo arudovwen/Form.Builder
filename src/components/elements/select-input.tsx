@@ -16,16 +16,19 @@ export default function SelectInput({
     trigger,
     setValue,
     watch,
+    getValues,
     isViewer,
-  } = validationData || {};
-  let selectedValue;
-  let selectedLabel;
-  if (watch) {
-    const values = watch();
-    selectedValue = values[element.id];
-    const metaData = values[`${element.id}_metaData`];
-    selectedLabel = metaData?.label || metaData?.name || element?.metaData?.responseObject?.label;
-  }
+  } = (validationData as any) || {};
+
+  const selectedValue =
+    (watch ? watch(element.id) : undefined) ??
+    (getValues ? getValues(element.id) : undefined) ??
+    element?.value;
+
+  const watchedMeta = watch ? watch(`${element.id}_metaData`) : undefined;
+  const formMeta = getValues ? getValues(`${element.id}_metaData`) : undefined;
+  const metaData = watchedMeta || formMeta || element?.metaData?.responseObject;
+  const selectedLabel = metaData?.label || metaData?.name;
   useEffect(() => {
     register(element.id);
   }, [element.id, register]);

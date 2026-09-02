@@ -5,5 +5,6 @@ export interface PollResultsProps {
         totalResponses: number;
         responsesData: any;
     };
+    hideInputs: boolean;
 }
 export declare const PollResultsBreakdown: React.FC<PollResultsProps>;

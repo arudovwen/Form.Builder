@@ -50,6 +50,7 @@ export interface DataColumnType {
   type?: string;
   validate?: boolean;
   id: string;
+  isColumnDeleted?: boolean;
 }
 
 export interface OptionType {
@@ -566,9 +567,7 @@ export const CategorizedPollElements = Object.freeze({
     ElementKind.RANKING,        // Ranking Poll
     ElementKind.MATRIX,         // Matrix Grid
     ElementKind.IMAGE_CHOICE,   // Image Choice
-    ElementKind.DATE,           // Date Selection
-    ElementKind.TIME,           // Time Selection
-    ElementKind.FILE,           // File Upload Poll
+
   ],
   layoutAndInfo: [
     ElementKind.BASIC_TEXT,     // Info Block (Assuming BASIC_TEXT is used as Info)

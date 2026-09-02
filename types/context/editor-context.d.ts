@@ -25,6 +25,9 @@ declare const EditorContext: React.Context<{
     setUploadUrl: (e: string) => void;
     copyElement: (elementId: string, sectionId: string) => void;
     pasteElement: (sectionId: string, targetIndex?: number) => void;
+    copySection: (sectionId: string) => void;
+    pasteSection: (targetIndex?: number, directClipboardText?: string) => void;
+    duplicateSection: (sectionId: string) => void;
     apiActivityCount: number;
     setApiActivityCount: React.Dispatch<React.SetStateAction<number>>;
     /**

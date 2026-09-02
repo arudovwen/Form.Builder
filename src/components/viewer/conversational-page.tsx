@@ -102,7 +102,7 @@ export default function ConversationalPage({ element, options, onNext, onPrev, i
             {!isLast && <span className="text-xs text-gray-400 font-medium hidden sm:inline-block">press Enter ↵</span>}
             
             {!isFirst && (
-               <button type="button" onClick={onPrev} className="text-gray-400 hover:text-gray-600 font-medium text-sm ml-auto flex items-center gap-1 transition-colors">
+               <button type="button" onClick={onPrev} className="text-gray-400 hover:text-gray-600 font-semibold  ml-auto flex items-center gap-1 transition-colors">
                  <AppIcon icon="material-symbols:arrow-upward-rounded" iconClass="text-lg" />
                  Back
                </button>

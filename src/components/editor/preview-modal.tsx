@@ -37,6 +37,7 @@ const PreviewModalModal: React.FC<PreviewModalModalProps> = ({
           ignoreValidation={true}
           config={config}
           uploadUrl={uploadUrl}
+          preview={true}
         />
       </div>
     </div>

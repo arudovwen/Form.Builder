@@ -48,6 +48,9 @@ export interface FormRendererProps {
   uploadUrl?: string;
   pollResults?: Record<string, any>; // Add pollResults
   showResults?: boolean; // Toggle for showing results
+  hideInputsOnResults?: boolean;
+  sendHiddenSectionsAsEmpty?: boolean;
+  preview?: boolean;
 }
 
 const FormRenderer: React.FC<FormRendererProps> = ({
@@ -63,6 +66,9 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   uploadUrl,
   pollResults,
   showResults,
+  hideInputsOnResults = false,
+  sendHiddenSectionsAsEmpty = false,
+  preview = false,
 }: FormRendererProps) => {
   const { setAnswerData, setUploadUrl, apiActivityCount }: any =
     useContext(EditorContext);
@@ -72,7 +78,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   const filteredFormData = useMemo(
     () =>
       form_data
-        .filter((i) => !i.isHidden && !i.isDeleted)
+        .filter((i) => (preview ? true : !i.isHidden) && !i.isDeleted)
         .map((section) => {
           const isSectionDisabled = section.isDisabled || section.disabled;
           const activeQuestions =
@@ -91,7 +97,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
             questionData: activeQuestions,
           };
         }),
-    [form_data],
+    [form_data, preview],
   );
   const totalSections = filteredFormData?.length ?? 0;
   const config = getItem("config");
@@ -172,30 +178,67 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   }, [setUploadUrl, uploadUrl]);
   // ✅ Effect runs only when actual values change
   useEffect(() => {
-    if (!filteredFormData?.length || !onGetValues) return;
+    if (!form_data?.length || !onGetValues) return;
 
-    const updatedData = filteredFormData.flatMap((section) =>
-      section?.questionData?.map((element: any) => ({
-        id: element.id,
-        value: memoizedValues[element.id] || "",
-        sectionId: section.id,
-        type: element.type,
-        metaData: {
-          prefix: element.prefix,
-          dateFormat: element.dateFormat,
-          ...(memoizedValues[`${element.id}_metaData`] ? { responseObject: memoizedValues[`${element.id}_metaData`] } : {}),
-        },
-      })),
-    );
+    const currentFormValues = {
+      ...(getValues ? getValues() : {}),
+      ...(memoizedValues || {}),
+    };
+
+    const updatedData = form_data
+      .filter((section: any) => !section?.isDeleted)
+      .flatMap((section: any) => {
+        const isSectionHidden = preview ? false : Boolean(section?.isHidden);
+        const shouldEmptyHidden = Boolean(
+          sendHiddenSectionsAsEmpty ||
+            section?.sendEmptyWhenHidden ||
+            section?.clearWhenHidden,
+        );
+        const shouldSendEmpty = isSectionHidden && shouldEmptyHidden;
+
+        return (
+          section?.questionData
+            ?.filter((el: any) => !el?.isDeleted)
+            ?.map((element: any) => {
+              const rawVal =
+                currentFormValues[element.id] !== undefined
+                  ? currentFormValues[element.id]
+                  : element.value !== undefined && element.value !== null
+                    ? element.value
+                    : "";
+
+              const metaObj =
+                currentFormValues[`${element.id}_metaData`] ||
+                element.metaData?.responseObject;
+
+              return {
+                id: element.id,
+                value: shouldSendEmpty ? "" : (rawVal ?? ""),
+                sectionId: section.id,
+                type: element.type,
+                metaData: {
+                  prefix: element.prefix,
+                  dateFormat: element.dateFormat,
+                  ...(shouldSendEmpty || !metaObj
+                    ? {}
+                    : { responseObject: metaObj }),
+                },
+              };
+            }) || []
+        );
+      });
 
     handleGetValues(updatedData);
-    setAnswerData(memoizedValues);
+    setAnswerData(currentFormValues);
   }, [
     memoizedValues,
-    filteredFormData,
+    form_data,
     handleGetValues,
     onGetValues,
     setAnswerData,
+    sendHiddenSectionsAsEmpty,
+    getValues,
+    preview,
   ]);
 
   // ✅ Answer data hydration
@@ -208,25 +251,59 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   // ✅ Submit handler
   const onSubmit = useCallback(
     (data: Record<string, any>) => {
-      const updatedData = filteredFormData.flatMap((section) =>
-        section?.questionData?.map((element: any) => ({
-          id: element.id,
-          value: data[element.id] || "",
-          sectionId: section.id,
-          type: element.type,
-          metaData: {
-            prefix: element.prefix,
-            dateFormat: element.dateFormat,
-            ...(data[`${element.id}_metaData`] ? { responseObject: data[`${element.id}_metaData`] } : {}),
-          },
-        })),
-      );
+      const currentFormValues = {
+        ...(getValues ? getValues() : {}),
+        ...(data || {}),
+      };
+
+      const updatedData = form_data
+        .filter((section: any) => !section?.isDeleted)
+        .flatMap((section: any) => {
+          const isSectionHidden = preview ? false : Boolean(section?.isHidden);
+          const shouldEmptyHidden = Boolean(
+            sendHiddenSectionsAsEmpty ||
+              section?.sendEmptyWhenHidden ||
+              section?.clearWhenHidden,
+          );
+          const shouldSendEmpty = isSectionHidden && shouldEmptyHidden;
+
+          return (
+            section?.questionData
+              ?.filter((el: any) => !el?.isDeleted)
+              ?.map((element: any) => {
+                const rawVal =
+                  currentFormValues[element.id] !== undefined
+                    ? currentFormValues[element.id]
+                    : element.value !== undefined && element.value !== null
+                      ? element.value
+                      : "";
+
+                const metaObj =
+                  currentFormValues[`${element.id}_metaData`] ||
+                  element.metaData?.responseObject;
+
+                return {
+                  id: element.id,
+                  value: shouldSendEmpty ? "" : (rawVal ?? ""),
+                  sectionId: section.id,
+                  type: element.type,
+                  metaData: {
+                    prefix: element.prefix,
+                    dateFormat: element.dateFormat,
+                    ...(shouldSendEmpty || !metaObj
+                      ? {}
+                      : { responseObject: metaObj }),
+                  },
+                };
+              }) || []
+          );
+        });
       if (Object.keys(errors).length > 0) {
         return;
       }
       onSubmitData?.(updatedData);
     },
-    [errors, filteredFormData, onSubmitData],
+    [errors, form_data, getValues, onSubmitData, sendHiddenSectionsAsEmpty],
   );
 
   // ✅ Navigation handlers
@@ -292,6 +369,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       apiActivityCount,
       pollResults,
       showResults,
+      hideInputsOnResults,
       isViewer: true,
     }),
     [
@@ -308,6 +386,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       apiActivityCount,
       pollResults,
       showResults,
+      hideInputsOnResults,
     ],
   );
 
@@ -381,7 +460,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                       <button
                         type="button"
                         onClick={handleBack}
-                        className="text-gray-400 hover:text-gray-600 font-medium text-sm flex items-center gap-1 transition-colors back_btn"
+                        className="text-gray-400 hover:text-gray-600 font-semibold text-base flex items-center gap-1 transition-colors back_btn"
                       >
                         <AppIcon
                           icon="material-symbols:arrow-upward-rounded"

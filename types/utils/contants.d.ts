@@ -41,6 +41,7 @@ export interface DataColumnType {
     type?: string;
     validate?: boolean;
     id: string;
+    isColumnDeleted?: boolean;
 }
 export interface OptionType {
     label: string;

@@ -30,32 +30,36 @@ const pollCategoryTitles = [
 
 const SideBar = ({ formType = "default" }: { formType?: FormType }) => {
   const [query, setQuery] = useState("");
-  const [canPaste, setCanPaste] = useState(false);
-  const { setIsDragging, addElement, selectedSection, pasteElement }: any =
+  const [clipboardType, setClipboardType] = useState<"element" | "section" | null>(null);
+  const { setIsDragging, addElement, selectedSection, pasteElement, pasteSection }: any =
     useContext(EditorContext);
 
   useEffect(() => {
     const checkClipboard = () => {
       try {
-        const clipboardString = localStorage.getItem("form_builder_clipboard");
+        const clipboardString =
+          localStorage.getItem("form_builder_section_clipboard") ||
+          localStorage.getItem("form_builder_clipboard");
         if (clipboardString) {
           const copiedData = JSON.parse(clipboardString);
-          if (copiedData?.type === "FORM_BUILDER_CLIPBOARD" && copiedData?.timestamp) {
-            const isExpired = Date.now() - copiedData.timestamp > 60000;
+          if (copiedData?.type === "FORM_BUILDER_SECTION_CLIPBOARD" && copiedData?.section) {
+            setClipboardType("section");
+          } else if (copiedData?.type === "FORM_BUILDER_CLIPBOARD" && copiedData?.element) {
+            const isExpired = copiedData?.timestamp && (Date.now() - copiedData.timestamp > 60000);
             if (isExpired) {
               localStorage.removeItem("form_builder_clipboard");
-              setCanPaste(false);
+              setClipboardType(null);
             } else {
-              setCanPaste(true);
+              setClipboardType("element");
             }
           } else {
-            setCanPaste(false);
+            setClipboardType(null);
           }
         } else {
-          setCanPaste(false);
+          setClipboardType(null);
         }
       } catch {
-        setCanPaste(false);
+        setClipboardType(null);
       }
     };
 
@@ -125,9 +129,23 @@ const SideBar = ({ formType = "default" }: { formType?: FormType }) => {
           id="search"
           autoComplete="off"
         />
-        {canPaste && (
+        {clipboardType === "section" && (
           <button
-            className="w-full mt-3 flex items-center justify-center gap-2 py-2 px-3 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-sm font-medium transition-colors"
+            className="w-full mt-3 flex items-center justify-center gap-2 py-2 px-3 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-lg text-sm font-medium transition-colors border border-purple-200"
+            onClick={() => {
+              if (typeof pasteSection === 'function') {
+                pasteSection();
+              }
+            }}
+            title="Paste copied section"
+          >
+            <AppIcon icon="lucide:clipboard-paste" />
+            Paste Section (Ctrl+V)
+          </button>
+        )}
+        {clipboardType === "element" && (
+          <button
+            className="w-full mt-3 flex items-center justify-center gap-2 py-2 px-3 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-sm font-medium transition-colors border border-blue-200"
             onClick={() => {
               if (!selectedSection) {
                 toast.error("Please select a section to paste the element.");

@@ -24,6 +24,8 @@ const SectionItem = ({
   toggleSection,
   handleSectionEdit,
   removeSection,
+  copySection,
+  duplicateSection,
   formDataLength,
   onDragOver,
   setIsDragging,
@@ -104,7 +106,30 @@ const SectionItem = ({
           <div className="flex items-center gap-x-2">
             <button
               type="button"
-              className="p-1 text-xs border rounded-lg"
+              className="p-1 text-xs border rounded-lg hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
+              title="Copy section to clipboard"
+              onClick={(e) => {
+                e.stopPropagation();
+                copySection?.(section.id);
+              }}
+            >
+              <AppIcon icon="fluent:copy-20-regular" />
+            </button>
+            <button
+              type="button"
+              className="p-1 text-xs border rounded-lg hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
+              title="Duplicate section"
+              onClick={(e) => {
+                e.stopPropagation();
+                duplicateSection?.(section.id);
+              }}
+            >
+              <AppIcon icon="lucide:copy-plus" />
+            </button>
+            <button
+              type="button"
+              className="p-1 text-xs border rounded-lg hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
+              title="Edit section"
               onClick={() => handleSectionEdit(section)}
             >
               <AppIcon icon="fluent:edit-28-regular" />
@@ -112,7 +137,8 @@ const SectionItem = ({
             {formDataLength > 1 && (
               <button
                 type="button"
-                className="p-1 text-xs border rounded-lg"
+                className="p-1 text-xs border rounded-lg hover:bg-red-50 text-gray-600 hover:text-red-600 transition-colors"
+                title="Delete section"
                 onClick={() => removeSection(section.id)}
               >
                 <AppIcon icon="lets-icons:trash-duotone-line" />
@@ -180,6 +206,9 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
     setFormData,
     isDragging,
     pasteElement,
+    copySection,
+    pasteSection,
+    duplicateSection,
   }: any = useContext(EditorContext);
 
   useEffect(() => {
@@ -190,9 +219,11 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
         return;
       }
 
-      if (selectedSection) {
+      const clipboardText = e.clipboardData?.getData('text') || "";
+      if (clipboardText.includes("FORM_BUILDER_SECTION_CLIPBOARD")) {
+        pasteSection(undefined, clipboardText);
+      } else if (selectedSection) {
         // Pass clipboard text directly to bypass async permission prompts
-        const clipboardText = e.clipboardData?.getData('text') || "";
         pasteElement(selectedSection, undefined, clipboardText);
       }
     };
@@ -201,7 +232,7 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
     return () => {
       window.removeEventListener('paste', handlePaste);
     };
-  }, [selectedSection, pasteElement]);
+  }, [selectedSection, pasteElement, pasteSection]);
 
   const prevFormDataLength = useRef(formData?.length || 0);
 
@@ -345,6 +376,8 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
                 toggleSection={toggleSection}
                 handleSectionEdit={handleSectionEdit}
                 removeSection={removeSection}
+                copySection={copySection}
+                duplicateSection={duplicateSection}
                 formDataLength={
                   formData?.filter((s: any) => !s?.isDeleted)?.length || 0
                 }
@@ -355,14 +388,24 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
               />
             ),
           )}
-        <div className="flex justify-center gap-x-4">
+        <div className="flex justify-center gap-x-4 flex-wrap gap-y-2">
           <button
             type="button"
             onClick={() => addSection()}
             style={{ color: config?.buttonColor || "#333" }}
-            className="text-sm font-medium"
+            className="text-sm font-medium hover:underline"
           >
-            + Add section{" "}
+            + Add section
+          </button>
+          <button
+            type="button"
+            onClick={() => pasteSection()}
+            style={{ color: config?.buttonColor || "#333" }}
+            className="text-sm font-medium hover:underline flex items-center gap-1"
+            title="Paste section from clipboard"
+          >
+            <AppIcon icon="lucide:clipboard-paste" iconClass="text-sm" />
+            Paste section
           </button>
           {(onAddTemplate || allTemplates?.length) ? (
             <button

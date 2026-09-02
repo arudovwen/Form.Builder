@@ -35,12 +35,27 @@ const CascadeDropdown: React.FC<CascadeDropdownProps> = ({
     trigger,
     setValue,
     watch,
+    getValues,
     isReadOnly,
-  } = validationData || {};
+  } = (validationData as any) || {};
   const fieldName = element?.id ?? "cascadeValue";
 
-  const [selectedFirst, setSelectedFirst] = useState<string>("");
-  const [selectedSecond, setSelectedSecond] = useState<string>("");
+  const watchedCombined = typeof watch === "function" ? watch(fieldName) : undefined;
+  const formCombined = typeof getValues === "function" ? getValues(fieldName) : undefined;
+  const currentCombined = (watchedCombined !== undefined ? watchedCombined : formCombined) || "";
+
+  const [selectedFirst, setSelectedFirst] = useState<string>(() => {
+    if (typeof currentCombined === "string" && currentCombined.includes("_")) {
+      return currentCombined.split("_")[0];
+    }
+    return "";
+  });
+  const [selectedSecond, setSelectedSecond] = useState<string>(() => {
+    if (typeof currentCombined === "string" && currentCombined.includes("_")) {
+      return currentCombined.split("_")[1];
+    }
+    return "";
+  });
 
   // Combine both values into one string: first_second
   const updateCombinedValue = (first: string, second: string) => {
@@ -62,16 +77,16 @@ const CascadeDropdown: React.FC<CascadeDropdownProps> = ({
   };
 
   useEffect(() => {
-    // Hydrate from form values if any
-    if (watch) {
-      const combined = watch(fieldName);
-      if (combined?.includes("_")) {
-        const [first, second] = combined.split("_");
-        setSelectedFirst(first);
-        setSelectedSecond(second);
-      }
+    // Hydrate from form values whenever currentCombined changes
+    if (typeof currentCombined === "string" && currentCombined.includes("_")) {
+      const [first, second] = currentCombined.split("_");
+      setSelectedFirst(first);
+      setSelectedSecond(second);
+    } else if (!currentCombined) {
+      setSelectedFirst("");
+      setSelectedSecond("");
     }
-  }, [watch, fieldName]);
+  }, [currentCombined]);
 
   const secondOptions = useMemo(
     () => element.options1?.filter((option) => option.key === selectedFirst),

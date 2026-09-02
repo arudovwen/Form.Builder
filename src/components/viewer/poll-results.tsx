@@ -7,6 +7,7 @@ export interface PollResultsProps {
     totalResponses: number;
     responsesData: any;
   };
+  hideInputs: boolean;
 }
 
 const parseRankingLabel = (labelStr: string) => {
@@ -21,13 +22,13 @@ const parseRankingLabel = (labelStr: string) => {
   return labelStr;
 };
 
-export const PollResultsBreakdown: React.FC<PollResultsProps> = ({ results }) => {
-  const [showResults, setShowResults] = useState(true);
+export const PollResultsBreakdown: React.FC<PollResultsProps> = ({ results, hideInputs }) => {
+  const [showResults, setShowResults] = useState(hideInputs ?? false);
 
   if (!results) return null;
 
   return (
-    <div className="mt-4 w-full">
+    <div className="mt-2 w-full">
       {showResults && (
         <div className="p-4 mb-3 rounded-xl border border-gray-200 bg-gray-50/50 shadow-sm w-full transition-all duration-300">
           <div className="flex justify-between items-center mb-4">

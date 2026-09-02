@@ -18,5 +18,8 @@ export interface RenderProps {
     uploadUrl?: string;
     pollResults?: Record<string, any>;
     showResults?: boolean;
+    hideInputsOnResults?: boolean;
+    sendHiddenSectionsAsEmpty?: boolean;
+    preview?: boolean;
 }
-export default function Viewer({ answerData, form_data, ignoreValidation, onSubmit, isReadOnly, loading, config, renderType, children, hideFooter, onGetValues, uploadUrl, pollResults, showResults, }: RenderProps): import("react/jsx-runtime").JSX.Element;
+export default function Viewer({ answerData, form_data, ignoreValidation, onSubmit, isReadOnly, loading, config, renderType, children, hideFooter, onGetValues, uploadUrl, pollResults, showResults, hideInputsOnResults, sendHiddenSectionsAsEmpty, preview, }: RenderProps): import("react/jsx-runtime").JSX.Element;

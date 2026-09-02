@@ -25,6 +25,9 @@ export interface RenderProps {
   uploadUrl?: string;
   pollResults?: Record<string, any>; // Add pollResults
   showResults?: boolean; // Toggle for showing results
+  hideInputsOnResults?: boolean; // Hide input controls when viewing results
+  sendHiddenSectionsAsEmpty?: boolean;
+  preview?: boolean;
 }
 
 export default function Viewer({
@@ -42,6 +45,9 @@ export default function Viewer({
   uploadUrl,
   pollResults,
   showResults,
+  hideInputsOnResults = false,
+  sendHiddenSectionsAsEmpty = false,
+  preview = false,
 }: RenderProps) {
   // ✅ Store config in localStorage only when it changes
   useEffect(() => {
@@ -84,6 +90,9 @@ export default function Viewer({
           uploadUrl={uploadUrl}
           pollResults={pollResults}
           showResults={showResults}
+          hideInputsOnResults={hideInputsOnResults}
+          sendHiddenSectionsAsEmpty={sendHiddenSectionsAsEmpty}
+          preview={preview}
         >
           {children}
         </FormRenderer>

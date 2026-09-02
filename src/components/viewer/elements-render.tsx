@@ -21,11 +21,18 @@ export const RenderElement = ({ element, validationData }: { element: any; valid
 
   if (!ElementComponent) return null;
 
+  const showResults = Boolean(validationData?.showResults);
+  const hideInputs = Boolean(
+    validationData?.hideInputsOnResults ?? validationData?.hideInputs,
+  );
+  const hasPollResults = Boolean(validationData?.pollResults?.[element.id]);
+  const shouldHideInput = showResults && hideInputs && hasPollResults;
+
   return (
     <div className={`${!isVisible ? "hidden" : ""} min-w-0 w-full`}>
       <div className="mb-1.5 min-w-0">
         {element.inputLabel && (
-          <label className="block text-sm font-medium  input_label">
+          <label className="block text-sm font-medium input_label">
             {element.inputLabel}{" "}
             {acceptedFileLabels && (
               <span className="text-gray-400 text-xs">
@@ -35,32 +42,38 @@ export const RenderElement = ({ element, validationData }: { element: any; valid
           </label>
         )}
       </div>
-      <ElementComponent
-        element={element}
-        state="view"
-        validationData={{
-          ...validationData,
-          isReadOnly:
-            validationData?.isReadOnly ||
-            element.isReadOnly ||
-            element.readOnly ||
-            element.isDisabled ||
-            element.disabled,
-          isDisabled:
-            validationData?.isDisabled ||
-            element.isDisabled ||
-            element.disabled,
-        }}
-      />
+
+      {!shouldHideInput && (
+        <ElementComponent
+          element={element}
+          state="view"
+          validationData={{
+            ...validationData,
+            isReadOnly:
+              validationData?.isReadOnly ||
+              element.isReadOnly ||
+              element.readOnly ||
+              element.isDisabled ||
+              element.disabled,
+            isDisabled:
+              validationData?.isDisabled ||
+              element.isDisabled ||
+              element.disabled,
+          }}
+        />
+      )}
+
+      {showResults && hasPollResults && (
+        <PollResultsBreakdown
+          results={validationData.pollResults[element.id]}
+          hideInputs={hideInputs}
+        />
+      )}
+
       {element.description && (
         <small className="block text-gray-400 mt-0.5 text-xs">
           {element.description}
         </small>
-      )}
-      
-      {/* Poll Results Rendering */}
-      {validationData?.showResults && validationData?.pollResults?.[element.id] && (
-        <PollResultsBreakdown results={validationData.pollResults[element.id]} />
       )}
     </div>
   );

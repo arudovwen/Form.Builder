@@ -239,7 +239,7 @@ export default function FileUpload({
   const hasFiles = fileData && fileData.length > 0;
 
   return (
-    <div className="flex flex-col items-start gap-2">
+    <div className="flex flex-col gap-2 w-full min-w-0 max-w-full">
       {!disabled && !(hasFiles && !multiple) && (
         <div className="!flex field-control !py-0 !px-0 relative w-full">
           <input
@@ -271,7 +271,7 @@ export default function FileUpload({
       )}
 
       {(hasFiles || isUploading) && (
-        <div className="relative grid gap-y-1 flex-1 w-full min-h-[40px]">
+        <div className="relative grid gap-y-1 flex-1 w-full min-w-0 max-w-full min-h-[40px]">
           {isUploading && (
             <div
               className={`z-10 flex items-center justify-center bg-white/60 rounded ${hasFiles ? "absolute inset-0" : "p-1 border border-dashed border-gray-300"}`}

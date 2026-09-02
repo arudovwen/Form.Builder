@@ -15,11 +15,22 @@ export default function DataGridInput({
     isReadOnly,
   } = validationData || {};
 
-  // registeredValue may be { rows, columns } or a plain array (legacy)
-  const registeredValue = (watch && watch(element?.id)) || {};
-  const rows = Array.isArray(registeredValue)
-    ? registeredValue
-    : registeredValue?.rows ?? [];
+  const rawRegisteredValue =
+    (watch && watch(element?.id)) ??
+    (validationData?.getValues ? validationData.getValues(element?.id) : undefined) ??
+    element?.value ??
+    {};
+
+  let parsedValue = rawRegisteredValue;
+  if (typeof rawRegisteredValue === "string" && (rawRegisteredValue.trim().startsWith("{") || rawRegisteredValue.trim().startsWith("["))) {
+    try {
+      parsedValue = JSON.parse(rawRegisteredValue);
+    } catch {}
+  }
+
+  const rows = Array.isArray(parsedValue)
+    ? parsedValue
+    : parsedValue?.rows ?? [];
 
   useEffect(() => {
     register(element.id);

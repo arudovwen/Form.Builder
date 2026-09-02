@@ -38,10 +38,10 @@ const FormPreview: React.FC = () => {
           form_data={formData}
           ignoreValidation={true}
           config={config}
-            uploadUrl="https://beta.api.gateway.thetaskforge.co/edms/v1/fileupload/upload-document"
+          uploadUrl={uploadUrl || "https://beta.api.gateway.thetaskforge.co/edms/v1/fileupload/upload-document"}
           renderType={previewMode}
           onGetValues={(e: any) => console.log(e)}
-
+          preview={true}
         />
       </div>
     </div>
