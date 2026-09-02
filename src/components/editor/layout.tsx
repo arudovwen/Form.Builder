@@ -13,7 +13,7 @@ export interface BuilderProps {
   questionData?: any; // Data for the questions in the form
   isReadOnly?: boolean; // Flag to indicate if the form is read-only
   config?: any; // Configuration for the form
-  deleteMode?: DeleteMode; // Setting for removing deleted fields or marking them as isDeleted ("remove" | "isDeleted")
+  deleteMode?: DeleteMode; // Setting for removing deleted fields or marking them as isFieldDeleted ("remove" | "isFieldDeleted")
   title?: string;
   loading?: boolean;
   goBackUrl?: () => void;
@@ -68,7 +68,9 @@ export default function Layout({
               </div>
             </div>
           )}
-          <div className={`flex-1 h-full max-h-full z-[1] ${viewMode === "canvas" ? "w-[calc(100%-250px)]" : "w-full"}`}>
+          <div
+            className={`flex-1 h-full max-h-full z-[1] ${viewMode === "canvas" ? "w-[calc(100%-250px)]" : "w-full"}`}
+          >
             <div className=" h-[70px]">
               <TopBar
                 title={title}
@@ -86,16 +88,16 @@ export default function Layout({
             </div>
             <div className="p-6 h-[calc(100vh-70px)]">
               {!loading ? (
-                <MainPage 
-                  questionData={questionData} 
-                  uploadUrl={uploadUrl} 
-                  onAddTemplate={onAddTemplate} 
-                  templates={templates} 
+                <MainPage
+                  questionData={questionData}
+                  uploadUrl={uploadUrl}
+                  onAddTemplate={onAddTemplate}
+                  templates={templates}
                   viewMode={viewMode}
                 />
               ) : (
                 <Loader loadingClass="!w-full !h-[800px]" />
-              )}  
+              )}
             </div>
           </div>
         </div>

@@ -3,14 +3,14 @@ type Section = {
   title: string;
   description: string;
   questionData?: any[];
-  isDeleted?: boolean;
+  isFieldDeleted?: boolean;
 };
 
 export function getAllQuestionData(sections: Section[]): any[] {
   return (
     sections
-      ?.filter((section) => !section?.isDeleted)
+      ?.filter((section) => !section?.isFieldDeleted)
       ?.flatMap((section) => section?.questionData ?? [])
-      ?.filter((field) => !field?.isDeleted) ?? []
+      ?.filter((field) => !field?.isFieldDeleted) ?? []
   );
 }

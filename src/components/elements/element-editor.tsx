@@ -233,18 +233,18 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
 
   const fieldCount =
     formData
-      ?.filter((section: any) => !section?.isDeleted)
+      ?.filter((section: any) => !section?.isFieldDeleted)
       ?.flatMap((section: any) => section?.questionData || [])
-      ?.filter((f: any) => !f?.isDeleted)?.length || 0;
+      ?.filter((f: any) => !f?.isFieldDeleted)?.length || 0;
 
   const mentionData = React.useMemo(() => {
     return (
       formData
-        ?.filter((section: any) => !section?.isDeleted)
+        ?.filter((section: any) => !section?.isFieldDeleted)
         ?.flatMap((section: any) => section?.questionData || [])
         .filter(
           (f: any) =>
-            !f?.isDeleted &&
+            !f?.isFieldDeleted &&
             f.id !== element?.id &&
             !["spacer", "divider", "section", "grid"].includes(
               f.type?.toLowerCase(),
@@ -443,138 +443,143 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           />
         </div>
       )}
-   {optionTypes === "manual" &&   <div>
-        <h3 className="mb-4 text-sm text-gray-500 font-semibold">
-          {element?.type?.toLowerCase() === "matrix"
-            ? "Rows Options"
-            : "Parent Options"}
-        </h3>
-        {fields?.map((field, index) => (
-          <div
-            key={field.id}
-            className="mb-6 pb-6 border-b border-gray-200 last:mb-0 last:pb-0 last:border-0"
-          >
-            <div className="flex items-start gap-x-4">
-              <div className="flex-1">
-                <DynamicInput
-                  watch={watch}
-                  label={index === 0 ? "Label" : ""}
-                  name={`options.${index}.label`}
-                  register={register}
-                  errors={errors}
-                  element={element}
-                  placeholder="Label"
-                  onChange={(e) => {
-                    const text = e.target.value;
-                    const slugified = text
-                      .toLowerCase()
-                      .trim()
-                      .replace(/[\s-]+/g, "_")
-                      .replace(/[^a-z0-9_]/g, "");
-                    setValue(`options.${index}.value`, slugified, {
-                      shouldValidate: true,
-                      shouldDirty: true,
-                    });
-                  }}
-                />
-              </div>
-              <div className="flex-1">
-                <DynamicInput
-                  watch={watch}
-                  label={index === 0 ? "Value" : ""}
-                  name={`options.${index}.value`}
-                  register={register}
-                  errors={errors}
-                  element={element}
-                  placeholder="Value"
-                />
-              </div>
-
-              <button
-                disabled={fields.length === 1}
-                type="button"
-                className={`outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed ${
-                  index === 0 ? "mt-[34px]" : "mt-[10px]"
-                }`}
-                onClick={() => remove(index)}
-              >
-                <AppIcon
-                  icon="iconamoon:sign-times-fill"
-                  iconClass="text-gray-400 hover:text-red-500 text-lg transition-colors"
-                />
-              </button>
-            </div>
-
-            {element.inputType === "imageChoice" && (
-              <div className="mt-3 pr-[36px]">
-                {index === 0 && (
-                  <label className="block text-sm font-medium text-[#344054] font-onest mb-1.5">
-                    Image Upload
-                  </label>
-                )}
-                <div className="flex gap-2">
-                  <FileUpload
-                    multiple={false}
-                    accept={[
-                      { value: "image/*", label: "All Images" },
-                      { value: "image/jpeg", label: "JPEG" },
-                      { value: "image/png", label: "PNG" },
-                      { value: "image/gif", label: "GIF" },
-                      { value: "image/webp", label: "WebP" },
-                      { value: "image/svg+xml", label: "SVG" },
-                    ]}
-                    onFileLoaded={(files) => {
-                      if (files && files.length > 0) {
-                        setValue(`options.${index}.imageUrl`, files[0].base64, {
-                          shouldDirty: true,
-                          shouldValidate: true,
-                        });
-                      } else {
-                        setValue(`options.${index}.imageUrl`, "", {
-                          shouldDirty: true,
-                          shouldValidate: true,
-                        });
-                      }
+      {optionTypes === "manual" && (
+        <div>
+          <h3 className="mb-4 text-sm text-gray-500 font-semibold">
+            {element?.type?.toLowerCase() === "matrix"
+              ? "Rows Options"
+              : "Parent Options"}
+          </h3>
+          {fields?.map((field, index) => (
+            <div
+              key={field.id}
+              className="mb-6 pb-6 border-b border-gray-200 last:mb-0 last:pb-0 last:border-0"
+            >
+              <div className="flex items-start gap-x-4">
+                <div className="flex-1">
+                  <DynamicInput
+                    watch={watch}
+                    label={index === 0 ? "Label" : ""}
+                    name={`options.${index}.label`}
+                    register={register}
+                    errors={errors}
+                    element={element}
+                    placeholder="Label"
+                    onChange={(e) => {
+                      const text = e.target.value;
+                      const slugified = text
+                        .toLowerCase()
+                        .trim()
+                        .replace(/[\s-]+/g, "_")
+                        .replace(/[^a-z0-9_]/g, "");
+                      setValue(`options.${index}.value`, slugified, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      });
                     }}
-                    list={
-                      watch(`options.${index}.imageUrl`)
-                        ? [
-                            {
-                              base64: watch(`options.${index}.imageUrl`),
-                              name: "Uploaded Image",
-                              type: "image",
-                            },
-                          ]
-                        : []
-                    }
                   />
-                  <div className="flex-1 hidden">
-                    <DynamicInput
-                      watch={watch}
-                      label=""
-                      name={`options.${index}.imageUrl`}
-                      register={register}
-                      errors={errors}
-                      element={element}
+                </div>
+                <div className="flex-1">
+                  <DynamicInput
+                    watch={watch}
+                    label={index === 0 ? "Value" : ""}
+                    name={`options.${index}.value`}
+                    register={register}
+                    errors={errors}
+                    element={element}
+                    placeholder="Value"
+                  />
+                </div>
+
+                <button
+                  disabled={fields.length === 1}
+                  type="button"
+                  className={`outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed ${
+                    index === 0 ? "mt-[34px]" : "mt-[10px]"
+                  }`}
+                  onClick={() => remove(index)}
+                >
+                  <AppIcon
+                    icon="iconamoon:sign-times-fill"
+                    iconClass="text-gray-400 hover:text-red-500 text-lg transition-colors"
+                  />
+                </button>
+              </div>
+
+              {element.inputType === "imageChoice" && (
+                <div className="mt-3 pr-[36px]">
+                  {index === 0 && (
+                    <label className="block text-sm font-medium text-[#344054] font-onest mb-1.5">
+                      Image Upload
+                    </label>
+                  )}
+                  <div className="flex gap-2">
+                    <FileUpload
+                      multiple={false}
+                      accept={[
+                        { value: "image/*", label: "All Images" },
+                        { value: "image/jpeg", label: "JPEG" },
+                        { value: "image/png", label: "PNG" },
+                        { value: "image/gif", label: "GIF" },
+                        { value: "image/webp", label: "WebP" },
+                        { value: "image/svg+xml", label: "SVG" },
+                      ]}
+                      onFileLoaded={(files) => {
+                        if (files && files.length > 0) {
+                          setValue(
+                            `options.${index}.imageUrl`,
+                            files[0].base64,
+                            {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            },
+                          );
+                        } else {
+                          setValue(`options.${index}.imageUrl`, "", {
+                            shouldDirty: true,
+                            shouldValidate: true,
+                          });
+                        }
+                      }}
+                      list={
+                        watch(`options.${index}.imageUrl`)
+                          ? [
+                              {
+                                base64: watch(`options.${index}.imageUrl`),
+                                name: "Uploaded Image",
+                                type: "image",
+                              },
+                            ]
+                          : []
+                      }
                     />
+                    <div className="flex-1 hidden">
+                      <DynamicInput
+                        watch={watch}
+                        label=""
+                        name={`options.${index}.imageUrl`}
+                        register={register}
+                        errors={errors}
+                        element={element}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+          ))}{" "}
+          <div>
+            {" "}
+            <button
+              type="button"
+              className="flex items-center mt-2 text-sm font-medium text-gray-700 gap-x-1"
+              onClick={() => append({ label: "", value: "", id: uuidv4() })}
+            >
+              <AppIcon icon="qlementine-icons:plus-16" /> Add Option
+            </button>
           </div>
-        ))}{" "}
-        <div>
-          {" "}
-          <button
-            type="button"
-            className="flex items-center mt-2 text-sm font-medium text-gray-700 gap-x-1"
-            onClick={() => append({ label: "", value: "", id: uuidv4() })}
-          >
-            <AppIcon icon="qlementine-icons:plus-16" /> Add Option
-          </button>
         </div>
-      </div>
-}
+      )}
       {["cascadeselect", "matrix"].includes(element.type.toLowerCase()) && (
         <>
           <hr className="my-5" />
@@ -722,29 +727,29 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       )}
       <div className="grid gap-y-3">
         {dataFields?.map((field, index) => {
-          const isDeleted =
+          const isFieldDeleted =
             values.dataColumns?.[index]?.isColumnDeleted ||
-            values.dataColumns?.[index]?.isDeleted ||
+            values.dataColumns?.[index]?.isFieldDeleted ||
             (field as any)?.isColumnDeleted ||
-            (field as any)?.isDeleted;
+            (field as any)?.isFieldDeleted;
 
-          if (isDeleted) return null;
+          if (isFieldDeleted) return null;
 
           const firstVisibleIndex = dataFields.findIndex((f, idx) => {
             const isDel =
               values.dataColumns?.[idx]?.isColumnDeleted ||
-              values.dataColumns?.[idx]?.isDeleted ||
+              values.dataColumns?.[idx]?.isFieldDeleted ||
               (f as any)?.isColumnDeleted ||
-              (f as any)?.isDeleted;
+              (f as any)?.isFieldDeleted;
             return !isDel;
           });
 
           const activeDataFieldsCount = dataFields.filter((f, idx) => {
             const isDel =
               values.dataColumns?.[idx]?.isColumnDeleted ||
-              values.dataColumns?.[idx]?.isDeleted ||
+              values.dataColumns?.[idx]?.isFieldDeleted ||
               (f as any)?.isColumnDeleted ||
-              (f as any)?.isDeleted;
+              (f as any)?.isFieldDeleted;
             return !isDel;
           }).length;
 
@@ -825,7 +830,10 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   type="button"
                   className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
                   onClick={() => {
-                    if (deleteMode === "isDeleted" || deleteMode === "soft") {
+                    if (
+                      deleteMode === "isFieldDeleted" ||
+                      deleteMode === "soft"
+                    ) {
                       setValue(`dataColumns.${index}.isColumnDeleted`, true, {
                         shouldValidate: true,
                         shouldDirty: true,

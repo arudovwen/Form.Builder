@@ -144,11 +144,11 @@ export default function LogicFlow({ formData }: { formData: any[] }) {
 
     // First pass: create all nodes and sequential edges
     formData
-      ?.filter((section: any) => !section?.isDeleted)
+      ?.filter((section: any) => !section?.isFieldDeleted)
       ?.forEach((section: any, sIndex: number) => {
         const colorScheme = sectionColors[sIndex % sectionColors.length];
         const activeFields =
-          section?.questionData?.filter((f: any) => !f?.isDeleted) || [];
+          section?.questionData?.filter((f: any) => !f?.isFieldDeleted) || [];
 
         const sectionX = sIndex * 400; // Layout left to right horizontally
         const sectionY = 0;
@@ -218,45 +218,49 @@ export default function LogicFlow({ formData }: { formData: any[] }) {
 
     // Second pass: Create conditional edges for hidden fields
     formData
-      ?.filter((section: any) => !section?.isDeleted)
+      ?.filter((section: any) => !section?.isFieldDeleted)
       ?.forEach((section: any) => {
         section?.questionData
-          ?.filter((field: any) => !field?.isDeleted)
+          ?.filter((field: any) => !field?.isFieldDeleted)
           ?.forEach((field: any) => {
-        if (field.isHidden && field.visibilityDependentFields?.length > 0) {
-          field.visibilityDependentFields.forEach((dep: any) => {
-            edges.push({
-              id: `e-cond-${dep.id}-${field.id}`,
-              source: dep.id,
-              target: field.id,
-              type: "smoothstep",
-              animated: true,
-              label: `if ${dep.operator} '${dep.fieldValue}'`,
-              labelStyle: { fill: "#f59e0b", fontWeight: 600, fontSize: 12 },
-              labelBgStyle: {
-                fill: "#fffef2",
-                stroke: "#fcd34d",
-                strokeWidth: 1,
-                rx: 4,
-                ry: 4,
-              },
-              labelBgPadding: [6, 4],
-              style: {
-                stroke: "#f59e0b",
-                strokeWidth: 2,
-                strokeDasharray: "5,5",
-              },
-              markerEnd: {
-                type: MarkerType.ArrowClosed,
-                width: 20,
-                height: 20,
-                color: "#f59e0b",
-              },
-            });
+            if (field.isHidden && field.visibilityDependentFields?.length > 0) {
+              field.visibilityDependentFields.forEach((dep: any) => {
+                edges.push({
+                  id: `e-cond-${dep.id}-${field.id}`,
+                  source: dep.id,
+                  target: field.id,
+                  type: "smoothstep",
+                  animated: true,
+                  label: `if ${dep.operator} '${dep.fieldValue}'`,
+                  labelStyle: {
+                    fill: "#f59e0b",
+                    fontWeight: 600,
+                    fontSize: 12,
+                  },
+                  labelBgStyle: {
+                    fill: "#fffef2",
+                    stroke: "#fcd34d",
+                    strokeWidth: 1,
+                    rx: 4,
+                    ry: 4,
+                  },
+                  labelBgPadding: [6, 4],
+                  style: {
+                    stroke: "#f59e0b",
+                    strokeWidth: 2,
+                    strokeDasharray: "5,5",
+                  },
+                  markerEnd: {
+                    type: MarkerType.ArrowClosed,
+                    width: 20,
+                    height: 20,
+                    color: "#f59e0b",
+                  },
+                });
+              });
+            }
           });
-        }
       });
-    });
 
     return { nodes, edges };
   }, [formData]);
@@ -279,7 +283,6 @@ export default function LogicFlow({ formData }: { formData: any[] }) {
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView
-       
         attributionPosition="bottom-right"
       >
         <Background color="#e2e8f0" gap={16} />

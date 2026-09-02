@@ -141,7 +141,7 @@ const GridInput = ({
         const section = formData.find((s: any) => s.id === sectionId);
         const occupant = section?.questionData?.find(
           (el: any) =>
-            !el.isDeleted &&
+            !el.isFieldDeleted &&
             el.gridId === element.id &&
             el.gridPosition?.col === currentCol,
         );
@@ -182,7 +182,7 @@ const GridInput = ({
       .find((s: any) => s.id === sectionId)
       ?.questionData?.find(
         (el: any) =>
-          !el.isDeleted &&
+          !el.isFieldDeleted &&
           el.gridId === element.id &&
           el.gridPosition?.col === currentCol,
       );

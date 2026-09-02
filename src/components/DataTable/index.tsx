@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo, memo, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  memo,
+  useRef,
+} from "react";
 import CurrencyInput from "react-currency-input-field";
 import AppIcon from "../ui/AppIcon";
 import { v4 as uuidv4 } from "uuid";
@@ -216,7 +223,7 @@ export default function CustomDataGrid<T extends { id: string }>({
 }: CustomDataGridProps<T>) {
   const [rows, setRows] = useState<T[]>(value);
   const config = getItem("config");
-  
+
   const rowsRef = useRef<T[]>(rows);
   rowsRef.current = rows;
 
@@ -224,7 +231,9 @@ export default function CustomDataGrid<T extends { id: string }>({
     () =>
       columns?.filter(
         (col: any) =>
-          !col?.isColumnDeleted && !col?.iscolumnDeleted && !col?.isDeleted,
+          !col?.isColumnDeleted &&
+          !col?.iscolumnDeleted &&
+          !col?.isFieldDeleted,
       ) || [],
     [columns],
   );

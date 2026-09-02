@@ -78,11 +78,11 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   const filteredFormData = useMemo(
     () =>
       form_data
-        .filter((i) => (preview ? true : !i.isHidden) && !i.isDeleted)
+        .filter((i) => (preview ? true : !i.isHidden) && !i.isFieldDeleted)
         .map((section) => {
           const isSectionDisabled = section.isDisabled || section.disabled;
           const activeQuestions =
-            section?.questionData?.filter((q: any) => !q.isDeleted) || [];
+            section?.questionData?.filter((q: any) => !q.isFieldDeleted) || [];
           if (isSectionDisabled) {
             return {
               ...section,
@@ -186,19 +186,19 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     };
 
     const updatedData = form_data
-      .filter((section: any) => !section?.isDeleted)
+      .filter((section: any) => !section?.isFieldDeleted)
       .flatMap((section: any) => {
         const isSectionHidden = preview ? false : Boolean(section?.isHidden);
         const shouldEmptyHidden = Boolean(
           sendHiddenSectionsAsEmpty ||
-            section?.sendEmptyWhenHidden ||
-            section?.clearWhenHidden,
+          section?.sendEmptyWhenHidden ||
+          section?.clearWhenHidden,
         );
         const shouldSendEmpty = isSectionHidden && shouldEmptyHidden;
 
         return (
           section?.questionData
-            ?.filter((el: any) => !el?.isDeleted)
+            ?.filter((el: any) => !el?.isFieldDeleted)
             ?.map((element: any) => {
               const rawVal =
                 currentFormValues[element.id] !== undefined
@@ -257,19 +257,19 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       };
 
       const updatedData = form_data
-        .filter((section: any) => !section?.isDeleted)
+        .filter((section: any) => !section?.isFieldDeleted)
         .flatMap((section: any) => {
           const isSectionHidden = preview ? false : Boolean(section?.isHidden);
           const shouldEmptyHidden = Boolean(
             sendHiddenSectionsAsEmpty ||
-              section?.sendEmptyWhenHidden ||
-              section?.clearWhenHidden,
+            section?.sendEmptyWhenHidden ||
+            section?.clearWhenHidden,
           );
           const shouldSendEmpty = isSectionHidden && shouldEmptyHidden;
 
           return (
             section?.questionData
-              ?.filter((el: any) => !el?.isDeleted)
+              ?.filter((el: any) => !el?.isFieldDeleted)
               ?.map((element: any) => {
                 const rawVal =
                   currentFormValues[element.id] !== undefined

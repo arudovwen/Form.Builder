@@ -158,7 +158,7 @@ const addNumberValidations = (
 };
 
 export const evaluateVisibility = (question: any, answerData: any) => {
-  if (question?.isDeleted) return false;
+  if (question?.isFieldDeleted) return false;
   if (!question.isHidden) return true;
   const fields = question.visibilityDependentFields || [];
   if (!fields.length) return true;
@@ -201,9 +201,9 @@ export function generateDynamicSchema({
   const schemaFields: Record<string, yup.Schema<any>> = {};
 
   formData.forEach((section: any) => {
-    if (section?.isDeleted) return;
+    if (section?.isFieldDeleted) return;
     section?.questionData?.forEach((question: any) => {
-      if (question?.isDeleted) return;
+      if (question?.isFieldDeleted) return;
       // If the field is conditionally hidden, skip validating it
       if (!evaluateVisibility(question, answerData)) {
         return;
@@ -248,34 +248,43 @@ export function generateDynamicSchema({
           question,
         );
       }
-      
+
       // Add array/multi-select validation for minChecked or requireAllChecked
       if (question.requireAllChecked) {
         fieldSchema = fieldSchema.test(
           "require-all-checked",
           "All options must be selected",
           (value) => {
-            const isEmpty = value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
+            const isEmpty =
+              value === undefined ||
+              value === null ||
+              value === "" ||
+              (Array.isArray(value) && value.length === 0);
             if (isEmpty) {
               return !isRequired;
             }
             const allOptionsCount = question.options?.length || 0;
             if (Array.isArray(value)) return value.length >= allOptionsCount;
             return allOptionsCount <= 1;
-          }
+          },
         );
       } else if (question.minChecked) {
         fieldSchema = fieldSchema.test(
           "min-checked",
           `Please select at least ${question.minChecked} option(s)`,
           (value) => {
-            const isEmpty = value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
+            const isEmpty =
+              value === undefined ||
+              value === null ||
+              value === "" ||
+              (Array.isArray(value) && value.length === 0);
             if (isEmpty) {
               return !isRequired;
             }
-            if (Array.isArray(value)) return value.length >= question.minChecked;
+            if (Array.isArray(value))
+              return value.length >= question.minChecked;
             return 1 >= question.minChecked;
-          }
+          },
         );
       }
 

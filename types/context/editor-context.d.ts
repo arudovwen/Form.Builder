@@ -1,5 +1,5 @@
 import React from "react";
-export type DeleteMode = "remove" | "isDeleted" | "soft" | "hard";
+export type DeleteMode = "remove" | "isFieldDeleted" | "soft" | "hard";
 interface EditorProviderProps {
     children: React.ReactNode;
     onChange?: (data: any) => void;

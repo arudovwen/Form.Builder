@@ -99,7 +99,10 @@ const SectionItem = ({
             className="flex-1 h-full py-4 cursor-grab active:cursor-grabbing flex items-center gap-2"
             title="Drag to reorder section"
           >
-            <AppIcon icon="material-symbols:drag-indicator" iconClass="text-gray-400 text-lg" />
+            <AppIcon
+              icon="material-symbols:drag-indicator"
+              iconClass="text-gray-400 text-lg"
+            />
             <h2 className="font-medium">{section.title || "Section title"}</h2>
           </div>
 
@@ -187,7 +190,13 @@ const SectionItem = ({
   );
 };
 
-const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void; templates?: any[] }) => {
+const FormBuilder = ({
+  onAddTemplate,
+  templates,
+}: {
+  onAddTemplate?: () => void;
+  templates?: any[];
+}) => {
   const allTemplates = [...defaultTemplates, ...(templates || [])];
   const [isOpen, setOpen] = useState(false);
   const [isTemplateModalOpen, setTemplateModalOpen] = useState(false);
@@ -215,11 +224,15 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
     const handlePaste = (e: ClipboardEvent) => {
       // Prevent pasting if the user is typing in an input/textarea
       const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
         return;
       }
 
-      const clipboardText = e.clipboardData?.getData('text') || "";
+      const clipboardText = e.clipboardData?.getData("text") || "";
       if (clipboardText.includes("FORM_BUILDER_SECTION_CLIPBOARD")) {
         pasteSection(undefined, clipboardText);
       } else if (selectedSection) {
@@ -228,9 +241,9 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
       }
     };
 
-    window.addEventListener('paste', handlePaste);
+    window.addEventListener("paste", handlePaste);
     return () => {
-      window.removeEventListener('paste', handlePaste);
+      window.removeEventListener("paste", handlePaste);
     };
   }, [selectedSection, pasteElement, pasteSection]);
 
@@ -260,18 +273,26 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
     event.dataTransfer.dropEffect = "move";
   }, []);
 
-  const handleReorderSection = useCallback((draggedId: string, targetId: string) => {
-    setFormData((prev: any[]) => {
-      const draggedIndex = prev.findIndex((s) => s.id === draggedId);
-      const targetIndex = prev.findIndex((s) => s.id === targetId);
-      if (draggedIndex === -1 || targetIndex === -1 || draggedIndex === targetIndex) return prev;
-      
-      const newArr = [...prev];
-      const [draggedItem] = newArr.splice(draggedIndex, 1);
-      newArr.splice(targetIndex, 0, draggedItem);
-      return newArr;
-    });
-  }, [setFormData]);
+  const handleReorderSection = useCallback(
+    (draggedId: string, targetId: string) => {
+      setFormData((prev: any[]) => {
+        const draggedIndex = prev.findIndex((s) => s.id === draggedId);
+        const targetIndex = prev.findIndex((s) => s.id === targetId);
+        if (
+          draggedIndex === -1 ||
+          targetIndex === -1 ||
+          draggedIndex === targetIndex
+        )
+          return prev;
+
+        const newArr = [...prev];
+        const [draggedItem] = newArr.splice(draggedIndex, 1);
+        newArr.splice(targetIndex, 0, draggedItem);
+        return newArr;
+      });
+    },
+    [setFormData],
+  );
 
   function toggleSection(index: number) {
     if (activeSections.includes(index)) {
@@ -293,37 +314,44 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
       ...JSON.parse(JSON.stringify(obj)),
       ...overrides,
     });
-    
+
     if (template.sections && Array.isArray(template.sections)) {
       const validSections = template.sections.filter(Boolean);
       const newSections = validSections.map((sec: any) => {
         const secId = uuidv4();
         const newQuestions = sec.questionData?.map((q: any) => {
-           const newQ = deepCloneWithNewId(q, { id: uuidv4(), sectionId: secId });
-           return newQ;
+          const newQ = deepCloneWithNewId(q, {
+            id: uuidv4(),
+            sectionId: secId,
+          });
+          return newQ;
         });
 
         // Let's make sure the grid children have the correct new gridId if they are part of a grid.
         // It's a bit complex, but for simple templates, this is a good start.
         if (newQuestions) {
-           const idMap = new Map();
-           sec.questionData.forEach((q: any, i: number) => {
-             idMap.set(q.id, newQuestions[i].id);
-           });
-           newQuestions.forEach((q: any) => {
-             if (q.gridId && idMap.has(q.gridId)) {
-                q.gridId = idMap.get(q.gridId);
-             }
-           });
+          const idMap = new Map();
+          sec.questionData.forEach((q: any, i: number) => {
+            idMap.set(q.id, newQuestions[i].id);
+          });
+          newQuestions.forEach((q: any) => {
+            if (q.gridId && idMap.has(q.gridId)) {
+              q.gridId = idMap.get(q.gridId);
+            }
+          });
         }
 
-        return deepCloneWithNewId(sec, { id: secId, questionData: newQuestions || [] });
+        return deepCloneWithNewId(sec, {
+          id: secId,
+          questionData: newQuestions || [],
+        });
       });
-      
-      const isInitialBlank = formData.length === 1 && 
-                             formData[0].title === "" && 
-                             formData[0].description === "" && 
-                             (!formData[0]?.questionData || formData[0]?.questionData?.length === 0);
+
+      const isInitialBlank =
+        formData.length === 1 &&
+        formData[0].title === "" &&
+        formData[0].description === "" &&
+        (!formData[0]?.questionData || formData[0]?.questionData?.length === 0);
 
       if (isInitialBlank) {
         setFormData(newSections);
@@ -338,9 +366,7 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
 
   const config = getItem("config");
   return (
-    <div
-      className="relative flex flex-col h-full pb-5 mx-auto gap-x-4 "
-    >
+    <div className="relative flex flex-col h-full pb-5 mx-auto gap-x-4 ">
       {isOpen && (
         <SectionEditorModal
           isOpen={isOpen}
@@ -354,7 +380,7 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
         className="relative flex flex-col flex-1 w-full gap-y-3 container overflow-y-auto"
       >
         {formData
-          ?.filter((section: any) => !section?.isDeleted)
+          ?.filter((section: any) => !section?.isFieldDeleted)
           ?.map(
             (
               section: {
@@ -362,7 +388,7 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
                 title: string;
                 description?: string;
                 questionData: any;
-                isDeleted?: boolean;
+                isFieldDeleted?: boolean;
               },
               index: number,
             ) => (
@@ -379,7 +405,7 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
                 copySection={copySection}
                 duplicateSection={duplicateSection}
                 formDataLength={
-                  formData?.filter((s: any) => !s?.isDeleted)?.length || 0
+                  formData?.filter((s: any) => !s?.isFieldDeleted)?.length || 0
                 }
                 onDragOver={onDragOver}
                 setIsDragging={setIsDragging}
@@ -407,7 +433,7 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
             <AppIcon icon="lucide:clipboard-paste" iconClass="text-sm" />
             Paste section
           </button>
-          {(onAddTemplate || allTemplates?.length) ? (
+          {onAddTemplate || allTemplates?.length ? (
             <button
               type="button"
               onClick={() => {

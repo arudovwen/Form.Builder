@@ -246,7 +246,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
   const gridChildrenMap = useMemo(() => {
     return (
       elementData?.reduce((acc: Record<string, any[]>, el: any) => {
-        if (el.gridId && !el.isDeleted) {
+        if (el.gridId && !el.isFieldDeleted) {
           acc[el.gridId] = acc[el.gridId] || [];
           acc[el.gridId].push(el);
         }
@@ -257,7 +257,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
 
   // ── Active elements ─────────────────────────────────────────────────────────
   const activeElements = useMemo(
-    () => elementData?.filter((el: any) => !el.isDeleted) || [],
+    () => elementData?.filter((el: any) => !el.isFieldDeleted) || [],
     [elementData],
   );
 

@@ -4,7 +4,12 @@ import BulderPage from "./pages/builder";
 import ViewerPage from "./pages/viewer";
 import "./assets/scss/style.scss";
 
-import { demoPollApiResponse, demoQuestionDa, demoFormData, demoAnswerData } from "./demo-data";
+import {
+  demoPollApiResponse,
+  demoQuestionDa,
+  demoFormData,
+  demoAnswerData,
+} from "./demo-data";
 
 const questionDa = demoFormData;
 const pollApiResponse = demoPollApiResponse;
@@ -54,7 +59,7 @@ function App() {
                 goBackUrl={() => undefined}
                 onAddTemplate={() => alert("Add template clicked!")}
                 onShowVersion={() => alert(" teonShowVersionmplate clicked!")}
-                deleteMode="isDeleted"
+                deleteMode="isFieldDeleted"
                 // formType="poll"
               />
             </div>
@@ -81,8 +86,6 @@ function App() {
               // pollResults={pollResultsMap}
               uploadUrl="https://beta.api.gateway.thetaskforge.co/edms/v1/fileupload/upload-document"
             />
-             
-    
           }
         />
       </Routes>
