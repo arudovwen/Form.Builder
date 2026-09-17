@@ -1,5 +1,5 @@
-export default function MainPage({ questionData, uploadUrl, onAddTemplate, templates, viewMode, }: {
-    questionData: any[];
+export default function MainPage({ initialFormData, uploadUrl, onAddTemplate, templates, viewMode, }: {
+    initialFormData: any[];
     isReadOnly?: boolean;
     uploadUrl?: string;
     onAddTemplate?: () => void;

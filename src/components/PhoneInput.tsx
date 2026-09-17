@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Combobox } from "@headlessui/react";
 import AppIcon from "./ui/AppIcon";
 import countries from "../data/countrycodes";
@@ -41,6 +41,8 @@ export default function PhoneInput({
   const [query, setQuery] = useState("");
   const [selectedCountry, setSelectedCountry] = useState<any>(null);
   const [number, setNumber] = useState("");
+
+  const phoneButtonRef = useRef<HTMLButtonElement>(null);
 
   // Build country list
   const countryList = useMemo(
@@ -137,30 +139,53 @@ export default function PhoneInput({
         <AppIcon icon="lucide:phone-call" />
 
         {/* Country Code Dropdown */}
-        <Combobox value={selectedCountry} onChange={setSelectedCountry}>
-          <div className="relative">
-            <Combobox.Input
-              className="pl-3 pr-4 mr-1 text-sm bg-white  py-[10px] outline-none whitespace-nowrap max-w-[70px]"
-              displayValue={(country: any) => country?.phone || "+234"}
-              placeholder="+234"
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <AppIcon icon="lucide:chevron-down" />
-            </Combobox.Button>
+        <Combobox
+          immediate
+          value={selectedCountry}
+          onChange={(c) => {
+            setSelectedCountry(c);
+            setQuery("");
+          }}
+          onClose={() => setQuery("")}
+        >
+          {({ open }: { open: boolean }) => (
+            <div className="relative">
+              <Combobox.Input
+                className="pl-3 pr-4 mr-1 text-sm bg-white py-[10px] outline-none whitespace-nowrap max-w-[70px]"
+                displayValue={(country: any) => country?.phone || "+234"}
+                placeholder="+234"
+                onChange={(e) => setQuery(e.target.value)}
+                onClick={() => {
+                  if (!open && !disabled && !readOnly) {
+                    phoneButtonRef.current?.click();
+                  }
+                }}
+                onFocus={() => {
+                  if (!open && !disabled && !readOnly) {
+                    phoneButtonRef.current?.click();
+                  }
+                }}
+              />
+              <Combobox.Button
+                ref={phoneButtonRef}
+                className="absolute inset-y-0 right-0 flex items-center pr-2"
+              >
+                <AppIcon icon="lucide:chevron-down" />
+              </Combobox.Button>
 
-            <Combobox.Options className="absolute z-10 w-[250px] left-0 bg-white border rounded-md shadow-lg max-h-[400px] overflow-y-auto">
-              {filteredCountries?.map((country, index) => (
-                <Combobox.Option
-                  key={`${country.code}+ ${index}`}
-                  value={country}
-                  className="px-4 py-2 cursor-pointer hover:bg-gray-100"
-                >
-                  {country.phone} - {country.label}
-                </Combobox.Option>
-              ))}
-            </Combobox.Options>
-          </div>
+              <Combobox.Options className="absolute z-10 w-[250px] left-0 bg-white border rounded-md shadow-lg max-h-[400px] overflow-y-auto">
+                {filteredCountries?.map((country, index) => (
+                  <Combobox.Option
+                    key={`${country.code}+ ${index}`}
+                    value={country}
+                    className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                  >
+                    {country.phone} - {country.label}
+                  </Combobox.Option>
+                ))}
+              </Combobox.Options>
+            </div>
+          )}
         </Combobox>
 
         {/* Phone Number Input */}

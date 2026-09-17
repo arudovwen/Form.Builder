@@ -1,9 +1,10 @@
 type Section = {
-  id: string;
-  title: string;
-  description: string;
-  questionData?: any[];
-  isFieldDeleted?: boolean;
+    id: string;
+    title: string;
+    description: string;
+    formData?: any[];
+    isFieldDeleted?: boolean;
+    isDeleted?: boolean;
 };
-export declare function getAllQuestionData(sections: Section[]): any[];
+export declare function getAllformData(sections: Section[]): any[];
 export {};

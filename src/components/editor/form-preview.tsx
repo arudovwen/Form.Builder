@@ -3,13 +3,16 @@ import React, { useContext, useState } from "react";
 import EditorContext from "../../context/editor-context";
 import { EditorContextType } from "./element-canvas";
 import { getItem } from "../../utils/localStorageControl";
+import { devLog } from "../../utils/logger";
 import "./preview.css";
 
 const FormPreview: React.FC = () => {
-  const { formData, uploadUrl } = useContext(
+  const { formData, uploadUrl, deleteMode } = useContext(
     EditorContext,
   ) as unknown as EditorContextType;
-  const [previewMode, setPreviewMode] = useState<"multi" | "conversational">("multi");
+  const [previewMode, setPreviewMode] = useState<"multi" | "conversational">(
+    "multi",
+  );
 
   const config = getItem("config");
 
@@ -38,10 +41,14 @@ const FormPreview: React.FC = () => {
           form_data={formData}
           ignoreValidation={true}
           config={config}
-          uploadUrl={uploadUrl || "https://beta.api.gateway.thetaskforge.co/edms/v1/fileupload/upload-document"}
+          uploadUrl={
+            uploadUrl ||
+            "https://beta.api.gateway.thetaskforge.co/edms/v1/fileupload/upload-document"
+          }
           renderType={previewMode}
-          onGetValues={(e: any) => console.log(e)}
+          onGetValues={(e: any) => devLog(e)}
           preview={true}
+          deleteMode={deleteMode || config?.deleteMode || "remove"}
         />
       </div>
     </div>

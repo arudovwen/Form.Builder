@@ -1,13 +1,16 @@
 import React from "react";
-export type DeleteMode = "remove" | "isFieldDeleted" | "soft" | "hard";
+export type DeleteMode = "remove" | "isFieldDeleted" | "isDeleted" | "soft" | "hard";
+export type BuilderMode = "create" | "edit";
 interface EditorProviderProps {
     children: React.ReactNode;
     onChange?: (data: any) => void;
     onLogAction?: (action: string, value: any) => void;
     deleteMode?: DeleteMode;
+    mode?: BuilderMode;
 }
 declare const EditorContext: React.Context<{
     deleteMode?: DeleteMode;
+    mode?: BuilderMode;
     showPreview: boolean;
     setShowPreview: React.Dispatch<React.SetStateAction<boolean>>;
     formData: any;

@@ -2,15 +2,16 @@ type Section = {
   id: string;
   title: string;
   description: string;
-  questionData?: any[];
+  formData?: any[];
   isFieldDeleted?: boolean;
+  isDeleted?: boolean;
 };
 
-export function getAllQuestionData(sections: Section[]): any[] {
+export function getAllformData(sections: Section[]): any[] {
   return (
     sections
-      ?.filter((section) => !section?.isFieldDeleted)
-      ?.flatMap((section) => section?.questionData ?? [])
-      ?.filter((field) => !field?.isFieldDeleted) ?? []
+      ?.filter((section) => !section?.isFieldDeleted && !section?.isDeleted)
+      ?.flatMap((section) => section?.formData ?? [])
+      ?.filter((field) => !field?.isFieldDeleted && !field?.isDeleted) ?? []
   );
 }

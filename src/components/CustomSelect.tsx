@@ -76,30 +76,28 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
     }
 
     // Single selection - find matching option
-    return (
-      options.find((o) => {
-        if (typeof o.value === "string" && typeof value === "string") {
-          return o.value.toLowerCase() === value.toLowerCase();
-        }
-        if (typeof o.value === "object" && typeof value === "object") {
-          return o.value?.id === value?.id;
-        }
-        return o.value === value;
-      }) || null
-    );
+    const found = options.find((o) => {
+      if (typeof o.value === "string" && typeof value === "string") {
+        return o.value.toLowerCase() === value.toLowerCase();
+      }
+      if (typeof o.value === "object" && typeof value === "object") {
+        return o.value?.id === value?.id;
+      }
+      return o.value === value;
+    });
+
+    if (found) return found;
+
+    return {
+      label:
+        typeof value === "object"
+          ? value?.label || value?.name || String(value?.value || "")
+          : String(value),
+      value: typeof value === "object" ? value?.value : value,
+    };
   }, [value, options, isMultiple]);
 
-  const hasUnmatchedValue = useMemo(() => {
-    if (value === undefined || value === null || value === "") return false;
-    if (!options || options.length === 0) return false;
-
-    if (isMultiple) {
-      if (!Array.isArray(value) || value.length === 0) return false;
-      return (computedSelected as Option[])?.length < value.length;
-    }
-
-    return computedSelected === null;
-  }, [value, options, computedSelected, isMultiple]);
+  const hasUnmatchedValue = false;
 
   /** Sync external value → internal state (avoid loops) */
   useEffect(() => {

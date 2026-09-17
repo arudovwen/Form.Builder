@@ -58,6 +58,7 @@ export interface OptionType {
   value: any;
   id: string;
   key?: string;
+  filterValue?: string;
 }
 
 export interface ElementType {
@@ -120,9 +121,14 @@ export interface ElementType {
   visibilityDependentFields?: string;
   visibilityDependentFieldsValue?: any;
 
+  filterByFieldId?: string;
+  clearOnFilterChange?: boolean;
+  filterBehavior?: "hide" | "disable";
+
   minChecked?: number | null;
   allowCheckAll?: boolean;
   requireAllChecked?: boolean;
+  selectionType?: string;
 
   isMultiple: boolean;
   acceptedFiles: any[];
@@ -153,6 +159,8 @@ const baseElement = {
   gridId: null,
   isHidden: false,
   visibilityDependentFields: [],
+  filterByFieldId: "",
+  clearOnFilterChange: true,
 };
 
 const textDefaults = {
@@ -326,6 +334,7 @@ export const Elements: ElementType[] = [
     inputType: "checkbox",
     minChecked: 1,
     requireAllChecked: false,
+    selectionType: "multiple",
     options: [option("Checkbox Option", "option")],
   }),
 

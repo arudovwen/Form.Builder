@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useFieldArray, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import clsx from "clsx";
 import AppIcon from "../ui/AppIcon";
 import TabsComponent from "../ui/AppTab";
 import { DynamicInput } from "../forms/dynamic-input";
@@ -37,7 +38,7 @@ import ValidateExample from "../ValidateExample";
 import CustomDatePicker from "../CutomDatePicker";
 import VisibilityEditor from "./visibility-editor";
 import MultiSelectInput from "./multi-select-input";
-import { normalizeGridRows, normalizeRows } from "@/utils/normalizeRows";
+import { normalizeGridRows, normalizeRows, slugify } from "@/utils/normalizeRows";
 import FormulaMentionInput from "./formula-mention-input";
 import FileUpload from "../forms/file-uploader";
 
@@ -45,6 +46,9 @@ interface Option {
   label?: string;
   value?: string;
   id?: string;
+  key?: string;
+  filterValue?: string;
+  imageUrl?: string;
 }
 
 interface FormInputs {
@@ -84,8 +88,11 @@ interface FormInputs {
   maxFileSize?: number;
   minChecked?: number;
   requireAllChecked?: boolean;
+  selectionType?: string;
   minLabel?: string;
   maxLabel?: string;
+  filterByFieldId?: string;
+  clearOnFilterChange?: boolean;
 }
 
 const schema = yup.object().shape({
@@ -136,6 +143,10 @@ const schema = yup.object().shape({
             schema.required("Value is required when label is present"),
           otherwise: (schema) => schema.nullable(),
         }),
+        id: yup.string().nullable(),
+        key: yup.string().nullable(),
+        filterValue: yup.string().nullable(),
+        imageUrl: yup.string().nullable(),
       }),
     )
     .when("inputType", {
@@ -155,6 +166,9 @@ const schema = yup.object().shape({
             schema.required("Value is required when label is present"),
           otherwise: (schema) => schema.nullable(),
         }),
+        id: yup.string().nullable(),
+        key: yup.string().nullable(),
+        filterValue: yup.string().nullable(),
       }),
     )
     .when("inputType", {
@@ -177,6 +191,7 @@ const schema = yup.object().shape({
   elementClass: yup.string().nullable(),
   apiUrl: yup.string().nullable(),
   selectType: yup.string().default("list"),
+  selectionType: yup.string().nullable().default("multiple"),
   dateType: yup.string().default("basic"),
   validationUrl: yup.string(),
   signatureLink: yup.string(),
@@ -202,6 +217,8 @@ const schema = yup.object().shape({
   externalApiUrl: yup.string().nullable(),
   valueSource: yup.string().nullable(),
   sourceFieldId: yup.string().nullable(),
+  filterByFieldId: yup.string().nullable(),
+  clearOnFilterChange: yup.boolean(),
 });
 
 const tabs = [
@@ -225,7 +242,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       !noAllowValidation.includes(element.inputType) ||
       tab.key !== "validation",
   );
-  const { updateElement, formData, deleteMode }: any =
+  const { updateElement, formData, deleteMode, mode = "edit" }: any =
     React.useContext(EditorContext);
   const [activeTab, setActiveTab] = useState("basic");
   const [optionsLoading, setOptionsLoading] = useState(false);
@@ -233,18 +250,19 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
 
   const fieldCount =
     formData
-      ?.filter((section: any) => !section?.isFieldDeleted)
-      ?.flatMap((section: any) => section?.questionData || [])
-      ?.filter((f: any) => !f?.isFieldDeleted)?.length || 0;
+      ?.filter((section: any) => !section?.isFieldDeleted && !section?.isDeleted)
+      ?.flatMap((section: any) => section?.formData || [])
+      ?.filter((f: any) => !f?.isFieldDeleted && !f?.isDeleted)?.length || 0;
 
   const mentionData = React.useMemo(() => {
     return (
       formData
-        ?.filter((section: any) => !section?.isFieldDeleted)
-        ?.flatMap((section: any) => section?.questionData || [])
+        ?.filter((section: any) => !section?.isFieldDeleted && !section?.isDeleted)
+        ?.flatMap((section: any) => section?.formData || [])
         .filter(
           (f: any) =>
             !f?.isFieldDeleted &&
+            !f?.isDeleted &&
             f.id !== element?.id &&
             !["spacer", "divider", "section", "grid"].includes(
               f.type?.toLowerCase(),
@@ -257,6 +275,24 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldCount, element?.id]);
+
+  const availableFilterFields = React.useMemo(() => {
+    return (
+      formData
+        ?.filter((section: any) => !section?.isFieldDeleted && !section?.isDeleted)
+        ?.flatMap((section: any) => section?.formData || [])
+        .filter(
+          (f: any) =>
+            !f?.isFieldDeleted &&
+            !f?.isDeleted &&
+            f.id !== element?.id &&
+            !["spacer", "divider", "section", "grid"].includes(
+              f.type?.toLowerCase(),
+            ),
+        ) || []
+    );
+  }, [fieldCount, element?.id, formData]);
+
   const config = getItem("config");
   const {
     register,
@@ -271,10 +307,21 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
     resolver: yupResolver(schema),
     defaultValues: {
       ...element,
+      selectionType: element.selectionType || "multiple",
       options: element.options || [],
+      visibilityDependentFields: element.visibilityDependentFields || [],
+      filterByFieldId: element.filterByFieldId || "",
+      clearOnFilterChange: element.clearOnFilterChange ?? true,
     },
   });
   const values = watch();
+
+  const selectedFilterField = React.useMemo(() => {
+    const filterId = values.filterByFieldId;
+    if (!filterId) return null;
+    return availableFilterFields.find((f: any) => f.id === filterId);
+  }, [values.filterByFieldId, availableFilterFields]);
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "options",
@@ -297,6 +344,39 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
     control,
     name: "dataColumns",
   });
+
+  // Track initial IDs of columns/options that already existed when modal opened
+  const initialDataColumnIdsRef = useRef<Set<string>>(new Set());
+  const initialOptionIdsRef = useRef<Set<string>>(new Set());
+  const initialOption1IdsRef = useRef<Set<string>>(new Set());
+
+  // Track row IDs where the user has manually edited the field key or option value
+  const manuallyEditedColumnsRef = useRef<Set<string>>(new Set());
+  const manuallyEditedOptionsRef = useRef<Set<string>>(new Set());
+  const manuallyEditedOptions1Ref = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (isOpen) {
+      initialDataColumnIdsRef.current = new Set(
+        (element?.dataColumns || [])
+          .map((c: any) => c.id || c.field)
+          .filter(Boolean),
+      );
+      initialOptionIdsRef.current = new Set(
+        (element?.options || [])
+          .map((o: any) => o.id || o.value)
+          .filter(Boolean),
+      );
+      initialOption1IdsRef.current = new Set(
+        (element?.options1 || [])
+          .map((o: any) => o.id || o.value)
+          .filter(Boolean),
+      );
+      manuallyEditedColumnsRef.current.clear();
+      manuallyEditedOptionsRef.current.clear();
+      manuallyEditedOptions1Ref.current.clear();
+    }
+  }, [isOpen, element]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -377,20 +457,115 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
     }
   }
   // Options field rendering
+  // Options field rendering
   const renderOptionsFields = () => (
     <div className="flex flex-col justify-start gap-y-1">
-      <div className="flex items-center mb-4 gap-x-5">
-        {OptionsTypes?.map((i) => (
-          <label key={i} className="items-center text-base capitalize gap-x-3">
-            <input
-              type="radio"
-              name="optionType"
-              onChange={(e) => setOptionTypes(e.target.value as optionType)}
-              value={i}
-            />{" "}
-            <span>{i} options</span>
-          </label>
-        ))}
+      {/* Cascading / Dependent Option Filter Configuration */}
+      {element.type?.toLowerCase() !== "cascadeselect" && (
+        <div className="mb-5 p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+          <div className="flex items-center gap-2">
+            <AppIcon
+              icon="material-symbols:filter-alt-outline"
+              iconClass="text-lg text-[#6366f1]"
+            />
+            <h4 className="text-sm font-semibold text-gray-800">
+              Filter Options by Field (Cascading Options)
+            </h4>
+          </div>
+          <p className="text-xs text-gray-500">
+            Dynamically filter which options appear in this field based on the selected value of another field in the form.
+          </p>
+
+          <CustomSelect
+            label="Parent / Source Field"
+            options={[
+              { label: "None (Show all options)", value: "" },
+              ...availableFilterFields.map((f: any) => ({
+                label: `${f.inputLabel || f.label || f.id} (${f.type})`,
+                value: f.id,
+              })),
+            ]}
+            register={register}
+            name="filterByFieldId"
+            setValue={setValue}
+            trigger={trigger}
+            value={watch("filterByFieldId") || ""}
+          />
+
+          {Boolean(watch("filterByFieldId")) && (
+            <div className="space-y-2 pt-2 border-t border-slate-200/60">
+              <div className="flex items-center gap-2">
+                <DynamicInput
+                  watch={watch}
+                  label="Clear selection when parent field value changes"
+                  name="clearOnFilterChange"
+                  register={register}
+                  errors={errors}
+                  element={element}
+                  type="checkbox"
+                  value={values.clearOnFilterChange}
+                />
+              </div>
+
+              {selectedFilterField?.options &&
+                selectedFilterField.options.length > 0 && (
+                  <div className="text-xs text-gray-600 bg-white p-2.5 rounded-lg border border-gray-200">
+                    <span className="font-medium text-gray-700 block mb-1">
+                      Parent field available options (click/copy values below):
+                    </span>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {selectedFilterField.options.map((pOpt: any) => (
+                        <span
+                          key={pOpt.id || pOpt.value}
+                          className="inline-flex items-center px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-mono border border-slate-200"
+                          title={`Value: ${pOpt.value}`}
+                        >
+                          {pOpt.label}: <strong className="ml-1 text-[#6366f1]">{pOpt.value}</strong>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="mb-5">
+        <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">
+          Options Source
+        </label>
+        <div className="grid grid-cols-3 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
+          {[
+            { id: "manual", label: "Manual Options", icon: "fluent:edit-16-regular" },
+            { id: "api", label: "API Endpoint", icon: "lucide:globe" },
+            { id: "sheet", label: "Sheet (CSV/XLSX)", icon: "tabler:file-spreadsheet" },
+          ].map((item) => {
+            const isSelected = optionTypes === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setOptionTypes(item.id as optionType)}
+                className={clsx(
+                  "flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer select-none",
+                  isSelected
+                    ? "bg-white text-blue-600 shadow-sm border border-slate-200/80 font-semibold"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                )}
+              >
+                <AppIcon
+                  icon={item.icon}
+                  iconClass={clsx(
+                    "text-sm transition-colors shrink-0",
+                    isSelected ? "text-blue-600" : "text-slate-400"
+                  )}
+                />
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
       {optionTypes === "api" && (
         <div className="mb-4">
@@ -445,15 +620,22 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       )}
       {optionTypes === "manual" && (
         <div>
-          <h3 className="mb-4 text-sm text-gray-500 font-semibold">
-            {element?.type?.toLowerCase() === "matrix"
-              ? "Rows Options"
-              : "Parent Options"}
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm text-gray-500 font-semibold">
+              {element?.type?.toLowerCase() === "matrix"
+                ? "Rows Options"
+                : "Parent Options"}
+            </h3>
+            {Boolean(watch("filterByFieldId")) && (
+              <span className="text-[11px] text-gray-400">
+                Options without a Filter Value are always visible.
+              </span>
+            )}
+          </div>
           {fields?.map((field, index) => (
             <div
               key={field.id}
-              className="mb-6 pb-6 border-b border-gray-200 last:mb-0 last:pb-0 last:border-0"
+              className="mb-3 pb-3 border-b border-gray-200 last:mb-0 last:pb-0 last:border-0"
             >
               <div className="flex items-start gap-x-4">
                 <div className="flex-1">
@@ -467,15 +649,22 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                     placeholder="Label"
                     onChange={(e) => {
                       const text = e.target.value;
-                      const slugified = text
-                        .toLowerCase()
-                        .trim()
-                        .replace(/[\s-]+/g, "_")
-                        .replace(/[^a-z0-9_]/g, "");
-                      setValue(`options.${index}.value`, slugified, {
-                        shouldValidate: true,
-                        shouldDirty: true,
-                      });
+                      const optId = values.options?.[index]?.id || field.id;
+                      const isExisting =
+                        initialOptionIdsRef.current.has(optId) ||
+                        Boolean(element.options?.[index]?.value);
+
+                      const shouldAutoUpdate =
+                        mode === "create" ||
+                        (!isExisting &&
+                          !manuallyEditedOptionsRef.current.has(optId));
+
+                      if (shouldAutoUpdate) {
+                        setValue(`options.${index}.value`, slugify(text), {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        });
+                      }
                     }}
                   />
                 </div>
@@ -488,8 +677,31 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                     errors={errors}
                     element={element}
                     placeholder="Value"
+                    onChange={() => {
+                      const optId = values.options?.[index]?.id || field.id;
+                      manuallyEditedOptionsRef.current.add(optId);
+                    }}
                   />
                 </div>
+
+                {Boolean(watch("filterByFieldId")) && (
+                  <div className="flex-1">
+                    <DynamicInput
+                      watch={watch}
+                      label={index === 0 ? "Filter Value" : ""}
+                      name={`options.${index}.filterValue`}
+                      register={register}
+                      errors={errors}
+                      element={element}
+                      placeholder="Parent Value"
+                      onChange={(e) => {
+                        setValue(`options.${index}.key`, e.target.value, {
+                          shouldDirty: true,
+                        });
+                      }}
+                    />
+                  </div>
+                )}
 
                 <button
                   disabled={fields.length === 1}
@@ -573,7 +785,15 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
             <button
               type="button"
               className="flex items-center mt-2 text-sm font-medium text-gray-700 gap-x-1"
-              onClick={() => append({ label: "", value: "", id: uuidv4() })}
+              onClick={() =>
+                append({
+                  label: "",
+                  value: "",
+                  filterValue: "",
+                  key: "",
+                  id: uuidv4(),
+                })
+              }
             >
               <AppIcon icon="qlementine-icons:plus-16" /> Add Option
             </button>
@@ -606,15 +826,22 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                     placeholder="Label"
                     onChange={(e) => {
                       const text = e.target.value;
-                      const slugified = text
-                        .toLowerCase()
-                        .trim()
-                        .replace(/[\s-]+/g, "_")
-                        .replace(/[^a-z0-9_]/g, "");
-                      setValue(`options1.${index}.value`, slugified, {
-                        shouldValidate: true,
-                        shouldDirty: true,
-                      });
+                      const optId = values.options1?.[index]?.id || field.id;
+                      const isExisting =
+                        initialOption1IdsRef.current.has(optId) ||
+                        Boolean(element.options1?.[index]?.value);
+
+                      const shouldAutoUpdate =
+                        mode === "create" ||
+                        (!isExisting &&
+                          !manuallyEditedOptions1Ref.current.has(optId));
+
+                      if (shouldAutoUpdate) {
+                        setValue(`options1.${index}.value`, slugify(text), {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        });
+                      }
                     }}
                   />
                 </div>
@@ -627,6 +854,10 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                     errors={errors}
                     element={element}
                     placeholder="Value"
+                    onChange={() => {
+                      const optId = values.options1?.[index]?.id || field.id;
+                      manuallyEditedOptions1Ref.current.add(optId);
+                    }}
                   />
                 </div>
                 <div className="flex-1">
@@ -671,19 +902,41 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   // Options field rendering
   const renderColumnsFields = () => (
     <div className="flex flex-col justify-start gap-y-1">
-      <div className="flex items-center mb-4 gap-x-5">
-        {OptionsTypes?.map((i) => (
-          <label key={i} className="items-center text-base capitalize gap-x-3">
-            <input
-              type="radio"
-              name="optionType"
-              onChange={(e) => setOptionTypes(e.target.value as optionType)}
-              value={i}
-              checked={i === optionTypes}
-            />{" "}
-            <span>{i} options</span>
-          </label>
-        ))}
+      <div className="mb-5">
+        <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">
+          Columns Source
+        </label>
+        <div className="grid grid-cols-3 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
+          {[
+            { id: "manual", label: "Manual Columns", icon: "fluent:edit-16-regular" },
+            { id: "api", label: "API Endpoint", icon: "lucide:globe" },
+            { id: "sheet", label: "Sheet (CSV/XLSX)", icon: "tabler:file-spreadsheet" },
+          ].map((item) => {
+            const isSelected = optionTypes === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setOptionTypes(item.id as optionType)}
+                className={clsx(
+                  "flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer select-none",
+                  isSelected
+                    ? "bg-white text-blue-600 shadow-sm border border-slate-200/80 font-semibold"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                )}
+              >
+                <AppIcon
+                  icon={item.icon}
+                  iconClass={clsx(
+                    "text-sm transition-colors shrink-0",
+                    isSelected ? "text-blue-600" : "text-slate-400"
+                  )}
+                />
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
       {optionTypes === "api" && (
         <div className="mb-4">
@@ -730,8 +983,10 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           const isFieldDeleted =
             values.dataColumns?.[index]?.isColumnDeleted ||
             values.dataColumns?.[index]?.isFieldDeleted ||
+            values.dataColumns?.[index]?.isDeleted ||
             (field as any)?.isColumnDeleted ||
-            (field as any)?.isFieldDeleted;
+            (field as any)?.isFieldDeleted ||
+            (field as any)?.isDeleted;
 
           if (isFieldDeleted) return null;
 
@@ -739,8 +994,10 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
             const isDel =
               values.dataColumns?.[idx]?.isColumnDeleted ||
               values.dataColumns?.[idx]?.isFieldDeleted ||
+              values.dataColumns?.[idx]?.isDeleted ||
               (f as any)?.isColumnDeleted ||
-              (f as any)?.isFieldDeleted;
+              (f as any)?.isFieldDeleted ||
+              (f as any)?.isDeleted;
             return !isDel;
           });
 
@@ -748,8 +1005,10 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
             const isDel =
               values.dataColumns?.[idx]?.isColumnDeleted ||
               values.dataColumns?.[idx]?.isFieldDeleted ||
+              values.dataColumns?.[idx]?.isDeleted ||
               (f as any)?.isColumnDeleted ||
-              (f as any)?.isFieldDeleted;
+              (f as any)?.isFieldDeleted ||
+              (f as any)?.isDeleted;
             return !isDel;
           }).length;
 
@@ -796,15 +1055,22 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                     register={register}
                     onChange={(e) => {
                       const text = e.target.value;
-                      const fieldName = text
-                        .toLowerCase()
-                        .trim()
-                        .replace(/[\s-]+/g, "_")
-                        .replace(/[^a-z0-9_]/g, "");
-                      setValue(`dataColumns.${index}.field`, fieldName, {
-                        shouldValidate: true,
-                        shouldDirty: true,
-                      });
+                      const colId = values.dataColumns?.[index]?.id || field.id;
+                      const isExisting =
+                        initialDataColumnIdsRef.current.has(colId) ||
+                        Boolean(element.dataColumns?.[index]?.field);
+
+                      const shouldAutoUpdate =
+                        mode === "create" ||
+                        (!isExisting &&
+                          !manuallyEditedColumnsRef.current.has(colId));
+
+                      if (shouldAutoUpdate) {
+                        setValue(`dataColumns.${index}.field`, slugify(text), {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        });
+                      }
                     }}
                     errors={errors}
                     element={element}
@@ -821,7 +1087,10 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                     errors={errors}
                     element={element}
                     placeholder="fieldKey"
-                    disabled
+                    onChange={() => {
+                      const colId = values.dataColumns?.[index]?.id || field.id;
+                      manuallyEditedColumnsRef.current.add(colId);
+                    }}
                   />
                 </div>
 
@@ -832,6 +1101,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                   onClick={() => {
                     if (
                       deleteMode === "isFieldDeleted" ||
+                      deleteMode === "isDeleted" ||
                       deleteMode === "soft"
                     ) {
                       setValue(`dataColumns.${index}.isColumnDeleted`, true, {
@@ -934,7 +1204,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           className="w-full flex-1 flex flex-col"
           autoComplete="off"
         >
-          <div className="flex-1">
+          <div className="flex-1 pb-6">
             {" "}
             <div className="config_box max-h-[83vh] overflow-y-auto flex-1">
               {activeTab === "basic" && (
@@ -1214,27 +1484,51 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                     element.type.toLowerCase(),
                   ) && (
                     <>
-                      <DynamicInput
-                        watch={watch}
-                        label="Minimum Options Checked"
-                        name="minChecked"
-                        register={register}
-                        errors={errors}
-                        element={element}
-                        type="number"
-                      />
-                      <div className="w-[250px]">
-                        <DynamicInput
-                          watch={watch}
-                          label="Require All Checked"
-                          name="requireAllChecked"
+                      {element.type.toLowerCase() === "checkbox" && (
+                        <CustomSelect
+                          label="Selection Mode"
+                          options={[
+                            {
+                              label: "Multi Check (Allow multiple checks)",
+                              value: "multiple",
+                            },
+                            {
+                              label: "Single Check (Allow only one check)",
+                              value: "single",
+                            },
+                          ]}
                           register={register}
-                          errors={errors}
-                          element={element}
-                          type="checkbox"
-                          value={values.requireAllChecked}
+                          name={"selectionType"}
+                          setValue={setValue}
+                          trigger={trigger}
+                          value={watch("selectionType") || "multiple"}
                         />
-                      </div>
+                      )}
+                      {(watch("selectionType") || element.selectionType) !== "single" && (
+                        <>
+                          <DynamicInput
+                            watch={watch}
+                            label="Minimum Options Checked"
+                            name="minChecked"
+                            register={register}
+                            errors={errors}
+                            element={element}
+                            type="number"
+                          />
+                          <div className="w-[250px]">
+                            <DynamicInput
+                              watch={watch}
+                              label="Require All Checked"
+                              name="requireAllChecked"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                              type="checkbox"
+                              value={values.requireAllChecked}
+                            />
+                          </div>
+                        </>
+                      )}
                     </>
                   )}
                   {element.type.toLowerCase() === "grid" && (

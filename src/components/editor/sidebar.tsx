@@ -37,27 +37,55 @@ const SideBar = ({ formType = "default" }: { formType?: FormType }) => {
   useEffect(() => {
     const checkClipboard = () => {
       try {
-        const clipboardString =
-          localStorage.getItem("form_builder_section_clipboard") ||
-          localStorage.getItem("form_builder_clipboard");
-        if (clipboardString) {
-          const copiedData = JSON.parse(clipboardString);
-          if (copiedData?.type === "FORM_BUILDER_SECTION_CLIPBOARD" && copiedData?.section) {
-            setClipboardType("section");
-          } else if (copiedData?.type === "FORM_BUILDER_CLIPBOARD" && copiedData?.element) {
-            const isExpired = copiedData?.timestamp && (Date.now() - copiedData.timestamp > 60000);
-            if (isExpired) {
-              localStorage.removeItem("form_builder_clipboard");
-              setClipboardType(null);
+        const sectionString = localStorage.getItem("form_builder_section_clipboard");
+        if (sectionString) {
+          try {
+            const sectionData = JSON.parse(sectionString);
+            if (sectionData?.type === "FORM_BUILDER_SECTION_CLIPBOARD" && sectionData?.section) {
+              const isExpired = sectionData?.timestamp && Date.now() - sectionData.timestamp > 60000;
+              if (isExpired) {
+                localStorage.removeItem("form_builder_section_clipboard");
+              } else {
+                setClipboardType("section");
+                return;
+              }
             } else {
-              setClipboardType("element");
+              localStorage.removeItem("form_builder_section_clipboard");
             }
-          } else {
-            setClipboardType(null);
+          } catch {
+            localStorage.removeItem("form_builder_section_clipboard");
           }
-        } else {
-          setClipboardType(null);
         }
+
+        const elementString = localStorage.getItem("form_builder_clipboard");
+        if (elementString) {
+          try {
+            const elementData = JSON.parse(elementString);
+            if (elementData?.type === "FORM_BUILDER_SECTION_CLIPBOARD" && elementData?.section) {
+              const isExpired = elementData?.timestamp && Date.now() - elementData.timestamp > 60000;
+              if (isExpired) {
+                localStorage.removeItem("form_builder_clipboard");
+              } else {
+                setClipboardType("section");
+                return;
+              }
+            } else if (elementData?.type === "FORM_BUILDER_CLIPBOARD" && elementData?.element) {
+              const isExpired = elementData?.timestamp && Date.now() - elementData.timestamp > 60000;
+              if (isExpired) {
+                localStorage.removeItem("form_builder_clipboard");
+              } else {
+                setClipboardType("element");
+                return;
+              }
+            } else {
+              localStorage.removeItem("form_builder_clipboard");
+            }
+          } catch {
+            localStorage.removeItem("form_builder_clipboard");
+          }
+        }
+
+        setClipboardType(null);
       } catch {
         setClipboardType(null);
       }

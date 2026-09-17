@@ -6,9 +6,10 @@ const HomePage = ({
   onSubmit,
   onChange,
   onLogAction,
-  questionData,
+  formData,
   isReadOnly,
   deleteMode,
+  mode,
   config = {
     buttonColor: "#333",
   },
@@ -37,9 +38,10 @@ const HomePage = ({
       onChange={onChange}
       onLogAction={onLogAction}
       onPublish={onPublish}
-      questionData={questionData}
+      formData={formData}
       isReadOnly={isReadOnly}
       deleteMode={deleteMode}
+      mode={mode}
       config={config}
       title={title}
       goBackUrl={goBackUrl}

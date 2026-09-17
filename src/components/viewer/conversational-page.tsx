@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import React from "react";
+import React, { useContext } from "react";
 import GridInput, { GridItem } from "../elements/grid-input";
 import { RenderElement } from "./elements-render";
 import { getElementOptions } from "./utils";
@@ -7,10 +7,14 @@ import { Transition } from "@headlessui/react";
 import AppButton from "../ui/AppButton";
 import AppIcon from "../ui/AppIcon";
 import { getItem } from "@/utils/localStorageControl";
+import EditorContext from "@/context/editor-context";
+import { evaluateVisibility } from "./validation";
 
 const config = getItem("config");
 
 export default function ConversationalPage({ element, options, onNext, onPrev, isFirst, isLast, isReadOnly }: any) {
+  const { answerData } = (useContext(EditorContext) as any) || {};
+
   if (!element) {
     return (
       <div className="flex items-center justify-center min-h-[500px] text-gray-500">
@@ -26,45 +30,60 @@ export default function ConversationalPage({ element, options, onNext, onPrev, i
     }
   };
 
-  const renderGridElement = (el: any) => (
-    <div key={el.id} className="min-w-0 w-full">
-      <GridInput
-        element={el}
-        customClass="p-0 min-h-[60px] border-none w-full"
-      >
-      {el.gridChildren?.map((child: any) => (
-        <GridItem
-          key={child.id}
-          col={child.gridPosition?.col}
-          customClass="p-0"
-        >
-          <RenderElement
-            element={child}
-            validationData={getElementOptions(child, options)}
-          />
-          <div className="mt-1 text-xs text-red-600 min-h-[1rem]">
-            {options?.errors?.[child.id]?.message}
-          </div>
-        </GridItem>
-      ))}
-      </GridInput>
-    </div>
-  );
+  const renderGridElement = (el: any) => {
+    const visibleChildren = el.gridChildren?.filter((child: any) =>
+      evaluateVisibility(child, answerData),
+    );
+    if (!visibleChildren || visibleChildren.length === 0) return null;
 
-  const renderStandardElement = (el: any) => (
-    <div
-      key={el.id}
-      className={clsx("group relative grid gap-y-[6px] min-w-0 w-full", el.elementClass)}
-    >
-      <RenderElement
-        element={el}
-        validationData={getElementOptions(el, options)}
-      />
-      <div className="mt-1 text-xs text-red-600 min-h-[1rem]">
-        {options?.errors?.[el.id]?.message}
+    return (
+      <div key={el.id} className="min-w-0 w-full">
+        <GridInput
+          element={el}
+          customClass="p-0 min-h-[60px] border-none w-full"
+        >
+          {visibleChildren.map((child: any) => (
+            <GridItem
+              key={child.id}
+              col={child.gridPosition?.col}
+              customClass="p-0 relative"
+            >
+              <RenderElement
+                element={child}
+                validationData={getElementOptions(child, options)}
+              />
+              {options?.errors?.[child.id]?.message && (
+                <div className="mt-1 text-xs text-red-600 min-h-[1rem]">
+                  {options.errors[child.id].message}
+                </div>
+              )}
+            </GridItem>
+          ))}
+        </GridInput>
       </div>
-    </div>
-  );
+    );
+  };
+
+  const renderStandardElement = (el: any) => {
+    if (!evaluateVisibility(el, answerData)) return null;
+
+    return (
+      <div
+        key={el.id}
+        className={clsx("group relative grid gap-y-[6px] min-w-0 w-full", el.elementClass)}
+      >
+        <RenderElement
+          element={el}
+          validationData={getElementOptions(el, options)}
+        />
+        {options?.errors?.[el.id]?.message && (
+          <div className="mt-1 text-xs text-red-600 min-h-[1rem]">
+            {options.errors[el.id].message}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div 

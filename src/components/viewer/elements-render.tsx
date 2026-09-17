@@ -20,6 +20,7 @@ export const RenderElement = ({ element, validationData }: { element: any; valid
   }, [answerData, element]);
 
   if (!ElementComponent) return null;
+  if (!isVisible) return null;
 
   const showResults = Boolean(validationData?.showResults);
   const hideInputs = Boolean(

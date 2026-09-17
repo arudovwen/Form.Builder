@@ -11,7 +11,7 @@ import {
 import clsx from "clsx";
 import { v4 as uuidv4 } from "uuid";
 
-import EditorContext from "../../context/editor-context";
+import EditorContext, { DeleteMode } from "../../context/editor-context";
 import { RenderElement } from "./element-render";
 import AppIcon from "../ui/AppIcon";
 import GridInput, { GridItem } from "../elements/grid-input";
@@ -22,6 +22,8 @@ const STATE = "edit";
 export interface FormElement {
   id: string;
   isReadOnly?: false;
+  isFieldDeleted?: boolean;
+  isDeleted?: boolean;
   [key: string]: any;
 }
 
@@ -33,6 +35,7 @@ export interface EditorContextType {
   removeElement: any;
   isDragging: boolean;
   uploadUrl?: string;
+  deleteMode?: DeleteMode;
 }
 
 // ─── DropZone ────────────────────────────────────────────────────────────────
@@ -51,6 +54,12 @@ function DropZone({
 }) {
   const [over, setOver] = useState(false);
 
+  useEffect(() => {
+    if (!isDragging) {
+      setOver(false);
+    }
+  }, [isDragging]);
+
   // Height: 52px when hovered, 28px any time a drag is happening, 4px idle
   const height = over ? 52 : isDragging ? 28 : 4;
 
@@ -63,9 +72,15 @@ function DropZone({
       onDragOver={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        e.dataTransfer.dropEffect = "move";
         setOver(true);
       }}
-      onDragLeave={() => setOver(false)}
+      onDragLeave={(e) => {
+        const related = e.relatedTarget as Node | null;
+        if (related && (e.currentTarget as HTMLElement).contains(related))
+          return;
+        setOver(false);
+      }}
       onDrop={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -109,9 +124,8 @@ function ElementCanvas({ elementData, sectionId }: any) {
 
   const [draggedElementId, setDraggedElementId] = useState<string | null>(null);
 
-  const questionData = useMemo(
-    () =>
-      formData.find((s: { id: any }) => s.id === sectionId)?.questionData || [],
+  const sectionElements = useMemo(
+    () => formData.find((s: { id: any }) => s.id === sectionId)?.formData || [],
     [formData, sectionId],
   );
 
@@ -147,6 +161,10 @@ function ElementCanvas({ elementData, sectionId }: any) {
   // ── Drop onto a card (reorder / eject from grid) ────────────────────────────
   // When a grid child is dropped onto a canvas card we eject it from its grid
   // (strip gridId/gridPosition) and insert it at the target's index position.
+  // ── Drop onto a card (reorder / eject from grid / insert new element) ───────
+  // When a grid child is dropped onto a canvas card we eject it from its grid
+  // (strip gridId/gridPosition) and insert it at the target's index position.
+  // When a new element from sidebar is dropped onto a card, insert before or after it.
   const handleDrop = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
       e.preventDefault();
@@ -155,13 +173,72 @@ function ElementCanvas({ elementData, sectionId }: any) {
       const draggedId = e.dataTransfer.getData("elementId");
       const targetId = e.currentTarget.id;
 
-      if (!draggedId || !targetId || draggedId === targetId) {
+      if (!targetId) {
         handleDragEnd();
         return;
       }
 
-      const draggedEl = questionData.find((el: any) => el.id === draggedId);
-      const targetIndex = questionData.findIndex(
+      // Check if this is a new element from the sidebar dropped directly onto a card
+      if (!draggedId) {
+        try {
+          const rawProps = e.dataTransfer.getData("properties");
+          if (rawProps) {
+            const data = JSON.parse(rawProps);
+            if (data?.type === "section") {
+              handleDragEnd();
+              return;
+            }
+
+            const targetIndex = sectionElements.findIndex(
+              (el: any) => el.id === targetId,
+            );
+
+            if (targetIndex !== -1) {
+              const targetEl = sectionElements[targetIndex];
+              const rect = e.currentTarget.getBoundingClientRect();
+              const isTopHalf = e.clientY < rect.top + rect.height / 2;
+
+              let insertIndex: number;
+              if (isTopHalf) {
+                insertIndex = targetIndex;
+              } else {
+                if (targetEl.type === "grid") {
+                  const relatedIndices = sectionElements
+                    .map((item: any, idx: number) => ({ item, idx }))
+                    .filter(
+                      ({ item }: any) =>
+                        item.id === targetEl.id || item.gridId === targetEl.id,
+                    )
+                    .map(({ idx }: any) => idx);
+                  insertIndex = relatedIndices.length
+                    ? Math.max(...relatedIndices) + 1
+                    : targetIndex + 1;
+                } else {
+                  insertIndex = targetIndex + 1;
+                }
+              }
+
+              const newElement = { ...data, id: uuidv4(), sectionId };
+              addElementInPosition(newElement, sectionId, insertIndex);
+              setDraggedElementId(null);
+              setIsDragging(false);
+              return;
+            }
+          }
+        } catch (err) {
+          console.error("Drop error on card:", err);
+        }
+        handleDragEnd();
+        return;
+      }
+
+      if (draggedId === targetId) {
+        handleDragEnd();
+        return;
+      }
+
+      const draggedEl = sectionElements.find((el: any) => el.id === draggedId);
+      const targetIndex = sectionElements.findIndex(
         (el: any) => el.id === targetId,
       );
 
@@ -175,7 +252,14 @@ function ElementCanvas({ elementData, sectionId }: any) {
       setDraggedElementId(null);
       setIsDragging(false);
     },
-    [sectionId, moveElement, setIsDragging, handleDragEnd, questionData],
+    [
+      sectionId,
+      moveElement,
+      setIsDragging,
+      handleDragEnd,
+      sectionElements,
+      addElementInPosition,
+    ],
   );
 
   // ── Drop onto an insertion dropzone ─────────────────────────────────────────
@@ -195,7 +279,9 @@ function ElementCanvas({ elementData, sectionId }: any) {
 
       // New element dragged from the sidebar
       try {
-        const data = JSON.parse(e.dataTransfer.getData("properties"));
+        const rawProps = e.dataTransfer.getData("properties");
+        if (!rawProps) return;
+        const data = JSON.parse(rawProps);
         if (data?.type === "section") return;
         const newElement = { ...data, id: uuidv4(), sectionId };
         addElementInPosition(newElement, sectionId, index);
@@ -222,6 +308,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
             : (e: DragEvent<HTMLDivElement>) => {
                 e.preventDefault();
                 e.stopPropagation();
+                e.dataTransfer.dropEffect = "move";
               }
         }
         onDrop={insideGrid ? undefined : handleDrop}
@@ -242,30 +329,80 @@ function ElementCanvas({ elementData, sectionId }: any) {
     [draggedElementId, handleDrop, sectionId, handleDragStart, handleDragEnd],
   );
 
-  // ── Map from gridId → children (only top-level elements that have a gridId) ──
+  // ── Active elements ─────────────────────────────────────────────────────────
+  const activeElements = useMemo(
+    () =>
+      elementData?.filter(
+        (el: any) => !el.isFieldDeleted && !el.isDeleted,
+      ) || [],
+    [elementData],
+  );
+
+  const gridMap = useMemo(() => {
+    const map = new Map<string, any>();
+    activeElements.forEach((el: any) => {
+      if (el.type === "grid") {
+        map.set(el.id, el);
+      }
+    });
+    return map;
+  }, [activeElements]);
+
+  // ── Map from gridId → children (only elements with a valid parent grid and column in bounds) ──
   const gridChildrenMap = useMemo(() => {
     return (
       elementData?.reduce((acc: Record<string, any[]>, el: any) => {
-        if (el.gridId && !el.isFieldDeleted) {
-          acc[el.gridId] = acc[el.gridId] || [];
-          acc[el.gridId].push(el);
+        if (el.gridId && !el.isFieldDeleted && !el.isDeleted) {
+          const parentGrid = gridMap.get(el.gridId);
+          if (
+            parentGrid &&
+            (!el.gridPosition?.col ||
+              el.gridPosition.col <= (parentGrid.columns || 1))
+          ) {
+            acc[el.gridId] = acc[el.gridId] || [];
+            acc[el.gridId].push(el);
+          }
         }
         return acc;
       }, {}) || {}
     );
-  }, [elementData]);
+  }, [elementData, gridMap]);
 
-  // ── Active elements ─────────────────────────────────────────────────────────
-  const activeElements = useMemo(
-    () => elementData?.filter((el: any) => !el.isFieldDeleted) || [],
-    [elementData],
+  // ── Element list ──────────────────────────────────────────────────────────────
+  // Top-level elements: elements without a gridId OR whose grid is missing/overflowing
+  const topLevelElements = useMemo(
+    () =>
+      activeElements.filter((el: any) => {
+        if (!el.gridId) return true;
+        const parentGrid = gridMap.get(el.gridId);
+        if (!parentGrid) return true;
+        if (
+          el.gridPosition?.col &&
+          el.gridPosition.col > (parentGrid.columns || 1)
+        ) {
+          return true;
+        }
+        return false;
+      }),
+    [activeElements, gridMap],
   );
+
+  const firstTopLevelIndex = useMemo(() => {
+    if (!topLevelElements.length) return 0;
+    const idx = sectionElements.findIndex(
+      (q: any) => q.id === topLevelElements[0].id,
+    );
+    return idx === -1 ? 0 : idx;
+  }, [sectionElements, topLevelElements]);
 
   // ── Empty canvas ─────────────────────────────────────────────────────────────
   if (!activeElements.length) {
     return (
       <div
-        onDragOver={(e) => e.preventDefault()}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+        }}
         onDrop={(e) => handleMainDrop(e, 0)}
         onDragEnd={handleDragEnd}
         className="w-full h-full flex items-center justify-center text-gray-400 min-h-[200px] p-10 col-span-2 border border-dashed border-gray-300 rounded-lg"
@@ -275,24 +412,21 @@ function ElementCanvas({ elementData, sectionId }: any) {
     );
   }
 
-  // ── Element list ──────────────────────────────────────────────────────────────
-  // We interleave a DropZone before every top-level element, plus one after the
-  // last one, so there are always valid insertion targets everywhere.
-  const topLevelElements = activeElements.filter((el: any) => !el.gridId);
-
   return (
     <div className="relative flex flex-col w-full h-full gap-2">
       {/* Leading drop zone — always rendered */}
       <DropZone
-        index={0}
+        index={firstTopLevelIndex}
         isDragging={isDragging}
         onDrop={handleMainDrop}
         onDragEnd={handleDragEnd}
       />
 
-      {topLevelElements.map((el: any) => {
-        // Compute the real index inside questionData for correct insertion
-        const realIndex = questionData.findIndex((q: any) => q.id === el.id);
+      {topLevelElements.map((el: any, i: number) => {
+        const nextTopLevel = topLevelElements[i + 1];
+        const dropIndex = nextTopLevel
+          ? sectionElements.findIndex((q: any) => q.id === nextTopLevel.id)
+          : sectionElements.length;
 
         // ── Grid element ──────────────────────────────────────────────────────
         if (el.type === "grid") {
@@ -309,6 +443,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
                 onDragOver={(e: DragEvent<HTMLDivElement>) => {
                   e.preventDefault();
                   e.stopPropagation();
+                  e.dataTransfer.dropEffect = "move";
                 }}
                 onDrop={handleDrop}
                 onDragEnd={handleDragEnd}
@@ -345,7 +480,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
 
               {/* Trailing drop zone after this grid */}
               <DropZone
-                index={realIndex + 1}
+                index={dropIndex}
                 isDragging={isDragging}
                 onDrop={handleMainDrop}
                 onDragEnd={handleDragEnd}
@@ -361,7 +496,7 @@ function ElementCanvas({ elementData, sectionId }: any) {
 
             {/* Trailing drop zone after this element */}
             <DropZone
-              index={realIndex + 1}
+              index={dropIndex}
               isDragging={isDragging}
               onDrop={handleMainDrop}
               onDragEnd={handleDragEnd}

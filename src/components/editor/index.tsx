@@ -33,13 +33,13 @@ const SectionItem = ({
   onReorderSection,
 }: any) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const prevLength = useRef(section?.questionData?.length);
+  const prevLength = useRef(section?.formData?.length);
 
   const wasDragging = useRef(isDragging);
 
   useEffect(() => {
     // Scroll to bottom when a new input is added
-    if (section?.questionData?.length > prevLength.current) {
+    if (section?.formData?.length > prevLength.current) {
       if (!isDragging && !wasDragging.current) {
         const container = document.getElementById("section-container");
         if (container) {
@@ -52,8 +52,8 @@ const SectionItem = ({
         }
       }
     }
-    prevLength.current = section?.questionData?.length;
-  }, [section?.questionData?.length, isDragging]);
+    prevLength.current = section?.formData?.length;
+  }, [section?.formData?.length, isDragging]);
 
   useEffect(() => {
     wasDragging.current = isDragging;
@@ -178,7 +178,7 @@ const SectionItem = ({
             <div className="h-full mt-4 gap-y-6 ">
               {
                 <ElementCanvas
-                  elementData={section?.questionData}
+                  elementData={section?.formData}
                   sectionId={section?.id}
                 />
               }
@@ -200,6 +200,7 @@ const FormBuilder = ({
   const allTemplates = [...defaultTemplates, ...(templates || [])];
   const [isOpen, setOpen] = useState(false);
   const [isTemplateModalOpen, setTemplateModalOpen] = useState(false);
+  const [hasSectionInClipboard, setHasSectionInClipboard] = useState(false);
   const tempSection = useRef(null);
   const containerRef = useRef<HTMLDivElement>(null); // Ref for the container
   const {
@@ -246,6 +247,44 @@ const FormBuilder = ({
       window.removeEventListener("paste", handlePaste);
     };
   }, [selectedSection, pasteElement, pasteSection]);
+
+  useEffect(() => {
+    const checkClipboard = () => {
+      try {
+        const clipboardString =
+          localStorage.getItem("form_builder_section_clipboard") ||
+          localStorage.getItem("form_builder_clipboard");
+        if (clipboardString) {
+          const copiedData = JSON.parse(clipboardString);
+          if (
+            copiedData?.type === "FORM_BUILDER_SECTION_CLIPBOARD" &&
+            copiedData?.section
+          ) {
+            const isExpired =
+              copiedData?.timestamp &&
+              Date.now() - copiedData.timestamp > 60000;
+            if (isExpired) {
+              localStorage.removeItem("form_builder_section_clipboard");
+              localStorage.removeItem("form_builder_clipboard");
+              setHasSectionInClipboard(false);
+            } else {
+              setHasSectionInClipboard(true);
+            }
+          } else {
+            setHasSectionInClipboard(false);
+          }
+        } else {
+          setHasSectionInClipboard(false);
+        }
+      } catch {
+        setHasSectionInClipboard(false);
+      }
+    };
+
+    checkClipboard();
+    const interval = setInterval(checkClipboard, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const prevFormDataLength = useRef(formData?.length || 0);
 
@@ -319,7 +358,7 @@ const FormBuilder = ({
       const validSections = template.sections.filter(Boolean);
       const newSections = validSections.map((sec: any) => {
         const secId = uuidv4();
-        const newQuestions = sec.questionData?.map((q: any) => {
+        const newQuestions = sec.formData?.map((q: any) => {
           const newQ = deepCloneWithNewId(q, {
             id: uuidv4(),
             sectionId: secId,
@@ -331,7 +370,7 @@ const FormBuilder = ({
         // It's a bit complex, but for simple templates, this is a good start.
         if (newQuestions) {
           const idMap = new Map();
-          sec.questionData.forEach((q: any, i: number) => {
+          sec.formData.forEach((q: any, i: number) => {
             idMap.set(q.id, newQuestions[i].id);
           });
           newQuestions.forEach((q: any) => {
@@ -343,7 +382,7 @@ const FormBuilder = ({
 
         return deepCloneWithNewId(sec, {
           id: secId,
-          questionData: newQuestions || [],
+          formData: newQuestions || [],
         });
       });
 
@@ -351,7 +390,7 @@ const FormBuilder = ({
         formData.length === 1 &&
         formData[0].title === "" &&
         formData[0].description === "" &&
-        (!formData[0]?.questionData || formData[0]?.questionData?.length === 0);
+        (!formData[0]?.formData || formData[0]?.formData?.length === 0);
 
       if (isInitialBlank) {
         setFormData(newSections);
@@ -380,15 +419,16 @@ const FormBuilder = ({
         className="relative flex flex-col flex-1 w-full gap-y-3 container overflow-y-auto"
       >
         {formData
-          ?.filter((section: any) => !section?.isFieldDeleted)
+          ?.filter((section: any) => !section?.isFieldDeleted && !section?.isDeleted)
           ?.map(
             (
               section: {
                 id: string;
                 title: string;
                 description?: string;
-                questionData: any;
+                formData: any;
                 isFieldDeleted?: boolean;
+                isDeleted?: boolean;
               },
               index: number,
             ) => (
@@ -405,7 +445,7 @@ const FormBuilder = ({
                 copySection={copySection}
                 duplicateSection={duplicateSection}
                 formDataLength={
-                  formData?.filter((s: any) => !s?.isFieldDeleted)?.length || 0
+                  formData?.filter((s: any) => !s?.isFieldDeleted && !s?.isDeleted)?.length || 0
                 }
                 onDragOver={onDragOver}
                 setIsDragging={setIsDragging}
@@ -423,16 +463,18 @@ const FormBuilder = ({
           >
             + Add section
           </button>
-          <button
-            type="button"
-            onClick={() => pasteSection()}
-            style={{ color: config?.buttonColor || "#333" }}
-            className="text-sm font-medium hover:underline flex items-center gap-1"
-            title="Paste section from clipboard"
-          >
-            <AppIcon icon="lucide:clipboard-paste" iconClass="text-sm" />
-            Paste section
-          </button>
+          {hasSectionInClipboard && (
+            <button
+              type="button"
+              onClick={() => pasteSection()}
+              style={{ color: config?.buttonColor || "#333" }}
+              className="text-sm font-medium hover:underline flex items-center gap-1"
+              title="Paste section from clipboard"
+            >
+              <AppIcon icon="lucide:clipboard-paste" iconClass="text-sm" />
+              Paste section
+            </button>
+          )}
           {onAddTemplate || allTemplates?.length ? (
             <button
               type="button"

@@ -31,16 +31,49 @@ interface GridItemProps {
   state?: string;
 }
 
-export const GridItem = ({ col, children, customClass }: GridItemProps) => (
+export const GridItem = ({ col, children, customClass, state }: GridItemProps) => (
   <div
     className={clsx("w-full bg-white min-w-0", customClass)}
-    style={{ gridColumn: col }}
+    style={state === "edit" && col ? { gridColumn: col } : undefined}
   >
     {children}
   </div>
 );
 
-const GridInput = ({
+const GridInputView = ({
+  element,
+  children,
+  customClass,
+}: {
+  element: any;
+  children?: ReactNode;
+  customClass?: string;
+}) => {
+  const childrenArray = React.Children.toArray(children).filter(Boolean);
+  if (!childrenArray.length) return null;
+
+  const maxCols = element?.columns || 1;
+  const numCols = Math.min(maxCols, childrenArray.length);
+
+  return (
+    <div className="relative w-full min-w-0">
+      <div
+        className={clsx("grid w-full gap-3 items-start min-w-0", customClass)}
+        style={{
+          gridTemplateColumns: `repeat(${numCols}, minmax(0, 1fr))`,
+        }}
+      >
+        {childrenArray.map((child: any, idx: number) => (
+          <div key={child?.key || idx} className="w-full min-w-0">
+            {child}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const GridInputEdit = ({
   element,
   sectionId,
   children,
@@ -139,9 +172,10 @@ const GridInput = ({
         if (properties?.type === "grid") return;
 
         const section = formData.find((s: any) => s.id === sectionId);
-        const occupant = section?.questionData?.find(
+        const occupant = section?.formData?.find(
           (el: any) =>
             !el.isFieldDeleted &&
+            !el.isDeleted &&
             el.gridId === element.id &&
             el.gridPosition?.col === currentCol,
         );
@@ -180,9 +214,10 @@ const GridInput = ({
     // itself must be the drag source (not just the inner card).
     const childData = formData
       .find((s: any) => s.id === sectionId)
-      ?.questionData?.find(
+      ?.formData?.find(
         (el: any) =>
           !el.isFieldDeleted &&
+          !el.isDeleted &&
           el.gridId === element.id &&
           el.gridPosition?.col === currentCol,
       );
@@ -226,14 +261,17 @@ const GridInput = ({
           onDragOver={(e) => handleDragOver(e, index)}
           onDragLeave={(e) => handleDragLeave(e, index)}
           className={clsx(
-            "relative border  rounded-lg min-h-[110px] min-w-0",
-            "flex items-center justify-center",
+            "relative border rounded-lg min-w-0",
+            isOccupied
+              ? "min-h-0 flex flex-col items-start justify-start"
+              : "min-h-[110px] flex items-center justify-center",
             "transition-all duration-200 ease-in-out",
-            state === "edit" ? "py-3 " : "",
+            state === "edit" ? (isOccupied ? "pt-4 pb-1" : "py-3") : "",
             isOccupied &&
               state === "edit" &&
               "cursor-grab active:cursor-grabbing border-none",
             customClass,
+            isOccupied && "!min-h-0",
 
             !globalDragging &&
               !isHovered &&
@@ -295,7 +333,7 @@ const GridInput = ({
   return (
     <div className="relative w-full">
       <div
-        className="grid w-full gap-3  items-center"
+        className="grid w-full gap-3 items-start"
         style={{
           gridTemplateColumns: `repeat(${element.columns}, minmax(0, 1fr))`,
         }}
@@ -306,6 +344,19 @@ const GridInput = ({
       </div>
     </div>
   );
+};
+
+const GridInput = (props: GridInputProps) => {
+  if (props.state !== "edit") {
+    return (
+      <GridInputView
+        element={props.element}
+        children={props.children}
+        customClass={props.customClass}
+      />
+    );
+  }
+  return <GridInputEdit {...props} />;
 };
 
 export default React.memo(GridInput);

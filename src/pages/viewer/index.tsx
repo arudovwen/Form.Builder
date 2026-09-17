@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useCallback } from "react";
 import Loader from "../../components/Loader";
 import FormRenderer from "../../components/viewer";
 import { setItem } from "../../utils/localStorageControl";
-import { EditorProvider } from "@/context/editor-context";
+import { EditorProvider, DeleteMode } from "@/context/editor-context";
 
 export interface RenderProps {
   onSubmit?: (e: any) => void;
@@ -28,6 +28,7 @@ export interface RenderProps {
   hideInputsOnResults?: boolean; // Hide input controls when viewing results
   sendHiddenSectionsAsEmpty?: boolean;
   preview?: boolean;
+  deleteMode?: DeleteMode;
 }
 
 export default function Viewer({
@@ -48,6 +49,7 @@ export default function Viewer({
   hideInputsOnResults = false,
   sendHiddenSectionsAsEmpty = false,
   preview = false,
+  deleteMode,
 }: RenderProps) {
   // ✅ Store config in localStorage only when it changes
   useEffect(() => {
@@ -77,7 +79,7 @@ export default function Viewer({
   return (
     <div className="w-full h-full min-w-0">
       <div id="root-portal"></div>
-      <EditorProvider>
+      <EditorProvider deleteMode={deleteMode}>
         <FormRenderer
           form_data={form_data}
           answerData={answerData}

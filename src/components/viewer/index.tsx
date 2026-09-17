@@ -78,15 +78,22 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   const filteredFormData = useMemo(
     () =>
       form_data
-        .filter((i) => (preview ? true : !i.isHidden) && !i.isFieldDeleted)
+        .filter(
+          (i) =>
+            (preview ? true : !i.isHidden) &&
+            !i.isFieldDeleted &&
+            !i.isDeleted,
+        )
         .map((section) => {
           const isSectionDisabled = section.isDisabled || section.disabled;
           const activeQuestions =
-            section?.questionData?.filter((q: any) => !q.isFieldDeleted) || [];
+            section?.formData?.filter(
+              (q: any) => !q.isFieldDeleted && !q.isDeleted,
+            ) || [];
           if (isSectionDisabled) {
             return {
               ...section,
-              questionData: activeQuestions.map((q: any) => ({
+              formData: activeQuestions.map((q: any) => ({
                 ...q,
                 isDisabled: true,
               })),
@@ -94,7 +101,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
           }
           return {
             ...section,
-            questionData: activeQuestions,
+            formData: activeQuestions,
           };
         }),
     [form_data, preview],
@@ -119,6 +126,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     resolver,
     mode: "onSubmit",
     defaultValues: {},
+    shouldUnregister: false,
   });
 
   const {
@@ -149,15 +157,32 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     if (renderType !== "conversational") return [];
     const questions: any[] = [];
     filteredFormData.forEach((section) => {
-      section?.questionData?.forEach((element: any) => {
+      section?.formData?.forEach((element: any) => {
         if (evaluateVisibility(element, memoizedValues)) {
           if (element.type === "grid") {
-            const children = section?.questionData?.filter(
-              (c: any) => c.gridId === element.id,
+            const children = section?.formData?.filter(
+              (c: any) =>
+                c.gridId === element.id &&
+                (!c.gridPosition?.col ||
+                  c.gridPosition.col <= (element.columns || 1)) &&
+                evaluateVisibility(c, memoizedValues),
             );
-            questions.push({ ...element, gridChildren: children });
-          } else if (!element.gridId) {
-            questions.push(element);
+            if (children && children.length > 0) {
+              questions.push({ ...element, gridChildren: children });
+            }
+          } else {
+            const parentGrid = element.gridId
+              ? section?.formData?.find(
+                  (g: any) => g.id === element.gridId && g.type === "grid",
+                )
+              : null;
+            const isGridChild =
+              parentGrid &&
+              (!element.gridPosition?.col ||
+                element.gridPosition.col <= (parentGrid.columns || 1));
+            if (!isGridChild) {
+              questions.push(element);
+            }
           }
         }
       });
@@ -178,15 +203,19 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   }, [setUploadUrl, uploadUrl]);
   // ✅ Effect runs only when actual values change
   useEffect(() => {
-    if (!form_data?.length || !onGetValues) return;
+    if (!form_data?.length) return;
 
     const currentFormValues = {
       ...(getValues ? getValues() : {}),
       ...(memoizedValues || {}),
     };
 
+    setAnswerData?.(currentFormValues);
+
+    if (!onGetValues) return;
+
     const updatedData = form_data
-      .filter((section: any) => !section?.isFieldDeleted)
+      .filter((section: any) => !section?.isFieldDeleted && !section?.isDeleted)
       .flatMap((section: any) => {
         const isSectionHidden = preview ? false : Boolean(section?.isHidden);
         const shouldEmptyHidden = Boolean(
@@ -197,8 +226,8 @@ const FormRenderer: React.FC<FormRendererProps> = ({
         const shouldSendEmpty = isSectionHidden && shouldEmptyHidden;
 
         return (
-          section?.questionData
-            ?.filter((el: any) => !el?.isFieldDeleted)
+          section?.formData
+            ?.filter((el: any) => !el?.isFieldDeleted && !el?.isDeleted)
             ?.map((element: any) => {
               const rawVal =
                 currentFormValues[element.id] !== undefined
@@ -229,7 +258,6 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       });
 
     handleGetValues(updatedData);
-    setAnswerData(currentFormValues);
   }, [
     memoizedValues,
     form_data,
@@ -257,7 +285,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       };
 
       const updatedData = form_data
-        .filter((section: any) => !section?.isFieldDeleted)
+        .filter((section: any) => !section?.isFieldDeleted && !section?.isDeleted)
         .flatMap((section: any) => {
           const isSectionHidden = preview ? false : Boolean(section?.isHidden);
           const shouldEmptyHidden = Boolean(
@@ -268,8 +296,8 @@ const FormRenderer: React.FC<FormRendererProps> = ({
           const shouldSendEmpty = isSectionHidden && shouldEmptyHidden;
 
           return (
-            section?.questionData
-              ?.filter((el: any) => !el?.isFieldDeleted)
+            section?.formData
+              ?.filter((el: any) => !el?.isFieldDeleted && !el?.isDeleted)
               ?.map((element: any) => {
                 const rawVal =
                   currentFormValues[element.id] !== undefined
@@ -327,7 +355,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     }
 
     if (!ignoreValidation) {
-      const currentFields = filteredFormData?.[current]?.questionData?.map(
+      const currentFields = filteredFormData?.[current]?.formData?.map(
         (ele: any) => ele.id,
       );
       const isValid = await trigger(currentFields);
@@ -403,7 +431,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
             key={
               renderType === "conversational"
                 ? `conv-${currentConvIndex}`
-                : filteredFormData?.[current]?.id
+                : undefined
             }
           >
             {renderType === "multi" &&

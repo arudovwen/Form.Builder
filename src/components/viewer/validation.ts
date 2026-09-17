@@ -1,6 +1,6 @@
 import * as yup from "yup";
 
-interface QuestionData {
+interface formData {
   id: string;
   type:
     | "textField"
@@ -27,7 +27,7 @@ interface QuestionData {
 }
 
 interface Section {
-  questionData: QuestionData[];
+  formData: formData[];
 }
 
 const DEFAULT_MESSAGES = {
@@ -40,7 +40,7 @@ const DEFAULT_MESSAGES = {
   maxAmount: (max: number) => `Maximum amount is ${max}`,
 } as const;
 
-const getBaseSchema = (type: QuestionData["type"]) => {
+const getBaseSchema = (type: formData["type"]) => {
   const schemas = {
     textField: yup.string().nullable(),
     longText: yup.string().nullable(),
@@ -108,7 +108,7 @@ const addTextValidations = (
     maxLength,
     minLengthMessage,
     maxLengthMessage,
-  }: Partial<QuestionData>,
+  }: Partial<formData>,
 ) => {
   let updatedSchema = schema;
 
@@ -136,7 +136,7 @@ const addNumberValidations = (
     maxAmount,
     minAmountMessage,
     maxAmountMessage,
-  }: Partial<QuestionData>,
+  }: Partial<formData>,
 ) => {
   let updatedSchema = schema;
 
@@ -158,29 +158,119 @@ const addNumberValidations = (
 };
 
 export const evaluateVisibility = (question: any, answerData: any) => {
-  if (question?.isFieldDeleted) return false;
+  if (question?.isFieldDeleted || question?.isDeleted) return false;
   if (!question.isHidden) return true;
   const fields = question.visibilityDependentFields || [];
   if (!fields.length) return true;
 
   return fields.every((field: any) => {
-    const value = answerData?.[field.id];
-    const valA = field.fieldValue;
+    const fieldId = typeof field === "object" ? (field?.id || field?.value) : field;
+    if (!fieldId) return true;
+
+    const value = answerData?.[fieldId];
+    const valA = typeof field === "object" ? field?.fieldValue : "";
     const valB = value;
 
-    switch (field.operator) {
+    const toStr = (v: any) => {
+      if (v === undefined || v === null) return "";
+      if (typeof v === "object" && "value" in v)
+        return String(v.value ?? "").toLowerCase();
+      return String(v).toLowerCase();
+    };
+
+    if (valB === undefined || valB === null || valB === "") {
+      if (field?.operator === "not_equals") {
+        if (Array.isArray(valA)) return valA.length > 0;
+        return valA !== undefined && valA !== null && valA !== "";
+      }
+      if (field?.operator === "equals") {
+        if (Array.isArray(valA)) return valA.length === 0;
+        return valA === undefined || valA === null || valA === "";
+      }
+      return false;
+    }
+
+    // When expected value valA is an array (multiple values selected in visibility rule)
+    if (Array.isArray(valA)) {
+      const valAStrings = valA.map(toStr).filter((s) => s !== "");
+
+      if (valAStrings.length === 0) {
+        return field?.operator === "not_equals";
+      }
+
+      // If answered value valB is also an array (e.g. multiSelect, checkbox)
+      if (Array.isArray(valB)) {
+        const valBStrings = valB.map(toStr);
+        switch (field?.operator) {
+          case "equals":
+            return valBStrings.some((b) => valAStrings.includes(b));
+          case "not_equals":
+            return !valBStrings.some((b) => valAStrings.includes(b));
+          case "contains":
+            return valBStrings.some((b) =>
+              valAStrings.some((a) => b.includes(a)),
+            );
+          case "not_contains":
+            return !valBStrings.some((b) =>
+              valAStrings.some((a) => b.includes(a)),
+            );
+          default:
+            return true;
+        }
+      }
+
+      // Answered value valB is a single value (e.g. dropdown selectField)
+      const strB = toStr(valB);
+      switch (field?.operator) {
+        case "equals":
+          return valAStrings.includes(strB);
+        case "not_equals":
+          return !valAStrings.includes(strB);
+        case "contains":
+          return valAStrings.some((a) => strB.includes(a));
+        case "not_contains":
+          return !valAStrings.some((a) => strB.includes(a));
+        default:
+          return true;
+      }
+    }
+
+    // Handle array values in answerData (e.g. multiSelect, checkbox)
+    if (Array.isArray(valB)) {
+      const targetStr = toStr(valA);
+      switch (field?.operator) {
+        case "equals":
+          return valB.some((item) => toStr(item) === targetStr);
+        case "not_equals":
+          return !valB.some((item) => toStr(item) === targetStr);
+        case "contains":
+          return valB.some((item) => toStr(item).includes(targetStr));
+        case "not_contains":
+          return !valB.some((item) => toStr(item).includes(targetStr));
+        default:
+          return true;
+      }
+    }
+
+    switch (field?.operator) {
       case "equals":
-        return String(valA).toLowerCase() === String(valB).toLowerCase();
+        return toStr(valA) === toStr(valB);
       case "not_equals":
-        return String(valA).toLowerCase() !== String(valB).toLowerCase();
-      case "greater":
-        return Number(valB) > Number(valA);
-      case "less":
-        return Number(valB) < Number(valA);
+        return toStr(valA) !== toStr(valB);
+      case "greater": {
+        const numA = Number(valA);
+        const numB = Number(valB);
+        return !isNaN(numA) && !isNaN(numB) ? numB > numA : false;
+      }
+      case "less": {
+        const numA = Number(valA);
+        const numB = Number(valB);
+        return !isNaN(numA) && !isNaN(numB) ? numB < numA : false;
+      }
       case "contains":
-        return String(valB).toLowerCase().includes(String(valA).toLowerCase());
+        return toStr(valB).includes(toStr(valA));
       case "not_contains":
-        return !String(valB).toLowerCase().includes(String(valA).toLowerCase());
+        return !toStr(valB).includes(toStr(valA));
       default:
         return true;
     }
@@ -201,9 +291,9 @@ export function generateDynamicSchema({
   const schemaFields: Record<string, yup.Schema<any>> = {};
 
   formData.forEach((section: any) => {
-    if (section?.isFieldDeleted) return;
-    section?.questionData?.forEach((question: any) => {
-      if (question?.isFieldDeleted) return;
+    if (section?.isFieldDeleted || section?.isDeleted) return;
+    section?.formData?.forEach((question: any) => {
+      if (question?.isFieldDeleted || question?.isDeleted) return;
       // If the field is conditionally hidden, skip validating it
       if (!evaluateVisibility(question, answerData)) {
         return;
@@ -250,42 +340,45 @@ export function generateDynamicSchema({
       }
 
       // Add array/multi-select validation for minChecked or requireAllChecked
-      if (question.requireAllChecked) {
-        fieldSchema = fieldSchema.test(
-          "require-all-checked",
-          "All options must be selected",
-          (value) => {
-            const isEmpty =
-              value === undefined ||
-              value === null ||
-              value === "" ||
-              (Array.isArray(value) && value.length === 0);
-            if (isEmpty) {
-              return !isRequired;
-            }
-            const allOptionsCount = question.options?.length || 0;
-            if (Array.isArray(value)) return value.length >= allOptionsCount;
-            return allOptionsCount <= 1;
-          },
-        );
-      } else if (question.minChecked) {
-        fieldSchema = fieldSchema.test(
-          "min-checked",
-          `Please select at least ${question.minChecked} option(s)`,
-          (value) => {
-            const isEmpty =
-              value === undefined ||
-              value === null ||
-              value === "" ||
-              (Array.isArray(value) && value.length === 0);
-            if (isEmpty) {
-              return !isRequired;
-            }
-            if (Array.isArray(value))
-              return value.length >= question.minChecked;
-            return 1 >= question.minChecked;
-          },
-        );
+      const isSingleCheck = question.selectionType === "single" || question.isMultiple === false;
+      if (!isSingleCheck) {
+        if (question.requireAllChecked) {
+          fieldSchema = fieldSchema.test(
+            "require-all-checked",
+            "All options must be selected",
+            (value) => {
+              const isEmpty =
+                value === undefined ||
+                value === null ||
+                value === "" ||
+                (Array.isArray(value) && value.length === 0);
+              if (isEmpty) {
+                return !isRequired;
+              }
+              const allOptionsCount = question.options?.length || 0;
+              if (Array.isArray(value)) return value.length >= allOptionsCount;
+              return allOptionsCount <= 1;
+            },
+          );
+        } else if (question.minChecked) {
+          fieldSchema = fieldSchema.test(
+            "min-checked",
+            `Please select at least ${question.minChecked} option(s)`,
+            (value) => {
+              const isEmpty =
+                value === undefined ||
+                value === null ||
+                value === "" ||
+                (Array.isArray(value) && value.length === 0);
+              if (isEmpty) {
+                return !isRequired;
+              }
+              if (Array.isArray(value))
+                return value.length >= question.minChecked;
+              return 1 >= question.minChecked;
+            },
+          );
+        }
       }
 
       schemaFields[id] = fieldSchema;

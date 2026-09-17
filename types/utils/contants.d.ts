@@ -48,6 +48,7 @@ export interface OptionType {
     value: any;
     id: string;
     key?: string;
+    filterValue?: string;
 }
 export interface ElementType {
     type: ElementKind;
@@ -97,9 +98,13 @@ export interface ElementType {
     isHidden: boolean;
     visibilityDependentFields?: string;
     visibilityDependentFieldsValue?: any;
+    filterByFieldId?: string;
+    clearOnFilterChange?: boolean;
+    filterBehavior?: "hide" | "disable";
     minChecked?: number | null;
     allowCheckAll?: boolean;
     requireAllChecked?: boolean;
+    selectionType?: string;
     isMultiple: boolean;
     acceptedFiles: any[];
     maxFileSize?: number;

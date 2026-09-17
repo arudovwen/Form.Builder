@@ -1,8 +1,13 @@
-import { Fragment, useEffect, useState, useMemo } from "react";
+import { Fragment, useEffect, useState, useMemo, useRef } from "react";
 import { Combobox, Transition } from "@headlessui/react";
 import AppIcon from "@/components/ui/AppIcon";
 import axios from "axios";
 import { getItem } from "@/utils/localStorageControl";
+import {
+  getFilteredOptions,
+  getParentFieldValue,
+  pruneSelectedValues,
+} from "@/utils/optionFiltering";
 
 export default function MultiSelectInput({
   element,
@@ -16,6 +21,7 @@ export default function MultiSelectInput({
   const {
     register = () => ({}),
     setValue,
+    trigger,
     isReadOnly,
     watch,
     getValues,
@@ -79,12 +85,28 @@ export default function MultiSelectInput({
     };
   }, [apiUrl, query]);
 
-  const activeOptions = apiUrl ? fetchedOptions : (element?.options ?? []);
+  const parentFieldValue = getParentFieldValue(
+    element?.filterByFieldId,
+    validationData,
+  );
+
+  const rawOptions = apiUrl ? fetchedOptions : (element?.options ?? []);
+
+  const activeOptions = useMemo(() => {
+    return getFilteredOptions(
+      rawOptions,
+      element?.filterByFieldId,
+      parentFieldValue,
+    );
+  }, [rawOptions, element?.filterByFieldId, parentFieldValue]);
 
   // Helper to map values to option objects
   const mapValuesToOptions = (vals: any[]) => {
     return vals.map((v) => {
-      if (typeof v === "object" && v !== null && "value" in v) return v;
+      if (typeof v === "object" && v !== null && "value" in v) {
+        const found = activeOptions.find((opt: any) => String(opt.value) === String(v.value));
+        return found ? { ...found, ...v } : v;
+      }
       const found = activeOptions.find((opt: any) => String(opt.value) === String(v));
       return found || { label: String(v), value: v };
     });
@@ -97,7 +119,6 @@ export default function MultiSelectInput({
     const current = getValues?.(element.id);
     return Array.isArray(current) ? mapValuesToOptions(current) : [];
   });
-
 
   /* ---------------- Register field ---------------- */
   useEffect(() => {
@@ -116,6 +137,51 @@ export default function MultiSelectInput({
     return () => subscription.unsubscribe?.();
   }, [watch, element.id, activeOptions]);
 
+  // Prune invalid selected values when parent value changes
+  const isHydratedRef = useRef(false);
+  const prevParentValRef = useRef<any>(undefined);
+  useEffect(() => {
+    if (!element?.filterByFieldId) return;
+
+    if (!isHydratedRef.current) {
+      if (parentFieldValue !== undefined) {
+        isHydratedRef.current = true;
+        prevParentValRef.current = parentFieldValue;
+      }
+      return;
+    }
+
+    if (
+      prevParentValRef.current !== undefined &&
+      prevParentValRef.current !== parentFieldValue
+    ) {
+      prevParentValRef.current = parentFieldValue;
+
+      if (element.clearOnFilterChange !== false && selectedValues.length > 0) {
+        const pruned = pruneSelectedValues(selectedValues, activeOptions);
+        if (pruned.length !== selectedValues.length) {
+          setSelectedValues(pruned);
+          const result = element?.returnObjects ? pruned : pruned.map((v) => v.value);
+          setValue?.(element.id, result, {
+            shouldValidate: true,
+            shouldDirty: true,
+          });
+          if (trigger) trigger(element.id);
+        }
+      }
+    }
+  }, [
+    element?.filterByFieldId,
+    element?.clearOnFilterChange,
+    element?.returnObjects,
+    element.id,
+    activeOptions,
+    parentFieldValue,
+    selectedValues,
+    setValue,
+    trigger,
+  ]);
+
   const filteredOptions = useMemo(() => {
     if (query === "") return activeOptions;
     const lowerQuery = query.toLowerCase();
@@ -128,16 +194,21 @@ export default function MultiSelectInput({
     e.stopPropagation();
     const newValues = selectedValues.filter((v) => v.value !== valToRemove.value);
     setSelectedValues(newValues);
-    setValue?.(element.id, newValues.map(v => v.value));
+    const result = element?.returnObjects ? newValues : newValues.map((v) => v.value);
+    setValue?.(element.id, result, { shouldDirty: true, shouldValidate: true });
+    trigger?.(element.id);
   };
 
   return (
     <div className="relative w-full">
       <Combobox
+        
         value={selectedValues || []}
         onChange={(values: any[]) => {
           setSelectedValues(values);
-          setValue?.(element.id, values.map(v => v.value));
+          const result = element?.returnObjects ? values : values.map((v) => v.value);
+          setValue?.(element.id, result, { shouldDirty: true, shouldValidate: true });
+          trigger?.(element.id);
         }}
         multiple
         disabled={isReadOnly}

@@ -1,7 +1,7 @@
 import MainPage from "./main";
 import SideBar from "./sidebar";
 import TopBar from "./topbar";
-import { EditorProvider, DeleteMode } from "../../context/editor-context";
+import { EditorProvider, DeleteMode, BuilderMode } from "../../context/editor-context";
 import Loader from "../Loader";
 import { Toaster } from "sonner";
 import { useState } from "react";
@@ -10,10 +10,11 @@ export interface BuilderProps {
   onSubmit?: (e: any) => void; // Function to handle form submission
   onChange?: (data: any) => void; // Function to stream form data updates
   onLogAction?: (action: string, value: any) => void; // Logger for user actions
-  questionData?: any; // Data for the questions in the form
+  formData?: any; // Data for the questions in the form
   isReadOnly?: boolean; // Flag to indicate if the form is read-only
   config?: any; // Configuration for the form
-  deleteMode?: DeleteMode; // Setting for removing deleted fields or marking them as isFieldDeleted ("remove" | "isFieldDeleted")
+  deleteMode?: DeleteMode; // Setting for removing deleted fields or marking them as deleted ("remove" | "isFieldDeleted" | "isDeleted" | "soft" | "hard")
+  mode?: BuilderMode; // Builder mode ("create" | "edit")
   title?: string;
   loading?: boolean;
   goBackUrl?: () => void;
@@ -33,8 +34,9 @@ export default function Layout({
   onSubmit,
   onChange,
   onLogAction,
-  questionData,
+  formData,
   deleteMode,
+  mode,
   config,
   title,
   goBackUrl,
@@ -52,11 +54,19 @@ export default function Layout({
 }: BuilderProps) {
   const [viewMode, setViewMode] = useState<"canvas" | "flow">("canvas");
 
+  const resolvedMode: BuilderMode =
+    mode ||
+    config?.mode ||
+    (formData && Array.isArray(formData) && formData.length > 0
+      ? "edit"
+      : "create");
+
   return (
     <EditorProvider
       onChange={onChange}
       onLogAction={onLogAction}
       deleteMode={deleteMode || config?.deleteMode || "remove"}
+      mode={resolvedMode}
     >
       <Toaster position="top-right" richColors closeButton />
       <div className="w-full h-full bg-[#F8F9FC] flex flex-col">
@@ -89,7 +99,7 @@ export default function Layout({
             <div className="p-6 h-[calc(100vh-70px)]">
               {!loading ? (
                 <MainPage
-                  questionData={questionData}
+                  initialFormData={formData}
                   uploadUrl={uploadUrl}
                   onAddTemplate={onAddTemplate}
                   templates={templates}
