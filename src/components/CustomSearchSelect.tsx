@@ -8,6 +8,7 @@ import {
   ComboboxOption,
   ComboboxOptions,
   ComboboxButton,
+  Transition,
 } from "@headlessui/react";
 import AppIcon from "./ui/AppIcon";
 
@@ -28,7 +29,6 @@ interface CustomSearchSelectProps {
   customClass?: string;
 }
 
-
 export default function CustomSearchSelect({
   options = [],
   apiUrl,
@@ -43,24 +43,37 @@ export default function CustomSearchSelect({
   const [query, setQuery] = useState<string | null>(null);
   const [fetchedOptions, setFetchedOptions] = useState<Option[]>([]);
   const [loading, setLoading] = useState(false);
-  const isInitialMount = useRef(true);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const optionsCacheRef = useRef<Map<string, Option>>(new Map());
 
+  // Store options in cache for fast lookup and persistence
+  const cacheOptions = useCallback((opts: Option[]) => {
+    opts.forEach((opt) => {
+      if (opt && opt.value !== undefined && opt.value !== null) {
+        optionsCacheRef.current.set(String(opt.value), opt);
+      }
+      if (opt && opt.label) {
+        optionsCacheRef.current.set(opt.label.toLowerCase(), opt);
+      }
+    });
+  }, []);
+
+  // Cache static options on change
   useEffect(() => {
-    const controller = new AbortController();
-    const currentVal = value ?? defaultValue;
-
-    // If the user has typed a query, search for it; on initial load, use preloaded value to search
-    let searchTerm = "";
-    if (query !== null) {
-      searchTerm = query;
-    } else if (currentVal) {
-      searchTerm = String(currentVal);
+    if (options && options.length > 0) {
+      cacheOptions(options);
     }
+  }, [options, cacheOptions]);
+
+  // Fetch options when apiUrl or query changes
+  useEffect(() => {
+    if (!apiUrl) return;
+
+    const controller = new AbortController();
+    const isSearchQuery = query !== null && query.trim() !== "";
+    const searchTerm = isSearchQuery ? query.trim() : "";
 
     const fetchOptions = async () => {
-      if (!apiUrl) return;
-
       setLoading(true);
       try {
         const token = getItem("token");
@@ -88,7 +101,7 @@ export default function CustomSearchSelect({
         }
 
         if (Array.isArray(data)) {
-          const mapped = data.map((item) => {
+          const mapped: Option[] = data.map((item) => {
             if (typeof item === "string") return { label: item, value: item };
             const label =
               item.label ??
@@ -107,6 +120,7 @@ export default function CustomSearchSelect({
               value: String(val),
             };
           });
+          cacheOptions(mapped);
           setFetchedOptions(mapped);
         }
       } catch (err: any) {
@@ -120,9 +134,7 @@ export default function CustomSearchSelect({
       }
     };
 
-    const delay = isInitialMount.current && currentVal ? 0 : 400;
-    isInitialMount.current = false;
-
+    const delay = isSearchQuery ? 350 : 0;
     const handler = setTimeout(() => {
       fetchOptions();
     }, delay);
@@ -131,80 +143,76 @@ export default function CustomSearchSelect({
       clearTimeout(handler);
       controller.abort();
     };
-  }, [apiUrl, query, value, defaultValue]);
+  }, [apiUrl, query, cacheOptions]);
 
-  const activeOptions = apiUrl ? fetchedOptions : options;
+  const activeOptions = useMemo(() => {
+    return apiUrl ? fetchedOptions : options;
+  }, [apiUrl, fetchedOptions, options]);
 
-  // Find the option object from value/defaultValue string
-  const initialOption = useMemo(() => {
-    const val = value !== undefined && value !== null && value !== "" ? value : defaultValue;
-    if (val === undefined || val === null || val === "") return null;
-    const rawVal: any = val;
-    if (typeof rawVal === "object" && "value" in rawVal) {
-      return {
-        label: rawVal.label || selectedLabel || String(rawVal.value),
-        value: String(rawVal.value),
-      };
-    }
-    const found = activeOptions.find(
-      (opt) =>
-        String(opt.value) === String(rawVal) ||
-        String(opt.label) === String(rawVal),
-    );
-    if (found) return found;
-    return {
-      label: selectedLabel || String(rawVal),
-      value: String(rawVal),
-    };
-  }, [value, defaultValue, selectedLabel, activeOptions]);
-
-  const [selectedOption, setSelected] = useState<Option | null>(initialOption);
-
-  // Update selected option when value/defaultValue prop changes (controlled component)
-  useEffect(() => {
-    const val = value !== undefined ? value : defaultValue;
-    if (val === undefined || val === null || val === "") {
-      setSelected(null);
-    } else {
-      const rawVal: any = val;
+  // Resolve option object from value/defaultValue
+  const resolveOption = useCallback(
+    (rawVal: any): Option | null => {
+      if (rawVal === undefined || rawVal === null || rawVal === "") return null;
       if (typeof rawVal === "object" && "value" in rawVal) {
-        setSelected({
+        const opt = {
           label: rawVal.label || selectedLabel || String(rawVal.value),
           value: String(rawVal.value),
-        });
-        return;
+        };
+        optionsCacheRef.current.set(String(opt.value), opt);
+        return opt;
       }
-      const option = activeOptions.find(
-        (opt) =>
-          String(opt.value) === String(rawVal) ||
-          String(opt.label) === String(rawVal),
-      );
-      if (option) {
-        setSelected(option);
-      } else {
-        setSelected((prev) => {
-          const currentLabel =
-            selectedLabel ||
-            (prev &&
-            (String(prev.value) === String(rawVal) ||
-              String(prev.label) === String(rawVal)) &&
-            prev.label
-              ? prev.label
-              : String(rawVal));
-          return {
-            label: currentLabel,
-            value: String(rawVal),
-          };
-        });
-      }
-    }
-  }, [value, defaultValue, selectedLabel, activeOptions]);
 
-  // Memoized filtered options
+      const strVal = String(rawVal);
+      // Check activeOptions first
+      const foundInActive = activeOptions.find(
+        (opt) =>
+          String(opt.value) === strVal ||
+          opt.label.toLowerCase() === strVal.toLowerCase(),
+      );
+      if (foundInActive) return foundInActive;
+
+      // Check cache
+      const cached =
+        optionsCacheRef.current.get(strVal) ||
+        optionsCacheRef.current.get(strVal.toLowerCase());
+      if (cached) return cached;
+
+      // Fallback
+      return {
+        label: selectedLabel || strVal,
+        value: strVal,
+      };
+    },
+    [activeOptions, selectedLabel],
+  );
+
+  const [selectedOption, setSelected] = useState<Option | null>(() => {
+    const initialVal =
+      value !== undefined && value !== null && value !== ""
+        ? value
+        : defaultValue;
+    return resolveOption(initialVal);
+  });
+
+  // Sync selected option when external value/defaultValue changes
+  useEffect(() => {
+    const currentVal = value !== undefined ? value : defaultValue;
+    if (currentVal === undefined || currentVal === null || currentVal === "") {
+      setSelected(null);
+    } else {
+      const resolved = resolveOption(currentVal);
+      setSelected(resolved);
+    }
+  }, [value, defaultValue, resolveOption]);
+
+  // Compute filtered options for display
   const filteredOptions = useMemo(() => {
     let list = activeOptions;
+
+    // Ensure selectedOption is in the list when not searching
     if (
       selectedOption &&
+      !query &&
       !list.some(
         (opt) =>
           String(opt.value) === String(selectedOption.value) ||
@@ -214,71 +222,43 @@ export default function CustomSearchSelect({
       list = [selectedOption, ...list];
     }
 
-    if (!query) return list;
+    if (!query || query.trim() === "") return list;
 
-    const lowerQuery = query.toLowerCase();
+    // If using API, fetchedOptions is already filtered by the API search endpoint
+    if (apiUrl) {
+      return list;
+    }
+
+    const lowerQuery = query.toLowerCase().trim();
     return list.filter((option) =>
       option.label.toLowerCase().includes(lowerQuery),
     );
-  }, [query, activeOptions, selectedOption]);
+  }, [query, activeOptions, selectedOption, apiUrl]);
 
-  const isExactMatch = useMemo(() => {
-    if (!query || query.trim() === "") return true;
-    const q = query.trim().toLowerCase();
-    return activeOptions.some(
-      (opt) =>
-        opt.label.toLowerCase() === q || String(opt.value).toLowerCase() === q,
-    );
-  }, [query, activeOptions]);
-
-  // Handle selection change - call parent callback directly
+  // Handle selection change
   const handleChange = useCallback(
     (option: Option | null) => {
       setSelected(option);
       setQuery(null);
+      if (option) {
+        optionsCacheRef.current.set(String(option.value), option);
+      }
       onGetValue(name, option);
     },
     [name, onGetValue],
   );
-
-  const resolveCustomQuery = useCallback(() => {
-    if (query !== null) {
-      const trimmed = query.trim();
-      if (trimmed === "") {
-        if (selectedOption !== null) {
-          handleChange(null);
-        }
-      } else {
-        const match = activeOptions.find(
-          (opt) =>
-            opt.label.toLowerCase() === trimmed.toLowerCase() ||
-            String(opt.value).toLowerCase() === trimmed.toLowerCase(),
-        );
-        if (match) {
-          handleChange(match);
-        } else {
-          handleChange({ label: trimmed, value: trimmed });
-        }
-      }
-    }
-  }, [query, activeOptions, selectedOption, handleChange]);
-
-  const handleClose = useCallback(() => {
-    resolveCustomQuery();
-    setQuery(null);
-  }, [resolveCustomQuery]);
 
   return (
     <div className="relative w-full">
       <Combobox
         value={selectedOption}
         onChange={handleChange}
-        onClose={handleClose}
         disabled={readOnly}
         by={(a: any, b: any) =>
           a && b
-            ? String(a.value) === String(b.value) ||
-              String(a.label) === String(b.label)
+            ? (a.value !== undefined && b.value !== undefined
+                ? String(a.value) === String(b.value)
+                : String(a.label) === String(b.label))
             : a === b
         }
       >
@@ -286,36 +266,32 @@ export default function CustomSearchSelect({
           <>
             <div className="relative">
               <ComboboxInput
-                className={`field-control ${customClass}`}
-                displayValue={(option: any) => {
-                  if (option && typeof option === "object") {
-                    if (option.label && String(option.label).trim() !== "") return option.label;
-                    if (option.value !== undefined && option.value !== null && String(option.value).trim() !== "") return String(option.value);
+                className={`field-control ${customClass ?? ""}`}
+                displayValue={(opt: any) => {
+                  if (opt && typeof opt === "object") {
+                    if (opt.label && String(opt.label).trim() !== "")
+                      return opt.label;
+                    if (
+                      opt.value !== undefined &&
+                      opt.value !== null &&
+                      String(opt.value).trim() !== ""
+                    )
+                      return String(opt.value);
                   }
-                  if (typeof option === "string" && option.trim() !== "") return option;
-                  if (selectedLabel && selectedLabel.trim() !== "") return selectedLabel;
+                  if (typeof opt === "string" && opt.trim() !== "") return opt;
+                  if (selectedOption?.label) return selectedOption.label;
+                  if (selectedLabel && selectedLabel.trim() !== "")
+                    return selectedLabel;
                   const rawVal = value ?? defaultValue;
-                  if (rawVal !== undefined && rawVal !== null && String(rawVal).trim() !== "") return String(rawVal);
+                  if (
+                    rawVal !== undefined &&
+                    rawVal !== null &&
+                    String(rawVal).trim() !== ""
+                  )
+                    return String(rawVal);
                   return "";
                 }}
                 onChange={(event) => setQuery(event.target.value)}
-                onBlur={() => {
-                  resolveCustomQuery();
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && query !== null && query.trim() !== "") {
-                    const trimmed = query.trim();
-                    const match = filteredOptions.find(
-                      (opt) =>
-                        opt.label.toLowerCase() === trimmed.toLowerCase() ||
-                        String(opt.value).toLowerCase() === trimmed.toLowerCase(),
-                    );
-                    if (!match) {
-                      e.preventDefault();
-                      handleChange({ label: trimmed, value: trimmed });
-                    }
-                  }
-                }}
                 onClick={() => {
                   if (!open && !readOnly) {
                     buttonRef.current?.click();
@@ -327,7 +303,11 @@ export default function CustomSearchSelect({
                   }
                 }}
                 placeholder={
-                  loading ? "Loading..." : readOnly ? "" : "Select an option..."
+                  loading
+                    ? "Loading..."
+                    : readOnly
+                      ? ""
+                      : "Select an option..."
                 }
               />
               {!readOnly && (
@@ -337,7 +317,7 @@ export default function CustomSearchSelect({
                 >
                   {loading ? (
                     <svg
-                      className="animate-spin h-4 w-4"
+                      className="animate-spin h-4 w-4 text-blue-500"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -363,57 +343,49 @@ export default function CustomSearchSelect({
               )}
             </div>
 
-            <ComboboxOptions
-              anchor="bottom start"
-              className="select-options__combo"
-              style={{ maxHeight: "400px", overflowY: "auto" }}
+            <Transition
+              as={React.Fragment}
+              leave="transition ease-in duration-100"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+              afterLeave={() => setQuery(null)}
             >
-              {loading ? (
-                <div className="px-3 py-2 text-sm text-gray-500">Loading...</div>
-              ) : (
-                <>
-                  {filteredOptions?.map((option, index) => (
-                    <ComboboxOption
-                      key={`${option.value}-${index}`}
-                      value={option}
-                      className={({ active, selected }) =>
-                        clsx("select-option", { active, selected })
-                      }
-                    >
-                      {({ selected }) => (
-                        <div className={clsx("option-text", { selected })}>
-                          {option.label}
-                        </div>
-                      )}
-                    </ComboboxOption>
-                  ))}
+              <ComboboxOptions
+                anchor="bottom start"
+                className="select-options__combo"
+                style={{ maxHeight: "400px", overflowY: "auto" }}
+              >
+                {loading && filteredOptions.length === 0 ? (
+                  <div className="px-3 py-2 text-sm text-gray-500">
+                    Loading options...
+                  </div>
+                ) : (
+                  <>
+                    {filteredOptions?.map((option, index) => (
+                      <ComboboxOption
+                        key={`${option.value}-${index}`}
+                        value={option}
+                        className={({ active, selected }) =>
+                          clsx("select-option", { active, selected })
+                        }
+                      >
+                        {({ selected }) => (
+                          <div className={clsx("option-text", { selected })}>
+                            {option.label}
+                          </div>
+                        )}
+                      </ComboboxOption>
+                    ))}
 
-                  {query && query.trim() !== "" && !isExactMatch && (
-                    <ComboboxOption
-                      value={{ label: query.trim(), value: query.trim() }}
-                      className={({ active }) =>
-                        clsx("select-option !bg-indigo-50/70 hover:!bg-indigo-100/80 !text-indigo-900 border-t border-indigo-100", {
-                          active: active,
-                        })
-                      }
-                    >
-                      <div className="flex items-center gap-1.5 py-0.5">
-                        <span className="text-xs text-indigo-500 font-normal">Use:</span>
-                        <span className="font-semibold text-indigo-700 truncate">
-                          "{query.trim()}"
-                        </span>
+                    {filteredOptions.length === 0 && !loading && (
+                      <div className="px-3 py-2 text-sm text-gray-500">
+                        No results found.
                       </div>
-                    </ComboboxOption>
-                  )}
-
-                  {filteredOptions.length === 0 && (!query || query.trim() === "") && (
-                    <div className="px-3 py-2 text-sm text-gray-500">
-                      No results found.
-                    </div>
-                  )}
-                </>
-              )}
-            </ComboboxOptions>
+                    )}
+                  </>
+                )}
+              </ComboboxOptions>
+            </Transition>
           </>
         )}
       </Combobox>
