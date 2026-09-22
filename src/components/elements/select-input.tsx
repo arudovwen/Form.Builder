@@ -104,10 +104,12 @@ export default function SelectInput({
   ]);
 
   const apiUrl = isViewer ? element.apiUrl : undefined;
+  const isCombobox =
+    element.selectType?.toLowerCase() === "combobox" || Boolean(apiUrl);
 
   return (
     <>
-      {element.selectType === "list" && !isViewer ? (
+      {!isCombobox ? (
         <CustomSelect
           options={filteredOptions}
           register={register}
@@ -125,6 +127,7 @@ export default function SelectInput({
           apiUrl={apiUrl}
           value={selectedValue}
           selectedLabel={selectedLabel}
+          allowCustom={element.selectType?.toLowerCase() === "combobox"}
           onGetValue={(name, option) => {
             setValue?.(name, option?.value ?? "");
             if (option) {
@@ -138,3 +141,4 @@ export default function SelectInput({
     </>
   );
 }
+

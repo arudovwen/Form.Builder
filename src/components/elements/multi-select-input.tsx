@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { Combobox, Transition } from "@headlessui/react";
 import AppIcon from "@/components/ui/AppIcon";
 import axios from "axios";
@@ -190,6 +190,44 @@ export default function MultiSelectInput({
     );
   }, [query, activeOptions]);
 
+  const isExactMatch = useMemo(() => {
+    if (!query || query.trim() === "") return true;
+    const trimmed = query.trim().toLowerCase();
+    return (
+      activeOptions.some(
+        (opt: any) =>
+          opt.label?.toLowerCase() === trimmed ||
+          String(opt.value)?.toLowerCase() === trimmed,
+      ) ||
+      selectedValues.some(
+        (sv) =>
+          sv.label?.toLowerCase() === trimmed ||
+          String(sv.value)?.toLowerCase() === trimmed,
+      )
+    );
+  }, [query, activeOptions, selectedValues]);
+
+  const addCustomValue = (customText: string) => {
+    const trimmed = customText.trim();
+    if (!trimmed) return;
+    const alreadySelected = selectedValues.some(
+      (sv) =>
+        sv.label?.toLowerCase() === trimmed.toLowerCase() ||
+        String(sv.value)?.toLowerCase() === trimmed.toLowerCase(),
+    );
+    if (alreadySelected) {
+      setQuery("");
+      return;
+    }
+    const newOption = { label: trimmed, value: trimmed };
+    const newValues = [...selectedValues, newOption];
+    setSelectedValues(newValues);
+    const result = element?.returnObjects ? newValues : newValues.map((v) => v.value);
+    setValue?.(element.id, result, { shouldDirty: true, shouldValidate: true });
+    trigger?.(element.id);
+    setQuery("");
+  };
+
   const removeValue = (valToRemove: any, e: React.MouseEvent) => {
     e.stopPropagation();
     const newValues = selectedValues.filter((v) => v.value !== valToRemove.value);
@@ -202,7 +240,6 @@ export default function MultiSelectInput({
   return (
     <div className="relative w-full">
       <Combobox
-        
         value={selectedValues || []}
         onChange={(values: any[]) => {
           setSelectedValues(values);
@@ -238,6 +275,20 @@ export default function MultiSelectInput({
                   className="multiselect-search"
                   onChange={(event) => setQuery(event.target.value)}
                   onFocus={() => setQuery("")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && query && query.trim() !== "") {
+                      const trimmed = query.trim();
+                      const match = filteredOptions.find(
+                        (opt: any) =>
+                          opt.label?.toLowerCase() === trimmed.toLowerCase() ||
+                          String(opt.value)?.toLowerCase() === trimmed.toLowerCase(),
+                      );
+                      if (!match) {
+                        e.preventDefault();
+                        addCustomValue(trimmed);
+                      }
+                    }
+                  }}
                   displayValue={() => ""}
                   placeholder={
                     selectedValues.length === 0 ? placeholder ?? "Select options..." : "Search..."
@@ -263,7 +314,6 @@ export default function MultiSelectInput({
           )}
 
           <Transition
-            as={Fragment}
             leave="fade-leave"
             leaveFrom="fade-to"
             leaveTo="fade-from"
@@ -274,16 +324,14 @@ export default function MultiSelectInput({
               className="select-button-options"
               style={{ maxHeight: "400px", overflowY: "auto" }}
             >
-              {loading && fetchedOptions.length === 0 ? (
+              {loading && fetchedOptions.length === 0 && (
                 <div className="px-4 py-2 text-sm text-gray-500">Loading...</div>
-              ) : filteredOptions.length === 0 && query !== "" ? (
-                <div className="px-4 py-2 text-sm text-gray-500">
-                  No results found.
-                </div>
-              ) : (
+              )}
+
+              {!loading &&
                 filteredOptions.map((option, index) => (
                   <Combobox.Option
-                    key={index}
+                    key={`${option.value}-${index}`}
                     value={option}
                     className={({ active }) =>
                       `select-option ${active ? "active" : ""}`
@@ -304,8 +352,35 @@ export default function MultiSelectInput({
                       </div>
                     )}
                   </Combobox.Option>
-                ))
+                ))}
+
+              {query && query.trim() !== "" && !isExactMatch && !loading && (
+                <Combobox.Option
+                  value={{ label: query.trim(), value: query.trim() }}
+                  className={({ active }) =>
+                    `select-option !bg-indigo-50/70 hover:!bg-indigo-100/80 !text-indigo-900 border-t border-indigo-100 cursor-pointer ${
+                      active ? "active" : ""
+                    }`
+                  }
+                >
+                  <div className="flex items-center gap-1.5 py-0.5">
+                    <span className="text-xs text-indigo-500 font-normal">
+                      Add / Use:
+                    </span>
+                    <span className="font-semibold text-indigo-700 truncate">
+                      "{query.trim()}"
+                    </span>
+                  </div>
+                </Combobox.Option>
               )}
+
+              {filteredOptions.length === 0 &&
+                !loading &&
+                (!query || query.trim() === "" || isExactMatch) && (
+                  <div className="px-4 py-2 text-sm text-gray-500">
+                    No results found.
+                  </div>
+                )}
             </Combobox.Options>
           </Transition>
         </div>

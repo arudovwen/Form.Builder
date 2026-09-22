@@ -52,7 +52,7 @@ function App() {
                 onLogAction={(action, value) => {
                   devLog(`[FormBuilder Log] Action: ${action}`, value);
                 }}
-                formData={questionDa}
+                formData={[]}
                 config={config}
                 title="Form Title"
                 goBackUrl={() => undefined}
@@ -72,170 +72,121 @@ function App() {
               onSubmit={function (e: any): void {
                 devLog("Viewer submit:", e);
               }}
-              answerData={answerData}
-              form_data={[
+              answerData={[
     {
-        "title": "",
-        "description": "",
-        "id": "362a75c4-6646-48e8-bfd8-3db982b2defa",
-        "formData": [
-            {
-                "required": false,
-                "description": "",
-                "value": null,
-                "isReadOnly": false,
-                "isDisabled": false,
-                "isRequired": false,
-                "customClass": "",
-                "elementClass": "",
-                "gridPosition": null,
-                "gridId": null,
-                "isHidden": false,
-                "visibilityDependentFields": [],
-                "filterByFieldId": "",
-                "clearOnFilterChange": true,
-                "maxLength": null,
-                "minLength": null,
-                "placeholder": "Type here",
-                "requiredMessage": "Field is required",
-                "minLengthMessage": "",
-                "maxLengthMessage": "",
-                "type": "textField",
-                "label": "Text Input",
-                "icon": "fluent:text-16-filled",
-                "inputLabel": "Text Label",
-                "inputType": "text",
-                "id": "4c2c514e-dab7-432c-a594-c332c0ca4e01",
-                "sectionId": "362a75c4-6646-48e8-bfd8-3db982b2defa"
-            },
-            {
-                "required": false,
-                "description": "",
-                "value": null,
-                "isReadOnly": false,
-                "isDisabled": false,
-                "isRequired": false,
-                "customClass": "",
-                "elementClass": "",
-                "gridPosition": null,
-                "gridId": null,
-                "isHidden": false,
-                "visibilityDependentFields": [],
-                "filterByFieldId": "",
-                "clearOnFilterChange": true,
-                "maxLength": null,
-                "minLength": null,
-                "placeholder": "Type here",
-                "requiredMessage": "Field is required",
-                "minLengthMessage": "",
-                "maxLengthMessage": "",
-                "type": "amountField",
-                "label": "Amount",
-                "icon": "carbon:currency",
-                "inputLabel": "Enter amount",
-                "inputType": "amount",
-                "prefix": null,
-                "id": "0d038f73-8477-496a-82a7-d2d782c9d613",
-                "sectionId": "362a75c4-6646-48e8-bfd8-3db982b2defa"
-            },
-            {
-                "required": false,
-                "description": "",
-                "value": null,
-                "isReadOnly": false,
-                "isDisabled": false,
-                "isRequired": false,
-                "customClass": "",
-                "elementClass": "",
-                "gridPosition": null,
-                "gridId": null,
-                "isHidden": false,
-                "visibilityDependentFields": [],
-                "filterByFieldId": "4c2c514e-dab7-432c-a594-c332c0ca4e01",
-                "clearOnFilterChange": true,
-                "maxLength": null,
-                "minLength": null,
-                "placeholder": "Type here",
-                "requiredMessage": "Field is required",
-                "minLengthMessage": "",
-                "maxLengthMessage": "",
-                "type": "selectField",
-                "label": "List",
-                "icon": "tabler:select",
-                "inputLabel": "Countries",
-                "inputType": "select",
-                "selectType": "list",
-                "options": [
-                    {
-                        "label": "Nigeria",
-                        "value": "nigeria",
-                        "id": "798dc13a-10ce-40ed-a27a-9c34036b11f7",
-                        "filterValue": "country",
-                        "key": "country"
-                    },
-                    {
-                        "label": "Ghana",
-                        "value": "ghana",
-                        "filterValue": "country",
-                        "key": "country",
-                        "id": "e12a03e4-4a9a-46ee-ab77-f85ea309e94f"
-                    },
-                    {
-                        "label": "Edo",
-                        "value": "edo",
-                        "filterValue": "state",
-                        "key": "state",
-                        "id": "13957fac-b7ea-4738-8f8a-8abb801b8270"
-                    }
-                ],
-                "id": "23caf72e-6add-44e7-8bd0-76acb854fb8d",
-                "sectionId": "362a75c4-6646-48e8-bfd8-3db982b2defa",
-                "dateType": "basic",
-                "selectionType": "multiple",
-                "options1": [],
-                "dataColumns": []
-            },
-            {
-                "required": false,
-                "description": "",
-                "value": null,
-                "isReadOnly": false,
-                "isDisabled": false,
-                "isRequired": false,
-                "customClass": "",
-                "elementClass": "",
-                "gridPosition": null,
-                "gridId": null,
-                "isHidden": false,
-                "visibilityDependentFields": [],
-                "filterByFieldId": "",
-                "clearOnFilterChange": true,
-                "maxLength": null,
-                "minLength": null,
-                "placeholder": "Type here",
-                "requiredMessage": "Field is required",
-                "minLengthMessage": "",
-                "maxLengthMessage": "",
-                "type": "email",
-                "label": "Email",
-                "icon": "mdi:email-outline",
-                "inputLabel": "Email Label",
-                "inputType": "email",
-                "id": "8a28dfac-203e-4d79-90a1-e5e7745663f3",
-                "sectionId": "362a75c4-6646-48e8-bfd8-3db982b2defa"
-            }
+        "id": "8ebb31a6-83cf-4074-ba34-6e65c42f9b46",
+        "value": [
+            "Plac",
+            "placeholder_1"
         ],
-        "disabled": false,
-        "isHidden": false
+        "sectionId": "0470cf02-007a-43d1-9d2d-7bccfc9e17af",
+        "type": "multiSelect",
+        "metaData": {}
+    },
+    {
+        "id": "c8d3bddf-4234-424e-b24c-2b0f516bcb10",
+        "value": "",
+        "sectionId": "0470cf02-007a-43d1-9d2d-7bccfc9e17af",
+        "type": "selectField",
+        "metaData": {}
     }
 ]}
+              form_data={[
+                {
+                  title: "",
+                  description: "",
+                  id: "0470cf02-007a-43d1-9d2d-7bccfc9e17af",
+                  formData: [
+                    {
+                      required: false,
+                      description: "",
+                      value: null,
+                      isReadOnly: false,
+                      isDisabled: false,
+                      isRequired: false,
+                      customClass: "",
+                      elementClass: "",
+                      gridPosition: null,
+                      gridId: null,
+                      isHidden: false,
+                      visibilityDependentFields: [],
+                      filterByFieldId: "",
+                      clearOnFilterChange: true,
+                      maxLength: null,
+                      minLength: null,
+                      placeholder: "Type here",
+                      requiredMessage: "Field is required",
+                      minLengthMessage: "",
+                      maxLengthMessage: "",
+                      type: "selectField",
+                      label: "List",
+                      icon: "tabler:select",
+                      inputLabel: "Select Text Label",
+                      inputType: "select",
+                      selectType: "Combobox",
+                      options: [
+                        {
+                          label: "Placeholder 1",
+                          value: "placeholder_1",
+                          id: "63cb8818-583d-4100-bfae-ccb632db70a4",
+                        },
+                      ],
+                      id: "d7de3eab-39af-4a65-9613-44bf351cf279",
+                      sectionId: "0470cf02-007a-43d1-9d2d-7bccfc9e17af",
+                      dateType: "basic",
+                      selectionType: "multiple",
+                      options1: [],
+                      dataColumns: [],
+                    },
+                    {
+                      required: false,
+                      description: "",
+                      value: null,
+                      isReadOnly: false,
+                      isDisabled: false,
+                      isRequired: false,
+                      customClass: "",
+                      elementClass: "",
+                      gridPosition: null,
+                      gridId: null,
+                      isHidden: false,
+                      visibilityDependentFields: [],
+                      filterByFieldId: "",
+                      clearOnFilterChange: true,
+                      maxLength: null,
+                      minLength: null,
+                      placeholder: "Type here",
+                      requiredMessage: "Field is required",
+                      minLengthMessage: "",
+                      maxLengthMessage: "",
+                      type: "multiSelect",
+                      label: "Multi List",
+                      icon: "fluent-mdl2:multi-select",
+                      inputLabel: "Select Text Label",
+                      inputType: "select",
+                      minChecked: 1,
+                      requireAllChecked: false,
+                      options: [
+                        {
+                          label: "Placeholder 1",
+                          value: "placeholder_1",
+                          id: "87cc347f-ee1a-4e97-bc55-e80ed42f44bb",
+                        },
+                      ],
+                      id: "8ebb31a6-83cf-4074-ba34-6e65c42f9b46",
+                      sectionId: "0470cf02-007a-43d1-9d2d-7bccfc9e17af",
+                    },
+                  ],
+                  disabled: false,
+                  isHidden: false,
+                },
+              ]}
               config={config}
               loading={false}
               renderType={"multi"}
               onGetValues={(val: any) => {
                 devLog("Viewer getValues:", val);
               }}
-           
               // showResults={true}
               // hideInputsOnResults={true}
               // pollResults={pollResultsMap}

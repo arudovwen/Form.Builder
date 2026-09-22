@@ -12,6 +12,7 @@ interface CustomSearchSelectProps {
     readOnly?: boolean;
     name: string;
     customClass?: string;
+    allowCustom?: boolean;
 }
-export default function CustomSearchSelect({ options, apiUrl, value, defaultValue, selectedLabel, onGetValue, readOnly, name, customClass, }: CustomSearchSelectProps): import("react/jsx-runtime").JSX.Element;
+export default function CustomSearchSelect({ options, apiUrl, value, defaultValue, selectedLabel, onGetValue, readOnly, name, customClass, allowCustom, }: CustomSearchSelectProps): import("react/jsx-runtime").JSX.Element;
 export {};

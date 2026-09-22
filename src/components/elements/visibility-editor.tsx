@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useEffect, Fragment } from "react";
+import React, { useContext, useMemo, useEffect } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import EditorContext from "@/context/editor-context";
 import { getAllformData } from "@/utils/getAllQuestions";
@@ -408,7 +408,6 @@ export default function VisibilityEditor({
                           />
                         </Listbox.Button>
                         <Transition
-                          as={Fragment}
                           leave="transition ease-in duration-100"
                           leaveFrom="opacity-100"
                           leaveTo="opacity-0"
@@ -470,7 +469,6 @@ export default function VisibilityEditor({
                           />
                         </Listbox.Button>
                         <Transition
-                          as={Fragment}
                           leave="transition ease-in duration-100"
                           leaveFrom="opacity-100"
                           leaveTo="opacity-0"
@@ -560,7 +558,6 @@ export default function VisibilityEditor({
                             />
                           </Listbox.Button>
                           <Transition
-                            as={Fragment}
                             leave="transition ease-in duration-100"
                             leaveFrom="opacity-100"
                             leaveTo="opacity-0"
@@ -637,7 +634,6 @@ export default function VisibilityEditor({
                             />
                           </Listbox.Button>
                           <Transition
-                            as={Fragment}
                             leave="transition ease-in duration-100"
                             leaveFrom="opacity-100"
                             leaveTo="opacity-0"

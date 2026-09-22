@@ -8,7 +8,6 @@ import {
   ComboboxOption,
   ComboboxOptions,
   ComboboxButton,
-  Transition,
 } from "@headlessui/react";
 import AppIcon from "./ui/AppIcon";
 
@@ -27,6 +26,7 @@ interface CustomSearchSelectProps {
   readOnly?: boolean;
   name: string;
   customClass?: string;
+  allowCustom?: boolean;
 }
 
 export default function CustomSearchSelect({
@@ -39,6 +39,7 @@ export default function CustomSearchSelect({
   readOnly,
   name,
   customClass,
+  allowCustom = true,
 }: CustomSearchSelectProps) {
   const [query, setQuery] = useState<string | null>(null);
   const [fetchedOptions, setFetchedOptions] = useState<Option[]>([]);
@@ -235,6 +236,16 @@ export default function CustomSearchSelect({
     );
   }, [query, activeOptions, selectedOption, apiUrl]);
 
+  const isExactMatch = useMemo(() => {
+    if (!query || query.trim() === "") return true;
+    const trimmed = query.trim().toLowerCase();
+    return filteredOptions.some(
+      (opt) =>
+        opt.label.toLowerCase() === trimmed ||
+        String(opt.value).toLowerCase() === trimmed,
+    );
+  }, [query, filteredOptions]);
+
   // Handle selection change
   const handleChange = useCallback(
     (option: Option | null) => {
@@ -253,6 +264,7 @@ export default function CustomSearchSelect({
       <Combobox
         value={selectedOption}
         onChange={handleChange}
+        onClose={() => setQuery(null)}
         disabled={readOnly}
         by={(a: any, b: any) =>
           a && b
@@ -262,132 +274,166 @@ export default function CustomSearchSelect({
             : a === b
         }
       >
-        {({ open }) => (
-          <>
-            <div className="relative">
-              <ComboboxInput
-                className={`field-control ${customClass ?? ""}`}
-                displayValue={(opt: any) => {
-                  if (opt && typeof opt === "object") {
-                    if (opt.label && String(opt.label).trim() !== "")
-                      return opt.label;
-                    if (
-                      opt.value !== undefined &&
-                      opt.value !== null &&
-                      String(opt.value).trim() !== ""
-                    )
-                      return String(opt.value);
-                  }
-                  if (typeof opt === "string" && opt.trim() !== "") return opt;
-                  if (selectedOption?.label) return selectedOption.label;
-                  if (selectedLabel && selectedLabel.trim() !== "")
-                    return selectedLabel;
-                  const rawVal = value ?? defaultValue;
-                  if (
-                    rawVal !== undefined &&
-                    rawVal !== null &&
-                    String(rawVal).trim() !== ""
-                  )
-                    return String(rawVal);
-                  return "";
-                }}
-                onChange={(event) => setQuery(event.target.value)}
-                onClick={() => {
-                  if (!open && !readOnly) {
-                    buttonRef.current?.click();
-                  }
-                }}
-                onFocus={() => {
-                  if (!open && !readOnly) {
-                    buttonRef.current?.click();
-                  }
-                }}
-                placeholder={
-                  loading
-                    ? "Loading..."
-                    : readOnly
-                      ? ""
-                      : "Select an option..."
+        <div className="relative">
+          <ComboboxInput
+            className={`field-control ${customClass ?? ""}`}
+            displayValue={(opt: any) => {
+              if (opt && typeof opt === "object") {
+                if (opt.label && String(opt.label).trim() !== "")
+                  return opt.label;
+                if (
+                  opt.value !== undefined &&
+                  opt.value !== null &&
+                  String(opt.value).trim() !== ""
+                )
+                  return String(opt.value);
+              }
+              if (typeof opt === "string" && opt.trim() !== "") return opt;
+              if (selectedOption?.label) return selectedOption.label;
+              if (selectedLabel && selectedLabel.trim() !== "")
+                return selectedLabel;
+              const rawVal = value ?? defaultValue;
+              if (
+                rawVal !== undefined &&
+                rawVal !== null &&
+                String(rawVal).trim() !== ""
+              )
+                return String(rawVal);
+              return "";
+            }}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(e) => {
+              if (
+                allowCustom &&
+                e.key === "Enter" &&
+                query !== null &&
+                query.trim() !== ""
+              ) {
+                const trimmed = query.trim();
+                const match = filteredOptions.find(
+                  (opt) =>
+                    opt.label.toLowerCase() === trimmed.toLowerCase() ||
+                    String(opt.value).toLowerCase() === trimmed.toLowerCase(),
+                );
+                if (!match) {
+                  e.preventDefault();
+                  handleChange({ label: trimmed, value: trimmed });
                 }
-              />
-              {!readOnly && (
-                <ComboboxButton
-                  ref={buttonRef}
-                  className="absolute inset-y-0 right-0 flex items-center px-2 text-gray-400 hover:text-gray-600"
-                >
-                  {loading ? (
-                    <svg
-                      className="animate-spin h-4 w-4 text-blue-500"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                  ) : (
-                    <AppIcon icon="octicon:chevron-down-12" />
-                  )}
-                </ComboboxButton>
-              )}
-            </div>
-
-            <Transition
-              as={React.Fragment}
-              leave="transition ease-in duration-100"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-              afterLeave={() => setQuery(null)}
+              }
+            }}
+            onClick={() => {
+              if (!readOnly) {
+                buttonRef.current?.click();
+              }
+            }}
+            onFocus={() => {
+              if (!readOnly) {
+                buttonRef.current?.click();
+              }
+            }}
+            placeholder={
+              loading
+                ? "Loading..."
+                : readOnly
+                  ? ""
+                  : "Select an option..."
+            }
+          />
+          {!readOnly && (
+            <ComboboxButton
+              ref={buttonRef}
+              className="absolute inset-y-0 right-0 flex items-center px-2 text-gray-400 hover:text-gray-600"
             >
-              <ComboboxOptions
-                anchor="bottom start"
-                className="select-options__combo"
-                style={{ maxHeight: "400px", overflowY: "auto" }}
-              >
-                {loading && filteredOptions.length === 0 ? (
-                  <div className="px-3 py-2 text-sm text-gray-500">
-                    Loading options...
-                  </div>
-                ) : (
-                  <>
-                    {filteredOptions?.map((option, index) => (
-                      <ComboboxOption
-                        key={`${option.value}-${index}`}
-                        value={option}
-                        className={({ active, selected }) =>
-                          clsx("select-option", { active, selected })
-                        }
-                      >
-                        {({ selected }) => (
-                          <div className={clsx("option-text", { selected })}>
-                            {option.label}
-                          </div>
-                        )}
-                      </ComboboxOption>
-                    ))}
+              {loading ? (
+                <svg
+                  className="animate-spin h-4 w-4 text-blue-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              ) : (
+                <AppIcon icon="octicon:chevron-down-12" />
+              )}
+            </ComboboxButton>
+          )}
+        </div>
 
-                    {filteredOptions.length === 0 && !loading && (
-                      <div className="px-3 py-2 text-sm text-gray-500">
-                        No results found.
-                      </div>
-                    )}
-                  </>
+        <ComboboxOptions
+          transition
+          anchor="bottom start"
+          className="select-options__combo transition duration-100 ease-in data-[closed]:opacity-0"
+          style={{ maxHeight: "400px", overflowY: "auto" }}
+        >
+          {loading && filteredOptions.length === 0 && (
+            <div className="px-3 py-2 text-sm text-gray-500">
+              Loading options...
+            </div>
+          )}
+
+          {!loading &&
+            filteredOptions?.map((option, index) => (
+              <ComboboxOption
+                key={`${option.value}-${index}`}
+                value={option}
+                className={({ active, selected }) =>
+                  clsx("select-option", { active, selected })
+                }
+              >
+                {({ selected }) => (
+                  <div className={clsx("option-text", { selected })}>
+                    {option.label}
+                  </div>
                 )}
-              </ComboboxOptions>
-            </Transition>
-          </>
-        )}
+              </ComboboxOption>
+            ))}
+
+          {allowCustom &&
+            query &&
+            query.trim() !== "" &&
+            !isExactMatch &&
+            !loading && (
+              <ComboboxOption
+                value={{ label: query.trim(), value: query.trim() }}
+                className={({ active }) =>
+                  clsx(
+                    "select-option !bg-indigo-50/70 hover:!bg-indigo-100/80 !text-indigo-900 border-t border-indigo-100 cursor-pointer",
+                    { active },
+                  )
+                }
+              >
+                <div className="flex items-center gap-1.5 py-0.5">
+                  <span className="text-xs text-indigo-500 font-normal">
+                    Add / Use:
+                  </span>
+                  <span className="font-semibold text-indigo-700 truncate">
+                    "{query.trim()}"
+                  </span>
+                </div>
+              </ComboboxOption>
+            )}
+
+          {filteredOptions.length === 0 &&
+            !loading &&
+            (!allowCustom || !query || query.trim() === "") && (
+              <div className="px-3 py-2 text-sm text-gray-500">
+                No results found.
+              </div>
+            )}
+        </ComboboxOptions>
       </Combobox>
     </div>
   );

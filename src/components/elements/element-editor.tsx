@@ -1206,7 +1206,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         >
           <div className="flex-1 pb-6">
             {" "}
-            <div className="config_box max-h-[83vh] overflow-y-auto flex-1">
+            <div className="config_box max-h-[80vh] overflow-y-auto flex-1">
               {activeTab === "basic" && (
                 <div className="z-10 flex flex-col w-full gap-5 px-6">
                   {allowValue.includes(element.inputType) && (
