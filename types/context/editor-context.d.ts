@@ -1,8 +1,18 @@
 import React from "react";
+export type DeleteMode = "remove" | "isFieldDeleted" | "isDeleted" | "soft" | "hard";
+export type BuilderMode = "create" | "edit";
 interface EditorProviderProps {
     children: React.ReactNode;
+    onChange?: (data: any) => void;
+    onLogAction?: (action: string, value: any) => void;
+    deleteMode?: DeleteMode;
+    mode?: BuilderMode;
 }
 declare const EditorContext: React.Context<{
+    deleteMode?: DeleteMode;
+    mode?: BuilderMode;
+    showPreview: boolean;
+    setShowPreview: React.Dispatch<React.SetStateAction<boolean>>;
     formData: any;
     setFormData: React.Dispatch<React.SetStateAction<any>>;
     handleDragStop: (e: any, elementId: string) => void;
@@ -14,6 +24,34 @@ declare const EditorContext: React.Context<{
     updateSection: (value: any, sectionId: string) => void;
     setIsDragging: (value: boolean) => void;
     isDragging: boolean;
+    uploadUrl: string;
+    setUploadUrl: (e: string) => void;
+    copyElement: (elementId: string, sectionId: string) => void;
+    pasteElement: (sectionId: string, targetIndex?: number) => void;
+    copySection: (sectionId: string) => void;
+    pasteSection: (targetIndex?: number, directClipboardText?: string) => void;
+    duplicateSection: (sectionId: string) => void;
+    apiActivityCount: number;
+    setApiActivityCount: React.Dispatch<React.SetStateAction<number>>;
+    /**
+     * Universal element move:
+     *  - canvas  → canvas  (reorder by index)
+     *  - grid    → canvas  (eject; targetIndex = insertion point)
+     *  - canvas  → grid    (inject into col; targetGridId + targetCol required)
+     *  - grid    → grid    (transfer between cells)
+     */
+    moveElement: (opts: {
+        draggedId: string;
+        sectionId: string;
+        targetIndex?: number;
+        targetId?: string;
+        targetGridId?: string;
+        targetCol?: number;
+    }) => void;
+    undo: () => void;
+    redo: () => void;
+    canUndo: boolean;
+    canRedo: boolean;
 }>;
 export declare const EditorProvider: React.FC<EditorProviderProps>;
 export default EditorContext;

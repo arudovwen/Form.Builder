@@ -1,4 +1,5 @@
 import { DynamicInput } from "../forms/dynamic-input";
+import { useEffect } from "react";
 
 export default function AmountInput({
   element,
@@ -19,6 +20,16 @@ export default function AmountInput({
     const values = watch();
     selectedValue = values[element.id];
   }
+
+  const isFieldSource = element.valueSource === "field" && element.sourceFieldId;
+  const sourceValue = isFieldSource && typeof watch === 'function' ? watch(element.sourceFieldId) : undefined;
+
+  useEffect(() => {
+    if (isFieldSource && typeof setValue === 'function') {
+      setValue(element.id, sourceValue);
+    }
+  }, [sourceValue, isFieldSource, element.id, setValue]);
+
   return (
     <DynamicInput
       placeholder={element.placeholder}
@@ -30,7 +41,10 @@ export default function AmountInput({
       setValue={setValue}
       value={selectedValue}
       prefix={element.prefix}
-      disabled={isReadOnly}
+      disabled={isReadOnly || element.valueSource === "field"}
+      readOnly={element.valueSource === "field"}
+      watch={watch}
+      className={element.valueSource === "field" ? "bg-[#faf8fc]" : undefined}
     />
   );
 }

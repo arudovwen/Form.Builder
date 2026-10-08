@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useFieldArray, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import clsx from "clsx";
 import AppIcon from "../ui/AppIcon";
 import TabsComponent from "../ui/AppTab";
 import { DynamicInput } from "../forms/dynamic-input";
@@ -17,7 +19,9 @@ import {
   AllowApiOptions,
   AllowTableOptions,
   allowValue,
+  AllowValueSource,
   dateFormats,
+  FileTypes,
 } from "../../utils/contants";
 
 import CustomSelect from "../CustomSelect";
@@ -25,7 +29,7 @@ import TableInputColumn from "../TableInputColumns";
 import ApiExample from "../ApiExample";
 import { getItem } from "../../utils/localStorageControl";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import OptionsExample from "../OptionsExample";
 import FileReaderComponent from "../FileReaderComponent";
 import ColumnExample from "../ColumnExample";
@@ -33,15 +37,22 @@ import DocumentSignExample from "../DocumentSign";
 import ValidateExample from "../ValidateExample";
 import CustomDatePicker from "../CutomDatePicker";
 import VisibilityEditor from "./visibility-editor";
+import MultiSelectInput from "./multi-select-input";
+import { normalizeGridRows, normalizeRows, slugify } from "@/utils/normalizeRows";
+import FormulaMentionInput from "./formula-mention-input";
+import FileUpload from "../forms/file-uploader";
 
 interface Option {
-  label: string;
-  value: string;
+  label?: string;
+  value?: string;
   id?: string;
+  key?: string;
+  filterValue?: string;
+  imageUrl?: string;
 }
 
 interface FormInputs {
-  inputLabel: string;
+  inputLabel?: string;
   placeholder?: string;
   description?: string;
   isReadOnly?: boolean;
@@ -72,10 +83,22 @@ interface FormInputs {
   dateType?: string;
   validationUrl?: string;
   signatureLink?: string;
+  isMultiple?: boolean;
+  acceptedFiles?: any;
+  maxFileSize?: number;
+  minChecked?: number;
+  requireAllChecked?: boolean;
+  selectionType?: string;
+  minLabel?: string;
+  maxLabel?: string;
+  filterByFieldId?: string;
+  clearOnFilterChange?: boolean;
 }
 
 const schema = yup.object().shape({
   inputLabel: yup.string().nullable(),
+  minLabel: yup.string().nullable(),
+  maxLabel: yup.string().nullable(),
   placeholder: yup.string().nullable(),
   description: yup.string().nullable(),
   isReadOnly: yup.boolean(),
@@ -84,8 +107,28 @@ const schema = yup.object().shape({
   requiredMessage: yup.string().nullable(),
   minLengthMessage: yup.string().nullable(),
   maxLengthMessage: yup.string().nullable(),
-  maxLength: yup.number().typeError("Expecting a number").nullable(),
-  minLength: yup.number().typeError("Expecting a number").nullable(),
+  maxLength: yup
+    .number()
+    .transform((value, originalValue) =>
+      String(originalValue).trim() === "" ? null : value,
+    )
+    .typeError("Expecting a number")
+    .nullable(),
+  minLength: yup
+    .number()
+    .transform((value, originalValue) =>
+      String(originalValue).trim() === "" ? null : value,
+    )
+    .typeError("Expecting a number")
+    .nullable(),
+  minChecked: yup
+    .number()
+    .transform((value, originalValue) =>
+      String(originalValue).trim() === "" ? null : value,
+    )
+    .typeError("Expecting a number")
+    .nullable(),
+  requireAllChecked: yup.boolean(),
   inputType: yup.string().nullable(),
   maxAmountMessage: yup.string().nullable(),
   maxAmount: yup.string().nullable(),
@@ -100,7 +143,11 @@ const schema = yup.object().shape({
             schema.required("Value is required when label is present"),
           otherwise: (schema) => schema.nullable(),
         }),
-      })
+        id: yup.string().nullable(),
+        key: yup.string().nullable(),
+        filterValue: yup.string().nullable(),
+        imageUrl: yup.string().nullable(),
+      }),
     )
     .when("inputType", {
       is: (inputType: string) => ["radio", "checkbox"].includes(inputType),
@@ -119,7 +166,10 @@ const schema = yup.object().shape({
             schema.required("Value is required when label is present"),
           otherwise: (schema) => schema.nullable(),
         }),
-      })
+        id: yup.string().nullable(),
+        key: yup.string().nullable(),
+        filterValue: yup.string().nullable(),
+      }),
     )
     .when("inputType", {
       is: (inputType: string) => ["radio", "checkbox"].includes(inputType),
@@ -135,12 +185,13 @@ const schema = yup.object().shape({
   minAmount: yup.string().nullable(),
   heading: yup.string().nullable(),
   minAmountMessage: yup.string().nullable(),
-  columns: yup.number().nullable(),
+  columns: yup.number().nullable().max(4).min(2),
   value: yup.mixed().nullable(),
   customClass: yup.string().nullable(),
   elementClass: yup.string().nullable(),
   apiUrl: yup.string().nullable(),
   selectType: yup.string().default("list"),
+  selectionType: yup.string().nullable().default("multiple"),
   dateType: yup.string().default("basic"),
   validationUrl: yup.string(),
   signatureLink: yup.string(),
@@ -148,8 +199,26 @@ const schema = yup.object().shape({
   maxDate: yup.string().nullable(),
   canHaveDateRange: yup.boolean(),
   allowYearPicker: yup.boolean(),
+  is24Hour: yup.boolean(),
   isHidden: yup.boolean(),
   visibilityDependentFields: yup.array().nullable(),
+  isMultiple: yup.boolean(),
+  acceptedFiles: yup.array(),
+  maxFileSize: yup
+    .number()
+    .transform((value, originalValue) =>
+      String(originalValue).trim() === "" ? null : value,
+    )
+    .typeError("Expecting a number")
+    .nullable(),
+  showState: yup.boolean(),
+  formula: yup.string().nullable(),
+  fetchExternalResults: yup.boolean(),
+  externalApiUrl: yup.string().nullable(),
+  valueSource: yup.string().nullable(),
+  sourceFieldId: yup.string().nullable(),
+  filterByFieldId: yup.string().nullable(),
+  clearOnFilterChange: yup.boolean(),
 });
 
 const tabs = [
@@ -170,12 +239,60 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
 }) => {
   const filteredTabs = tabs.filter(
     (tab) =>
-      !noAllowValidation.includes(element.inputType) || tab.key !== "validation"
+      !noAllowValidation.includes(element.inputType) ||
+      tab.key !== "validation",
   );
-  const { updateElement }: any = React.useContext(EditorContext);
+  const { updateElement, formData, deleteMode, mode = "edit" }: any =
+    React.useContext(EditorContext);
   const [activeTab, setActiveTab] = useState("basic");
   const [optionsLoading, setOptionsLoading] = useState(false);
   const [optionTypes, setOptionTypes] = useState<optionType>("manual");
+
+  const fieldCount =
+    formData
+      ?.filter((section: any) => !section?.isFieldDeleted && !section?.isDeleted)
+      ?.flatMap((section: any) => section?.formData || [])
+      ?.filter((f: any) => !f?.isFieldDeleted && !f?.isDeleted)?.length || 0;
+
+  const mentionData = React.useMemo(() => {
+    return (
+      formData
+        ?.filter((section: any) => !section?.isFieldDeleted && !section?.isDeleted)
+        ?.flatMap((section: any) => section?.formData || [])
+        .filter(
+          (f: any) =>
+            !f?.isFieldDeleted &&
+            !f?.isDeleted &&
+            f.id !== element?.id &&
+            !["spacer", "divider", "section", "grid"].includes(
+              f.type?.toLowerCase(),
+            ),
+        )
+        .map((f: any) => ({
+          id: f.id,
+          display: f.inputLabel || f.label || "Unnamed",
+        })) || []
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fieldCount, element?.id]);
+
+  const availableFilterFields = React.useMemo(() => {
+    return (
+      formData
+        ?.filter((section: any) => !section?.isFieldDeleted && !section?.isDeleted)
+        ?.flatMap((section: any) => section?.formData || [])
+        .filter(
+          (f: any) =>
+            !f?.isFieldDeleted &&
+            !f?.isDeleted &&
+            f.id !== element?.id &&
+            !["spacer", "divider", "section", "grid"].includes(
+              f.type?.toLowerCase(),
+            ),
+        ) || []
+    );
+  }, [fieldCount, element?.id, formData]);
+
   const config = getItem("config");
   const {
     register,
@@ -190,10 +307,21 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
     resolver: yupResolver(schema),
     defaultValues: {
       ...element,
+      selectionType: element.selectionType || "multiple",
       options: element.options || [],
+      visibilityDependentFields: element.visibilityDependentFields || [],
+      filterByFieldId: element.filterByFieldId || "",
+      clearOnFilterChange: element.clearOnFilterChange ?? true,
     },
   });
   const values = watch();
+
+  const selectedFilterField = React.useMemo(() => {
+    const filterId = values.filterByFieldId;
+    if (!filterId) return null;
+    return availableFilterFields.find((f: any) => f.id === filterId);
+  }, [values.filterByFieldId, availableFilterFields]);
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "options",
@@ -217,6 +345,39 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
     name: "dataColumns",
   });
 
+  // Track initial IDs of columns/options that already existed when modal opened
+  const initialDataColumnIdsRef = useRef<Set<string>>(new Set());
+  const initialOptionIdsRef = useRef<Set<string>>(new Set());
+  const initialOption1IdsRef = useRef<Set<string>>(new Set());
+
+  // Track row IDs where the user has manually edited the field key or option value
+  const manuallyEditedColumnsRef = useRef<Set<string>>(new Set());
+  const manuallyEditedOptionsRef = useRef<Set<string>>(new Set());
+  const manuallyEditedOptions1Ref = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (isOpen) {
+      initialDataColumnIdsRef.current = new Set(
+        (element?.dataColumns || [])
+          .map((c: any) => c.id || c.field)
+          .filter(Boolean),
+      );
+      initialOptionIdsRef.current = new Set(
+        (element?.options || [])
+          .map((o: any) => o.id || o.value)
+          .filter(Boolean),
+      );
+      initialOption1IdsRef.current = new Set(
+        (element?.options1 || [])
+          .map((o: any) => o.id || o.value)
+          .filter(Boolean),
+      );
+      manuallyEditedColumnsRef.current.clear();
+      manuallyEditedOptionsRef.current.clear();
+      manuallyEditedOptions1Ref.current.clear();
+    }
+  }, [isOpen, element]);
+
   useEffect(() => {
     if (!isOpen) {
       reset();
@@ -229,20 +390,32 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   };
 
   // Fetch options from api
-  const token = getItem("token");
-  const axiosconfig = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const fetchOptions = useCallback(async () => {
     if (!values.apiUrl || !/^https?:\/\//.test(values.apiUrl)) {
       toast.info("Please provide a valid API URL");
       return;
     }
 
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       setOptionsLoading(true);
+
+      const token = getItem("token");
+      const axiosconfig = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        signal: controller.signal,
+        defaultMessage: "Unable to load options",
+      } as any;
 
       const { status, data } = await axios.get(values.apiUrl, axiosconfig);
 
@@ -261,18 +434,18 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
 
       // Determine where to set the data
       if (element.type?.toLowerCase() === "datagrid") {
-        setValue("dataColumns", options);
+        setValue("dataColumns", normalizeGridRows(options));
       } else {
-        setValue("options", options);
+        setValue("options", normalizeRows(options));
       }
-    } catch (error) {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Unable to load options";
-      toast.error(message);
+    } catch (error: any) {
+      if (!axios.isCancel(error)) {
+        console.error(error);
+      }
     } finally {
-      setOptionsLoading(false);
+      if (abortControllerRef.current === controller) {
+        setOptionsLoading(false);
+      }
     }
   }, [element.type, setValue, values.apiUrl]);
 
@@ -284,20 +457,115 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
     }
   }
   // Options field rendering
+  // Options field rendering
   const renderOptionsFields = () => (
     <div className="flex flex-col justify-start gap-y-1">
-      <div className="flex items-center mb-4 gap-x-5">
-        {OptionsTypes.map((i) => (
-          <label key={i} className="items-center text-base capitalize gap-x-3">
-            <input
-              type="radio"
-              name="optionType"
-              onChange={(e) => setOptionTypes(e.target.value as optionType)}
-              value={i}
-            />{" "}
-            <span>{i} options</span>
-          </label>
-        ))}
+      {/* Cascading / Dependent Option Filter Configuration */}
+      {element.type?.toLowerCase() !== "cascadeselect" && (
+        <div className="mb-5 p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+          <div className="flex items-center gap-2">
+            <AppIcon
+              icon="material-symbols:filter-alt-outline"
+              iconClass="text-lg text-[#6366f1]"
+            />
+            <h4 className="text-sm font-semibold text-gray-800">
+              Filter Options by Field (Cascading Options)
+            </h4>
+          </div>
+          <p className="text-xs text-gray-500">
+            Dynamically filter which options appear in this field based on the selected value of another field in the form.
+          </p>
+
+          <CustomSelect
+            label="Parent / Source Field"
+            options={[
+              { label: "None (Show all options)", value: "" },
+              ...availableFilterFields.map((f: any) => ({
+                label: `${f.inputLabel || f.label || f.id} (${f.type})`,
+                value: f.id,
+              })),
+            ]}
+            register={register}
+            name="filterByFieldId"
+            setValue={setValue}
+            trigger={trigger}
+            value={watch("filterByFieldId") || ""}
+          />
+
+          {Boolean(watch("filterByFieldId")) && (
+            <div className="space-y-2 pt-2 border-t border-slate-200/60">
+              <div className="flex items-center gap-2">
+                <DynamicInput
+                  watch={watch}
+                  label="Clear selection when parent field value changes"
+                  name="clearOnFilterChange"
+                  register={register}
+                  errors={errors}
+                  element={element}
+                  type="checkbox"
+                  value={values.clearOnFilterChange}
+                />
+              </div>
+
+              {selectedFilterField?.options &&
+                selectedFilterField.options.length > 0 && (
+                  <div className="text-xs text-gray-600 bg-white p-2.5 rounded-lg border border-gray-200">
+                    <span className="font-medium text-gray-700 block mb-1">
+                      Parent field available options (click/copy values below):
+                    </span>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {selectedFilterField.options.map((pOpt: any) => (
+                        <span
+                          key={pOpt.id || pOpt.value}
+                          className="inline-flex items-center px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-mono border border-slate-200"
+                          title={`Value: ${pOpt.value}`}
+                        >
+                          {pOpt.label}: <strong className="ml-1 text-[#6366f1]">{pOpt.value}</strong>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="mb-5">
+        <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">
+          Options Source
+        </label>
+        <div className="grid grid-cols-3 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
+          {[
+            { id: "manual", label: "Manual Options", icon: "fluent:edit-16-regular" },
+            { id: "api", label: "API Endpoint", icon: "lucide:globe" },
+            { id: "sheet", label: "Sheet (CSV/XLSX)", icon: "tabler:file-spreadsheet" },
+          ].map((item) => {
+            const isSelected = optionTypes === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setOptionTypes(item.id as optionType)}
+                className={clsx(
+                  "flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer select-none",
+                  isSelected
+                    ? "bg-white text-blue-600 shadow-sm border border-slate-200/80 font-semibold"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                )}
+              >
+                <AppIcon
+                  icon={item.icon}
+                  iconClass={clsx(
+                    "text-sm transition-colors shrink-0",
+                    isSelected ? "text-blue-600" : "text-slate-400"
+                  )}
+                />
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
       {optionTypes === "api" && (
         <div className="mb-4">
@@ -305,6 +573,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           <div className="flex items-center gap-x-2">
             <div className="relative flex items-center w-full mb-2">
               <DynamicInput
+                watch={watch}
                 label="Load Options from Api"
                 name="apiUrl"
                 errors={errors}
@@ -318,85 +587,229 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 <div className="absolute w-4 h-4 mt-1 border-2 border-blue-500 rounded-full border-t-transparent animate-spin right-3 top-1/2"></div>
               )}
             </div>
-            <button
-              onClick={loadApi}
-              className="px-3 py-1 text-xs text-white bg-gray-600 rounded"
-              type="button"
-            >
-              Load
-            </button>
+            {!(
+              element.type === "multiSelect" || element.type === "selectField"
+            ) && (
+              <button
+                onClick={loadApi}
+                className="px-3 py-1 text-xs text-white bg-gray-600 rounded"
+                type="button"
+              >
+                Load
+              </button>
+            )}
           </div>
-          <OptionsExample />
+          {element.type === "multiSelect" || element.type === "selectField" ? (
+            <p className="text-xs text-blue-500 mb-2">
+              Options will be loaded dynamically at runtime.
+            </p>
+          ) : (
+            <OptionsExample />
+          )}
         </div>
       )}
       {optionTypes === "sheet" && (
         <div className="mb-4">
           <FileReaderComponent
-            isFloating
+            type={element.type}
             label="Load options form sheet (csv, xlsx)"
             setValue={setValue}
             name="options"
           />
         </div>
       )}
-      <div>
-        <h3 className="mb-4 text-sm text-gray-500">Parent Options </h3>
-        {fields.map((field, index) => (
-          <div
-            key={field.id}
-            className="flex items-center mb-1 gap-x-4 last:mb-0"
-          >
-            <div className="flex-1">
-              <DynamicInput
-                label="Label"
-                name={`options.${index}.label`}
-                register={register}
-                errors={errors}
-                element={element}
-                placeholder="Label"
-                isFloating
-              />
-            </div>
-            <div className="flex-1">
-              <DynamicInput
-                label="Value"
-                name={`options.${index}.value`}
-                register={register}
-                errors={errors}
-                element={element}
-                placeholder="Value"
-                isFloating
-              />
-            </div>
-
-            <button
-              disabled={fields.length === 1}
-              type="button"
-              className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
-              onClick={() => remove(index)}
+      {optionTypes === "manual" && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm text-gray-500 font-semibold">
+              {element?.type?.toLowerCase() === "matrix"
+                ? "Rows Options"
+                : "Parent Options"}
+            </h3>
+            {Boolean(watch("filterByFieldId")) && (
+              <span className="text-[11px] text-gray-400">
+                Options without a Filter Value are always visible.
+              </span>
+            )}
+          </div>
+          {fields?.map((field, index) => (
+            <div
+              key={field.id}
+              className="mb-3 pb-3 border-b border-gray-200 last:mb-0 last:pb-0 last:border-0"
             >
-              <AppIcon icon="iconamoon:sign-times-fill" />
+              <div className="flex items-start gap-x-4">
+                <div className="flex-1">
+                  <DynamicInput
+                    watch={watch}
+                    label={index === 0 ? "Label" : ""}
+                    name={`options.${index}.label`}
+                    register={register}
+                    errors={errors}
+                    element={element}
+                    placeholder="Label"
+                    onChange={(e) => {
+                      const text = e.target.value;
+                      const optId = values.options?.[index]?.id || field.id;
+                      const isExisting =
+                        initialOptionIdsRef.current.has(optId) ||
+                        Boolean(element.options?.[index]?.value);
+
+                      const shouldAutoUpdate =
+                        mode === "create" ||
+                        (!isExisting &&
+                          !manuallyEditedOptionsRef.current.has(optId));
+
+                      if (shouldAutoUpdate) {
+                        setValue(`options.${index}.value`, slugify(text), {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        });
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex-1">
+                  <DynamicInput
+                    watch={watch}
+                    label={index === 0 ? "Value" : ""}
+                    name={`options.${index}.value`}
+                    register={register}
+                    errors={errors}
+                    element={element}
+                    placeholder="Value"
+                    onChange={() => {
+                      const optId = values.options?.[index]?.id || field.id;
+                      manuallyEditedOptionsRef.current.add(optId);
+                    }}
+                  />
+                </div>
+
+                {Boolean(watch("filterByFieldId")) && (
+                  <div className="flex-1">
+                    <DynamicInput
+                      watch={watch}
+                      label={index === 0 ? "Filter Value" : ""}
+                      name={`options.${index}.filterValue`}
+                      register={register}
+                      errors={errors}
+                      element={element}
+                      placeholder="Parent Value"
+                      onChange={(e) => {
+                        setValue(`options.${index}.key`, e.target.value, {
+                          shouldDirty: true,
+                        });
+                      }}
+                    />
+                  </div>
+                )}
+
+                <button
+                  disabled={fields.length === 1}
+                  type="button"
+                  className={`outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed ${
+                    index === 0 ? "mt-[34px]" : "mt-[10px]"
+                  }`}
+                  onClick={() => remove(index)}
+                >
+                  <AppIcon
+                    icon="iconamoon:sign-times-fill"
+                    iconClass="text-gray-400 hover:text-red-500 text-lg transition-colors"
+                  />
+                </button>
+              </div>
+
+              {element.inputType === "imageChoice" && (
+                <div className="mt-3 pr-[36px]">
+                  {index === 0 && (
+                    <label className="block text-sm font-medium text-[#344054] font-onest mb-1.5">
+                      Image Upload
+                    </label>
+                  )}
+                  <div className="flex gap-2">
+                    <FileUpload
+                      multiple={false}
+                      accept={[
+                        { value: "image/*", label: "All Images" },
+                        { value: "image/jpeg", label: "JPEG" },
+                        { value: "image/png", label: "PNG" },
+                        { value: "image/gif", label: "GIF" },
+                        { value: "image/webp", label: "WebP" },
+                        { value: "image/svg+xml", label: "SVG" },
+                      ]}
+                      onFileLoaded={(files) => {
+                        if (files && files.length > 0) {
+                          setValue(
+                            `options.${index}.imageUrl`,
+                            files[0].base64,
+                            {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            },
+                          );
+                        } else {
+                          setValue(`options.${index}.imageUrl`, "", {
+                            shouldDirty: true,
+                            shouldValidate: true,
+                          });
+                        }
+                      }}
+                      list={
+                        watch(`options.${index}.imageUrl`)
+                          ? [
+                              {
+                                base64: watch(`options.${index}.imageUrl`),
+                                name: "Uploaded Image",
+                                type: "image",
+                              },
+                            ]
+                          : []
+                      }
+                    />
+                    <div className="flex-1 hidden">
+                      <DynamicInput
+                        watch={watch}
+                        label=""
+                        name={`options.${index}.imageUrl`}
+                        register={register}
+                        errors={errors}
+                        element={element}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}{" "}
+          <div>
+            {" "}
+            <button
+              type="button"
+              className="flex items-center mt-2 text-sm font-medium text-gray-700 gap-x-1"
+              onClick={() =>
+                append({
+                  label: "",
+                  value: "",
+                  filterValue: "",
+                  key: "",
+                  id: uuidv4(),
+                })
+              }
+            >
+              <AppIcon icon="qlementine-icons:plus-16" /> Add Option
             </button>
           </div>
-        ))}{" "}
-        <div>
-          {" "}
-          <button
-            type="button"
-            className="flex items-center mt-2 text-sm font-medium text-gray-700 gap-x-1"
-            onClick={() => append({ label: "", value: "", id: uuidv4() })}
-          >
-            <AppIcon icon="qlementine-icons:plus-16" /> Add Option
-          </button>
         </div>
-      </div>
-
-      {element.type.toLowerCase() === "cascadeselect" && (
+      )}
+      {["cascadeselect", "matrix"].includes(element.type.toLowerCase()) && (
         <>
           <hr className="my-5" />
           <div>
             {" "}
-            <h3 className="mb-4 text-sm text-gray-500">Child Options </h3>
+            <h3 className="mb-4 text-sm text-gray-500 font-semibold">
+              {element?.type?.toLowerCase() === "matrix"
+                ? "Columns Options"
+                : "Child Options"}
+            </h3>
             {fields1?.map((field, index) => (
               <div
                 key={field.id}
@@ -404,35 +817,58 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               >
                 <div className="flex-1">
                   <DynamicInput
-                    label="Label"
+                    watch={watch}
+                    label={index === 0 ? "Label" : ""}
                     name={`options1.${index}.label`}
                     register={register}
                     errors={errors}
                     element={element}
                     placeholder="Label"
-                    isFloating
+                    onChange={(e) => {
+                      const text = e.target.value;
+                      const optId = values.options1?.[index]?.id || field.id;
+                      const isExisting =
+                        initialOption1IdsRef.current.has(optId) ||
+                        Boolean(element.options1?.[index]?.value);
+
+                      const shouldAutoUpdate =
+                        mode === "create" ||
+                        (!isExisting &&
+                          !manuallyEditedOptions1Ref.current.has(optId));
+
+                      if (shouldAutoUpdate) {
+                        setValue(`options1.${index}.value`, slugify(text), {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        });
+                      }
+                    }}
                   />
                 </div>
                 <div className="flex-1">
                   <DynamicInput
-                    label="Value"
+                    watch={watch}
+                    label={index === 0 ? "Value" : ""}
                     name={`options1.${index}.value`}
                     register={register}
                     errors={errors}
                     element={element}
                     placeholder="Value"
-                    isFloating
+                    onChange={() => {
+                      const optId = values.options1?.[index]?.id || field.id;
+                      manuallyEditedOptions1Ref.current.add(optId);
+                    }}
                   />
                 </div>
                 <div className="flex-1">
                   <DynamicInput
-                    label="Key"
+                    watch={watch}
+                    label={index === 0 ? "Key" : ""}
                     name={`options1.${index}.key`}
                     register={register}
                     errors={errors}
                     element={element}
                     placeholder="Key"
-                    isFloating
                   />
                 </div>
                 <button
@@ -466,19 +902,41 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
   // Options field rendering
   const renderColumnsFields = () => (
     <div className="flex flex-col justify-start gap-y-1">
-      <div className="flex items-center mb-4 gap-x-5">
-        {OptionsTypes.map((i) => (
-          <label key={i} className="items-center text-base capitalize gap-x-3">
-            <input
-              type="radio"
-              name="optionType"
-              onChange={(e) => setOptionTypes(e.target.value as optionType)}
-              value={i}
-              checked={i === optionTypes}
-            />{" "}
-            <span>{i} options</span>
-          </label>
-        ))}
+      <div className="mb-5">
+        <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">
+          Columns Source
+        </label>
+        <div className="grid grid-cols-3 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
+          {[
+            { id: "manual", label: "Manual Columns", icon: "fluent:edit-16-regular" },
+            { id: "api", label: "API Endpoint", icon: "lucide:globe" },
+            { id: "sheet", label: "Sheet (CSV/XLSX)", icon: "tabler:file-spreadsheet" },
+          ].map((item) => {
+            const isSelected = optionTypes === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setOptionTypes(item.id as optionType)}
+                className={clsx(
+                  "flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer select-none",
+                  isSelected
+                    ? "bg-white text-blue-600 shadow-sm border border-slate-200/80 font-semibold"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                )}
+              >
+                <AppIcon
+                  icon={item.icon}
+                  iconClass={clsx(
+                    "text-sm transition-colors shrink-0",
+                    isSelected ? "text-blue-600" : "text-slate-400"
+                  )}
+                />
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
       {optionTypes === "api" && (
         <div className="mb-4">
@@ -486,13 +944,13 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           <div className="flex items-center gap-x-2">
             <div className="relative flex items-center w-full mb-2">
               <DynamicInput
+                watch={watch}
                 label="Load Columns from Api"
                 name="apiUrl"
                 errors={errors}
                 register={register}
                 className="!w-full"
                 placeholder="https://example.com/columns"
-                isFloating
               />
 
               {optionsLoading && (
@@ -513,54 +971,171 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       {optionTypes === "sheet" && (
         <div className="mb-4">
           <FileReaderComponent
-            isFloating
+            type={element.type}
             label="Load columns form sheet (csv, xlsx)"
             setValue={setValue}
             name="dataColumns"
           />
         </div>
       )}
-      {dataFields.map((field, index) => (
-        <div key={field.id} className="flex items-center gap-x-4 ">
-          <div className="flex-1">
-            <DynamicInput
-              label="Field key"
-              name={`dataColumns.${index}.field`}
-              register={register}
-              errors={errors}
-              element={element}
-              placeholder="Field"
-              isFloating
-            />
-          </div>
-          <div className="flex-1">
-            <DynamicInput
-              label="Header Name"
-              name={`dataColumns.${index}.headerName`}
-              register={register}
-              errors={errors}
-              element={element}
-              placeholder="headerName"
-              isFloating
-            />
-          </div>
-          {/* <div className="flex items-center flex-1 gap-x-3">
-            <label>
-              {" "}
-              <input type="checkbox" name={`dataColumns.${index}.editable`} />{" "}
-              <span>Is Editable</span>
-            </label>
-          </div> */}
-          <button
-            disabled={dataFields.length === 1}
-            type="button"
-            className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
-            onClick={() => columnRemove(index)}
-          >
-            <AppIcon icon="iconamoon:sign-times-fill" />
-          </button>
-        </div>
-      ))}
+      <div className="grid gap-y-3">
+        {dataFields?.map((field, index) => {
+          const isFieldDeleted =
+            values.dataColumns?.[index]?.isColumnDeleted ||
+            values.dataColumns?.[index]?.isFieldDeleted ||
+            values.dataColumns?.[index]?.isDeleted ||
+            (field as any)?.isColumnDeleted ||
+            (field as any)?.isFieldDeleted ||
+            (field as any)?.isDeleted;
+
+          if (isFieldDeleted) return null;
+
+          const firstVisibleIndex = dataFields.findIndex((f, idx) => {
+            const isDel =
+              values.dataColumns?.[idx]?.isColumnDeleted ||
+              values.dataColumns?.[idx]?.isFieldDeleted ||
+              values.dataColumns?.[idx]?.isDeleted ||
+              (f as any)?.isColumnDeleted ||
+              (f as any)?.isFieldDeleted ||
+              (f as any)?.isDeleted;
+            return !isDel;
+          });
+
+          const activeDataFieldsCount = dataFields.filter((f, idx) => {
+            const isDel =
+              values.dataColumns?.[idx]?.isColumnDeleted ||
+              values.dataColumns?.[idx]?.isFieldDeleted ||
+              values.dataColumns?.[idx]?.isDeleted ||
+              (f as any)?.isColumnDeleted ||
+              (f as any)?.isFieldDeleted ||
+              (f as any)?.isDeleted;
+            return !isDel;
+          }).length;
+
+          return (
+            <div
+              key={field.id}
+              className="flex flex-col gap-2 border-b border-gray-100 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0"
+            >
+              <div className="flex items-center gap-x-4">
+                <div className="min-w-[140px]">
+                  <CustomSelect
+                    label={index === firstVisibleIndex ? "Type" : ""}
+                    options={[
+                      {
+                        label: "Text",
+                        value: "text",
+                      },
+                      {
+                        label: "Number",
+                        value: "number",
+                      },
+                      {
+                        label: "Checkbox",
+                        value: "checkbox",
+                      },
+                      {
+                        label: "Select",
+                        value: "select",
+                      },
+                    ]}
+                    register={register}
+                    name={`dataColumns.${index}.type`}
+                    setValue={setValue}
+                    trigger={trigger}
+                    value={values.dataColumns?.[index]?.type}
+                  />
+                </div>
+
+                <div className="flex-1">
+                  <DynamicInput
+                    watch={watch}
+                    label={index === firstVisibleIndex ? "Display header" : ""}
+                    name={`dataColumns.${index}.headerName`}
+                    register={register}
+                    onChange={(e) => {
+                      const text = e.target.value;
+                      const colId = values.dataColumns?.[index]?.id || field.id;
+                      const isExisting =
+                        initialDataColumnIdsRef.current.has(colId) ||
+                        Boolean(element.dataColumns?.[index]?.field);
+
+                      const shouldAutoUpdate =
+                        mode === "create" ||
+                        (!isExisting &&
+                          !manuallyEditedColumnsRef.current.has(colId));
+
+                      if (shouldAutoUpdate) {
+                        setValue(`dataColumns.${index}.field`, slugify(text), {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        });
+                      }
+                    }}
+                    errors={errors}
+                    element={element}
+                    placeholder="header"
+                  />
+                </div>
+
+                <div className="flex-1">
+                  <DynamicInput
+                    watch={watch}
+                    label={index === firstVisibleIndex ? "Field key" : ""}
+                    name={`dataColumns.${index}.field`}
+                    register={register}
+                    errors={errors}
+                    element={element}
+                    placeholder="fieldKey"
+                    onChange={() => {
+                      const colId = values.dataColumns?.[index]?.id || field.id;
+                      manuallyEditedColumnsRef.current.add(colId);
+                    }}
+                  />
+                </div>
+
+                <button
+                  disabled={activeDataFieldsCount <= 1}
+                  type="button"
+                  className="outline-none hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
+                  onClick={() => {
+                    if (
+                      deleteMode === "isFieldDeleted" ||
+                      deleteMode === "isDeleted" ||
+                      deleteMode === "soft"
+                    ) {
+                      setValue(`dataColumns.${index}.isColumnDeleted`, true, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      });
+                    } else {
+                      columnRemove(index);
+                    }
+                  }}
+                >
+                  <AppIcon icon="iconamoon:sign-times-fill" />
+                </button>
+              </div>
+
+              {values.dataColumns?.[index]?.type === "select" && (
+                <div className="flex items-center gap-x-4">
+                  <div className="flex-1">
+                    <DynamicInput
+                      watch={watch}
+                      label="Options API URL"
+                      name={`dataColumns.${index}.optionsUrl`}
+                      register={register}
+                      errors={errors}
+                      element={element}
+                      placeholder="https://api.example.com/options"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
       <div>
         {" "}
         <button
@@ -572,6 +1147,8 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
               field: "",
               editable: true,
               id: uuidv4(),
+              type: "text",
+              validate: false,
             })
           }
         >
@@ -580,38 +1157,26 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       </div>
     </div>
   );
-  const getDocuments = useCallback(async () => {
-    const token = getItem("token");
-    const { status, data } = await axios.get(values.url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (status === 200) {
-      console.log({ data });
-      setValue("options", data?.data || data);
-    }
-  }, [setValue, values.url]);
 
-  useEffect(() => {
-    if (element.type === "document" && values.url) {
-      getDocuments();
-    }
-  }, [values.url, element.type, getDocuments]);
-
-  return (
+  const modalContent = (
     <div
-      className="fixed inset-0 bg-black/30 flex items-center justify-center z-[999] cursor-default  select-none "
-      draggable="true"
-      onDragStart={(e) => e.preventDefault()}
+      className="fixed inset-0 bg-gray-800/40 backdrop-blur-sm flex items-center justify-end z-[999] cursor-default"
+      onMouseDown={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      onDragStart={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
     >
-      <div
-        className="min-w-[600px] bg-white rounded-xl shadow-xl relative flex flex-col pb-4 items-center   select-"
-        draggable="true"
-        onDragStart={(e) => e.preventDefault()}
-      >
+      <div className="w-full lg:w-2/3 xl:w-2/5 bg-white h-screen  shadow-xl relative flex flex-col  items-center">
+        <button
+          className="bg-white h-10 w-10 flex justify-center items-center absolute top-1 -left-12 rounded-lg hover:bg-gray-50"
+          onClick={onClose}
+        >
+          <AppIcon icon="tabler:x" iconClass="text-xl" />
+        </button>
         {/* Header */}
-        <div className="z-10 flex flex-col items-start w-full gap-4 px-6 pt-4 pb-5 mb-3">
+        {/* <div className="z-10 flex flex-col items-start w-full gap-4 px-6 pt-4 pb-5 mb-3">
           <button
             onClick={onClose}
             type="button"
@@ -620,10 +1185,10 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
           >
             <AppIcon icon="tabler:x" />
           </button>
-        </div>
+        </div> */}
 
         {/* Tabs */}
-        <div className="w-full">
+        <div className="w-full pt-4">
           <TabsComponent
             tabs={filteredTabs}
             setActiveTab={setActiveTab}
@@ -634,386 +1199,659 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
         </div>
 
         {/* Form Content */}
-        <form onSubmit={handleSubmit(onSubmit)} className="w-full">
-          <div className=" max-h-[600px] overflow-y-auto">
-            {activeTab === "basic" && (
-              <div className="z-10 flex flex-col w-full gap-5 px-6">
-                {allowValue.includes(element.inputType) && (
-                  <>
-                    <DynamicInput
-                      label="Value"
-                      name="value"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                    />
-                  </>
-                )}
-
-                {!allowValue.includes(element.inputType) &&
-                  !noAllowValidation.includes(element.inputType) && (
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="w-full flex-1 flex flex-col"
+          autoComplete="off"
+        >
+          <div className="flex-1 pb-6">
+            {" "}
+            <div className="config_box max-h-[80vh] overflow-y-auto flex-1">
+              {activeTab === "basic" && (
+                <div className="z-10 flex flex-col w-full gap-5 px-6">
+                  {allowValue.includes(element.inputType) && (
                     <>
                       <DynamicInput
-                        label="Label"
-                        name="inputLabel"
+                        watch={watch}
+                        label="Value"
+                        name="value"
                         register={register}
                         errors={errors}
                         element={element}
-                      />{" "}
-                      {element.type.toLowerCase() === "cascadeselect" && (
+                      />
+                    </>
+                  )}
+
+                  {!allowValue.includes(element.inputType) &&
+                    !noAllowValidation.includes(element.inputType) && (
+                      <>
                         <DynamicInput
-                          label="Child Label"
-                          name="childLabel"
+                          watch={watch}
+                          label="Label"
+                          name="inputLabel"
                           register={register}
                           errors={errors}
                           element={element}
+                        />{" "}
+                        {element.type.toLowerCase() === "cascadeselect" && (
+                          <DynamicInput
+                            watch={watch}
+                            label="Child Label"
+                            name="childLabel"
+                            register={register}
+                            errors={errors}
+                            element={element}
+                          />
+                        )}
+                        {element.inputType === "nps" && (
+                          <>
+                            <DynamicInput
+                              watch={watch}
+                              label="Low Rating Label (e.g. Not at all likely)"
+                              name="minLabel"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                              placeholder="Not at all likely"
+                            />
+                            <DynamicInput
+                              watch={watch}
+                              label="High Rating Label (e.g. Extremely likely)"
+                              name="maxLabel"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                              placeholder="Extremely likely"
+                            />
+                          </>
+                        )}
+                      </>
+                    )}
+                  {AllowValidationPlaceholder.includes(element.inputType) && (
+                    <DynamicInput
+                      watch={watch}
+                      label="Placeholder"
+                      name="placeholder"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                    />
+                  )}
+                  {AllowValidationPrefix.includes(element.inputType) && (
+                    <DynamicInput
+                      watch={watch}
+                      label="Prefix"
+                      name="prefix"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                    />
+                  )}
+                  {AllowValueSource.includes(element.inputType) && (
+                    <div className="grid gap-y-4">
+                      <CustomSelect
+                        label="Value Source"
+                        options={[
+                          { label: "Manual Input", value: "manual" },
+                          { label: "From Another Field", value: "field" },
+                        ]}
+                        register={register}
+                        name={"valueSource"}
+                        setValue={setValue}
+                        trigger={trigger}
+                        value={watch("valueSource") || "manual"}
+                      />
+                      {watch("valueSource") === "field" && (
+                        <CustomSelect
+                          label="Source Field"
+                          options={mentionData.map((m: any) => ({
+                            label: m.display,
+                            value: m.id,
+                          }))}
+                          register={register}
+                          name={"sourceFieldId"}
+                          setValue={setValue}
+                          trigger={trigger}
+                          value={watch("sourceFieldId")}
                         />
                       )}
-                    </>
+                    </div>
                   )}
-                {AllowValidationPlaceholder.includes(element.inputType) && (
-                  <DynamicInput
-                    label="Placeholder"
-                    name="placeholder"
-                    register={register}
-                    errors={errors}
-                    element={element}
-                  />
-                )}
-                {AllowValidationPrefix.includes(element.inputType) && (
-                  <DynamicInput
-                    label="Prefix"
-                    name="prefix"
-                    register={register}
-                    errors={errors}
-                    element={element}
-                  />
-                )}
-                {AllowApiOptions.includes(element.inputType) && (
-                  <div className="grid gap-y-4">
-                    <ApiExample />
-                    <DynamicInput
-                      label="Api Url"
-                      name="url"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                    />
-                    <CustomSelect
-                      label="Api Method"
-                      options={[
-                        {
-                          label: "GET",
-                          value: "GET",
-                        },
-                        {
-                          label: "POST",
-                          value: "POST",
-                        },
-                      ]}
-                      register={register}
-                      name={"method"}
-                      setValue={setValue}
-                      trigger={trigger}
-                      value={watch("method")}
-                    />
-                    <CustomSelect
-                      label="Api Response type"
-                      options={[
-                        {
-                          label: "String",
-                          value: "string",
-                        },
-                        {
-                          label: "Object",
-                          value: "object",
-                        },
-                      ]}
-                      register={register}
-                      name={"responseType"}
-                      setValue={setValue}
-                      trigger={trigger}
-                      value={watch("responseType")}
-                    />
-                  </div>
-                )}
-                {AllowTableOptions.includes(element.inputType) && (
-                  <TableInputColumn
-                    onChange={(newValues) => {
-                      setValue("denominators", newValues);
-                    }}
-                    value={watch("denominators")}
-                  />
-                )}
-                {!allowValue.includes(element.inputType) &&
-                  !noAllowValidation.includes(element.inputType) && (
-                    <DynamicInput
-                      label="Short Description"
-                      name="description"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                    />
-                  )}
-                {element.type.toLowerCase() === "date" && (
-                  <>
-                    {/* {watch("dateType") === "custom" && ( */}
-                    <CustomSelect
-                      label="Date Format"
-                      options={dateFormats}
-                      register={register}
-                      name={"dateFormat"}
-                      setValue={setValue}
-                      trigger={trigger}
-                      value={watch("dateFormat")}
-                    />
-                    <DynamicInput
-                      label="Allow Range"
-                      name="canHaveDateRange"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                      type="checkbox"
-                    />
-                    {values?.canHaveDateRange && (
-                      <div className="grid grid-cols-2 gap-4">
-                        <CustomDatePicker
-                          name="minDate"
-                          value={values?.minDate}
-                          onGetValue={setValue}
-                          placeholder="Select min date"
-                        />
-                        <CustomDatePicker
-                          name="maxDate"
-                          value={values?.minDate}
-                          onGetValue={setValue}
-                          placeholder="Select max date"
-                          minDate={values?.minDate}
-                        />
-                      </div>
-                    )}
-                    <DynamicInput
-                      label="Allow Year Picker"
-                      name="allowYearPicker"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                      type="checkbox"
-                    />
-                  </>
-                )}
-                {element.type.toLowerCase() === "selectfield" && (
-                  <CustomSelect
-                    label="Select Type"
-                    options={[
-                      {
-                        label: "List",
-                        value: "list",
-                      },
-                      {
-                        label: "Combobox",
-                        value: "Combobox",
-                      },
-                    ]}
-                    register={register}
-                    name={"selectType"}
-                    setValue={setValue}
-                    trigger={trigger}
-                    value={watch("selectType")}
-                  />
-                )}
-                {element.type.toLowerCase() === "grid" && (
-                  <DynamicInput
-                    label="Number of columns"
-                    name="columns"
-                    register={register}
-                    errors={errors}
-                    element={element}
-                  />
-                )}
-                {element.type.toLowerCase() === "document" && (
-                  <div className="grid gap-y-6">
-                    <div className="grid gap-y-1">
+                  {AllowApiOptions.includes(element.inputType) && (
+                    <div className="grid gap-y-4">
+                      <ApiExample />
                       <DynamicInput
-                        label="Document Options Url"
+                        watch={watch}
+                        label="Api Url"
                         name="url"
                         register={register}
                         errors={errors}
                         element={element}
-                      />{" "}
-                      <DocumentSignExample />
-                    </div>
-                    <div className="grid gap-y-1">
-                      <DynamicInput
-                        label="Document Validation Url"
-                        name="validationUrl"
-                        register={register}
-                        errors={errors}
-                        element={element}
                       />
-                      <ValidateExample />
-                    </div>
-                    <div className="grid gap-y-1">
-                      <DynamicInput
-                        label="Signature Page Url"
-                        name="signatureLink"
+                      <CustomSelect
+                        label="Api Method"
+                        options={[
+                          {
+                            label: "GET",
+                            value: "GET",
+                          },
+                          {
+                            label: "POST",
+                            value: "POST",
+                          },
+                        ]}
                         register={register}
-                        errors={errors}
-                        element={element}
+                        name={"method"}
+                        setValue={setValue}
+                        trigger={trigger}
+                        value={watch("method")}
+                      />
+                      <CustomSelect
+                        label="Api Response type"
+                        options={[
+                          {
+                            label: "String",
+                            value: "string",
+                          },
+                          {
+                            label: "Object",
+                            value: "object",
+                          },
+                        ]}
+                        register={register}
+                        name={"responseType"}
+                        setValue={setValue}
+                        trigger={trigger}
+                        value={watch("responseType")}
                       />
                     </div>
-                  </div>
-                )}
-                {element.type.toLowerCase() === "datagrid" &&
-                  renderColumnsFields()}
-                {AllowOptions.includes(element.inputType) &&
-                  renderOptionsFields()}
-                {/* VisibilityEditor  */}
-                <div>
-                  <div className="w-[150px] mb-4">
-                    <DynamicInput
-                      label="Toggle Visibility"
-                      name="isHidden"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                      type="checkbox"
-                    />
-                  </div>{" "}
-                  {values.isHidden && (
-                    <VisibilityEditor
-                      register={register}
-                      setValue={setValue}
-                      trigger={trigger}
-                      watch={watch}
-                      id={element?.id}
+                  )}
+                  {AllowTableOptions.includes(element.inputType) && (
+                    <TableInputColumn
+                      onChange={(newValues: any) => {
+                        setValue("denominators", newValues);
+                      }}
+                      value={watch("denominators")}
                     />
                   )}
-                </div>
-              </div>
-            )}
-
-            {!noAllowValidation.includes(element.type.toLowerCase()) &&
-              activeTab === "validation" && (
-                <div className="z-10 flex flex-col w-full gap-5 px-6">
-                  <div className="flex items-center gap-x-6">
-                    <div className="w-[150px]">
+                  {!allowValue.includes(element.inputType) &&
+                    !noAllowValidation.includes(element.inputType) && (
                       <DynamicInput
-                        label="Required"
-                        name="isRequired"
+                        watch={watch}
+                        label="Short Description"
+                        name="description"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                      />
+                    )}
+                  {element.type.toLowerCase() === "date" && (
+                    <>
+                      {/* {watch("dateType") === "custom" && ( */}
+                      <CustomSelect
+                        label="Date Format"
+                        options={dateFormats}
+                        register={register}
+                        name={"dateFormat"}
+                        setValue={setValue}
+                        trigger={trigger}
+                        value={watch("dateFormat")}
+                      />
+                      <DynamicInput
+                        watch={watch}
+                        label="Allow Range"
+                        name="canHaveDateRange"
                         register={register}
                         errors={errors}
                         element={element}
                         type="checkbox"
+                        value={values.canHaveDateRange}
                       />
-                    </div>{" "}
-                    <div className="flex-1">
+                      {values?.canHaveDateRange && (
+                        <div className="grid grid-cols-2 gap-4">
+                          <CustomDatePicker
+                            name="minDate"
+                            value={values?.minDate}
+                            onGetValue={setValue}
+                            placeholder="Select min date"
+                          />
+                          <CustomDatePicker
+                            name="maxDate"
+                            value={values?.minDate}
+                            onGetValue={setValue}
+                            placeholder="Select max date"
+                            minDate={values?.minDate}
+                          />
+                        </div>
+                      )}
                       <DynamicInput
-                        label="Error message text"
-                        name="requiredMessage"
+                        watch={watch}
+                        label="Allow Year Picker"
+                        name="allowYearPicker"
                         register={register}
                         errors={errors}
                         element={element}
+                        type="checkbox"
+                        value={values.allowYearPicker}
                       />
-                    </div>
-                  </div>
-                  {AllowValidationMaxMin.includes(element.inputType) && (
-                    <>
-                      <div className="flex items-center gap-x-6">
-                        <div className="w-[150px]">
-                          <DynamicInput
-                            label="Min Length"
-                            name="minLength"
-                            register={register}
-                            errors={errors}
-                            element={element}
-                            type="number"
-                          />
-                        </div>{" "}
-                        <div className="flex-1">
-                          <DynamicInput
-                            label="Error message text"
-                            name="minLengthMessage"
-                            register={register}
-                            errors={errors}
-                            element={element}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-x-6">
-                        <div className="w-[150px]">
-                          <DynamicInput
-                            label="Max Length"
-                            name="maxLength"
-                            register={register}
-                            errors={errors}
-                            element={element}
-                            type="number"
-                          />
-                        </div>{" "}
-                        <div className="flex-1">
-                          <DynamicInput
-                            label="Error message text"
-                            name="maxLengthMessage"
-                            register={register}
-                            errors={errors}
-                            element={element}
-                          />
-                        </div>
-                      </div>
                     </>
                   )}
-                  {AllowValidationAmount.includes(element.inputType) && (
+                  {element.type.toLowerCase() === "time" && (
+                    <DynamicInput
+                      watch={watch}
+                      label="24 Hour Format"
+                      name="is24Hour"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                      type="checkbox"
+                      value={values.is24Hour}
+                    />
+                  )}
+                  {element.type.toLowerCase() === "country" && (
+                    <DynamicInput
+                      watch={watch}
+                      label="Allow States"
+                      name="showState"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                      type="checkbox"
+                      value={values.showState}
+                    />
+                  )}
+                  {element.type.toLowerCase() === "selectfield" && (
+                    <CustomSelect
+                      label="Select Type"
+                      options={[
+                        {
+                          label: "List",
+                          value: "list",
+                        },
+                        {
+                          label: "Combobox",
+                          value: "Combobox",
+                        },
+                      ]}
+                      register={register}
+                      name={"selectType"}
+                      setValue={setValue}
+                      trigger={trigger}
+                      value={watch("selectType")}
+                    />
+                  )}
+                  {["multiselect", "checkbox"].includes(
+                    element.type.toLowerCase(),
+                  ) && (
                     <>
-                      <div className="flex items-center gap-x-6">
-                        <div className="w-[150px]">
+                      {element.type.toLowerCase() === "checkbox" && (
+                        <CustomSelect
+                          label="Selection Mode"
+                          options={[
+                            {
+                              label: "Multi Check (Allow multiple checks)",
+                              value: "multiple",
+                            },
+                            {
+                              label: "Single Check (Allow only one check)",
+                              value: "single",
+                            },
+                          ]}
+                          register={register}
+                          name={"selectionType"}
+                          setValue={setValue}
+                          trigger={trigger}
+                          value={watch("selectionType") || "multiple"}
+                        />
+                      )}
+                      {(watch("selectionType") || element.selectionType) !== "single" && (
+                        <>
                           <DynamicInput
-                            label="Min Amount"
-                            name="minAmount"
+                            watch={watch}
+                            label="Minimum Options Checked"
+                            name="minChecked"
                             register={register}
                             errors={errors}
                             element={element}
-                            type="amount"
+                            type="number"
                           />
-                        </div>{" "}
-                        <div className="flex-1">
-                          <DynamicInput
-                            label="Error message text"
-                            name="minAmountMessage"
-                            register={register}
-                            errors={errors}
-                            element={element}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-x-6">
-                        <div className="w-[150px]">
-                          <DynamicInput
-                            label="Max Amount"
-                            name="maxAmount"
-                            register={register}
-                            errors={errors}
-                            element={element}
-                            type="amount"
-                          />
-                        </div>{" "}
-                        <div className="flex-1">
-                          <DynamicInput
-                            label="Error message text"
-                            name="maxAmountMessage"
-                            register={register}
-                            errors={errors}
-                            element={element}
-                          />
-                        </div>
-                      </div>
+                          <div className="w-[250px]">
+                            <DynamicInput
+                              watch={watch}
+                              label="Require All Checked"
+                              name="requireAllChecked"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                              type="checkbox"
+                              value={values.requireAllChecked}
+                            />
+                          </div>
+                        </>
+                      )}
                     </>
+                  )}
+                  {element.type.toLowerCase() === "grid" && (
+                    <DynamicInput
+                      watch={watch}
+                      label="Number of columns (max: 4)"
+                      name="columns"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                      max={4}
+                      min={1}
+                    />
+                  )}
+                  {element.type.toLowerCase() === "document" && (
+                    <div className="grid gap-y-6">
+                      <div className="grid gap-y-1">
+                        <DynamicInput
+                          watch={watch}
+                          label="Document Options Url"
+                          name="url"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                        />{" "}
+                        <DocumentSignExample />
+                      </div>
+                      <div className="grid gap-y-1">
+                        <DynamicInput
+                          watch={watch}
+                          label="Document Validation Url"
+                          name="validationUrl"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                        />
+                        <ValidateExample />
+                      </div>
+                      <div className="grid gap-y-1">
+                        <DynamicInput
+                          watch={watch}
+                          label="Signature Page Url"
+                          name="signatureLink"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {element.type.toLowerCase() === "datagrid" &&
+                    renderColumnsFields()}
+
+                  {element.type.toLowerCase() === "file" && (
+                    <>
+                      <DynamicInput
+                        watch={watch}
+                        label="Allow Multiple Uploads"
+                        name="isMultiple"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="checkbox"
+                        value={values.isMultiple}
+                      />
+                      <MultiSelectInput
+                        element={{
+                          options: FileTypes,
+                          id: "acceptedFiles",
+                          value: values?.acceptedFiles,
+                        }}
+                        validationData={{ register, setValue, trigger, watch }}
+                        placeholder="Choose file types"
+                      />
+                      <DynamicInput
+                        watch={watch}
+                        label="Max File Size (MB)"
+                        name="maxFileSize"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="number"
+                      />
+                    </>
+                  )}
+                  {AllowOptions.includes(element.inputType) &&
+                    renderOptionsFields()}
+
+                  {!["spacer", "divider", "section", "grid"].includes(
+                    element.type?.toLowerCase(),
+                  ) && (
+                    <div className="flex items-center gap-x-6 mb-4">
+                      <div className="w-[150px]">
+                        <DynamicInput
+                          watch={watch}
+                          label="Disabled"
+                          name="isDisabled"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                          type="checkbox"
+                          value={values.isDisabled}
+                        />
+                      </div>
+                      <div className="w-[150px]">
+                        <DynamicInput
+                          watch={watch}
+                          label="Read Only"
+                          name="isReadOnly"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                          type="checkbox"
+                          value={values.isReadOnly}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* VisibilityEditor  */}
+                  <div>
+                    <div className="w-[150px] mb-4">
+                      <DynamicInput
+                        watch={watch}
+                        label="Toggle Visibility"
+                        name="isHidden"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="checkbox"
+                        value={values.isHidden}
+                      />
+                    </div>{" "}
+                    {values.isHidden && (
+                      <VisibilityEditor
+                        register={register}
+                        setValue={setValue}
+                        trigger={trigger}
+                        watch={watch}
+                        id={element?.id}
+                      />
+                    )}
+                  </div>
+                  {element.type.toLowerCase() === "calculatedfield" && (
+                    <div className="grid gap-y-2 mb-4">
+                      <label className="block text-sm font-medium text-[#344054] font-onest">
+                        Formula
+                      </label>
+                      <FormulaMentionInput
+                        value={watch("formula") || ""}
+                        onChange={(val) =>
+                          setValue("formula", val, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          })
+                        }
+                        fields={mentionData}
+                        placeholder="Build your formula..."
+                      />
+                    </div>
+                  )}
+
+                  {element.type.toLowerCase() === "polling" && (
+                    <div className="grid gap-y-4 mb-4 mt-2">
+                      <DynamicInput
+                        watch={watch}
+                        label="Fetch results from external API"
+                        name="fetchExternalResults"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="checkbox"
+                        value={values.fetchExternalResults}
+                      />
+                      {values.fetchExternalResults && (
+                        <DynamicInput
+                          watch={watch}
+                          label="External API URL (returns options results)"
+                          name="externalApiUrl"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                          placeholder="https://api.example.com/poll/results"
+                        />
+                      )}
+                    </div>
                   )}
                 </div>
               )}
+
+              {!noAllowValidation.includes(element.type.toLowerCase()) &&
+                activeTab === "validation" && (
+                  <div className="z-10 flex flex-col w-full gap-5 px-6">
+                    <div className="flex items-center gap-x-6">
+                      <div className="w-[150px]">
+                        <DynamicInput
+                          watch={watch}
+                          label="Required"
+                          name="isRequired"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                          type="checkbox"
+                          value={values.isRequired}
+                        />
+                      </div>{" "}
+                      <div className="flex-1">
+                        <DynamicInput
+                          watch={watch}
+                          label="Error message text"
+                          name="requiredMessage"
+                          register={register}
+                          errors={errors}
+                          element={element}
+                        />
+                      </div>
+                    </div>
+                    {AllowValidationMaxMin.includes(element.inputType) && (
+                      <>
+                        <div className="flex items-center gap-x-6">
+                          <div className="w-[150px]">
+                            <DynamicInput
+                              watch={watch}
+                              label="Min Length"
+                              name="minLength"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                              type="number"
+                            />
+                          </div>{" "}
+                          <div className="flex-1">
+                            <DynamicInput
+                              watch={watch}
+                              label="Error message text"
+                              name="minLengthMessage"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-x-6">
+                          <div className="w-[150px]">
+                            <DynamicInput
+                              watch={watch}
+                              label="Max Length"
+                              name="maxLength"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                              type="number"
+                            />
+                          </div>{" "}
+                          <div className="flex-1">
+                            <DynamicInput
+                              watch={watch}
+                              label="Error message text"
+                              name="maxLengthMessage"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    {AllowValidationAmount.includes(element.inputType) && (
+                      <>
+                        <div className="flex items-center gap-x-6">
+                          <div className="w-[150px]">
+                            <DynamicInput
+                              watch={watch}
+                              label="Min Amount"
+                              name="minAmount"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                              type="amount"
+                            />
+                          </div>{" "}
+                          <div className="flex-1">
+                            <DynamicInput
+                              watch={watch}
+                              label="Error message text"
+                              name="minAmountMessage"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-x-6">
+                          <div className="w-[150px]">
+                            <DynamicInput
+                              watch={watch}
+                              label="Max Amount"
+                              name="maxAmount"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                              type="amount"
+                            />
+                          </div>{" "}
+                          <div className="flex-1">
+                            <DynamicInput
+                              watch={watch}
+                              label="Error message text"
+                              name="maxAmountMessage"
+                              register={register}
+                              errors={errors}
+                              element={element}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+            </div>
           </div>
           {/* Actions */}
-          <div className="sticky flex w-full gap-3 px-6 pt-8 pb-4 mt-10 border-t">
+          <div className="sticky flex w-full gap-3 px-6 pt-8 pb-10 border-t">
             <button
               type="button"
               onClick={onClose}
@@ -1029,7 +1867,7 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                 !isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#2563EB]"
               } ${
                 !isValid || isSubmitting ? "text-[#98A2B3]" : "text-white"
-              } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-50 editor_option__save`}
+              } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-80 editor_option__save`}
             >
               {isSubmitting ? "Saving..." : "Save"}
             </button>
@@ -1038,6 +1876,10 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
       </div>
     </div>
   );
+
+  return document.body
+    ? createPortal(modalContent, document.body)
+    : modalContent;
 };
 
 export default ElementEditorModal;

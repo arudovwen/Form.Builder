@@ -1,6 +1,9 @@
+import { DeleteMode } from "../../context/editor-context";
 export interface FormElement {
     id: string;
     isReadOnly?: false;
+    isFieldDeleted?: boolean;
+    isDeleted?: boolean;
     [key: string]: any;
 }
 export interface EditorContextType {
@@ -10,6 +13,8 @@ export interface EditorContextType {
     updateElement: any;
     removeElement: any;
     isDragging: boolean;
+    uploadUrl?: string;
+    deleteMode?: DeleteMode;
 }
 declare function ElementCanvas({ elementData, sectionId }: any): import("react/jsx-runtime").JSX.Element;
 declare const _default: import("react").MemoExoticComponent<typeof ElementCanvas>;

@@ -1,6 +1,28 @@
-export default function CustomDataGrid({ value, onChange, isReadOnly, columns, }: {
-    value?: any[];
-    onChange: any;
-    isReadOnly: any;
-    columns?: any[];
-}): import("react/jsx-runtime").JSX.Element;
+export type ColumnType = "text" | "number" | "checkbox" | "select";
+export interface DataGridColumn<T> {
+    field: keyof T;
+    headerName?: string;
+    editable?: boolean;
+    type?: ColumnType;
+    validate?: boolean;
+    id: string;
+    optionsUrl?: string;
+    options?: {
+        label: string;
+        value: string;
+    }[];
+    isColumnDeleted?: boolean;
+}
+interface CustomDataGridProps<T extends {
+    id: string;
+}> {
+    value?: T[];
+    onChange?: (rows: T[]) => void;
+    isReadOnly?: boolean;
+    columns: DataGridColumn<T>[];
+    url?: string;
+}
+export default function CustomDataGrid<T extends {
+    id: string;
+}>({ value, onChange, isReadOnly, columns, }: CustomDataGridProps<T>): import("react/jsx-runtime").JSX.Element;
+export {};

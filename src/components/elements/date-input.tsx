@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import CustomDatePicker from "../CutomDatePicker";
 import { useEffect } from "react";
 
@@ -15,15 +14,14 @@ export default function DateInput({
     setValue,
     watch,
   } = validationData || {};
-  let selectedValue;
-  if (watch) {
-    const values = watch();
-    selectedValue = values[element.id];
-  }
+  const selectedValue =
+    (watch ? watch(element.id) : undefined) ??
+    (validationData?.getValues ? validationData.getValues(element.id) : undefined) ??
+    element?.value;
 
   useEffect(() => {
     register(element.id);
-  }, [element.id]);
+  }, [element.id, register]);
   return (
     <CustomDatePicker
       name={element.id}

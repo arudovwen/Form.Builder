@@ -1,5 +1,6 @@
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import CurrencyInput from "react-currency-input-field";
+import CheckSvg from "@/assets/svgs/check";
 
 interface InputProps {
   label: string;
@@ -16,6 +17,12 @@ interface InputProps {
   trigger?: any;
   prefix?: string;
   disabled?: boolean;
+  readOnly?: boolean;
+  watch?: any;
+  min?: number;
+  max?: number;
+  description?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
 export const DynamicInput = ({
@@ -31,9 +38,15 @@ export const DynamicInput = ({
   value,
   trigger,
   prefix,
-  disabled
+  disabled,
+  watch,
+  min,
+  max,
+  description,
+  onChange,
+  readOnly,
 }: InputProps) => {
-  const registerProps = register ? { ...register(name) } : {};
+  const registerProps: React.InputHTMLAttributes<HTMLInputElement> & React.TextareaHTMLAttributes<HTMLTextAreaElement> = register ? { ...register(name) } : {};
 
   if (type === "amount") {
     return (
@@ -49,7 +62,7 @@ export const DynamicInput = ({
         </label>
         <CurrencyInput
           onValueChange={(value: any) => {
-            setValue(name, value);
+            setValue(name, value ?? null);
             if (register) {
               register(name);
             }
@@ -65,9 +78,10 @@ export const DynamicInput = ({
           value={value}
           prefix={prefix}
           disabled={disabled}
+          readOnly={readOnly}
         />
         {errors?.[name] && (
-          <p className="mt-1 text-sm text-red-600">
+          <p className="absolute -bottom-[18px] left-0 text-xs text-red-600 whitespace-nowrap">
             {errors[name]?.message as string}
           </p>
         )}
@@ -76,22 +90,90 @@ export const DynamicInput = ({
   }
 
   if (["checkbox", "radio"].includes(type)) {
+    const checkedValue = watch?.(name);
+    let isChecked = false;
+
+    if (checkedValue !== undefined && checkedValue !== null) {
+      if (type === "checkbox") {
+        let normalizedCheckVal = checkedValue;
+        if (typeof checkedValue === "string" && checkedValue.trim().startsWith("[")) {
+          try {
+            normalizedCheckVal = JSON.parse(checkedValue);
+          } catch {}
+        }
+
+        if (Array.isArray(normalizedCheckVal)) {
+          isChecked = normalizedCheckVal.includes(value);
+        } else if (typeof normalizedCheckVal === "boolean") {
+          isChecked = normalizedCheckVal;
+        } else if (normalizedCheckVal === "true") {
+          isChecked = true;
+        } else if (normalizedCheckVal === "false") {
+          isChecked = false;
+        } else {
+          isChecked = normalizedCheckVal == value;
+        }
+      } else {
+        isChecked = checkedValue == value;
+      }
+    }
+
     return (
-      <div>
-        <label className="flex items-center space-x-2">
+      <div className="space-y-1 relative">
+        <label
+          className={`flex  gap-3 cursor-pointer select-none ${description ? "items-start" : "items-center"}`}
+        >
           <input
             {...registerProps}
             type={type}
-            className="w-4 h-4 border-gray-300 rounded"
-            value={value}
+            value={value || ""}
+            checked={isChecked}
+            onChange={(e) => {
+              onChange?.(e);
+              if (!e.defaultPrevented) {
+                registerProps?.onChange?.(e);
+              }
+            }}
             disabled={disabled}
+            readOnly={readOnly}
+            className="peer sr-only"
           />
-          <span className="text-sm font-medium text-[#344054] font-onest">
-            {label}
-          </span>
+
+          <div
+            className={`
+            w-[18px] h-[18px] flex items-center justify-center
+            border rounded-md transition-all duration-200
+            ${
+              isChecked
+                ? "bg-[#7F56D9] border-[#7F56D9]"
+                : errors?.[name]
+                ? "border-red-300 bg-white"
+                : "border-[#D0D5DD] bg-white"
+            }
+            ${disabled ? "opacity-60 cursor-not-allowed" : ""}
+          `}
+          >
+            {isChecked && (
+              <CheckSvg className="text-white z-10"
+              />
+            )}
+          </div>
+
+          <div>
+            <span className="text-sm leading-none block font-medium text-[#344054] font-onest">
+              {label}
+            </span>
+
+            {description && (
+              <span className="text-xs font-medium leading-none text-[#5c6c86] font-onest">
+                {description}
+              </span>
+            )}
+          </div>
         </label>
+
         {errors?.[name] && (
-          <p className="ml-2 text-sm text-red-600">
+          <p className="absolute -bottom-[18px] left-8 text-xs text-red-600 whitespace-nowrap">
             {errors[name]?.message as string}
           </p>
         )}
@@ -113,14 +195,20 @@ export const DynamicInput = ({
         </label>
         <textarea
           {...registerProps}
+          onChange={(e) => {
+            registerProps.onChange?.(e as any);
+            onChange?.(e);
+          }}
           className={`field-control ${
             errors?.[name] ? "border-red-300" : "border-[#D0D5DD]"
           } ${className}`}
           placeholder={placeholder}
           disabled={disabled}
+          readOnly={readOnly}
+          autoComplete="off"
         />
         {errors?.[name] && (
-          <p className="mt-1 text-sm text-red-600">
+          <p className="absolute -bottom-[18px] left-0 text-xs text-red-600 whitespace-nowrap">
             {errors[name]?.message as string}
           </p>
         )}
@@ -128,27 +216,36 @@ export const DynamicInput = ({
     );
   }
   return (
-    <div className="space-y-1.5 relative w-full">
-      <label
-        className={`block text-sm font-medium text-[#344054] font-onest ${
+    <div className=" relative w-full">
+   {label &&   <label
+        className={`block text-sm font-medium text-[#344054] font-onest mb-1.5 ${
           isFloating
             ? "z-[40] absolute block text-[#667085] bg-white  py-[2px] px-1 -top-[12px] left-3"
             : "relative"
         }`}
       >
         {label}
-      </label>
+      </label>}
       <input
         {...registerProps}
+        onChange={(e) => {
+          registerProps.onChange?.(e as any);
+          onChange?.(e);
+        }}
         type={type}
         className={`field-control ${
           errors?.[name] ? "border-red-300" : "border-[#D0D5DD]"
         } ${className}`}
         placeholder={isFloating ? "" : placeholder}
         disabled={disabled}
+        readOnly={readOnly}
+        min={min}
+        max={max}
+        autoComplete="off"
+        data-1p-ignore
       />
       {errors?.[name] && (
-        <p className="mt-1 text-sm text-red-600">
+        <p className="absolute -bottom-[18px] left-0 text-xs text-red-600 whitespace-nowrap">
           {errors[name]?.message as string}
         </p>
       )}

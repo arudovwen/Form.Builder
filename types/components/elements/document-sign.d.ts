@@ -11,6 +11,7 @@ type SignDocumentProps = {
     validationData: {
         register?: (id: string) => any;
         isReadOnly?: boolean;
+        setValue?: (id: string, value: any) => void;
     };
 };
 export default function SignDocument({ element, validationData, }: SignDocumentProps): import("react/jsx-runtime").JSX.Element;

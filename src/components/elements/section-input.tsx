@@ -1,10 +1,3 @@
-// @ts-nocheck 
-export default function SectionInput({
-  element,
-  state,
-}: {
-  element: string;
-  state: string;
-}) {
+export default function SectionInput() {
   return <div>SectionInput</div>;
 }

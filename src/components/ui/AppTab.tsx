@@ -31,7 +31,7 @@ const TabsComponent: FC<TabsComponentProps> = ({
 
   return (
     <div className={containerClass}>
-      {tabs.map((tab) => {
+      {tabs?.map((tab) => {
         const isActive = activeTab === tab.key;
         const tabCount = count[tab.key] || 0;
         

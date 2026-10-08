@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useCallback } from "react";
 import Loader from "../../components/Loader";
 import FormRenderer from "../../components/viewer";
 import { setItem } from "../../utils/localStorageControl";
-import { EditorProvider } from "@/context/editor-context";
+import { EditorProvider, DeleteMode } from "@/context/editor-context";
 
 export interface RenderProps {
   onSubmit?: (e: any) => void;
@@ -12,10 +12,25 @@ export interface RenderProps {
   ignoreValidation?: boolean;
   loading?: boolean;
   config?: any;
-  renderType?: "multi" | "single";
-  children?: ReactNode;
+  renderType?: "multi" | "single" | "conversational";
+  children?:
+    | ReactNode
+    | ((options: {
+        isUploading: boolean;
+        isSubmitting: boolean;
+        hasErrors: boolean;
+        submitText?: string;
+      }) => ReactNode);
   hideFooter?: boolean;
   onGetValues?: (e: any) => void;
+  uploadUrl?: string;
+  pollResults?: Record<string, any>; // Add pollResults
+  showResults?: boolean; // Toggle for showing results
+  hideInputsOnResults?: boolean; // Hide input controls when viewing results
+  sendHiddenSectionsAsEmpty?: boolean;
+  preview?: boolean;
+  deleteMode?: DeleteMode;
+  submitText?: string;
 }
 
 export default function Viewer({
@@ -30,6 +45,14 @@ export default function Viewer({
   children,
   hideFooter,
   onGetValues,
+  uploadUrl,
+  pollResults,
+  showResults,
+  hideInputsOnResults = false,
+  sendHiddenSectionsAsEmpty = false,
+  preview = false,
+  deleteMode,
+  submitText = "Submit",
 }: RenderProps) {
   // ✅ Store config in localStorage only when it changes
   useEffect(() => {
@@ -41,7 +64,7 @@ export default function Viewer({
     (vals: any) => {
       if (onGetValues) onGetValues(vals);
     },
-    [onGetValues]
+    [onGetValues],
   );
 
   if (loading) return <Loader />;
@@ -57,21 +80,28 @@ export default function Viewer({
   }
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full min-w-0">
       <div id="root-portal"></div>
-      <EditorProvider>
-      <FormRenderer
-        form_data={form_data}
-        answerData={answerData}
-        ignoreValidation={ignoreValidation}
-        onSubmitData={onSubmit}
-        isReadOnly={isReadOnly}
-        renderType={renderType}
-        hideFooter={hideFooter}
-        onGetValues={stableOnGetValues} // ✅ stable reference
-      >
-        {children}
-      </FormRenderer>
+      <EditorProvider deleteMode={deleteMode}>
+        <FormRenderer
+          form_data={form_data}
+          answerData={answerData}
+          ignoreValidation={ignoreValidation}
+          onSubmitData={onSubmit}
+          isReadOnly={isReadOnly}
+          renderType={renderType}
+          hideFooter={hideFooter}
+          onGetValues={stableOnGetValues} // ✅ stable reference
+          uploadUrl={uploadUrl}
+          pollResults={pollResults}
+          showResults={showResults}
+          hideInputsOnResults={hideInputsOnResults}
+          sendHiddenSectionsAsEmpty={sendHiddenSectionsAsEmpty}
+          preview={preview}
+          submitText={submitText}
+        >
+          {children}
+        </FormRenderer>
       </EditorProvider>
     </div>
   );

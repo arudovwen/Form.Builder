@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Combobox } from "@headlessui/react";
 import AppIcon from "./ui/AppIcon";
 import countries from "../data/countrycodes";
@@ -34,7 +34,7 @@ export default function PhoneInput({
   readOnly,
   horizontal,
   description,
-  validate,
+
   onChange,
   onError,
 }: PhoneInputProps) {
@@ -42,13 +42,15 @@ export default function PhoneInput({
   const [selectedCountry, setSelectedCountry] = useState<any>(null);
   const [number, setNumber] = useState("");
 
+  const phoneButtonRef = useRef<HTMLButtonElement>(null);
+
   // Build country list
   const countryList = useMemo(
     () =>
       countries
         ?.slice() // create a shallow copy so we don’t mutate state
         .sort((a, b) => a.label.localeCompare(b.label))
-        .map((c) => ({ ...c, phone: `+${c.phone}` })),
+        ?.map((c) => ({ ...c, phone: `+${c.phone}` })),
     []
   );
 
@@ -68,7 +70,7 @@ export default function PhoneInput({
     number ? `${selectedCountry?.phone || "+234"}-${number}` : "";
 
   const parsePhone = (val: string) => {
-    if (!val) return { code: "+234", number: "" };
+    if (!val || typeof val !== "string") return { code: "+234", number: "" };
     const parts = val.split(/[-\s]/);
     return { code: parts[0], number: parts.slice(1).join(" ") };
   };
@@ -76,11 +78,14 @@ export default function PhoneInput({
   // Handle incoming value
   useEffect(() => {
     if (value) {
-      const parsed = parsePhone(value);
-      setSelectedCountry(
-        countryList.find((c) => c.phone === parsed.code) || countryList[0]
-      );
-      setNumber(parsed.number);
+      const formatted = formatPhone();
+      if (value !== formatted) {
+        const parsed = parsePhone(value);
+        setSelectedCountry(
+          countryList.find((c) => c.phone === parsed.code) || countryList[0]
+        );
+        setNumber(parsed.number);
+      }
     }
   }, [value, countryList]);
 
@@ -97,17 +102,24 @@ export default function PhoneInput({
     return "";
   }, [error, number, min, max, isRequired]);
 
-  // Sync with parent
+  // Sync value with parent
   useEffect(() => {
-    onChange?.(formatPhone());
+    const formatted = formatPhone();
+    if (formatted !== value) {
+      onChange?.(formatted);
+    }
+  }, [number, selectedCountry]); // Only trigger when user changes local state
+
+  // Sync error with parent
+  useEffect(() => {
     onError?.(phoneError || null);
-  }, [number, selectedCountry, phoneError]);
+  }, [phoneError]); // Only trigger when the error string itself changes
 
   return (
     <div
-      className={`relative formGroup ${phoneError ? "has-error" : ""} ${
+      className={`relative formGroup ${phoneError  && !readOnly ? "has-error" : ""} ${
         horizontal ? "flex" : ""
-      } ${!phoneError && number.length > 0 ? "is-valid" : ""}`}
+      } ${!phoneError && number.length > 0 && !readOnly ? "is-valid" : ""}`}
     >
       {/* Label */}
       {label && (
@@ -127,30 +139,53 @@ export default function PhoneInput({
         <AppIcon icon="lucide:phone-call" />
 
         {/* Country Code Dropdown */}
-        <Combobox value={selectedCountry} onChange={setSelectedCountry}>
-          <div className="relative">
-            <Combobox.Input
-              className="pl-3 pr-4 mr-1 text-sm bg-white  py-[10px] outline-none whitespace-nowrap max-w-[70px]"
-              displayValue={(country: any) => country?.phone || "+234"}
-              placeholder="+234"
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <AppIcon icon="lucide:chevron-down" />
-            </Combobox.Button>
+        <Combobox
+          immediate
+          value={selectedCountry}
+          onChange={(c) => {
+            setSelectedCountry(c);
+            setQuery("");
+          }}
+          onClose={() => setQuery("")}
+        >
+          {({ open }: { open: boolean }) => (
+            <div className="relative">
+              <Combobox.Input
+                className="pl-3 pr-4 mr-1 text-sm bg-white py-[10px] outline-none whitespace-nowrap max-w-[70px]"
+                displayValue={(country: any) => country?.phone || "+234"}
+                placeholder="+234"
+                onChange={(e) => setQuery(e.target.value)}
+                onClick={() => {
+                  if (!open && !disabled && !readOnly) {
+                    phoneButtonRef.current?.click();
+                  }
+                }}
+                onFocus={() => {
+                  if (!open && !disabled && !readOnly) {
+                    phoneButtonRef.current?.click();
+                  }
+                }}
+              />
+              <Combobox.Button
+                ref={phoneButtonRef}
+                className="absolute inset-y-0 right-0 flex items-center pr-2"
+              >
+                <AppIcon icon="lucide:chevron-down" />
+              </Combobox.Button>
 
-            <Combobox.Options className="absolute z-10 w-[250px] left-0 bg-white border rounded-md shadow-lg max-h-[400px] overflow-y-auto">
-              {filteredCountries.map((country, index) => (
-                <Combobox.Option
-                  key={`${country.code}+ ${index}`}
-                  value={country}
-                  className="px-4 py-2 cursor-pointer hover:bg-gray-100"
-                >
-                  {country.phone} - {country.label}
-                </Combobox.Option>
-              ))}
-            </Combobox.Options>
-          </div>
+              <Combobox.Options className="absolute z-10 w-[250px] left-0 bg-white border rounded-md shadow-lg max-h-[400px] overflow-y-auto">
+                {filteredCountries?.map((country, index) => (
+                  <Combobox.Option
+                    key={`${country.code}+ ${index}`}
+                    value={country}
+                    className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                  >
+                    {country.phone} - {country.label}
+                  </Combobox.Option>
+                ))}
+              </Combobox.Options>
+            </div>
+          )}
         </Combobox>
 
         {/* Phone Number Input */}
@@ -167,11 +202,13 @@ export default function PhoneInput({
             }}
             placeholder={placeholder}
             className="w-full px-3 outline-none"
+            maxLength={max}
+            minLength={min} 
           />
 
           {/* Icons */}
           <div className="absolute flex text-xl -translate-y-1/2 top-1/2 right-4">
-            {!phoneError && number.length > 0 && (
+            {!phoneError && number.length > 0 && !readOnly && (
               <span className="text-green-500">
                 <AppIcon icon="bi:check-lg" />
               </span>
@@ -181,14 +218,14 @@ export default function PhoneInput({
       </div>
 
       {/* Error / Success */}
-      {phoneError ? (
+      {/* {phoneError ? (
         <span className="block mt-1 text-sm text-red-500">{phoneError}</span>
       ) : (
         number.length > 0 &&
         validate && (
           <span className="block mt-1 text-sm text-green-500">{validate}</span>
         )
-      )}
+      )} */}
 
       {/* Description */}
       {description && (

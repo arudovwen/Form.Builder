@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";
+import "@/assets/scss/_date-picker.scss";
 import CalendarSvg from "../assets/svgs/calendar";
 
 interface CustomDatePickerProps {
@@ -13,27 +14,33 @@ interface CustomDatePickerProps {
   placeholder?: string;
   minDate?: null;
   maxDate?: null;
-  showYearDropdown?: boolean
+  showYearDropdown?: boolean;
 }
 
 const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   value = null,
   onGetValue,
   readOnly = false,
-  dateFormat='dd/MM/yyyy',
+  dateFormat = "dd/MM/yyyy",
   name,
   placeholder = "Select date",
   minDate,
   maxDate,
-  showYearDropdown
+  showYearDropdown,
 }) => {
-  const initialDate = value ? new Date(value) : null;
+  const getValidDate = (val: any) => {
+    if (!val) return null;
+    const date = new Date(val);
+    return isNaN(date.getTime()) ? null : date;
+  };
+
+  const initialDate = getValidDate(value);
 
   const [startDate, setStartDate] = useState<Date | null>(initialDate);
 
   // 🔥 Watch for external value changes
   useEffect(() => {
-    const newDate = value ? new Date(value) : null;
+    const newDate = getValidDate(value);
 
     // Only update if the value actually changed
     if (
@@ -57,7 +64,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   };
 
   return (
-    <>
+    <div className="builder_date__picker">
       <DatePicker
         showIcon
         icon={<CalendarSvg className="react-datepicker__calendar-icon" />}
@@ -67,14 +74,15 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         selected={startDate}
         onChange={handleDateChange}
         className="field-control"
-        portalId="root-portal"
+        portalId="root"
         placeholderText={placeholder}
         minDate={minDate}
         maxDate={maxDate}
         showYearDropdown={showYearDropdown}
-        dropdownMode="select"
+        scrollableYearDropdown
+        yearDropdownItemNumber={40}
       />
-    </>
+    </div>
   );
 };
 

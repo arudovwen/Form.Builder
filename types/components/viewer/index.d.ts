@@ -4,7 +4,7 @@ export interface AnswerElement {
     value: any;
     [key: string]: any;
 }
-export type RenderType = "multi" | "single";
+export type RenderType = "multi" | "single" | "conversational";
 export interface FormRendererProps {
     form_data: any[];
     answerData?: any[];
@@ -13,8 +13,20 @@ export interface FormRendererProps {
     onGetValues?: (data: any[]) => void;
     isReadOnly?: boolean;
     renderType?: RenderType;
-    children?: ReactNode;
+    children?: ReactNode | ((options: {
+        isUploading: boolean;
+        isSubmitting: boolean;
+        hasErrors: boolean;
+        submitText?: string;
+    }) => ReactNode);
     hideFooter?: boolean;
+    uploadUrl?: string;
+    pollResults?: Record<string, any>;
+    showResults?: boolean;
+    hideInputsOnResults?: boolean;
+    sendHiddenSectionsAsEmpty?: boolean;
+    preview?: boolean;
+    submitText?: string;
 }
 declare const _default: React.NamedExoticComponent<FormRendererProps>;
 export default _default;

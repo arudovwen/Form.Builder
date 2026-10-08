@@ -43,7 +43,7 @@ const DynamicInputOptionList: React.FC<DynamicInputOptionListProps> = ({
   return (
     <>
       <div className="mb-10">
-        {fields.map((field, index) => (
+        {fields?.map((field, index) => (
           <div key={index} className="flex gap-x-[10px] mb-2">
             <input
               placeholder="Enter Key"

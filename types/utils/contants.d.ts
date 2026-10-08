@@ -5,10 +5,12 @@ export declare enum ElementKind {
     SELECT = "selectField",
     CASCADE_SELECT = "cascadeSelect",
     MULTI_SELECT = "multiSelect",
-    VALIDATE_INPUT = "validateInput",
+    DATA_LOOKUP = "dataLookup",
     NUMBER = "numberField",
     AMOUNT = "amountField",
     DATE = "date",
+    TIME = "time",
+    URL = "url",
     PASSWORD = "password",
     CHECKBOX = "checkbox",
     PHONE = "phoneField",
@@ -22,19 +24,31 @@ export declare enum ElementKind {
     DIVIDER = "divider",
     SPACER = "spacer",
     SECTION = "section",
-    GRID = "grid"
+    GRID = "grid",
+    MATRIX = "matrix",
+    CALCULATED_FIELD = "calculatedField",
+    POLLING = "polling",
+    NPS = "nps",
+    RANKING = "ranking",
+    IMAGE_CHOICE = "imageChoice"
 }
+export type FormType = "default" | "poll";
 export interface DataColumnType {
     field: string;
     headerName: string;
     width?: number;
     editable?: boolean;
+    type?: string;
+    validate?: boolean;
+    id: string;
+    isColumnDeleted?: boolean;
 }
 export interface OptionType {
     label: string;
     value: any;
     id: string;
     key?: string;
+    filterValue?: string;
 }
 export interface ElementType {
     type: ElementKind;
@@ -59,6 +73,7 @@ export interface ElementType {
     minAmountMessage?: string;
     maxAmountMessage?: string;
     options?: OptionType[];
+    options1?: OptionType[];
     options2?: OptionType[];
     columns?: number;
     dataColumns?: DataColumnType[];
@@ -72,6 +87,7 @@ export interface ElementType {
     maxDate?: string | null;
     canHaveDateRange?: boolean;
     allowYearPicker?: boolean;
+    is24Hour?: boolean;
     url?: string;
     method?: string;
     responseType?: string;
@@ -82,6 +98,22 @@ export interface ElementType {
     isHidden: boolean;
     visibilityDependentFields?: string;
     visibilityDependentFieldsValue?: any;
+    filterByFieldId?: string;
+    clearOnFilterChange?: boolean;
+    filterBehavior?: "hide" | "disable";
+    minChecked?: number | null;
+    allowCheckAll?: boolean;
+    requireAllChecked?: boolean;
+    selectionType?: string;
+    isMultiple: boolean;
+    acceptedFiles: any[];
+    maxFileSize?: number;
+    showState?: boolean;
+    formula?: string;
+    fetchExternalResults?: boolean;
+    externalApiUrl?: string;
+    minLabel?: string;
+    maxLabel?: string;
 }
 export declare const countryOptions: OptionType[];
 export declare const Elements: ElementType[];
@@ -93,7 +125,11 @@ export declare const CategorizedElements: Readonly<{
     layoutAndDisplay: ElementKind[];
     advancedData: ElementKind[];
 }>;
-export declare const dateFormats: readonly {
+export declare const CategorizedPollElements: Readonly<{
+    pollComponents: ElementKind[];
+    layoutAndInfo: ElementKind[];
+}>;
+export declare const dateFormats: {
     label: string;
     value: string;
 }[];
@@ -108,3 +144,8 @@ export declare const AllowTableOptions: string[];
 export declare const AllowTextOptions: string[];
 export declare const noAllowEdit: string[];
 export declare const allowValue: string[];
+export declare const AllowValueSource: string[];
+export declare const FileTypes: {
+    value: string;
+    label: string;
+}[];

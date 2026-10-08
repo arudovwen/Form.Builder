@@ -4,8 +4,12 @@ import { setItem } from "../../utils/localStorageControl";
 
 const HomePage = ({
   onSubmit,
-  questionData,
+  onChange,
+  onLogAction,
+  formData,
   isReadOnly,
+  deleteMode,
+  mode,
   config = {
     buttonColor: "#333",
   },
@@ -15,7 +19,13 @@ const HomePage = ({
   onPublish,
   previewLoading,
   saveLoading,
-  publishLoading,onTitleChange
+  publishLoading,
+  onTitleChange,
+  uploadUrl,
+  onAddTemplate,
+  templates,
+  onShowVersion,
+  formType,
 }: BuilderProps) => {
   useEffect(() => {
     if (config) {
@@ -25,9 +35,14 @@ const HomePage = ({
   return (
     <Layout
       onSubmit={onSubmit}
+      onChange={onChange}
+      onLogAction={onLogAction}
       onPublish={onPublish}
-      questionData={questionData}
+      formData={formData}
       isReadOnly={isReadOnly}
+      deleteMode={deleteMode}
+      mode={mode}
+      config={config}
       title={title}
       goBackUrl={goBackUrl}
       loading={loading}
@@ -35,6 +50,11 @@ const HomePage = ({
       saveLoading={saveLoading}
       publishLoading={publishLoading}
       onTitleChange={onTitleChange}
+      uploadUrl={uploadUrl}
+      onAddTemplate={onAddTemplate}
+      templates={templates}
+      onShowVersion={onShowVersion}
+      formType={formType}
     />
   );
 };

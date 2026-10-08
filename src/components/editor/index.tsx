@@ -8,13 +8,199 @@ import {
 } from "react";
 import EditorContext from "../../context/editor-context";
 import ElementCanvas from "./element-canvas";
-// import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import AppIcon from "../ui/AppIcon";
 import SectionEditorModal from "../elements/section-editor";
+import TemplateSelectorModal from "../elements/template-selector";
 import { getItem } from "../../utils/localStorageControl";
+import { defaultTemplates } from "../../utils/default-templates";
 
-const FormBuilder = () => {
+const SectionItem = ({
+  section,
+  index,
+  selectedSection,
+  setSelectedSection,
+  activeSections,
+  toggleSection,
+  handleSectionEdit,
+  removeSection,
+  copySection,
+  duplicateSection,
+  formDataLength,
+  onDragOver,
+  setIsDragging,
+  isDragging,
+  onReorderSection,
+}: any) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const prevLength = useRef(section?.formData?.length);
+
+  const wasDragging = useRef(isDragging);
+
+  useEffect(() => {
+    // Scroll to bottom when a new input is added
+    if (section?.formData?.length > prevLength.current) {
+      if (!isDragging && !wasDragging.current) {
+        const container = document.getElementById("section-container");
+        if (container) {
+          requestAnimationFrame(() => {
+            container.scrollTo({
+              top: container.scrollHeight,
+              behavior: "smooth",
+            });
+          });
+        }
+      }
+    }
+    prevLength.current = section?.formData?.length;
+  }, [section?.formData?.length, isDragging]);
+
+  useEffect(() => {
+    wasDragging.current = isDragging;
+  }, [isDragging]);
+
+  return (
+    <div
+      ref={scrollRef}
+      key={section?.id}
+      onDragOver={(e) => {
+        if (e.dataTransfer.types.includes("sectionid")) {
+          e.preventDefault();
+        }
+      }}
+      onDrop={(e) => {
+        const draggedId = e.dataTransfer.getData("sectionid");
+        if (draggedId) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (onReorderSection) onReorderSection(draggedId, section.id);
+        }
+      }}
+      className={`bg-white group cursor-pointer rounded-lg  shadow-[rgba(149,157,165,0.2)_0px_2px_2px] transition-colors duration-200`}
+    >
+      <div
+        className={` border border-gray-200 rounded-lg  px-4 transition-colors duration-200
+          ${
+            selectedSection === section.id
+              ? " border-blue-200 bg-gray-100"
+              : "bg-white"
+          } ${activeSections.includes(index) ? "min-h-[300px] pb-6 " : ""}`}
+      >
+        <div className="flex items-center justify-between">
+          <div
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.setData("sectionid", section.id);
+              e.dataTransfer.effectAllowed = "move";
+              setIsDragging(true);
+            }}
+            onDragEnd={() => setIsDragging(false)}
+            onClick={() => setSelectedSection(section.id)}
+            className="flex-1 h-full py-4 cursor-grab active:cursor-grabbing flex items-center gap-2"
+            title="Drag to reorder section"
+          >
+            <AppIcon
+              icon="material-symbols:drag-indicator"
+              iconClass="text-gray-400 text-lg"
+            />
+            <h2 className="font-medium">{section.title || "Section title"}</h2>
+          </div>
+
+          <div className="flex items-center gap-x-2">
+            <button
+              type="button"
+              className="p-1 text-xs border rounded-lg hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
+              title="Copy section to clipboard"
+              onClick={(e) => {
+                e.stopPropagation();
+                copySection?.(section.id);
+              }}
+            >
+              <AppIcon icon="fluent:copy-20-regular" />
+            </button>
+            <button
+              type="button"
+              className="p-1 text-xs border rounded-lg hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
+              title="Duplicate section"
+              onClick={(e) => {
+                e.stopPropagation();
+                duplicateSection?.(section.id);
+              }}
+            >
+              <AppIcon icon="lucide:copy-plus" />
+            </button>
+            <button
+              type="button"
+              className="p-1 text-xs border rounded-lg hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
+              title="Edit section"
+              onClick={() => handleSectionEdit(section)}
+            >
+              <AppIcon icon="fluent:edit-28-regular" />
+            </button>
+            {formDataLength > 1 && (
+              <button
+                type="button"
+                className="p-1 text-xs border rounded-lg hover:bg-red-50 text-gray-600 hover:text-red-600 transition-colors"
+                title="Delete section"
+                onClick={() => removeSection(section.id)}
+              >
+                <AppIcon icon="lets-icons:trash-duotone-line" />
+              </button>
+            )}
+            <button
+              type="button"
+              className="p-1 text-xs rounded-lg"
+              onClick={() => toggleSection(index)}
+            >
+              <AppIcon
+                icon={
+                  activeSections.includes(index)
+                    ? "fa6-solid:chevron-up"
+                    : "fa6-solid:chevron-down"
+                }
+                iconClass="text-base"
+              />
+            </button>
+          </div>
+        </div>
+        {section?.description && activeSections.includes(index) && (
+          <p className="mt-2 text-sm text-gray-600">{section?.description}</p>
+        )}
+        {activeSections.includes(index) && (
+          <div
+            className="h-full mt-4 transition-all duration-200"
+            id={section.id}
+            onDragOver={onDragOver}
+            onDragEnd={() => setIsDragging(false)}
+            onClick={() => setSelectedSection(section.id)}
+          >
+            <hr className="group-last:hidden" />
+            <div className="h-full mt-4 gap-y-6 ">
+              {
+                <ElementCanvas
+                  elementData={section?.formData}
+                  sectionId={section?.id}
+                />
+              }
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const FormBuilder = ({
+  onAddTemplate,
+  templates,
+}: {
+  onAddTemplate?: () => void;
+  templates?: any[];
+}) => {
+  const allTemplates = [...defaultTemplates, ...(templates || [])];
   const [isOpen, setOpen] = useState(false);
+  const [isTemplateModalOpen, setTemplateModalOpen] = useState(false);
+  const [hasSectionInClipboard, setHasSectionInClipboard] = useState(false);
   const tempSection = useRef(null);
   const containerRef = useRef<HTMLDivElement>(null); // Ref for the container
   const {
@@ -27,55 +213,133 @@ const FormBuilder = () => {
     selectedSection,
     activeSections,
     setActiveSections,
+    setFormData,
+    isDragging,
+    pasteElement,
+    copySection,
+    pasteSection,
+    duplicateSection,
   }: any = useContext(EditorContext);
+
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      // Prevent pasting if the user is typing in an input/textarea
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      const clipboardText = e.clipboardData?.getData("text") || "";
+      if (clipboardText.includes("FORM_BUILDER_SECTION_CLIPBOARD")) {
+        pasteSection(undefined, clipboardText);
+      } else if (selectedSection) {
+        // Pass clipboard text directly to bypass async permission prompts
+        pasteElement(selectedSection, undefined, clipboardText);
+      }
+    };
+
+    window.addEventListener("paste", handlePaste);
+    return () => {
+      window.removeEventListener("paste", handlePaste);
+    };
+  }, [selectedSection, pasteElement, pasteSection]);
+
+  useEffect(() => {
+    const checkClipboard = () => {
+      try {
+        const clipboardString =
+          localStorage.getItem("form_builder_section_clipboard") ||
+          localStorage.getItem("form_builder_clipboard");
+        if (clipboardString) {
+          const copiedData = JSON.parse(clipboardString);
+          if (
+            copiedData?.type === "FORM_BUILDER_SECTION_CLIPBOARD" &&
+            copiedData?.section
+          ) {
+            const isExpired =
+              copiedData?.timestamp &&
+              Date.now() - copiedData.timestamp > 60000;
+            if (isExpired) {
+              localStorage.removeItem("form_builder_section_clipboard");
+              localStorage.removeItem("form_builder_clipboard");
+              setHasSectionInClipboard(false);
+            } else {
+              setHasSectionInClipboard(true);
+            }
+          } else {
+            setHasSectionInClipboard(false);
+          }
+        } else {
+          setHasSectionInClipboard(false);
+        }
+      } catch {
+        setHasSectionInClipboard(false);
+      }
+    };
+
+    checkClipboard();
+    const interval = setInterval(checkClipboard, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const prevFormDataLength = useRef(formData?.length || 0);
 
   useEffect(() => {
     setSelectedSection(formData[0]?.id || null);
   }, []);
 
+  useEffect(() => {
+    // Scroll to bottom when a new section is added
+    if (formData?.length > prevFormDataLength.current) {
+      if (containerRef.current) {
+        requestAnimationFrame(() => {
+          containerRef.current?.scrollTo({
+            top: containerRef.current.scrollHeight,
+            behavior: "smooth",
+          });
+        });
+      }
+    }
+    prevFormDataLength.current = formData?.length || 0;
+  }, [formData?.length]);
+
   const onDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
-
-    // Scroll to the bottom of the container
-    if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
-    }
   }, []);
 
-  // const onDrop = useCallback(
-  //   (event: DragEvent<HTMLDivElement>) => {
-  //     try {
-  //       event.preventDefault();
-  //       setIsDragging(false);
-  //       const targetElement = event?.currentTarget;
-  //       const data = event.dataTransfer.getData("properties");
-  //       if (data) {
-  //         const properties = JSON.parse(data);
+  const handleReorderSection = useCallback(
+    (draggedId: string, targetId: string) => {
+      setFormData((prev: any[]) => {
+        const draggedIndex = prev.findIndex((s) => s.id === draggedId);
+        const targetIndex = prev.findIndex((s) => s.id === targetId);
+        if (
+          draggedIndex === -1 ||
+          targetIndex === -1 ||
+          draggedIndex === targetIndex
+        )
+          return prev;
 
-  //         const newElement = {
-  //           id: uuidv4(),
-  //           sectionId: targetElement.id,
-  //           ...properties,
-  //         };
-
-  //         addElement(newElement, targetElement.id);
-  //       }
-  //     } catch (error) {
-  //       console.log(error);
-  //       setIsDragging(false);
-  //     }
-  //   },
-  //   [addElement, setIsDragging]
-  // );
+        const newArr = [...prev];
+        const [draggedItem] = newArr.splice(draggedIndex, 1);
+        newArr.splice(targetIndex, 0, draggedItem);
+        return newArr;
+      });
+    },
+    [setFormData],
+  );
 
   function toggleSection(index: number) {
     if (activeSections.includes(index)) {
-      setActiveSections((prevSections) =>
-        prevSections.filter((id) => id !== index)
+      setActiveSections((prevSections: any[]) =>
+        prevSections.filter((id) => id !== index),
       );
     } else {
-      setActiveSections((prevSections) => [...prevSections, index]);
+      setActiveSections((prevSections: any[]) => [...prevSections, index]);
     }
   }
 
@@ -83,12 +347,65 @@ const FormBuilder = () => {
     tempSection.current = section;
     setOpen(true);
   }
+
+  const handleTemplateSelect = (template: any) => {
+    const deepCloneWithNewId = (obj: any, overrides: any = {}) => ({
+      ...JSON.parse(JSON.stringify(obj)),
+      ...overrides,
+    });
+
+    if (template.sections && Array.isArray(template.sections)) {
+      const validSections = template.sections.filter(Boolean);
+      const newSections = validSections.map((sec: any) => {
+        const secId = uuidv4();
+        const newQuestions = sec.formData?.map((q: any) => {
+          const newQ = deepCloneWithNewId(q, {
+            id: uuidv4(),
+            sectionId: secId,
+          });
+          return newQ;
+        });
+
+        // Let's make sure the grid children have the correct new gridId if they are part of a grid.
+        // It's a bit complex, but for simple templates, this is a good start.
+        if (newQuestions) {
+          const idMap = new Map();
+          sec.formData.forEach((q: any, i: number) => {
+            idMap.set(q.id, newQuestions[i].id);
+          });
+          newQuestions.forEach((q: any) => {
+            if (q.gridId && idMap.has(q.gridId)) {
+              q.gridId = idMap.get(q.gridId);
+            }
+          });
+        }
+
+        return deepCloneWithNewId(sec, {
+          id: secId,
+          formData: newQuestions || [],
+        });
+      });
+
+      const isInitialBlank =
+        formData.length === 1 &&
+        formData[0].title === "" &&
+        formData[0].description === "" &&
+        (!formData[0]?.formData || formData[0]?.formData?.length === 0);
+
+      if (isInitialBlank) {
+        setFormData(newSections);
+        if (newSections.length > 0) {
+          setSelectedSection(newSections[0]?.id);
+        }
+      } else {
+        setFormData((prev: any[]) => [...prev, ...newSections]);
+      }
+    }
+  };
+
   const config = getItem("config");
   return (
-    <div
-      ref={containerRef} // Attach the ref to the container
-      className="relative flex flex-col h-full px-6 pb-5 mx-auto gap-x-4"
-    >
+    <div className="relative flex flex-col h-full pb-5 mx-auto gap-x-4 ">
       {isOpen && (
         <SectionEditorModal
           isOpen={isOpen}
@@ -96,114 +413,94 @@ const FormBuilder = () => {
           section={tempSection.current}
         />
       )}
-      <div className="relative flex flex-col flex-1 w-full py-4 gap-y-6">
-        {formData.map(
-          (
-            section: {
-              id: string | undefined;
-              title: string;
-              description?: string;
-              questionData: any;
-            },
-            index: number
-          ) => (
-            <div
-              key={section.id}
-              className={`bg-white group cursor-pointer rounded `}
-            >
-              <div
-                className={`border border-gray-100 rounded  px-4 shadow-[rgba(149,157,165,0.2)_0px_2px_4px] transition-colors duration-200
-                  ${
-                    selectedSection === section.id
-                      ? "border-dashed border-blue-400 bg-[#f7f8fa]"
-                      : ""
-                  } ${
-                  activeSections.includes(index) ? "min-h-[300px] pb-6 " : ""
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div
-                    onClick={() => setSelectedSection(section.id)}
-                    className="flex-1 h-full py-4 cursor-pointer"
-                  >
-                    <h2 className="font-medium">
-                      {section.title || "Section title"}
-                    </h2>
-                  </div>
-
-                  <div className="flex items-center gap-x-2">
-                    <button
-                      type="button"
-                      className="p-1 text-xs border rounded-lg"
-                      onClick={() => handleSectionEdit(section)}
-                    >
-                      <AppIcon icon="fluent:edit-28-regular" />
-                    </button>
-                    {formData.length > 1 && (
-                      <button
-                        type="button"
-                        className="p-1 text-xs border rounded-lg"
-                        onClick={() => removeSection(section.id)}
-                      >
-                        <AppIcon icon="lets-icons:trash-duotone-line" />
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      className="p-1 text-xs rounded-lg"
-                      onClick={() => toggleSection(index)}
-                    >
-                      <AppIcon
-                        icon={
-                          activeSections.includes(index)
-                            ? "fa6-solid:chevron-up"
-                            : "fa6-solid:chevron-down"
-                        }
-                        iconClass="text-base"
-                      />
-                    </button>
-                  </div>
-                </div>
-                {section?.description && activeSections.includes(index) && (
-                  <p className="mt-2 text-sm text-gray-600 text-gray-60">
-                    {section?.description}
-                  </p>
-                )}
-                {activeSections.includes(index) && (
-                  <div
-                    className="h-full mt-4 transition-all duration-200"
-                    id={section.id}
-                    onDragOver={onDragOver}
-                    onDragEnd={() => setIsDragging(false)}
-                    onClick={() => setSelectedSection(section.id)}
-                  >
-                    <hr className="group-last:hidden" />
-                    <div className="h-full mt-4 gap-y-6">
-                      {
-                        <ElementCanvas
-                          elementData={section.questionData}
-                          sectionId={section.id}
-                        />
-                      }
-                    </div>
-                  </div>
-                )}
-              </div>
-              {/* <hr className="mt-6 group-last:hidden" /> */}
-            </div>
-          )
-        )}
-        <div className="flex justify-center">
+      <div
+        id="section-container"
+        ref={containerRef} // Attach the ref to the container
+        className="relative flex flex-col flex-1 w-full gap-y-3 container overflow-y-auto"
+      >
+        {formData
+          ?.filter((section: any) => !section?.isFieldDeleted && !section?.isDeleted)
+          ?.map(
+            (
+              section: {
+                id: string;
+                title: string;
+                description?: string;
+                formData: any;
+                isFieldDeleted?: boolean;
+                isDeleted?: boolean;
+              },
+              index: number,
+            ) => (
+              <SectionItem
+                key={section.id}
+                section={section}
+                index={index}
+                selectedSection={selectedSection}
+                setSelectedSection={setSelectedSection}
+                activeSections={activeSections}
+                toggleSection={toggleSection}
+                handleSectionEdit={handleSectionEdit}
+                removeSection={removeSection}
+                copySection={copySection}
+                duplicateSection={duplicateSection}
+                formDataLength={
+                  formData?.filter((s: any) => !s?.isFieldDeleted && !s?.isDeleted)?.length || 0
+                }
+                onDragOver={onDragOver}
+                setIsDragging={setIsDragging}
+                isDragging={isDragging}
+                onReorderSection={handleReorderSection}
+              />
+            ),
+          )}
+        <div className="flex justify-center gap-x-4 flex-wrap gap-y-2">
           <button
             type="button"
             onClick={() => addSection()}
             style={{ color: config?.buttonColor || "#333" }}
-            className="text-sm font-medium"
+            className="text-sm font-medium hover:underline"
           >
-            + Add section{" "}
+            + Add section
           </button>
+          {hasSectionInClipboard && (
+            <button
+              type="button"
+              onClick={() => pasteSection()}
+              style={{ color: config?.buttonColor || "#333" }}
+              className="text-sm font-medium hover:underline flex items-center gap-1"
+              title="Paste section from clipboard"
+            >
+              <AppIcon icon="lucide:clipboard-paste" iconClass="text-sm" />
+              Paste section
+            </button>
+          )}
+          {onAddTemplate || allTemplates?.length ? (
+            <button
+              type="button"
+              onClick={() => {
+                if (allTemplates?.length) {
+                  setTemplateModalOpen(true);
+                } else if (onAddTemplate) {
+                  onAddTemplate();
+                }
+              }}
+              style={{ color: config?.buttonColor || "#333" }}
+              className="text-sm font-medium"
+            >
+              + Add existing template
+            </button>
+          ) : null}
         </div>
       </div>
+      {isTemplateModalOpen && (
+        <TemplateSelectorModal
+          isOpen={isTemplateModalOpen}
+          onClose={() => setTemplateModalOpen(false)}
+          templates={allTemplates}
+          onSelect={handleTemplateSelect}
+        />
+      )}
     </div>
   );
 };

@@ -1,160 +1,352 @@
-import React, { useEffect, useState } from "react";
-import AppIcon from "../ui/AppIcon";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  memo,
+  useRef,
+} from "react";
 import CurrencyInput from "react-currency-input-field";
+import AppIcon from "../ui/AppIcon";
+import { v4 as uuidv4 } from "uuid";
+import { getItem } from "@/utils/localStorageControl";
+import CustomSearchSelect from "../CustomSearchSelect";
 
-export default function CustomDataGrid({
+/* ---------------- TYPES ---------------- */
+
+export type ColumnType = "text" | "number" | "checkbox" | "select";
+
+export interface DataGridColumn<T> {
+  field: keyof T;
+  headerName?: string;
+  editable?: boolean;
+  type?: ColumnType;
+  validate?: boolean;
+  id: string;
+  optionsUrl?: string;
+  options?: { label: string; value: string }[];
+  isColumnDeleted?: boolean;
+}
+
+interface ValidationResult {
+  isValid: boolean;
+  data?: string | null;
+  error?: string | null;
+}
+
+interface CustomDataGridProps<T extends { id: string }> {
+  value?: T[];
+  onChange?: (rows: T[]) => void;
+  isReadOnly?: boolean;
+  columns: DataGridColumn<T>[];
+  url?: string;
+}
+
+/* ================= ROW COMPONENT ================= */
+
+interface RowProps<T extends { id: string }> {
+  row: T;
+  columns: DataGridColumn<T>[];
+  isReadOnly: boolean;
+  handleCellChange: (val: unknown, rowId: string, field: keyof T) => void;
+  getValidationStatus: (
+    rowId: string,
+    field: keyof T,
+  ) => {
+    isValidating: boolean;
+    result?: ValidationResult;
+  };
+  deleteRow: (rowId: string) => void;
+}
+
+function RowComponent<T extends { id: string }>({
+  row,
+  columns,
+  isReadOnly,
+  handleCellChange,
+  getValidationStatus,
+  deleteRow,
+}: RowProps<T>) {
+  return (
+    <tr>
+      {columns.map((col) => {
+        const value = row[col.field];
+        const editable = col.editable && !isReadOnly;
+        const { isValidating, result } = getValidationStatus(row.id, col.field);
+
+        let validationClass = "border-gray-300";
+        if (col.validate) {
+          if (result?.isValid === false)
+            validationClass = "border-red-500 bg-red-50";
+          else if (result?.isValid === true)
+            validationClass = "border-green-500 bg-green-50";
+        }
+
+        const inputClassName = `w-full py-1 rounded outline-none ${validationClass}`;
+
+        return (
+          <td
+            key={String(col.id)}
+            className="px-3 py-1 border-b border-r last:border-r-0"
+          >
+            {editable ? (
+              <div className="relative">
+                {col.type === "number" ? (
+                  <CurrencyInput
+                    value={value as string | number | undefined}
+                    decimalsLimit={6}
+                    allowNegativeValue={false}
+                    className={inputClassName}
+                    onValueChange={(val) =>
+                      handleCellChange(val, row.id, col.field)
+                    }
+                  />
+                ) : col.type === "checkbox" ? (
+                  <div className="flex items-center gap-x-4">
+                    {(["yes", "no"] as const).map((option) => {
+                      const isYes = option === "yes";
+                      const radioId = `radio-${row.id}-${String(col.field)}-${option}`;
+                      return (
+                        <label
+                          key={option}
+                          htmlFor={radioId}
+                          className="flex items-center gap-1 cursor-pointer"
+                        >
+                          <input
+                            id={radioId}
+                            type="radio"
+                            name={`boolean-${row.id}-${String(col.field)}`}
+                            checked={value === isYes}
+                            onChange={() =>
+                              handleCellChange(isYes, row.id, col.field)
+                            }
+                          />
+                          <span className="text-sm">
+                            {isYes ? "Yes" : "No"}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                ) : col.type === "select" ? (
+                  <CustomSearchSelect
+                    name={String(col.field)}
+                    options={col.options || []}
+                    apiUrl={col.optionsUrl}
+                    value={value as string}
+                    onGetValue={(_name, option) =>
+                      handleCellChange(option?.value || "", row.id, col.field)
+                    }
+                    customClass="!border-none !p-0"
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={String(value ?? "")}
+                    onChange={(e) =>
+                      handleCellChange(e.target.value, row.id, col.field)
+                    }
+                    className={inputClassName}
+                  />
+                )}
+
+                {isValidating && (
+                  <div className="absolute right-1 top-1">
+                    <div className="w-4 h-4 border-2 border-blue-500 rounded-full border-t-transparent animate-spin" />
+                  </div>
+                )}
+              </div>
+            ) : col.validate && result ? (
+              <div className="flex items-center gap-2">
+                <span>
+                  {String(value ?? "")} {result.data && `[${result.data}]`}
+                </span>
+                {result.isValid ? (
+                  <span className="text-xs text-green-600">✓</span>
+                ) : (
+                  <span
+                    className="text-xs text-red-600 cursor-help"
+                    title={result.error ?? ""}
+                  >
+                    ✗
+                  </span>
+                )}
+              </div>
+            ) : col.type === "select" ? (
+              <CustomSearchSelect
+                name={String(col.field)}
+                options={col.options || []}
+                apiUrl={col.optionsUrl}
+                value={value as string}
+                onGetValue={() => {}}
+                readOnly={true}
+                customClass="!border-none !bg-transparent !p-0 !text-gray-700 pointer-events-none"
+              />
+            ) : col.type === "checkbox" ? (
+              <span className="block py-1 text-gray-700">
+                {value === true ? "Yes" : value === false ? "No" : ""}
+              </span>
+            ) : (
+              <span className="block py-1 text-gray-700">
+                {String(value ?? "")}
+              </span>
+            )}
+          </td>
+        );
+      })}
+
+      {!isReadOnly && (
+        <td className="px-3 py-1 text-center border sticky right-0 bg-gray-50 z-10">
+          <button
+            type="button"
+            onClick={() => deleteRow(row.id)}
+            className="text-red-500 hover:text-red-700"
+            aria-label="Delete row"
+          >
+            <AppIcon icon="lets-icons:trash-duotone" iconClass="text-xl" />
+          </button>
+        </td>
+      )}
+    </tr>
+  );
+}
+
+const MemoRow = memo(RowComponent) as typeof RowComponent;
+
+/* ================= MAIN COMPONENT ================= */
+
+export default function CustomDataGrid<T extends { id: string }>({
   value = [],
   onChange,
-  isReadOnly,
-  columns = [],
-}) {
-  const [rows, setRows] = useState(value);
-  const [editingCell, setEditingCell] = useState(null); // { rowIndex, field }
+  isReadOnly = false,
+  columns,
+}: CustomDataGridProps<T>) {
+  const [rows, setRows] = useState<T[]>(value);
+  const config = getItem("config");
 
-  // Keep local rows in sync with value prop
+  const rowsRef = useRef<T[]>(rows);
+  rowsRef.current = rows;
+
+  const visibleColumns = useMemo(
+    () =>
+      columns?.filter(
+        (col: any) =>
+          !col?.isColumnDeleted &&
+          !col?.iscolumnDeleted &&
+          !col?.isFieldDeleted,
+      ) || [],
+    [columns],
+  );
+
+  /* ---- Sync external value changes ---- */
   useEffect(() => {
-    setRows(value);
-  }, []);
+    setRows((prev) => {
+      if (JSON.stringify(prev) !== JSON.stringify(value)) return value;
+      return prev;
+    });
+  }, [value]);
 
-  const handleCellChange = (val, rowIndex, field) => {
-    const updated = rows.map((row, i) => (i === rowIndex ? { ...row, [field]: val } : row));
-    setRows(updated);
+  const handleCellChange = useCallback(
+    (val: unknown, rowId: string, field: keyof T) => {
+      const next = rowsRef.current.map((row) =>
+        row.id === rowId ? { ...row, [field]: val } : row,
+      ) as T[];
+      setRows(next);
+      onChange?.(next);
+    },
+    [onChange],
+  );
 
-    if (onChange) onChange(updated);
-  };
+  const addRow = useCallback(() => {
+    const id = uuidv4();
+    const newRow = visibleColumns.reduce((acc, col) => {
+      (acc as any)[col.field] = col.field === "id" ? id : "";
+      return acc;
+    }, {} as T);
+    const next = [...rowsRef.current, { id, ...newRow }];
+    setRows(next);
+    onChange?.(next);
+  }, [visibleColumns, onChange]);
 
-  const addRow = () => {
-    const newId =
-      rows.length > 0
-        ? Math.max(...rows.map((row) => Number(row.id) || 0)) + 1
-        : 1;
+  const deleteRow = useCallback(
+    (rowId: string) => {
+      const next = rowsRef.current.filter((r) => r.id !== rowId);
+      setRows(next);
+      onChange?.(next);
+    },
+    [onChange],
+  );
 
-    const newRow = columns.reduce(
-      (acc, col) => ({
-        ...acc,
-        [col.field]: col.field === 'id' ? newId : '',
-      }),
-      {},
-    );
-    const updated = [...rows, newRow];
-    setRows(updated);
-    if (onChange) onChange(updated);
-  };
-
-  const deleteRow = (index) => {
-    const updated = rows.filter((_, i) => i !== index);
-    setRows(updated);
-    if (onChange) onChange(updated);
-  };
-
-  const isEditing = (rowIndex, field) => editingCell?.rowIndex === rowIndex && editingCell?.field === field;
+  const getValidationStatus = useCallback(
+    () => ({
+      isValidating: false,
+      result: undefined as ValidationResult | undefined,
+    }),
+    [],
+  );
 
   return (
-    <div className="mt-4 rounded">
-      <div className="flex justify-end">
-        {columns?.length > 0 && !isReadOnly && (
+    <div className="mt-3 rounded">
+      <div className="w-full max-w-full overflow-x-auto border rounded-lg">
+        <table className="min-w-max w-full text-sm border-collapse table-auto">
+          <thead>
+            <tr className="bg-gray-100">
+              {visibleColumns.map((col, idx) => (
+                <th
+                  key={`${String(col.id)}-${idx}`}
+                  className="px-3 py-2 text-xs font-semibold text-left text-gray-600 border-b whitespace-nowrap"
+                >
+                  {col.headerName ?? String(col.field)}
+                  {col.validate && (
+                    <span className="ml-1 text-blue-600">*</span>
+                  )}
+                </th>
+              ))}
+              {!isReadOnly && (
+                <th className="w-10 px-2 py-2 border sticky right-0 bg-gray-100 z-10" />
+              )}
+            </tr>
+          </thead>
+
+          <tbody>
+            {rows.length > 0 ? (
+              rows.map((row) => (
+                <MemoRow
+                  key={row.id}
+                  row={row}
+                  columns={visibleColumns}
+                  isReadOnly={isReadOnly}
+                  handleCellChange={handleCellChange}
+                  getValidationStatus={getValidationStatus}
+                  deleteRow={deleteRow}
+                />
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan={visibleColumns.length + (isReadOnly ? 0 : 1)}
+                  className="p-2 text-xs text-center text-gray-400"
+                >
+                  No data available
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {!isReadOnly && (
+        <div className="flex justify-center mt-2">
           <button
             onClick={addRow}
             type="button"
-            className="px-2 py-1 mb-3 text-xs text-white bg-gray-600 rounded hover:bg-gray-700"
+            style={{ color: config?.buttonColor || "#333" }}
+            className="px-2 py-1 mb-3 text-xs text-gray-600 font-medium"
           >
-            Add Row
+            + Add Row
           </button>
-        )}
-      </div>
-
-      <table className="w-full text-sm border-collapse rounded table-auto bg-gray-50">
-        <thead>
-          <tr className="bg-gray-100">
-            {columns.map((col) => (
-              <th
-                key={col.field}
-                className="px-3 py-2 text-xs font-semibold text-left text-gray-600 border"
-              >
-                {col.headerName || col.field}
-              </th>
-            ))}
-            {!isReadOnly && <th className="w-10 px-2 py-2 border"></th>}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.length > 0 ? (
-            rows.map((row, rowIndex) => (
-              <tr key={row.id ?? rowIndex}>
-                {columns.map((col) => (
-                  <td
-                    key={col.field}
-                    className="px-2 py-1 border"
-                    onDoubleClick={() => col.editable &&
-                      !isReadOnly &&
-                      setEditingCell({ rowIndex, field: col.field })
-                    }
-                  >
-                    {col.editable &&
-                    isEditing(rowIndex, col.field) &&
-                    !isReadOnly ? (
-                      <>
-                        {col.type === 'number' ? (
-                          <CurrencyInput
-                            value={row[col.field] ?? ''}
-                            onValueChange={(val) => handleCellChange(val, rowIndex, col.field)
-                            }
-                            decimalsLimit={6}
-                            allowNegativeValue={false}
-                            placeholder=""
-                            className="w-full px-2 py-1 border rounded outline-none"
-                          />
-                        ) : (
-                          <input
-                            autoFocus
-                            type="text"
-                            value={row[col.field] ?? ''}
-                            onChange={(e) => handleCellChange(
-                                e.target.value,
-                                rowIndex,
-                                col.field,
-                              )
-                            }
-                            onBlur={() => setEditingCell(null)}
-                            className="w-full px-2 py-1 text-gray-600 border rounded outline-none"
-                          />
-                        )}
-                      </>
-                    ) : (
-                      <span className="block py-1 text-gray-700 cursor-pointer">
-                        {row[col.field]}
-                      </span>
-                    )}
-                  </td>
-                ))}
-                {!isReadOnly && (
-                  <td className="px-2 py-1 text-center border">
-                    <button
-                      onClick={() => deleteRow(rowIndex)}
-                      className="text-red-500 hover:text-red-700"
-                      aria-label="Delete row"
-                    >
-                       <AppIcon
-                          icon="lets-icons:trash-duotone"
-                          iconClass="text-xl"
-                        />
-                    </button>
-                  </td>
-                )}
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td
-                colSpan={columns.length + (isReadOnly ? 0 : 1)}
-                className="p-2 text-xs text-center text-gray-400"
-              >
-                No data available
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+        </div>
+      )}
     </div>
   );
 }

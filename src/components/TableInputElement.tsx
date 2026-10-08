@@ -43,7 +43,7 @@ export default function TableInputElement({
 
   useEffect(() => {
     if (denominators?.length) {
-      const tempValues = denominators.map((i, index) => ({
+      const tempValues = denominators?.map((i, index) => ({
         key: i.value,
         value:
           Array.isArray(defaultValue) && defaultValue[index]
@@ -68,7 +68,7 @@ export default function TableInputElement({
             <span>Sub total</span>
           </div>
         </div>
-        {values.map((item, index) => (
+        {values?.map((item, index) => (
           <div
             key={index + "index"}
             className="grid grid-cols-3 text-sm border-b border-gray-100"

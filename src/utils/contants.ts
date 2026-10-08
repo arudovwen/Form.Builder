@@ -1,4 +1,5 @@
 import countries from "../data/countries.json";
+import { v4 as uuidv4 } from "uuid";
 
 /* ---------------------------------- */
 /* Enums & Types */
@@ -11,10 +12,12 @@ export enum ElementKind {
   SELECT = "selectField",
   CASCADE_SELECT = "cascadeSelect",
   MULTI_SELECT = "multiSelect",
-  VALIDATE_INPUT = "validateInput",
+  DATA_LOOKUP = "dataLookup",
   NUMBER = "numberField",
   AMOUNT = "amountField",
   DATE = "date",
+  TIME = "time",
+  URL = "url",
   PASSWORD = "password",
   CHECKBOX = "checkbox",
   PHONE = "phoneField",
@@ -29,13 +32,25 @@ export enum ElementKind {
   SPACER = "spacer",
   SECTION = "section",
   GRID = "grid",
+  MATRIX = "matrix",
+  CALCULATED_FIELD = "calculatedField",
+  POLLING = "polling",
+  NPS = "nps",
+  RANKING = "ranking",
+  IMAGE_CHOICE = "imageChoice",
 }
+
+export type FormType = "default" | "poll";
 
 export interface DataColumnType {
   field: string;
   headerName: string;
   width?: number;
   editable?: boolean;
+  type?: string;
+  validate?: boolean;
+  id: string;
+  isColumnDeleted?: boolean;
 }
 
 export interface OptionType {
@@ -43,6 +58,7 @@ export interface OptionType {
   value: any;
   id: string;
   key?: string;
+  filterValue?: string;
 }
 
 export interface ElementType {
@@ -73,6 +89,7 @@ export interface ElementType {
   maxAmountMessage?: string;
 
   options?: OptionType[];
+  options1?: OptionType[];
   options2?: OptionType[];
 
   columns?: number;
@@ -89,6 +106,7 @@ export interface ElementType {
   maxDate?: string | null;
   canHaveDateRange?: boolean;
   allowYearPicker?: boolean;
+  is24Hour?: boolean;
 
   url?: string;
   method?: string;
@@ -102,6 +120,26 @@ export interface ElementType {
   isHidden: boolean;
   visibilityDependentFields?: string;
   visibilityDependentFieldsValue?: any;
+
+  filterByFieldId?: string;
+  clearOnFilterChange?: boolean;
+  filterBehavior?: "hide" | "disable";
+
+  minChecked?: number | null;
+  allowCheckAll?: boolean;
+  requireAllChecked?: boolean;
+  selectionType?: string;
+
+  isMultiple: boolean;
+  acceptedFiles: any[];
+  maxFileSize?: number;
+
+  showState?: boolean;
+  formula?: string;
+  fetchExternalResults?: boolean;
+  externalApiUrl?: string;
+  minLabel?: string;
+  maxLabel?: string;
 }
 
 /* ---------------------------------- */
@@ -121,6 +159,8 @@ const baseElement = {
   gridId: null,
   isHidden: false,
   visibilityDependentFields: [],
+  filterByFieldId: "",
+  clearOnFilterChange: true,
 };
 
 const textDefaults = {
@@ -140,20 +180,20 @@ const textDefaults = {
 const option = (label: string, value = label): OptionType => ({
   label,
   value,
-  id: value,
+  id: uuidv4(),
 });
 
 const createElement = (config: Partial<ElementType>): ElementType =>
   ({
     ...textDefaults,
     ...config,
-  } as ElementType);
+  }) as ElementType;
 
 /* ---------------------------------- */
 /* Static Options */
 /* ---------------------------------- */
 
-export const countryOptions: OptionType[] = countries.map((c: any) => ({
+export const countryOptions: OptionType[] = countries?.map((c: any) => ({
   label: c.name,
   value: c.name,
   id: c.code || c.name,
@@ -167,14 +207,14 @@ export const Elements: ElementType[] = [
   createElement({
     type: ElementKind.BASIC_TEXT,
     label: "Basic Text",
-    icon: "fluent:text-16-filled",
+    icon: "majesticons:text",
     inputLabel: "",
     inputType: "basicText",
   }),
 
   createElement({
     type: ElementKind.TEXT,
-    label: "Text Field",
+    label: "Text Input",
     icon: "fluent:text-16-filled",
     inputLabel: "Text Label",
     inputType: "text",
@@ -182,7 +222,7 @@ export const Elements: ElementType[] = [
 
   createElement({
     type: ElementKind.LONG_TEXT,
-    label: "Long Text Field",
+    label: "Long Text",
     icon: "dashicons:text",
     inputLabel: "Long Text Label",
     inputType: "text",
@@ -190,40 +230,42 @@ export const Elements: ElementType[] = [
 
   createElement({
     type: ElementKind.SELECT,
-    label: "Select List",
+    label: "List",
     icon: "tabler:select",
     inputLabel: "Select Text Label",
     inputType: "select",
     selectType: "list",
-    options: [option("Placeholder 1", "")],
+    options: [option("Placeholder 1", "placeholder_1")],
   }),
 
-  createElement({
-    type: ElementKind.CASCADE_SELECT,
-    label: "Cascade Select",
-    icon: "tabler:select",
-    inputLabel: "Select Text Label",
-    inputType: "select",
-    options: [option("Parent", "")],
-    options2: [option("Child", "")],
-  }),
+  // createElement({
+  //   type: ElementKind.CASCADE_SELECT,
+  //   label: "Cascade Select",
+  //   icon: "tabler:select",
+  //   inputLabel: "Select Text Label",
+  //   inputType: "select",
+  //   options: [option("Parent", "")],
+  //   options2: [option("Child", "")],
+  // }),
 
   createElement({
     type: ElementKind.MULTI_SELECT,
-    label: "Multi Select",
+    label: "Multi List",
     icon: "fluent-mdl2:multi-select",
     inputLabel: "Select Text Label",
     inputType: "select",
-    options: [option("Placeholder 1", "")],
+    minChecked: 1,
+    requireAllChecked: false,
+    options: [option("Placeholder 1", "placeholder_1")],
   }),
 
   createElement({
-    type: ElementKind.VALIDATE_INPUT,
-    label: "Validate Input",
+    type: ElementKind.DATA_LOOKUP,
+    label: "Data Lookup",
     icon: "iconoir:www",
-    inputLabel: "Validate Input Label",
-    inputType: "validateInput",
-    url: "https://api.example.com/validate?value={value}",
+    inputLabel: "Data Lookup Label",
+    inputType: "dataLookup",
+    url: "",
     method: "GET",
     responseType: "string",
   }),
@@ -245,7 +287,6 @@ export const Elements: ElementType[] = [
     inputType: "amount",
     prefix: null,
   }),
-
   createElement({
     type: ElementKind.DATE,
     label: "Date",
@@ -258,6 +299,23 @@ export const Elements: ElementType[] = [
     maxDate: null,
     canHaveDateRange: false,
     allowYearPicker: false,
+  }),
+
+  createElement({
+    type: ElementKind.TIME,
+    label: "Time",
+    icon: "mdi:clock-outline",
+    inputLabel: "Time Label",
+    inputType: "time",
+    is24Hour: false,
+  }),
+
+  createElement({
+    type: ElementKind.URL,
+    label: "Link",
+    icon: "iconamoon:link",
+    inputLabel: "Url Link",
+    inputType: "url",
   }),
 
   createElement({
@@ -274,12 +332,15 @@ export const Elements: ElementType[] = [
     icon: "mingcute:checkbox-line",
     inputLabel: "Checkbox Label",
     inputType: "checkbox",
-    options: [option("Checkbox Option", "")],
+    minChecked: 1,
+    requireAllChecked: false,
+    selectionType: "multiple",
+    options: [option("Checkbox Option", "option")],
   }),
 
   createElement({
     type: ElementKind.PHONE,
-    label: "Phone Number",
+    label: "Phone",
     icon: "fluent-mdl2:add-phone",
     inputLabel: "Phone Label",
     inputType: "tel",
@@ -288,7 +349,7 @@ export const Elements: ElementType[] = [
 
   createElement({
     type: ElementKind.RADIO,
-    label: "Radio Select",
+    label: "Radio",
     icon: "ri:checkbox-circle-line",
     inputLabel: "Radio Label",
     inputType: "radio",
@@ -305,10 +366,13 @@ export const Elements: ElementType[] = [
 
   createElement({
     type: ElementKind.FILE,
-    label: "File Attachment",
+    label: "File",
     icon: "ion:attach-sharp",
     inputLabel: "File Label",
     inputType: "file",
+    isMultiple: false,
+    acceptedFiles: [],
+    maxFileSize: 5,
   }),
 
   createElement({
@@ -318,6 +382,7 @@ export const Elements: ElementType[] = [
     inputLabel: "Select Country",
     inputType: "country",
     options: countryOptions,
+    showState: false,
   }),
 
   createElement({
@@ -330,29 +395,32 @@ export const Elements: ElementType[] = [
 
   createElement({
     type: ElementKind.DATA_GRID,
-    label: "Data Grid",
+    label: "Table",
     icon: "carbon:data-table",
-    inputLabel: "Data Grid Label",
+    inputLabel: "Table Label",
     inputType: "dataGrid",
     value: [],
     dataColumns: [
       {
-        field: "firstName",
-        headerName: "First Name",
+        id: uuidv4(),
+        field: "",
+        headerName: "",
         width: 150,
         editable: true,
+        type: "text",
+        validate: false,
       },
     ],
   }),
 
-  createElement({
-    type: ElementKind.TABLE_INPUT,
-    label: "Table Input",
-    icon: "iconoir:table",
-    inputLabel: "Table Input Label",
-    inputType: "tableInput",
-    value: [],
-  }),
+  // createElement({
+  //   type: ElementKind.TABLE_INPUT,
+  //   label: "Table Input",
+  //   icon: "iconoir:table",
+  //   inputLabel: "Table Input Label",
+  //   inputType: "tableInput",
+  //   value: [],
+  // }),
 
   createElement({
     type: ElementKind.DIVIDER,
@@ -370,13 +438,13 @@ export const Elements: ElementType[] = [
     inputType: "spacer",
   }),
 
-  createElement({
-    type: ElementKind.SECTION,
-    label: "Section",
-    icon: "stash:section-divider",
-    inputLabel: "",
-    inputType: "section",
-  }),
+  // createElement({
+  //   type: ElementKind.SECTION,
+  //   label: "Section",
+  //   icon: "stash:section-divider",
+  //   inputLabel: "",
+  //   inputType: "section",
+  // }),
 
   createElement({
     type: ElementKind.GRID,
@@ -385,6 +453,70 @@ export const Elements: ElementType[] = [
     inputLabel: "",
     inputType: "grid",
     columns: 2,
+  }),
+
+  createElement({
+    type: ElementKind.MATRIX,
+    label: "Likert Scale",
+    icon: "pepicons-pop:list",
+    inputLabel: "Matrix Label",
+    inputType: "matrix",
+    options: [{ id: "r1", label: "Example Row", value: "row_1" }],
+    options1: [
+      { id: "c1", label: "Strongly Disagree", value: "strongly_disagree" },
+      { id: "c2", label: "Disagree", value: "disagree" },
+      { id: "c3", label: "Neutral", value: "neutral" },
+      { id: "c4", label: "Agree", value: "agree" },
+      { id: "c5", label: "Strongly Agree", value: "strongly_agree" },
+    ],
+  }),
+
+  createElement({
+    type: ElementKind.CALCULATED_FIELD,
+    label: "Calculated Field",
+    icon: "material-symbols:functions",
+    inputLabel: "Calculated Label",
+    inputType: "calculatedField",
+    formula: "",
+  }),
+
+  createElement({
+    type: ElementKind.POLLING,
+    label: "Polling",
+    icon: "mdi:poll",
+    inputLabel: "Poll Label",
+    inputType: "polling",
+    options: [option("Option 1", "option_1"), option("Option 2", "option_2")],
+    fetchExternalResults: false,
+    externalApiUrl: "",
+  }),
+
+  createElement({
+    type: ElementKind.NPS,
+    label: "NPS Score (0-10)",
+    icon: "tabler:hash",
+    inputLabel: "NPS Label",
+    inputType: "nps",
+    minLabel: "Not at all likely",
+    maxLabel: "Extremely likely",
+  }),
+
+  createElement({
+    type: ElementKind.RANKING,
+    label: "Ranking Poll",
+    icon: "fluent:re-order-16-regular",
+    inputLabel: "Ranking Label",
+    inputType: "ranking",
+    options: [option("Option 1", "option_1"), option("Option 2", "option_2")],
+  }),
+
+  createElement({
+    type: ElementKind.IMAGE_CHOICE,
+    label: "Image Choice",
+    icon: "ic:outline-image",
+    inputLabel: "Image Choice Label",
+    inputType: "imageChoice",
+    options: [option("Image 1", "image_1"), option("Image 2", "image_2")],
   }),
 ];
 
@@ -402,7 +534,8 @@ export const CategorizedElements = Object.freeze({
     ElementKind.PASSWORD,
     ElementKind.PHONE,
     ElementKind.EMAIL,
-    ElementKind.VALIDATE_INPUT,
+    ElementKind.DATA_LOOKUP,
+    ElementKind.URL,
   ],
   selectionFields: [
     ElementKind.SELECT,
@@ -412,8 +545,9 @@ export const CategorizedElements = Object.freeze({
     ElementKind.CHECKBOX,
     ElementKind.COUNTRY,
     ElementKind.RATING,
+    ElementKind.MATRIX,
   ],
-  dateAndTime: [ElementKind.DATE],
+  dateAndTime: [ElementKind.DATE, ElementKind.TIME],
   fileAndMedia: [ElementKind.FILE],
   layoutAndDisplay: [
     ElementKind.DIVIDER,
@@ -421,14 +555,40 @@ export const CategorizedElements = Object.freeze({
     ElementKind.GRID,
     ElementKind.SECTION,
   ],
-  advancedData: [ElementKind.DATA_GRID, ElementKind.TABLE_INPUT],
+  advancedData: [
+    ElementKind.DATA_GRID,
+    ElementKind.TABLE_INPUT,
+    ElementKind.CALCULATED_FIELD,
+  ],
+});
+
+export const CategorizedPollElements = Object.freeze({
+  pollComponents: [
+    ElementKind.TEXT,
+    ElementKind.PHONE,
+    ElementKind.EMAIL,
+    ElementKind.RADIO,          // Single Choice
+    ElementKind.CHECKBOX,       // Multiple Choice
+    ElementKind.RATING,         // Rating Scale
+    ElementKind.SELECT,         // Dropdown Poll
+    ElementKind.POLLING,        // Yes / No Poll
+    ElementKind.NPS,            // NPS Score
+    ElementKind.RANKING,        // Ranking Poll
+    ElementKind.MATRIX,         // Matrix Grid
+    ElementKind.IMAGE_CHOICE,   // Image Choice
+
+  ],
+  layoutAndInfo: [
+    ElementKind.BASIC_TEXT,     // Info Block (Assuming BASIC_TEXT is used as Info)
+    ElementKind.DIVIDER,        // Divider
+  ],
 });
 
 /* ---------------------------------- */
 /* Date Formats */
 /* ---------------------------------- */
 
-export const dateFormats = Object.freeze([
+export const dateFormats = [
   { label: "Day/Month/Year", value: "dd/MM/yyyy" },
   { label: "Month/Day/Year", value: "MM/dd/yyyy" },
   { label: "ISO (Year-Month-Day)", value: "yyyy-MM-dd" },
@@ -439,7 +599,7 @@ export const dateFormats = Object.freeze([
   { label: "Weekday, Month Day, Year", value: "EEEE, MMMM d, yyyy" },
   { label: "Short Weekday, Month Day, Year", value: "EEE, MMM d, yyyy" },
   { label: "Day-Month-Year", value: "dd-MM-yyyy" },
-]);
+];
 
 export const AllowValidationPrefix: string[] = ["amount"];
 export const AllowValidationMaxMin: string[] = ["text", "number"];
@@ -448,6 +608,7 @@ export const AllowValidationPlaceholder: string[] = [
   "number",
   "amount",
   "date",
+  "time",
   "password",
 ];
 export const AllowValidationAmount: string[] = ["amount"];
@@ -463,9 +624,68 @@ export const AllowOptions: string[] = [
   "select",
   "checkbox",
   "multiselect",
+  "matrix",
+  "polling",
+  "ranking",
+  "imageChoice",
 ];
-export const AllowApiOptions: string[] = ["validateInput"];
+export const AllowApiOptions: string[] = ["dataLookup"];
 export const AllowTableOptions: string[] = ["tableInput"];
 export const AllowTextOptions: string[] = ["text"];
 export const noAllowEdit: string[] = ["divider", "spacer"];
 export const allowValue: string[] = ["basicText"];
+export const AllowValueSource: string[] = [
+  "text",
+  "basicText",
+  "number",
+  "amount",
+  "url",
+  "password",
+  "tel",
+  "email",
+  "dataLookup",
+];
+
+export const FileTypes = [
+  {
+    value: [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "image/svg+xml",
+      "image/heic",
+    ].join(", "),
+    label: "Image",
+  },
+  {
+    value: "application/pdf",
+    label: "PDF",
+  },
+  {
+    value: [
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+    ].join(", "),
+    label: "Word",
+  },
+  {
+    value: [
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ].join(", "),
+    label: "Spreadsheet",
+  },
+  {
+    value: [
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ].join(", "),
+    label: "PowerPoint",
+  },
+  {
+    value: ["video/mp4", "video/x-m4v", "video/*"].join(", "),
+    label: "Videos",
+  },
+];

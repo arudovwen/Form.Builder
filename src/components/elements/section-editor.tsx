@@ -12,13 +12,16 @@ const schema = yup
   .object({
     title: yup.string(),
     description: yup.string(),
+    disabled: yup.boolean().default(false),
+    isHidden: yup.boolean().default(false),
+    sendEmptyWhenHidden: yup.boolean().default(false),
   })
 
   .required();
 
 type FormInputs = yup.InferType<typeof schema>;
 
- const config = getItem("config");
+const config = getItem("config");
 const SectionEditorModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -29,6 +32,7 @@ const SectionEditorModal: React.FC<{
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting, isValid },
     reset,
   } = useForm<FormInputs>({
@@ -48,6 +52,8 @@ const SectionEditorModal: React.FC<{
     updateSection(value, section.id);
     onClose();
   };
+  const values = watch();
+
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[999] cursor-default no-drag select-none">
       <div className="min-w-[600px] bg-white rounded-xl shadow-xl relative flex flex-col items-center">
@@ -65,13 +71,18 @@ const SectionEditorModal: React.FC<{
         </div>
 
         {/* Form Content */}
-        <form onSubmit={handleSubmit(onSubmit)} className="w-full">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="w-full"
+          autoComplete="off"
+        >
           <div className="w-full px-6 flex flex-col gap-5 z-10">
             <DynamicInput
               label="Title"
               name="title"
               register={register}
               errors={errors}
+              watch={watch}
             />
 
             <DynamicInput
@@ -79,6 +90,38 @@ const SectionEditorModal: React.FC<{
               name="description"
               register={register}
               errors={errors}
+              watch={watch}
+              type="textarea"
+            />
+            <DynamicInput
+              label="Disable Section"
+              name="disabled"
+              register={register}
+              errors={errors}
+              watch={watch}
+              type="checkbox"
+              value={values.disabled}
+              description="Disables all fields in this section"
+            />
+            <DynamicInput
+              label="Hide Section"
+              name="isHidden"
+              register={register}
+              errors={errors}
+              watch={watch}
+              type="checkbox"
+              value={values.isHidden}
+              description="Hides this section from the form"
+            />
+            <DynamicInput
+              label="Send Empty When Hidden"
+              name="sendEmptyWhenHidden"
+              register={register}
+              errors={errors}
+              watch={watch}
+              type="checkbox"
+              value={values.sendEmptyWhenHidden}
+              description="Submits empty values for this section's fields when hidden"
             />
           </div>
 
@@ -93,12 +136,12 @@ const SectionEditorModal: React.FC<{
             <button
               type="submit"
               disabled={!isValid || isSubmitting}
-               style={{ background: config?.buttonColor || "#333" }}
+              style={{ background: config?.buttonColor || "#333" }}
               className={`flex-1 px-4 py-2.5 ${
                 !isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#2563EB]"
               } ${
                 !isValid || isSubmitting ? "text-[#98A2B3]" : "text-white"
-              } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-50`}
+              } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-80`}
             >
               {isSubmitting ? "Saving..." : "Save"}
             </button>

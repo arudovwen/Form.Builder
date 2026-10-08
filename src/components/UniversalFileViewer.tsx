@@ -14,6 +14,7 @@ const IMAGE_EXTENSIONS = [
 
 const getFileType = (url = "") => {
   const ext = url.split(".").pop()?.toLowerCase() || "";
+
   if (IMAGE_EXTENSIONS.includes(ext) || url.startsWith("data:image/"))
     return "image";
   if (ext === "pdf" || url.startsWith("data:application/pdf")) return "pdf";
@@ -28,7 +29,12 @@ const FileIcon: Record<string, string> = {
   excel: "vscode-icons:file-type-excel",
   powerpoint: "vscode-icons:file-type-powerpoint2",
 };
-export default function UniversalFileViewer({ fileUrl, fileName }) {
+export default function UniversalFileViewer({
+  fileUrl,
+  fileName,
+  removeFile,
+}: any) {
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fileType, setFileType] = useState("unknown");
   const [blobUrl, setBlobUrl] = useState(null);
@@ -68,7 +74,6 @@ export default function UniversalFileViewer({ fileUrl, fileName }) {
 
   const closeModal = () => setIsModalOpen(false);
 
-
   const fileLabel = fileName || fileUrl?.split("/").pop() || "Unknown file";
   function downloadFile(fileUrl, fileName = "download") {
     if (!fileUrl) return;
@@ -94,35 +99,45 @@ export default function UniversalFileViewer({ fileUrl, fileName }) {
   }
 
   return (
-    <div className="mt-2 field-control !py-1 !bg-gray-50 !flex justify-between gap-x-8 items-center">
+    <div className="mt-2 field-control !py-1 !bg-gray-50 !flex justify-between gap-x-4 items-center w-full min-w-0 max-w-full overflow-hidden">
       <div
         onClick={handleFileClick}
-        className="!flex items-center rounded cursor-pointer   gap-x-3"
+        className="!flex items-center rounded cursor-pointer gap-x-3 min-w-0 flex-1 overflow-hidden"
         title={`Click to preview ${fileLabel}`}
       >
         {fileType === "image" && (
-          <div className="flex items-center justify-center ">
-            <AppIcon
-             iconClass="text-4xl"
-              icon="fluent-color:image-48"
-            />
+          <div className="flex items-center justify-center shrink-0">
+            <AppIcon iconClass="text-4xl" icon="fluent-color:image-48" />
           </div>
         )}
         {fileType !== "image" && (
-          <AppIcon icon={FileIcon[fileType]} iconClass="text-4xl" />
+          <div className="shrink-0 flex items-center justify-center">
+            <AppIcon icon={FileIcon[fileType]} iconClass="text-4xl" />
+          </div>
         )}
-        <span className="text-sm font-semibold text-center text-gray-700 truncate">
+        <span className="text-sm font-semibold text-gray-700 truncate min-w-0 flex-1 block">
           {fileLabel}
         </span>
       </div>
-      <button
-        type="button"
-        className="p-2"
-        onClick={() => downloadFile(blobUrl || fileUrl, fileName)}
+      <div className="flex gap-x-1 items-center shrink-0">
+        <button
+          type="button"
+          className="p-2"
+          onClick={() => downloadFile(blobUrl || fileUrl, fileName)}
           title={`Download ${fileLabel}`}
-      >
-        <AppIcon icon="streamline-flex:download-tray-solid" />
-      </button>
+        >
+          <AppIcon icon="streamline-flex:download-tray-solid" />
+        </button>
+        {removeFile && (
+          <button
+            type="button"
+            className="p-2 text-lg text-red-500"
+            onClick={removeFile}
+          >
+            <AppIcon icon="lets-icons:trash-duotone" />
+          </button>
+        )}
+      </div>
       {isModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
@@ -145,6 +160,7 @@ export default function UniversalFileViewer({ fileUrl, fileName }) {
                 src={fileUrl}
                 alt={fileLabel}
                 className="max-w-full max-h-[80vh] mx-auto object-contain"
+                crossOrigin="anonymous"
               />
             ) : fileType === "pdf" ? (
               <iframe

@@ -1,63 +1,81 @@
 import React, { useContext, useMemo } from "react";
-import { elementMap } from "../editor/element-render";
+import { elementMap } from "../elements/element-map";
 import EditorContext from "@/context/editor-context";
 
-export const RenderElement = (element: any, validationData?: any) => {
+import { evaluateVisibility } from "./validation";
+import { PollResultsBreakdown } from "./poll-results";
+
+export const RenderElement = ({ element, validationData }: { element: any; validationData?: any }) => {
   const ElementComponent = elementMap[element.type];
   const { answerData }: any = useContext(EditorContext);
-
-  const fields = useMemo(
-    () => element?.visibilityDependentFields || [],
-    [element]
+  const acceptedFileLabels = useMemo(
+    () =>
+      element?.acceptedFiles?.map((i: { label: any }) => i.label).join(", "),
+    [element],
   );
 
   // Compute visibility based on dependent fields
   const isVisible = useMemo(() => {
-    if (!fields.length) return true; // No dependencies, always visible
-
-    return fields.every((field) => {
-      const value = answerData?.[field.id];
-      const valA = field.fieldValue;
-      const valB = value;
-
- 
-      switch (field.operator) {
-        case "equals":
-          return String(valA).toLowerCase() === String(valB).toLowerCase();
-        case "not_equals":
-          return String(valA).toLowerCase() !== String(valB).toLowerCase();
-        case "greater":
-          return Number(valB) > Number(valA);
-        case "less":
-          return Number(valB) < Number(valA);
-        case "contains":
-          return String(valB)
-            .toLowerCase()
-            .includes(String(valA).toLowerCase());
-        case "not_contains":
-          return !String(valB)
-            .toLowerCase()
-            .includes(String(valA).toLowerCase());
-        default:
-          return true; // fallback: show
-      }
-    });
-  }, [fields, answerData]);
+    return evaluateVisibility(element, answerData);
+  }, [answerData, element]);
 
   if (!ElementComponent) return null;
+  if (!isVisible) return null;
+
+  const showResults = Boolean(validationData?.showResults);
+  const hideInputs = Boolean(
+    validationData?.hideInputsOnResults ?? validationData?.hideInputs,
+  );
+  const hasPollResults = Boolean(validationData?.pollResults?.[element.id]);
+  const shouldHideInput = showResults && hideInputs && hasPollResults;
 
   return (
-    <div className={!isVisible ? "invisible h-0" : ""}>
-      {element.inputLabel && (
-        <label className="block text-sm font-medium mb-[5px] input_label">
-          {element.inputLabel}
-        </label>
+    <div className={`${!isVisible ? "hidden" : ""} min-w-0 w-full`}>
+      <div className="mb-1.5 min-w-0">
+        {element.inputLabel && (
+          <label className="block text-sm font-medium input_label">
+            {element.inputLabel}{" "}
+            {acceptedFileLabels && (
+              <span className="text-gray-400 text-xs">
+                ({acceptedFileLabels?.toLowerCase()})
+              </span>
+            )}
+          </label>
+        )}
+      </div>
+
+      {!shouldHideInput && (
+        <ElementComponent
+          element={element}
+          state="view"
+          validationData={{
+            ...validationData,
+            isReadOnly:
+              validationData?.isReadOnly ||
+              element.isReadOnly ||
+              element.readOnly ||
+              element.isDisabled ||
+              element.disabled,
+            isDisabled:
+              validationData?.isDisabled ||
+              element.isDisabled ||
+              element.disabled,
+          }}
+        />
       )}
-      <ElementComponent
-        element={element}
-        state="edit"
-        validationData={validationData}
-      />
+
+      {showResults && hasPollResults && (
+        <PollResultsBreakdown
+          results={validationData.pollResults[element.id]}
+          hideInputs={hideInputs}
+        />
+      )}
+
+      {element.description && (
+        <small className="block text-gray-400 mt-0.5 text-xs">
+          {element.description}
+        </small>
+      )}
     </div>
   );
 };

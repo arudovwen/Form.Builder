@@ -1,15 +1,17 @@
 import React from "react";
 interface CustomSelectProps {
     className?: string;
-    options: any;
+    options: any[];
     placeholder?: string;
-    errors?: any;
+    errors?: {
+        message?: string;
+    };
     register?: any;
-    setValue?: any;
+    setValue?: (name: string, value: any) => void;
     name: string;
     label?: string;
     value?: any;
-    trigger?: any;
+    trigger?: (name: string) => void;
     isMultiple?: boolean;
     isFloatingLabel?: boolean;
     subText?: string;

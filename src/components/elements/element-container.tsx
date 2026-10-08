@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, memo, useState } from "react";
+import React, { ReactNode, useCallback, memo, useState, useMemo } from "react";
 import AppIcon from "../ui/AppIcon";
 import EditorContext from "../../context/editor-context";
 import ElementEditorModal from "./element-editor";
@@ -18,15 +18,20 @@ interface ElementContainerProps {
 const ElementContainer = memo(
   ({ state, element, children }: ElementContainerProps) => {
     const [isOpen, setOpen] = useState(false);
-    const { removeElement }: any = React.useContext(EditorContext);
+    const { removeElement, duplicateElement, updateElement, copyElement }: any =
+      React.useContext(EditorContext);
+    const acceptedFileLabels = useMemo(
+      () =>
+        element?.acceptedFiles?.map((i: { label: any }) => i.label).join(", "),
+      [element],
+    );
 
     const handleRemove = useCallback(() => {
       removeElement(element.id, element.sectionId);
     }, [element.id, element.sectionId, removeElement]);
 
-  
     return (
-      <div className="w-full">
+      <div className="w-full min-w-0">
         {isOpen && (
           <ElementEditorModal
             isOpen={isOpen}
@@ -39,35 +44,108 @@ const ElementContainer = memo(
             {" "}
             {element.inputLabel && (
               <label className="text-sm font-medium input_label">
-                {element.inputLabel}
+                {element.inputLabel}{" "}
+                {acceptedFileLabels && (
+                  <span className="text-gray-400 text-xs">
+                    ({acceptedFileLabels?.toLowerCase()})
+                  </span>
+                )}
               </label>
             )}
           </span>
           {state === "edit" && (
             <span className="flex items-center gap-x-3">
-           
+              {element.type?.toLowerCase() !== "spacer" && element.type?.toLowerCase() !== "divider" && (
+                <>
+                  {element.isDisabled && (
+                    <span className="px-1.5 py-0.5 text-[10px] font-medium bg-gray-100 text-gray-600 rounded border border-gray-200">
+                      Disabled
+                    </span>
+                  )}
+                  {element.isReadOnly && (
+                    <span className="px-1.5 py-0.5 text-[10px] font-medium bg-amber-50 text-amber-700 rounded border border-amber-200">
+                      Read Only
+                    </span>
+                  )}
+                  <label className="flex items-center gap-1 text-xs cursor-pointer text-gray-500 mr-2 hover:text-gray-700 select-none">
+                    <input
+                      type="checkbox"
+                      checked={element.isRequired || false}
+                      onChange={(e) =>
+                        updateElement(
+                          { ...element, isRequired: e.target.checked },
+                          element.sectionId
+                        )
+                      }
+                      className="cursor-pointer"
+                    />
+                    <span className="mt-0.5">Required</span>
+                  </label>
+                </>
+              )}
+
+
+              {
                 <button
                   type="button"
-                  className="text-sm outline-none hover:opacity-80"
-                  onClick={() => setOpen(true)}
+                  className="text-sm outline-none hover:opacity-80 py-1 text-gray-600"
+                  onClick={() => {
+                    if (typeof duplicateElement === 'function') {
+                      duplicateElement(element?.id, element.sectionId);
+                    }
+                  }}
+                  title="Duplicate"
                 >
-                  <AppIcon icon="circum:edit" iconClass="text-base" />
+                  <AppIcon icon="solar:copy-outline" iconClass="text-base" />
                 </button>
-             
+              }
+
+              {
+                <button
+                  type="button"
+                  className="text-sm outline-none hover:opacity-80 py-1 text-gray-600"
+                  onClick={() => {
+                    if (typeof copyElement === 'function') {
+                      copyElement(element?.id, element.sectionId);
+                      // Optional: simple toast or visual feedback could go here
+                    }
+                  }}
+                  title="Copy to Clipboard"
+                >
+                  <AppIcon icon="lucide:clipboard-copy" iconClass="text-base" />
+                </button>
+              }
+
               <button
                 type="button"
-                className="text-sm outline-none hover:opacity-80"
-                onClick={handleRemove}
+                className="text-sm outline-none hover:opacity-80 text-gray-600 py-1"
+                onClick={() => setOpen(true)}
+                title="Edit"
               >
-                <AppIcon icon="iconamoon:trash"  iconClass="text-base"  />
+                <AppIcon icon="circum:edit" iconClass="text-base" />
+              </button>
+
+              <button
+                type="button"
+                className="text-sm outline-none hover:opacity-80 text-gray-600 py-1"
+                onClick={handleRemove}
+                title="Remove"
+              >
+                <AppIcon icon="iconamoon:trash" iconClass="text-base" />
               </button>
             </span>
           )}
         </div>
+        
         {children}
+        {element.description && (
+          <small className="block text-gray-400 mt-1 text-xs">
+            {element.description}
+          </small>
+        )}
       </div>
     );
-  }
+  },
 );
 
 ElementContainer.displayName = "ElementContainer";

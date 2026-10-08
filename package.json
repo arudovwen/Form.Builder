@@ -1,14 +1,23 @@
 {
   "name": "@arudovwen/form-builder-react",
-  "version": "1.4.15",
+  "version": "1.9.23",
   "description": "A React-based form builder component library.",
   "type": "module",
   "main": "./dist/form-builder.umd.js",
   "module": "./dist/form-builder.es.js",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./dist/form-builder.es.js",
+      "require": "./dist/form-builder.umd.js"
+    },
+    "./style.css": "./dist/form-builder-react.css"
+  },
+  
   "types": "./types/index.d.ts",
   "files": [
     "dist",
-    "dist/form-builder.css",
+    "dist/form-builder-react.css",
     "types"
   ],
   "sideEffects": false,
@@ -44,28 +53,35 @@
     "@hookform/resolvers": "^3.0.0",
     "axios": "^1.0.0",
     "papaparse": "^5.5.0",
-    "react": "^18.0.0",
+    "react": "^19.0.0",
     "react-currency-input-field": "^3.9.0",
     "react-datepicker": "^8.0.0",
-    "react-dom": "^18.0.0",
+    "react-dom": "^19.0.0",
     "react-draggable": "^4.4.0",
     "react-hook-form": "^7.0.0",
     "react-router": "^7.0.0",
     "react-router-dom": "^7.0.0",
-    "react-toastify": "^11.0.0",
+    "tailwindcss": "^3.0.0",
     "uuid": "^11.0.0",
     "xlsx": "^0.18.0",
     "yup": "^1.0.0"
   },
   "dependencies": {
-    "clsx": "^2.1.1"
+    "@xyflow/react": "^12.11.1",
+    "clsx": "^2.1.1",
+    "dagre": "^0.8.5",
+    "react-mentions": "^4.4.10",
+    "run-parallel": "^1.2.0",
+    "sonner": "^2.0.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
     "@iconify/react": "^6.0.2",
+    "@types/dagre": "^0.7.54",
     "@types/node": "^22.10.2",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/react-mentions": "^4.4.1",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.15.0",

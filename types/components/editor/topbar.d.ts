@@ -1,4 +1,4 @@
-export default function TopBar({ title, goBackUrl, onSubmit, onPublish, previewLoading, saveLoading, publishLoading, onTitleChange, }: {
+interface TopBarProps {
     title: string;
     goBackUrl: () => void;
     onSubmit?: (e: any) => void;
@@ -7,4 +7,9 @@ export default function TopBar({ title, goBackUrl, onSubmit, onPublish, previewL
     saveLoading?: boolean;
     publishLoading?: boolean;
     onTitleChange?: (newTitle: string) => void;
-}): import("react/jsx-runtime").JSX.Element;
+    viewMode?: "canvas" | "flow";
+    setViewMode?: (mode: "canvas" | "flow") => void;
+    onShowVersion?: () => void;
+}
+export default function TopBar({ title, goBackUrl, onSubmit, onPublish, previewLoading, saveLoading, publishLoading, onTitleChange, viewMode, setViewMode, onShowVersion, }: TopBarProps): import("react/jsx-runtime").JSX.Element;
+export {};
