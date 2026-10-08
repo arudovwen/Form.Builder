@@ -43,6 +43,7 @@ export interface FormRendererProps {
         isUploading: boolean;
         isSubmitting: boolean;
         hasErrors: boolean;
+        submitText?: string;
       }) => ReactNode);
   hideFooter?: boolean;
   uploadUrl?: string;
@@ -51,6 +52,7 @@ export interface FormRendererProps {
   hideInputsOnResults?: boolean;
   sendHiddenSectionsAsEmpty?: boolean;
   preview?: boolean;
+  submitText?: string;
 }
 
 const FormRenderer: React.FC<FormRendererProps> = ({
@@ -69,6 +71,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   hideInputsOnResults = false,
   sendHiddenSectionsAsEmpty = false,
   preview = false,
+  submitText = "Submit",
 }: FormRendererProps) => {
   const { setAnswerData, setUploadUrl, apiActivityCount }: any =
     useContext(EditorContext);
@@ -466,6 +469,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                 isFirst={currentConvIndex === 0}
                 isLast={currentConvIndex === visibleQuestions.length - 1}
                 isReadOnly={isReadOnly}
+                submitText={submitText}
               />
             ) : (
               <SinglePage
@@ -515,6 +519,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                         isUploading: apiActivityCount > 0,
                         isSubmitting,
                         hasErrors: Object.keys(errors).length > 0,
+                        submitText: submitText || "Submit",
                       })
                     : children) ?? (
                     <AppButton
@@ -525,7 +530,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                       }
                       isLoading={isSubmitting}
                       type="submit"
-                      text="Submit"
+                      text={submitText || "Submit"}
                       style={{ background: config?.buttonColor || "#333" }}
                       btnClass="text-gray-700 border-[#98A2B3] submit_btn !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
                     />
@@ -538,6 +543,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                     isUploading: apiActivityCount > 0,
                     isSubmitting,
                     hasErrors: Object.keys(errors).length > 0,
+                    submitText: submitText || "Submit",
                   })
                 : children) ?? (
                 <AppButton
@@ -548,7 +554,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                   }
                   isLoading={isSubmitting}
                   type="submit"
-                  text="Submit"
+                  text={submitText || "Submit"}
                   style={{ background: config?.buttonColor || "#333" }}
                   btnClass="text-gray-700 border-[#98A2B3] submit_btn !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
                 />

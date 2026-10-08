@@ -13,6 +13,7 @@ export interface RenderProps {
         isUploading: boolean;
         isSubmitting: boolean;
         hasErrors: boolean;
+        submitText?: string;
     }) => ReactNode);
     hideFooter?: boolean;
     onGetValues?: (e: any) => void;
@@ -23,5 +24,6 @@ export interface RenderProps {
     sendHiddenSectionsAsEmpty?: boolean;
     preview?: boolean;
     deleteMode?: DeleteMode;
+    submitText?: string;
 }
-export default function Viewer({ answerData, form_data, ignoreValidation, onSubmit, isReadOnly, loading, config, renderType, children, hideFooter, onGetValues, uploadUrl, pollResults, showResults, hideInputsOnResults, sendHiddenSectionsAsEmpty, preview, deleteMode, }: RenderProps): import("react/jsx-runtime").JSX.Element;
+export default function Viewer({ answerData, form_data, ignoreValidation, onSubmit, isReadOnly, loading, config, renderType, children, hideFooter, onGetValues, uploadUrl, pollResults, showResults, hideInputsOnResults, sendHiddenSectionsAsEmpty, preview, deleteMode, submitText, }: RenderProps): import("react/jsx-runtime").JSX.Element;

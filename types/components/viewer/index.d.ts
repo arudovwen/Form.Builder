@@ -17,6 +17,7 @@ export interface FormRendererProps {
         isUploading: boolean;
         isSubmitting: boolean;
         hasErrors: boolean;
+        submitText?: string;
     }) => ReactNode);
     hideFooter?: boolean;
     uploadUrl?: string;
@@ -25,6 +26,7 @@ export interface FormRendererProps {
     hideInputsOnResults?: boolean;
     sendHiddenSectionsAsEmpty?: boolean;
     preview?: boolean;
+    submitText?: string;
 }
 declare const _default: React.NamedExoticComponent<FormRendererProps>;
 export default _default;

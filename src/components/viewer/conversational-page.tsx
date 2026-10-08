@@ -12,7 +12,16 @@ import { evaluateVisibility } from "./validation";
 
 const config = getItem("config");
 
-export default function ConversationalPage({ element, options, onNext, onPrev, isFirst, isLast, isReadOnly }: any) {
+export default function ConversationalPage({
+  element,
+  options,
+  onNext,
+  onPrev,
+  isFirst,
+  isLast,
+  isReadOnly,
+  submitText = "Submit",
+}: any) {
   const { answerData } = (useContext(EditorContext) as any) || {};
 
   if (!element) {
@@ -112,7 +121,13 @@ export default function ConversationalPage({ element, options, onNext, onPrev, i
           <div className="flex items-center gap-4 mt-8">
             <AppButton
               type="button"
-              text={isLast ? (options?.isSubmitting ? "Submitting..." : "Submit") : "OK"}
+              text={
+                isLast
+                  ? options?.isSubmitting
+                    ? "Submitting..."
+                    : submitText || "Submit"
+                  : "OK"
+              }
               onClick={onNext}
               style={{ background: config?.buttonColor || "#333" }}
               btnClass={`text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg ${isLast ? 'submit_btn' : 'continue_btn next_btn text-sm'}`}
