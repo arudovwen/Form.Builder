@@ -19,6 +19,7 @@ export interface RenderProps {
         isUploading: boolean;
         isSubmitting: boolean;
         hasErrors: boolean;
+        submitText?: string;
       }) => ReactNode);
   hideFooter?: boolean;
   onGetValues?: (e: any) => void;
@@ -29,6 +30,7 @@ export interface RenderProps {
   sendHiddenSectionsAsEmpty?: boolean;
   preview?: boolean;
   deleteMode?: DeleteMode;
+  submitText?: string;
 }
 
 export default function Viewer({
@@ -50,6 +52,7 @@ export default function Viewer({
   sendHiddenSectionsAsEmpty = false,
   preview = false,
   deleteMode,
+  submitText = "Submit",
 }: RenderProps) {
   // ✅ Store config in localStorage only when it changes
   useEffect(() => {
@@ -95,6 +98,7 @@ export default function Viewer({
           hideInputsOnResults={hideInputsOnResults}
           sendHiddenSectionsAsEmpty={sendHiddenSectionsAsEmpty}
           preview={preview}
+          submitText={submitText}
         >
           {children}
         </FormRenderer>
