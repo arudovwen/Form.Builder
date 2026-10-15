@@ -259,6 +259,15 @@ export default function CustomSearchSelect({
     [name, onGetValue],
   );
 
+  const openDropdown = useCallback(() => {
+    if (readOnly) return;
+    const isExpanded =
+      buttonRef.current?.getAttribute("aria-expanded") === "true";
+    if (!isExpanded) {
+      buttonRef.current?.click();
+    }
+  }, [readOnly]);
+
   return (
     <div className="relative w-full">
       <Combobox
@@ -321,16 +330,8 @@ export default function CustomSearchSelect({
                 }
               }
             }}
-            onClick={() => {
-              if (!readOnly) {
-                buttonRef.current?.click();
-              }
-            }}
-            onFocus={() => {
-              if (!readOnly) {
-                buttonRef.current?.click();
-              }
-            }}
+            onClick={openDropdown}
+            onFocus={openDropdown}
             placeholder={
               loading
                 ? "Loading..."
