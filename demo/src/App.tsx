@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router";
 import { FormBuilder, FormViewer } from "@arudovwen/form-builder-react";
-import "@arudovwen/form-builder-react/dist/index.css";
+import "@arudovwen/form-builder-react/style.css";
 
 import React, { useState, useEffect } from "react";
 
