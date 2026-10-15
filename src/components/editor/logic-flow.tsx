@@ -144,15 +144,17 @@ export default function LogicFlow({ formData }: { formData: any[] }) {
 
     // First pass: create all nodes and sequential edges
     formData
-      ?.filter((section: any) => !section?.isDeleted)
+      ?.filter((section: any) => !section?.isFieldDeleted && !section?.isDeleted)
       ?.forEach((section: any, sIndex: number) => {
         const colorScheme = sectionColors[sIndex % sectionColors.length];
         const activeFields =
-          section?.questionData?.filter((f: any) => !f?.isDeleted) || [];
+          section?.formData?.filter(
+            (f: any) => !f?.isFieldDeleted && !f?.isDeleted,
+          ) || [];
 
         const sectionX = sIndex * 400; // Layout left to right horizontally
         const sectionY = 0;
-        const sectionWidth = 320;
+        const sectionWidth = 400;
         const sectionHeight = 60 + activeFields.length * 110;
 
         // Create Section Group Node
@@ -218,45 +220,88 @@ export default function LogicFlow({ formData }: { formData: any[] }) {
 
     // Second pass: Create conditional edges for hidden fields
     formData
-      ?.filter((section: any) => !section?.isDeleted)
+      ?.filter((section: any) => !section?.isFieldDeleted && !section?.isDeleted)
       ?.forEach((section: any) => {
-        section?.questionData
-          ?.filter((field: any) => !field?.isDeleted)
+        section?.formData
+          ?.filter((field: any) => !field?.isFieldDeleted && !field?.isDeleted)
           ?.forEach((field: any) => {
-        if (field.isHidden && field.visibilityDependentFields?.length > 0) {
-          field.visibilityDependentFields.forEach((dep: any) => {
-            edges.push({
-              id: `e-cond-${dep.id}-${field.id}`,
-              source: dep.id,
-              target: field.id,
-              type: "smoothstep",
-              animated: true,
-              label: `if ${dep.operator} '${dep.fieldValue}'`,
-              labelStyle: { fill: "#f59e0b", fontWeight: 600, fontSize: 12 },
-              labelBgStyle: {
-                fill: "#fffef2",
-                stroke: "#fcd34d",
-                strokeWidth: 1,
-                rx: 4,
-                ry: 4,
-              },
-              labelBgPadding: [6, 4],
-              style: {
-                stroke: "#f59e0b",
-                strokeWidth: 2,
-                strokeDasharray: "5,5",
-              },
-              markerEnd: {
-                type: MarkerType.ArrowClosed,
-                width: 20,
-                height: 20,
-                color: "#f59e0b",
-              },
-            });
+            if (field.isHidden && field.visibilityDependentFields?.length > 0) {
+              field.visibilityDependentFields.forEach((dep: any) => {
+                const depId = typeof dep === "object" ? (dep.id || dep.value) : dep;
+                if (!depId) return;
+                const op = typeof dep === "object" ? dep.operator || "equals" : "equals";
+                const val = typeof dep === "object" ? dep.fieldValue ?? "" : "";
+                edges.push({
+                  id: `e-cond-${depId}-${field.id}`,
+                  source: depId,
+                  target: field.id,
+                  type: "smoothstep",
+                  animated: true,
+                  label: `if ${op} '${val}'`,
+                  labelStyle: {
+                    fill: "#f59e0b",
+                    fontWeight: 600,
+                    fontSize: 12,
+                  },
+                  labelBgStyle: {
+                    fill: "#fffef2",
+                    stroke: "#fcd34d",
+                    strokeWidth: 1,
+                    rx: 4,
+                    ry: 4,
+                  },
+                  labelBgPadding: [6, 4],
+                  style: {
+                    stroke: "#f59e0b",
+                    strokeWidth: 2,
+                    strokeDasharray: "5,5",
+                  },
+                  markerEnd: {
+                    type: MarkerType.ArrowClosed,
+                    width: 20,
+                    height: 20,
+                    color: "#f59e0b",
+                  },
+                });
+              });
+            }
+
+            if (field.filterByFieldId) {
+              edges.push({
+                id: `e-filter-${field.filterByFieldId}-${field.id}`,
+                source: field.filterByFieldId,
+                target: field.id,
+                type: "smoothstep",
+                animated: true,
+                label: "filters options",
+                labelStyle: {
+                  fill: "#6366f1",
+                  fontWeight: 600,
+                  fontSize: 12,
+                },
+                labelBgStyle: {
+                  fill: "#eef2ff",
+                  stroke: "#c7d2fe",
+                  strokeWidth: 1,
+                  rx: 4,
+                  ry: 4,
+                },
+                labelBgPadding: [6, 4],
+                style: {
+                  stroke: "#6366f1",
+                  strokeWidth: 2,
+                  strokeDasharray: "4,4",
+                },
+                markerEnd: {
+                  type: MarkerType.ArrowClosed,
+                  width: 20,
+                  height: 20,
+                  color: "#6366f1",
+                },
+              });
+            }
           });
-        }
       });
-    });
 
     return { nodes, edges };
   }, [formData]);
@@ -279,7 +324,6 @@ export default function LogicFlow({ formData }: { formData: any[] }) {
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView
-       
         attributionPosition="bottom-right"
       >
         <Background color="#e2e8f0" gap={16} />

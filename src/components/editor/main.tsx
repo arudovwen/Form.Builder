@@ -9,13 +9,13 @@ import Loader from "../Loader";
 const LogicFlow = React.lazy(() => import("./logic-flow"));
 
 export default function MainPage({
-  questionData,
+  initialFormData,
   uploadUrl,
   onAddTemplate,
   templates,
   viewMode = "canvas",
 }: {
-  questionData: any[];
+  initialFormData: any[];
   isReadOnly?: boolean;
   uploadUrl?: string;
   onAddTemplate?: () => void;
@@ -26,10 +26,10 @@ export default function MainPage({
     useContext(EditorContext);
 
   useEffect(() => {
-    if (questionData && questionData.length > 0) {
-      setFormData(questionData);
+    if (initialFormData && initialFormData.length > 0) {
+      setFormData(initialFormData);
     }
-  }, [questionData, setFormData]);
+  }, [initialFormData, setFormData]);
 
   useEffect(() => {
     setUploadUrl(uploadUrl);

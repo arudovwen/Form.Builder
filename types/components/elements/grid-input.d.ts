@@ -15,6 +15,6 @@ interface GridItemProps {
     customClass?: string;
     state?: string;
 }
-export declare const GridItem: ({ col, children, customClass }: GridItemProps) => import("react/jsx-runtime").JSX.Element;
-declare const _default: React.MemoExoticComponent<({ element, sectionId, children, customClass, state, draggedElementId, }: GridInputProps) => import("react/jsx-runtime").JSX.Element>;
+export declare const GridItem: ({ col, children, customClass, state }: GridItemProps) => import("react/jsx-runtime").JSX.Element;
+declare const _default: React.MemoExoticComponent<(props: GridInputProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

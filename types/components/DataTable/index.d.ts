@@ -11,6 +11,7 @@ export interface DataGridColumn<T> {
         label: string;
         value: string;
     }[];
+    isColumnDeleted?: boolean;
 }
 interface CustomDataGridProps<T extends {
     id: string;

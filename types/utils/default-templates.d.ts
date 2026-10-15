@@ -6,7 +6,7 @@ export declare const defaultTemplates: ({
         id: string;
         title: string;
         description: string;
-        questionData: ({
+        formData: ({
             id: string;
             type: string;
             label: string;
@@ -27,7 +27,7 @@ export declare const defaultTemplates: ({
     sections: {
         id: string;
         title: string;
-        questionData: ({
+        formData: ({
             id: string;
             type: string;
             label: string;
@@ -48,7 +48,7 @@ export declare const defaultTemplates: ({
     sections: {
         id: string;
         title: string;
-        questionData: ({
+        formData: ({
             id: string;
             type: string;
             label: string;

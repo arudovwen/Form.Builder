@@ -43,11 +43,16 @@ export interface FormRendererProps {
         isUploading: boolean;
         isSubmitting: boolean;
         hasErrors: boolean;
+        submitText?: string;
       }) => ReactNode);
   hideFooter?: boolean;
   uploadUrl?: string;
   pollResults?: Record<string, any>; // Add pollResults
   showResults?: boolean; // Toggle for showing results
+  hideInputsOnResults?: boolean;
+  sendHiddenSectionsAsEmpty?: boolean;
+  preview?: boolean;
+  submitText?: string;
 }
 
 const FormRenderer: React.FC<FormRendererProps> = ({
@@ -63,6 +68,10 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   uploadUrl,
   pollResults,
   showResults,
+  hideInputsOnResults = false,
+  sendHiddenSectionsAsEmpty = false,
+  preview = false,
+  submitText = "Submit",
 }: FormRendererProps) => {
   const { setAnswerData, setUploadUrl, apiActivityCount }: any =
     useContext(EditorContext);
@@ -72,15 +81,22 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   const filteredFormData = useMemo(
     () =>
       form_data
-        .filter((i) => !i.isHidden && !i.isDeleted)
+        .filter(
+          (i) =>
+            (preview ? true : !i.isHidden) &&
+            !i.isFieldDeleted &&
+            !i.isDeleted,
+        )
         .map((section) => {
           const isSectionDisabled = section.isDisabled || section.disabled;
           const activeQuestions =
-            section?.questionData?.filter((q: any) => !q.isDeleted) || [];
+            section?.formData?.filter(
+              (q: any) => !q.isFieldDeleted && !q.isDeleted,
+            ) || [];
           if (isSectionDisabled) {
             return {
               ...section,
-              questionData: activeQuestions.map((q: any) => ({
+              formData: activeQuestions.map((q: any) => ({
                 ...q,
                 isDisabled: true,
               })),
@@ -88,10 +104,10 @@ const FormRenderer: React.FC<FormRendererProps> = ({
           }
           return {
             ...section,
-            questionData: activeQuestions,
+            formData: activeQuestions,
           };
         }),
-    [form_data],
+    [form_data, preview],
   );
   const totalSections = filteredFormData?.length ?? 0;
   const config = getItem("config");
@@ -113,6 +129,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     resolver,
     mode: "onSubmit",
     defaultValues: {},
+    shouldUnregister: false,
   });
 
   const {
@@ -143,15 +160,32 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     if (renderType !== "conversational") return [];
     const questions: any[] = [];
     filteredFormData.forEach((section) => {
-      section?.questionData?.forEach((element: any) => {
+      section?.formData?.forEach((element: any) => {
         if (evaluateVisibility(element, memoizedValues)) {
           if (element.type === "grid") {
-            const children = section?.questionData?.filter(
-              (c: any) => c.gridId === element.id,
+            const children = section?.formData?.filter(
+              (c: any) =>
+                c.gridId === element.id &&
+                (!c.gridPosition?.col ||
+                  c.gridPosition.col <= (element.columns || 1)) &&
+                evaluateVisibility(c, memoizedValues),
             );
-            questions.push({ ...element, gridChildren: children });
-          } else if (!element.gridId) {
-            questions.push(element);
+            if (children && children.length > 0) {
+              questions.push({ ...element, gridChildren: children });
+            }
+          } else {
+            const parentGrid = element.gridId
+              ? section?.formData?.find(
+                  (g: any) => g.id === element.gridId && g.type === "grid",
+                )
+              : null;
+            const isGridChild =
+              parentGrid &&
+              (!element.gridPosition?.col ||
+                element.gridPosition.col <= (parentGrid.columns || 1));
+            if (!isGridChild) {
+              questions.push(element);
+            }
           }
         }
       });
@@ -172,30 +206,70 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   }, [setUploadUrl, uploadUrl]);
   // ✅ Effect runs only when actual values change
   useEffect(() => {
-    if (!filteredFormData?.length || !onGetValues) return;
+    if (!form_data?.length) return;
 
-    const updatedData = filteredFormData.flatMap((section) =>
-      section?.questionData?.map((element: any) => ({
-        id: element.id,
-        value: memoizedValues[element.id] || "",
-        sectionId: section.id,
-        type: element.type,
-        metaData: {
-          prefix: element.prefix,
-          dateFormat: element.dateFormat,
-          ...(memoizedValues[`${element.id}_metaData`] ? { responseObject: memoizedValues[`${element.id}_metaData`] } : {}),
-        },
-      })),
-    );
+    const currentFormValues = {
+      ...(getValues ? getValues() : {}),
+      ...(memoizedValues || {}),
+    };
+
+    setAnswerData?.(currentFormValues);
+
+    if (!onGetValues) return;
+
+    const updatedData = form_data
+      .filter((section: any) => !section?.isFieldDeleted && !section?.isDeleted)
+      .flatMap((section: any) => {
+        const isSectionHidden = preview ? false : Boolean(section?.isHidden);
+        const shouldEmptyHidden = Boolean(
+          sendHiddenSectionsAsEmpty ||
+          section?.sendEmptyWhenHidden ||
+          section?.clearWhenHidden,
+        );
+        const shouldSendEmpty = isSectionHidden && shouldEmptyHidden;
+
+        return (
+          section?.formData
+            ?.filter((el: any) => !el?.isFieldDeleted && !el?.isDeleted)
+            ?.map((element: any) => {
+              const rawVal =
+                currentFormValues[element.id] !== undefined
+                  ? currentFormValues[element.id]
+                  : element.value !== undefined && element.value !== null
+                    ? element.value
+                    : "";
+
+              const metaObj =
+                currentFormValues[`${element.id}_metaData`] ||
+                element.metaData?.responseObject;
+
+              return {
+                id: element.id,
+                value: shouldSendEmpty ? "" : (rawVal ?? ""),
+                sectionId: section.id,
+                type: element.type,
+                metaData: {
+                  prefix: element.prefix,
+                  dateFormat: element.dateFormat,
+                  ...(shouldSendEmpty || !metaObj
+                    ? {}
+                    : { responseObject: metaObj }),
+                },
+              };
+            }) || []
+        );
+      });
 
     handleGetValues(updatedData);
-    setAnswerData(memoizedValues);
   }, [
     memoizedValues,
-    filteredFormData,
+    form_data,
     handleGetValues,
     onGetValues,
     setAnswerData,
+    sendHiddenSectionsAsEmpty,
+    getValues,
+    preview,
   ]);
 
   // ✅ Answer data hydration
@@ -208,25 +282,59 @@ const FormRenderer: React.FC<FormRendererProps> = ({
   // ✅ Submit handler
   const onSubmit = useCallback(
     (data: Record<string, any>) => {
-      const updatedData = filteredFormData.flatMap((section) =>
-        section?.questionData?.map((element: any) => ({
-          id: element.id,
-          value: data[element.id] || "",
-          sectionId: section.id,
-          type: element.type,
-          metaData: {
-            prefix: element.prefix,
-            dateFormat: element.dateFormat,
-            ...(data[`${element.id}_metaData`] ? { responseObject: data[`${element.id}_metaData`] } : {}),
-          },
-        })),
-      );
+      const currentFormValues = {
+        ...(getValues ? getValues() : {}),
+        ...(data || {}),
+      };
+
+      const updatedData = form_data
+        .filter((section: any) => !section?.isFieldDeleted && !section?.isDeleted)
+        .flatMap((section: any) => {
+          const isSectionHidden = preview ? false : Boolean(section?.isHidden);
+          const shouldEmptyHidden = Boolean(
+            sendHiddenSectionsAsEmpty ||
+            section?.sendEmptyWhenHidden ||
+            section?.clearWhenHidden,
+          );
+          const shouldSendEmpty = isSectionHidden && shouldEmptyHidden;
+
+          return (
+            section?.formData
+              ?.filter((el: any) => !el?.isFieldDeleted && !el?.isDeleted)
+              ?.map((element: any) => {
+                const rawVal =
+                  currentFormValues[element.id] !== undefined
+                    ? currentFormValues[element.id]
+                    : element.value !== undefined && element.value !== null
+                      ? element.value
+                      : "";
+
+                const metaObj =
+                  currentFormValues[`${element.id}_metaData`] ||
+                  element.metaData?.responseObject;
+
+                return {
+                  id: element.id,
+                  value: shouldSendEmpty ? "" : (rawVal ?? ""),
+                  sectionId: section.id,
+                  type: element.type,
+                  metaData: {
+                    prefix: element.prefix,
+                    dateFormat: element.dateFormat,
+                    ...(shouldSendEmpty || !metaObj
+                      ? {}
+                      : { responseObject: metaObj }),
+                  },
+                };
+              }) || []
+          );
+        });
       if (Object.keys(errors).length > 0) {
         return;
       }
       onSubmitData?.(updatedData);
     },
-    [errors, filteredFormData, onSubmitData],
+    [errors, form_data, getValues, onSubmitData, sendHiddenSectionsAsEmpty],
   );
 
   // ✅ Navigation handlers
@@ -250,7 +358,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     }
 
     if (!ignoreValidation) {
-      const currentFields = filteredFormData?.[current]?.questionData?.map(
+      const currentFields = filteredFormData?.[current]?.formData?.map(
         (ele: any) => ele.id,
       );
       const isValid = await trigger(currentFields);
@@ -292,6 +400,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       apiActivityCount,
       pollResults,
       showResults,
+      hideInputsOnResults,
       isViewer: true,
     }),
     [
@@ -308,6 +417,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       apiActivityCount,
       pollResults,
       showResults,
+      hideInputsOnResults,
     ],
   );
 
@@ -324,7 +434,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
             key={
               renderType === "conversational"
                 ? `conv-${currentConvIndex}`
-                : filteredFormData?.[current]?.id
+                : undefined
             }
           >
             {renderType === "multi" &&
@@ -359,6 +469,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                 isFirst={currentConvIndex === 0}
                 isLast={currentConvIndex === visibleQuestions.length - 1}
                 isReadOnly={isReadOnly}
+                submitText={submitText}
               />
             ) : (
               <SinglePage
@@ -381,7 +492,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                       <button
                         type="button"
                         onClick={handleBack}
-                        className="text-gray-400 hover:text-gray-600 font-medium text-sm flex items-center gap-1 transition-colors back_btn"
+                        className="text-gray-400 hover:text-gray-600 font-semibold text-base flex items-center gap-1 transition-colors back_btn"
                       >
                         <AppIcon
                           icon="material-symbols:arrow-upward-rounded"
@@ -408,6 +519,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                         isUploading: apiActivityCount > 0,
                         isSubmitting,
                         hasErrors: Object.keys(errors).length > 0,
+                        submitText: submitText || "Submit",
                       })
                     : children) ?? (
                     <AppButton
@@ -418,7 +530,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                       }
                       isLoading={isSubmitting}
                       type="submit"
-                      text="Submit"
+                      text={submitText || "Submit"}
                       style={{ background: config?.buttonColor || "#333" }}
                       btnClass="text-gray-700 border-[#98A2B3] submit_btn !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
                     />
@@ -431,6 +543,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                     isUploading: apiActivityCount > 0,
                     isSubmitting,
                     hasErrors: Object.keys(errors).length > 0,
+                    submitText: submitText || "Submit",
                   })
                 : children) ?? (
                 <AppButton
@@ -441,7 +554,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                   }
                   isLoading={isSubmitting}
                   type="submit"
-                  text="Submit"
+                  text={submitText || "Submit"}
                   style={{ background: config?.buttonColor || "#333" }}
                   btnClass="text-gray-700 border-[#98A2B3] submit_btn !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg submit_btn"
                 />

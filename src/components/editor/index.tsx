@@ -24,6 +24,8 @@ const SectionItem = ({
   toggleSection,
   handleSectionEdit,
   removeSection,
+  copySection,
+  duplicateSection,
   formDataLength,
   onDragOver,
   setIsDragging,
@@ -31,13 +33,13 @@ const SectionItem = ({
   onReorderSection,
 }: any) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const prevLength = useRef(section?.questionData?.length);
+  const prevLength = useRef(section?.formData?.length);
 
   const wasDragging = useRef(isDragging);
 
   useEffect(() => {
     // Scroll to bottom when a new input is added
-    if (section?.questionData?.length > prevLength.current) {
+    if (section?.formData?.length > prevLength.current) {
       if (!isDragging && !wasDragging.current) {
         const container = document.getElementById("section-container");
         if (container) {
@@ -50,8 +52,8 @@ const SectionItem = ({
         }
       }
     }
-    prevLength.current = section?.questionData?.length;
-  }, [section?.questionData?.length, isDragging]);
+    prevLength.current = section?.formData?.length;
+  }, [section?.formData?.length, isDragging]);
 
   useEffect(() => {
     wasDragging.current = isDragging;
@@ -97,14 +99,40 @@ const SectionItem = ({
             className="flex-1 h-full py-4 cursor-grab active:cursor-grabbing flex items-center gap-2"
             title="Drag to reorder section"
           >
-            <AppIcon icon="material-symbols:drag-indicator" iconClass="text-gray-400 text-lg" />
+            <AppIcon
+              icon="material-symbols:drag-indicator"
+              iconClass="text-gray-400 text-lg"
+            />
             <h2 className="font-medium">{section.title || "Section title"}</h2>
           </div>
 
           <div className="flex items-center gap-x-2">
             <button
               type="button"
-              className="p-1 text-xs border rounded-lg"
+              className="p-1 text-xs border rounded-lg hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
+              title="Copy section to clipboard"
+              onClick={(e) => {
+                e.stopPropagation();
+                copySection?.(section.id);
+              }}
+            >
+              <AppIcon icon="fluent:copy-20-regular" />
+            </button>
+            <button
+              type="button"
+              className="p-1 text-xs border rounded-lg hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
+              title="Duplicate section"
+              onClick={(e) => {
+                e.stopPropagation();
+                duplicateSection?.(section.id);
+              }}
+            >
+              <AppIcon icon="lucide:copy-plus" />
+            </button>
+            <button
+              type="button"
+              className="p-1 text-xs border rounded-lg hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
+              title="Edit section"
               onClick={() => handleSectionEdit(section)}
             >
               <AppIcon icon="fluent:edit-28-regular" />
@@ -112,7 +140,8 @@ const SectionItem = ({
             {formDataLength > 1 && (
               <button
                 type="button"
-                className="p-1 text-xs border rounded-lg"
+                className="p-1 text-xs border rounded-lg hover:bg-red-50 text-gray-600 hover:text-red-600 transition-colors"
+                title="Delete section"
                 onClick={() => removeSection(section.id)}
               >
                 <AppIcon icon="lets-icons:trash-duotone-line" />
@@ -149,7 +178,7 @@ const SectionItem = ({
             <div className="h-full mt-4 gap-y-6 ">
               {
                 <ElementCanvas
-                  elementData={section?.questionData}
+                  elementData={section?.formData}
                   sectionId={section?.id}
                 />
               }
@@ -161,10 +190,17 @@ const SectionItem = ({
   );
 };
 
-const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void; templates?: any[] }) => {
+const FormBuilder = ({
+  onAddTemplate,
+  templates,
+}: {
+  onAddTemplate?: () => void;
+  templates?: any[];
+}) => {
   const allTemplates = [...defaultTemplates, ...(templates || [])];
   const [isOpen, setOpen] = useState(false);
   const [isTemplateModalOpen, setTemplateModalOpen] = useState(false);
+  const [hasSectionInClipboard, setHasSectionInClipboard] = useState(false);
   const tempSection = useRef(null);
   const containerRef = useRef<HTMLDivElement>(null); // Ref for the container
   const {
@@ -180,28 +216,75 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
     setFormData,
     isDragging,
     pasteElement,
+    copySection,
+    pasteSection,
+    duplicateSection,
   }: any = useContext(EditorContext);
 
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
       // Prevent pasting if the user is typing in an input/textarea
       const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
         return;
       }
 
-      if (selectedSection) {
+      const clipboardText = e.clipboardData?.getData("text") || "";
+      if (clipboardText.includes("FORM_BUILDER_SECTION_CLIPBOARD")) {
+        pasteSection(undefined, clipboardText);
+      } else if (selectedSection) {
         // Pass clipboard text directly to bypass async permission prompts
-        const clipboardText = e.clipboardData?.getData('text') || "";
         pasteElement(selectedSection, undefined, clipboardText);
       }
     };
 
-    window.addEventListener('paste', handlePaste);
+    window.addEventListener("paste", handlePaste);
     return () => {
-      window.removeEventListener('paste', handlePaste);
+      window.removeEventListener("paste", handlePaste);
     };
-  }, [selectedSection, pasteElement]);
+  }, [selectedSection, pasteElement, pasteSection]);
+
+  useEffect(() => {
+    const checkClipboard = () => {
+      try {
+        const clipboardString =
+          localStorage.getItem("form_builder_section_clipboard") ||
+          localStorage.getItem("form_builder_clipboard");
+        if (clipboardString) {
+          const copiedData = JSON.parse(clipboardString);
+          if (
+            copiedData?.type === "FORM_BUILDER_SECTION_CLIPBOARD" &&
+            copiedData?.section
+          ) {
+            const isExpired =
+              copiedData?.timestamp &&
+              Date.now() - copiedData.timestamp > 60000;
+            if (isExpired) {
+              localStorage.removeItem("form_builder_section_clipboard");
+              localStorage.removeItem("form_builder_clipboard");
+              setHasSectionInClipboard(false);
+            } else {
+              setHasSectionInClipboard(true);
+            }
+          } else {
+            setHasSectionInClipboard(false);
+          }
+        } else {
+          setHasSectionInClipboard(false);
+        }
+      } catch {
+        setHasSectionInClipboard(false);
+      }
+    };
+
+    checkClipboard();
+    const interval = setInterval(checkClipboard, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const prevFormDataLength = useRef(formData?.length || 0);
 
@@ -229,18 +312,26 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
     event.dataTransfer.dropEffect = "move";
   }, []);
 
-  const handleReorderSection = useCallback((draggedId: string, targetId: string) => {
-    setFormData((prev: any[]) => {
-      const draggedIndex = prev.findIndex((s) => s.id === draggedId);
-      const targetIndex = prev.findIndex((s) => s.id === targetId);
-      if (draggedIndex === -1 || targetIndex === -1 || draggedIndex === targetIndex) return prev;
-      
-      const newArr = [...prev];
-      const [draggedItem] = newArr.splice(draggedIndex, 1);
-      newArr.splice(targetIndex, 0, draggedItem);
-      return newArr;
-    });
-  }, [setFormData]);
+  const handleReorderSection = useCallback(
+    (draggedId: string, targetId: string) => {
+      setFormData((prev: any[]) => {
+        const draggedIndex = prev.findIndex((s) => s.id === draggedId);
+        const targetIndex = prev.findIndex((s) => s.id === targetId);
+        if (
+          draggedIndex === -1 ||
+          targetIndex === -1 ||
+          draggedIndex === targetIndex
+        )
+          return prev;
+
+        const newArr = [...prev];
+        const [draggedItem] = newArr.splice(draggedIndex, 1);
+        newArr.splice(targetIndex, 0, draggedItem);
+        return newArr;
+      });
+    },
+    [setFormData],
+  );
 
   function toggleSection(index: number) {
     if (activeSections.includes(index)) {
@@ -262,37 +353,44 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
       ...JSON.parse(JSON.stringify(obj)),
       ...overrides,
     });
-    
+
     if (template.sections && Array.isArray(template.sections)) {
       const validSections = template.sections.filter(Boolean);
       const newSections = validSections.map((sec: any) => {
         const secId = uuidv4();
-        const newQuestions = sec.questionData?.map((q: any) => {
-           const newQ = deepCloneWithNewId(q, { id: uuidv4(), sectionId: secId });
-           return newQ;
+        const newQuestions = sec.formData?.map((q: any) => {
+          const newQ = deepCloneWithNewId(q, {
+            id: uuidv4(),
+            sectionId: secId,
+          });
+          return newQ;
         });
 
         // Let's make sure the grid children have the correct new gridId if they are part of a grid.
         // It's a bit complex, but for simple templates, this is a good start.
         if (newQuestions) {
-           const idMap = new Map();
-           sec.questionData.forEach((q: any, i: number) => {
-             idMap.set(q.id, newQuestions[i].id);
-           });
-           newQuestions.forEach((q: any) => {
-             if (q.gridId && idMap.has(q.gridId)) {
-                q.gridId = idMap.get(q.gridId);
-             }
-           });
+          const idMap = new Map();
+          sec.formData.forEach((q: any, i: number) => {
+            idMap.set(q.id, newQuestions[i].id);
+          });
+          newQuestions.forEach((q: any) => {
+            if (q.gridId && idMap.has(q.gridId)) {
+              q.gridId = idMap.get(q.gridId);
+            }
+          });
         }
 
-        return deepCloneWithNewId(sec, { id: secId, questionData: newQuestions || [] });
+        return deepCloneWithNewId(sec, {
+          id: secId,
+          formData: newQuestions || [],
+        });
       });
-      
-      const isInitialBlank = formData.length === 1 && 
-                             formData[0].title === "" && 
-                             formData[0].description === "" && 
-                             (!formData[0]?.questionData || formData[0]?.questionData?.length === 0);
+
+      const isInitialBlank =
+        formData.length === 1 &&
+        formData[0].title === "" &&
+        formData[0].description === "" &&
+        (!formData[0]?.formData || formData[0]?.formData?.length === 0);
 
       if (isInitialBlank) {
         setFormData(newSections);
@@ -307,9 +405,7 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
 
   const config = getItem("config");
   return (
-    <div
-      className="relative flex flex-col h-full pb-5 mx-auto gap-x-4 "
-    >
+    <div className="relative flex flex-col h-full pb-5 mx-auto gap-x-4 ">
       {isOpen && (
         <SectionEditorModal
           isOpen={isOpen}
@@ -323,14 +419,15 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
         className="relative flex flex-col flex-1 w-full gap-y-3 container overflow-y-auto"
       >
         {formData
-          ?.filter((section: any) => !section?.isDeleted)
+          ?.filter((section: any) => !section?.isFieldDeleted && !section?.isDeleted)
           ?.map(
             (
               section: {
                 id: string;
                 title: string;
                 description?: string;
-                questionData: any;
+                formData: any;
+                isFieldDeleted?: boolean;
                 isDeleted?: boolean;
               },
               index: number,
@@ -345,8 +442,10 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
                 toggleSection={toggleSection}
                 handleSectionEdit={handleSectionEdit}
                 removeSection={removeSection}
+                copySection={copySection}
+                duplicateSection={duplicateSection}
                 formDataLength={
-                  formData?.filter((s: any) => !s?.isDeleted)?.length || 0
+                  formData?.filter((s: any) => !s?.isFieldDeleted && !s?.isDeleted)?.length || 0
                 }
                 onDragOver={onDragOver}
                 setIsDragging={setIsDragging}
@@ -355,16 +454,28 @@ const FormBuilder = ({ onAddTemplate, templates }: { onAddTemplate?: () => void;
               />
             ),
           )}
-        <div className="flex justify-center gap-x-4">
+        <div className="flex justify-center gap-x-4 flex-wrap gap-y-2">
           <button
             type="button"
             onClick={() => addSection()}
             style={{ color: config?.buttonColor || "#333" }}
-            className="text-sm font-medium"
+            className="text-sm font-medium hover:underline"
           >
-            + Add section{" "}
+            + Add section
           </button>
-          {(onAddTemplate || allTemplates?.length) ? (
+          {hasSectionInClipboard && (
+            <button
+              type="button"
+              onClick={() => pasteSection()}
+              style={{ color: config?.buttonColor || "#333" }}
+              className="text-sm font-medium hover:underline flex items-center gap-1"
+              title="Paste section from clipboard"
+            >
+              <AppIcon icon="lucide:clipboard-paste" iconClass="text-sm" />
+              Paste section
+            </button>
+          )}
+          {onAddTemplate || allTemplates?.length ? (
             <button
               type="button"
               onClick={() => {

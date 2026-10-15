@@ -1,6 +1,6 @@
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import CurrencyInput from "react-currency-input-field";
-import AppIcon from "../ui/AppIcon";
+import CheckSvg from "@/assets/svgs/check";
 
 interface InputProps {
   label: string;
@@ -95,12 +95,23 @@ export const DynamicInput = ({
 
     if (checkedValue !== undefined && checkedValue !== null) {
       if (type === "checkbox") {
-        if (Array.isArray(checkedValue)) {
-          isChecked = checkedValue.includes(value);
-        } else if (typeof checkedValue === "boolean") {
-          isChecked = checkedValue;
+        let normalizedCheckVal = checkedValue;
+        if (typeof checkedValue === "string" && checkedValue.trim().startsWith("[")) {
+          try {
+            normalizedCheckVal = JSON.parse(checkedValue);
+          } catch {}
+        }
+
+        if (Array.isArray(normalizedCheckVal)) {
+          isChecked = normalizedCheckVal.includes(value);
+        } else if (typeof normalizedCheckVal === "boolean") {
+          isChecked = normalizedCheckVal;
+        } else if (normalizedCheckVal === "true") {
+          isChecked = true;
+        } else if (normalizedCheckVal === "false") {
+          isChecked = false;
         } else {
-          isChecked = checkedValue == value;
+          isChecked = normalizedCheckVal == value;
         }
       } else {
         isChecked = checkedValue == value;
@@ -116,6 +127,13 @@ export const DynamicInput = ({
             {...registerProps}
             type={type}
             value={value || ""}
+            checked={isChecked}
+            onChange={(e) => {
+              onChange?.(e);
+              if (!e.defaultPrevented) {
+                registerProps?.onChange?.(e);
+              }
+            }}
             disabled={disabled}
             readOnly={readOnly}
             className="peer sr-only"
@@ -125,17 +143,18 @@ export const DynamicInput = ({
             className={`
             w-[18px] h-[18px] flex items-center justify-center
             border rounded-md transition-all duration-200
-            ${errors?.[name] ? "border-red-300" : "border-[#D0D5DD]"}
-            peer-checked:bg-[#7F56D9]
-            peer-checked:border-[#7F56D9]
-            peer-disabled:opacity-60
-            peer-disabled:cursor-not-allowed
+            ${
+              isChecked
+                ? "bg-[#7F56D9] border-[#7F56D9]"
+                : errors?.[name]
+                ? "border-red-300 bg-white"
+                : "border-[#D0D5DD] bg-white"
+            }
+            ${disabled ? "opacity-60 cursor-not-allowed" : ""}
           `}
           >
             {isChecked && (
-              <AppIcon
-                icon="bi:check-lg"
-                iconClass="w-4 h-4 text-white"
+              <CheckSvg className="text-white z-10"
               />
             )}
           </div>

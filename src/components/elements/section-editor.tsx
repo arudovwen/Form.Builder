@@ -14,6 +14,7 @@ const schema = yup
     description: yup.string(),
     disabled: yup.boolean().default(false),
     isHidden: yup.boolean().default(false),
+    sendEmptyWhenHidden: yup.boolean().default(false),
   })
 
   .required();
@@ -111,6 +112,16 @@ const SectionEditorModal: React.FC<{
               type="checkbox"
               value={values.isHidden}
               description="Hides this section from the form"
+            />
+            <DynamicInput
+              label="Send Empty When Hidden"
+              name="sendEmptyWhenHidden"
+              register={register}
+              errors={errors}
+              watch={watch}
+              type="checkbox"
+              value={values.sendEmptyWhenHidden}
+              description="Submits empty values for this section's fields when hidden"
             />
           </div>
 

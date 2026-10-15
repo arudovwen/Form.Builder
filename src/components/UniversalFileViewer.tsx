@@ -99,25 +99,27 @@ export default function UniversalFileViewer({
   }
 
   return (
-    <div className="mt-2 field-control !py-1 !bg-gray-50 !flex justify-between gap-x-8 items-center">
+    <div className="mt-2 field-control !py-1 !bg-gray-50 !flex justify-between gap-x-4 items-center w-full min-w-0 max-w-full overflow-hidden">
       <div
         onClick={handleFileClick}
-        className="!flex items-center rounded cursor-pointer   gap-x-3"
+        className="!flex items-center rounded cursor-pointer gap-x-3 min-w-0 flex-1 overflow-hidden"
         title={`Click to preview ${fileLabel}`}
       >
         {fileType === "image" && (
-          <div className="flex items-center justify-center ">
+          <div className="flex items-center justify-center shrink-0">
             <AppIcon iconClass="text-4xl" icon="fluent-color:image-48" />
           </div>
         )}
         {fileType !== "image" && (
-          <AppIcon icon={FileIcon[fileType]} iconClass="text-4xl" />
+          <div className="shrink-0 flex items-center justify-center">
+            <AppIcon icon={FileIcon[fileType]} iconClass="text-4xl" />
+          </div>
         )}
-        <span className="text-sm font-semibold text-center text-gray-700 truncate max-w-[300px]">
+        <span className="text-sm font-semibold text-gray-700 truncate min-w-0 flex-1 block">
           {fileLabel}
         </span>
       </div>
-      <div className="flex gap-x-1 items-center">
+      <div className="flex gap-x-1 items-center shrink-0">
         <button
           type="button"
           className="p-2"

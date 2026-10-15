@@ -50,6 +50,7 @@ export interface DataColumnType {
   type?: string;
   validate?: boolean;
   id: string;
+  isColumnDeleted?: boolean;
 }
 
 export interface OptionType {
@@ -57,6 +58,7 @@ export interface OptionType {
   value: any;
   id: string;
   key?: string;
+  filterValue?: string;
 }
 
 export interface ElementType {
@@ -119,9 +121,14 @@ export interface ElementType {
   visibilityDependentFields?: string;
   visibilityDependentFieldsValue?: any;
 
+  filterByFieldId?: string;
+  clearOnFilterChange?: boolean;
+  filterBehavior?: "hide" | "disable";
+
   minChecked?: number | null;
   allowCheckAll?: boolean;
   requireAllChecked?: boolean;
+  selectionType?: string;
 
   isMultiple: boolean;
   acceptedFiles: any[];
@@ -152,6 +159,8 @@ const baseElement = {
   gridId: null,
   isHidden: false,
   visibilityDependentFields: [],
+  filterByFieldId: "",
+  clearOnFilterChange: true,
 };
 
 const textDefaults = {
@@ -325,6 +334,7 @@ export const Elements: ElementType[] = [
     inputType: "checkbox",
     minChecked: 1,
     requireAllChecked: false,
+    selectionType: "multiple",
     options: [option("Checkbox Option", "option")],
   }),
 
@@ -566,9 +576,7 @@ export const CategorizedPollElements = Object.freeze({
     ElementKind.RANKING,        // Ranking Poll
     ElementKind.MATRIX,         // Matrix Grid
     ElementKind.IMAGE_CHOICE,   // Image Choice
-    ElementKind.DATE,           // Date Selection
-    ElementKind.TIME,           // Time Selection
-    ElementKind.FILE,           // File Upload Poll
+
   ],
   layoutAndInfo: [
     ElementKind.BASIC_TEXT,     // Info Block (Assuming BASIC_TEXT is used as Info)

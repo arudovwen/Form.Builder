@@ -1,13 +1,16 @@
 import React from "react";
-export type DeleteMode = "remove" | "isDeleted" | "soft" | "hard";
+export type DeleteMode = "remove" | "isFieldDeleted" | "isDeleted" | "soft" | "hard";
+export type BuilderMode = "create" | "edit";
 interface EditorProviderProps {
     children: React.ReactNode;
     onChange?: (data: any) => void;
     onLogAction?: (action: string, value: any) => void;
     deleteMode?: DeleteMode;
+    mode?: BuilderMode;
 }
 declare const EditorContext: React.Context<{
     deleteMode?: DeleteMode;
+    mode?: BuilderMode;
     showPreview: boolean;
     setShowPreview: React.Dispatch<React.SetStateAction<boolean>>;
     formData: any;
@@ -25,6 +28,9 @@ declare const EditorContext: React.Context<{
     setUploadUrl: (e: string) => void;
     copyElement: (elementId: string, sectionId: string) => void;
     pasteElement: (sectionId: string, targetIndex?: number) => void;
+    copySection: (sectionId: string) => void;
+    pasteSection: (targetIndex?: number, directClipboardText?: string) => void;
+    duplicateSection: (sectionId: string) => void;
     apiActivityCount: number;
     setApiActivityCount: React.Dispatch<React.SetStateAction<number>>;
     /**

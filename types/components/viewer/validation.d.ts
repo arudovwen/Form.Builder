@@ -1,5 +1,5 @@
 import * as yup from "yup";
-interface QuestionData {
+interface formData {
     id: string;
     type: "textField" | "longText" | "numberField" | "amountField" | "selectField" | "checkbox" | "email" | "date" | "matrix" | "url";
     isRequired?: boolean;
@@ -15,7 +15,7 @@ interface QuestionData {
     isDisabled?: boolean;
 }
 interface Section {
-    questionData: QuestionData[];
+    formData: formData[];
 }
 export declare const evaluateVisibility: (question: any, answerData: any) => any;
 export declare function generateDynamicSchema({ formData, isReadOnly, ignoreValidation, answerData, }: {

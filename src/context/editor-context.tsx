@@ -8,18 +8,21 @@ import React, {
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
 
-export type DeleteMode = "remove" | "isDeleted" | "soft" | "hard";
+export type DeleteMode = "remove" | "isFieldDeleted" | "isDeleted" | "soft" | "hard";
+export type BuilderMode = "create" | "edit";
 
 interface EditorProviderProps {
   children: React.ReactNode;
   onChange?: (data: any) => void;
   onLogAction?: (action: string, value: any) => void;
   deleteMode?: DeleteMode;
+  mode?: BuilderMode;
 }
 
 const EditorContext = createContext<
   | {
       deleteMode?: DeleteMode;
+      mode?: BuilderMode;
       showPreview: boolean;
       setShowPreview: React.Dispatch<React.SetStateAction<boolean>>;
       formData: any;
@@ -44,6 +47,12 @@ const EditorContext = createContext<
       setUploadUrl: (e: string) => void;
       copyElement: (elementId: string, sectionId: string) => void;
       pasteElement: (sectionId: string, targetIndex?: number) => void;
+      copySection: (sectionId: string) => void;
+      pasteSection: (
+        targetIndex?: number,
+        directClipboardText?: string,
+      ) => void;
+      duplicateSection: (sectionId: string) => void;
       apiActivityCount: number;
       setApiActivityCount: React.Dispatch<React.SetStateAction<number>>;
       /**
@@ -78,7 +87,7 @@ const newSection = {
   title: "",
   description: "",
   id: uuidv4(),
-  questionData: [],
+  formData: [],
   disabled: false,
   isHidden: false,
 };
@@ -87,6 +96,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   onChange,
   onLogAction,
   deleteMode = "remove",
+  mode = "edit",
 }) => {
   const [showPreview, setShowPreview] = useState(false);
   const [answerData, setAnswerData] = useState({});
@@ -157,7 +167,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
 
           lastSaveRef.current = now;
           const newPast = [...p, prev];
-          return newPast.length > 20 ? newPast.slice(newPast.length - 20) : newPast;
+          return newPast.length > 20
+            ? newPast.slice(newPast.length - 20)
+            : newPast;
         });
         setFuture([]);
       }
@@ -211,15 +223,21 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   }, [formData, onLogAction, setFormData]);
   const removeSection = React.useCallback(
     (sectionId: string) => {
-      if (deleteMode === "isDeleted" || deleteMode === "soft") {
+      if (
+        deleteMode === "isFieldDeleted" ||
+        deleteMode === "isDeleted" ||
+        deleteMode === "soft"
+      ) {
         setFormData((prevFormData) =>
           prevFormData.map((sec) =>
             sec.id === sectionId
               ? {
                   ...sec,
+                  isFieldDeleted: true,
                   isDeleted: true,
-                  questionData: sec?.questionData?.map((q: any) => ({
+                  formData: sec?.formData?.map((q: any) => ({
                     ...q,
+                    isFieldDeleted: true,
                     isDeleted: true,
                   })),
                 }
@@ -240,7 +258,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   const removeElement = React.useCallback(
     (elementId: string, sectionId: string) => {
       const section = formData.find((section) => section.id === sectionId);
-      const elementData = section?.questionData.find(
+      const elementData = section?.formData.find(
         (el: { id: string }) => el.id === elementId,
       );
 
@@ -250,19 +268,31 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
         prevFormData?.map((section) => {
           if (section.id !== sectionId) return section;
 
-          if (deleteMode === "isDeleted" || deleteMode === "soft") {
+          if (
+            deleteMode === "isFieldDeleted" ||
+            deleteMode === "isDeleted" ||
+            deleteMode === "soft"
+          ) {
             return {
               ...section,
-              questionData: section?.questionData?.map((element: any) => {
+              formData: section?.formData?.map((element: any) => {
                 if (elementData.type === "grid") {
                   if (
                     element.gridId === elementData.id ||
                     element.id === elementData.id
                   ) {
-                    return { ...element, isDeleted: true };
+                    return {
+                      ...element,
+                      isFieldDeleted: true,
+                      isDeleted: true,
+                    };
                   }
                 } else if (element.id === elementId) {
-                  return { ...element, isDeleted: true };
+                  return {
+                    ...element,
+                    isFieldDeleted: true,
+                    isDeleted: true,
+                  };
                 }
                 return element;
               }),
@@ -271,7 +301,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
 
           return {
             ...section,
-            questionData: section?.questionData.filter((element: any) => {
+            formData: section?.formData.filter((element: any) => {
               if (elementData.type === "grid") {
                 // remove both the grid and its children
                 return (
@@ -294,12 +324,12 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       const section = formData.find((sec) => sec.id === sectionId);
       if (!section) return;
 
-      const elementIndex = section?.questionData.findIndex(
+      const elementIndex = section?.formData.findIndex(
         (el: any) => el.id === elementId,
       );
       if (elementIndex === -1) return;
 
-      const original = section?.questionData[elementIndex];
+      const original = section?.formData[elementIndex];
 
       const deepCloneWithNewId = (obj: any, overrides: any = {}) => ({
         ...JSON.parse(JSON.stringify(obj)),
@@ -311,7 +341,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
         prevFormData?.map((sec: any) => {
           if (sec.id !== sectionId) return sec;
 
-          const qd = [...sec.questionData];
+          const qd = [...sec.formData];
 
           if (original.type === "grid") {
             // Duplicate a grid and all its children
@@ -335,14 +365,14 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
               deepCloneWithNewId(child, { gridId: newGridId }),
             );
 
-            const newQuestionData = [
+            const newformData = [
               ...qd.slice(0, insertAfter),
               newGrid,
               ...newChildren,
               ...qd.slice(insertAfter),
             ];
 
-            return { ...sec, questionData: newQuestionData };
+            return { ...sec, formData: newformData };
           } else if (original.gridId) {
             // Duplicate a grid child → eject clone to canvas (strip grid bindings)
             // so we don't have to worry about column capacity.
@@ -361,21 +391,21 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
               elementIndex,
             );
 
-            const newQuestionData = [
+            const newformData = [
               ...qd.slice(0, lastGridSiblingIndex + 1),
               newElement,
               ...qd.slice(lastGridSiblingIndex + 1),
             ];
-            return { ...sec, questionData: newQuestionData };
+            return { ...sec, formData: newformData };
           } else {
             // Duplicate a normal canvas element
             const newElement = deepCloneWithNewId(original, {});
-            const newQuestionData = [
+            const newformData = [
               ...qd.slice(0, elementIndex + 1),
               newElement,
               ...qd.slice(elementIndex + 1),
             ];
-            return { ...sec, questionData: newQuestionData };
+            return { ...sec, formData: newformData };
           }
         }),
       );
@@ -389,17 +419,17 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       const section = formData.find((sec) => sec.id === sectionId);
       if (!section) return;
 
-      const elementIndex = section?.questionData.findIndex(
+      const elementIndex = section?.formData.findIndex(
         (el: any) => el.id === elementId,
       );
       if (elementIndex === -1) return;
 
-      const original = section?.questionData[elementIndex];
+      const original = section?.formData[elementIndex];
       let copiedData = null;
 
       if (original.type === "grid") {
-        const children = section.questionData.filter(
-          (e: any) => e.gridId === original.id
+        const children = section.formData.filter(
+          (e: any) => e.gridId === original.id,
         );
         copiedData = {
           type: "FORM_BUILDER_CLIPBOARD",
@@ -428,7 +458,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
         const payloadString = JSON.stringify(copiedData);
         try {
           localStorage.setItem("form_builder_clipboard", payloadString);
-          
+
           // Also try to write to system clipboard
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(payloadString).catch(() => {
@@ -448,15 +478,26 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   );
 
   const pasteElement = React.useCallback(
-    async (sectionId: string, targetIndex?: number, directClipboardText?: string) => {
+    async (
+      sectionId: string,
+      targetIndex?: number,
+      directClipboardText?: string,
+    ) => {
       let clipboardString = "";
 
-      if (directClipboardText && directClipboardText.includes("FORM_BUILDER_CLIPBOARD")) {
+      if (
+        directClipboardText &&
+        directClipboardText.includes("FORM_BUILDER_CLIPBOARD")
+      ) {
         clipboardString = directClipboardText;
       }
 
       // Try system clipboard if no valid direct text was provided
-      if (!clipboardString && navigator.clipboard && navigator.clipboard.readText) {
+      if (
+        !clipboardString &&
+        navigator.clipboard &&
+        navigator.clipboard.readText
+      ) {
         try {
           const sysClipboard = await navigator.clipboard.readText();
           if (sysClipboard && sysClipboard.includes("FORM_BUILDER_CLIPBOARD")) {
@@ -480,7 +521,10 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
 
       try {
         const copiedData = JSON.parse(clipboardString);
-        if (copiedData?.type !== "FORM_BUILDER_CLIPBOARD" || !copiedData?.element) {
+        if (
+          copiedData?.type !== "FORM_BUILDER_CLIPBOARD" ||
+          !copiedData?.element
+        ) {
           toast.error("Invalid clipboard data.");
           return;
         }
@@ -505,33 +549,39 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
           prevFormData?.map((sec: any) => {
             if (sec.id !== sectionId) return sec;
 
-            const qd = [...sec.questionData];
-            const newQuestionData = [...qd];
+            const qd = [...sec.formData];
+            const newformData = [...qd];
 
             if (copiedData.element.type === "grid") {
               const newGridId = uuidv4();
-              const newGrid = deepCloneWithNewId(copiedData.element, { id: newGridId, sectionId });
-              
-              const newChildren = (copiedData.children || []).map((child: any) =>
-                deepCloneWithNewId(child, { gridId: newGridId, sectionId })
+              const newGrid = deepCloneWithNewId(copiedData.element, {
+                id: newGridId,
+                sectionId,
+              });
+
+              const newChildren = (copiedData.children || []).map(
+                (child: any) =>
+                  deepCloneWithNewId(child, { gridId: newGridId, sectionId }),
               );
 
               if (targetIndex !== undefined) {
-                newQuestionData.splice(targetIndex, 0, newGrid, ...newChildren);
+                newformData.splice(targetIndex, 0, newGrid, ...newChildren);
               } else {
-                newQuestionData.push(newGrid, ...newChildren);
+                newformData.push(newGrid, ...newChildren);
               }
             } else {
-              const newElement = deepCloneWithNewId(copiedData.element, { sectionId });
+              const newElement = deepCloneWithNewId(copiedData.element, {
+                sectionId,
+              });
               if (targetIndex !== undefined) {
-                newQuestionData.splice(targetIndex, 0, newElement);
+                newformData.splice(targetIndex, 0, newElement);
               } else {
-                newQuestionData.push(newElement);
+                newformData.push(newElement);
               }
             }
 
-            return { ...sec, questionData: newQuestionData };
-          })
+            return { ...sec, formData: newformData };
+          }),
         );
         toast.success("Element pasted successfully");
         onLogAction?.("PASTE_ELEMENT", { sectionId });
@@ -543,12 +593,228 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
     [setFormData, onLogAction],
   );
 
+  const copySection = React.useCallback(
+    (sectionId: string) => {
+      const section = formData.find((sec: any) => sec.id === sectionId);
+      if (!section) return;
+
+      const copiedData = {
+        type: "FORM_BUILDER_SECTION_CLIPBOARD",
+        section: {
+          title: section.title,
+          description: section.description,
+          disabled: section.disabled,
+          isDisabled: section.isDisabled,
+          isHidden: section.isHidden,
+          formData: section.formData || [],
+        },
+        timestamp: Date.now(),
+      };
+
+      const payloadString = JSON.stringify(copiedData);
+      try {
+        localStorage.setItem("form_builder_section_clipboard", payloadString);
+        localStorage.setItem("form_builder_clipboard", payloadString);
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(payloadString).catch(() => {
+            // Ignore clipboard write permission errors
+          });
+        }
+
+        toast.success("Section copied to clipboard");
+        onLogAction?.("COPY_SECTION", { sectionId });
+      } catch (e) {
+        console.warn("Could not copy section to clipboard", e);
+        toast.error("Failed to copy section");
+      }
+    },
+    [formData, onLogAction],
+  );
+
+  const duplicateSection = React.useCallback(
+    (sectionId: string) => {
+      const sectionIndex = formData.findIndex(
+        (sec: any) => sec.id === sectionId,
+      );
+      if (sectionIndex === -1) return;
+
+      const original = formData[sectionIndex];
+      const deepCloneWithNewId = (obj: any, overrides: any = {}) => ({
+        ...JSON.parse(JSON.stringify(obj)),
+        ...overrides,
+      });
+
+      const newSecId = uuidv4();
+      const oldQuestions = original.formData || [];
+      const idMap = new Map();
+      const newQuestions = oldQuestions.map((q: any) => {
+        const newId = uuidv4();
+        idMap.set(q.id, newId);
+        return deepCloneWithNewId(q, { id: newId, sectionId: newSecId });
+      });
+
+      newQuestions.forEach((q: any) => {
+        if (q.gridId && idMap.has(q.gridId)) {
+          q.gridId = idMap.get(q.gridId);
+        }
+      });
+
+      const newSectionObj = deepCloneWithNewId(original, {
+        id: newSecId,
+        title: original.title ? `${original.title} (Copy)` : "Section (Copy)",
+        formData: newQuestions,
+      });
+
+      setFormData((prev: any[]) => {
+        const arr = [...prev];
+        arr.splice(sectionIndex + 1, 0, newSectionObj);
+        return arr;
+      });
+
+      setSelectedSection(newSecId);
+      setActiveSections((prev: any[]) => {
+        return Array.from(new Set([...prev, sectionIndex + 1]));
+      });
+
+      toast.success("Section duplicated");
+      onLogAction?.("DUPLICATE_SECTION", { sectionId, newSectionId: newSecId });
+    },
+    [formData, onLogAction, setActiveSections, setFormData, setSelectedSection],
+  );
+
+  const pasteSection = React.useCallback(
+    async (targetIndex?: number, directClipboardText?: string) => {
+      let clipboardString = "";
+
+      if (
+        directClipboardText &&
+        directClipboardText.includes("FORM_BUILDER_SECTION_CLIPBOARD")
+      ) {
+        clipboardString = directClipboardText;
+      }
+
+      if (
+        !clipboardString &&
+        navigator.clipboard &&
+        navigator.clipboard.readText
+      ) {
+        try {
+          const sysClipboard = await navigator.clipboard.readText();
+          if (
+            sysClipboard &&
+            sysClipboard.includes("FORM_BUILDER_SECTION_CLIPBOARD")
+          ) {
+            clipboardString = sysClipboard;
+          }
+        } catch (err) {
+          console.warn("Could not read system clipboard", err);
+        }
+      }
+
+      if (!clipboardString) {
+        clipboardString =
+          localStorage.getItem("form_builder_section_clipboard") ||
+          localStorage.getItem("form_builder_clipboard") ||
+          "";
+      }
+
+      if (!clipboardString) {
+        toast.error("Nothing to paste. Copy a section first.");
+        return;
+      }
+
+      try {
+        const copiedData = JSON.parse(clipboardString);
+        if (
+          copiedData?.type !== "FORM_BUILDER_SECTION_CLIPBOARD" ||
+          !copiedData?.section
+        ) {
+          toast.error("Invalid section clipboard data.");
+          return;
+        }
+
+        // Check timestamp for 1-minute expiration
+        if (copiedData.timestamp) {
+          const isExpired = Date.now() - copiedData.timestamp > 60000;
+          if (isExpired) {
+            toast.error("Copied section has expired (1 minute limit).");
+            localStorage.removeItem("form_builder_section_clipboard");
+            localStorage.removeItem("form_builder_clipboard");
+            return;
+          }
+        }
+
+        const deepCloneWithNewId = (obj: any, overrides: any = {}) => ({
+          ...JSON.parse(JSON.stringify(obj)),
+          ...overrides,
+        });
+
+        const newSecId = uuidv4();
+        const rawSec = copiedData.section;
+
+        const oldQuestions = rawSec.formData || [];
+        const idMap = new Map();
+        const newQuestions = oldQuestions.map((q: any) => {
+          const newId = uuidv4();
+          idMap.set(q.id, newId);
+          return deepCloneWithNewId(q, { id: newId, sectionId: newSecId });
+        });
+
+        newQuestions.forEach((q: any) => {
+          if (q.gridId && idMap.has(q.gridId)) {
+            q.gridId = idMap.get(q.gridId);
+          }
+        });
+
+        const newSectionObj = deepCloneWithNewId(rawSec, {
+          id: newSecId,
+          title: rawSec.title ? `${rawSec.title} (Copy)` : "Section (Copy)",
+          formData: newQuestions,
+        });
+
+        setFormData((prevFormData: any[]) => {
+          const prev = [...prevFormData];
+          if (
+            targetIndex !== undefined &&
+            targetIndex >= 0 &&
+            targetIndex <= prev.length
+          ) {
+            prev.splice(targetIndex, 0, newSectionObj);
+            return prev;
+          }
+          return [...prev, newSectionObj];
+        });
+
+        setSelectedSection(newSecId);
+        setActiveSections((prev: any[]) => {
+          const newIndex =
+            targetIndex !== undefined ? targetIndex : formData.length;
+          return Array.from(new Set([...prev, newIndex]));
+        });
+
+        toast.success("Section pasted successfully");
+        onLogAction?.("PASTE_SECTION", { sectionId: newSecId });
+      } catch (e) {
+        console.error("Failed to paste section", e);
+        toast.error("Failed to paste section.");
+      }
+    },
+    [
+      formData.length,
+      onLogAction,
+      setActiveSections,
+      setFormData,
+      setSelectedSection,
+    ],
+  );
+
   const updateElementPosition = React.useCallback(
-    (updatedQuestionData: any[], sectionId: string) => {
+    (updatedformData: any[], sectionId: string) => {
       setFormData((prevFormData) =>
         prevFormData?.map((section) =>
           section.id === sectionId
-            ? { ...section, questionData: updatedQuestionData }
+            ? { ...section, formData: updatedformData }
             : section,
         ),
       );
@@ -564,7 +830,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
           section.id === sectionId
             ? {
                 ...section,
-                questionData: [...(section?.questionData || []), element],
+                formData: [...(section?.formData || []), element],
               }
             : section,
         ),
@@ -580,10 +846,10 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
           section.id === sectionId
             ? {
                 ...section,
-                questionData: [
-                  ...(section?.questionData || []).slice(0, index),
+                formData: [
+                  ...(section?.formData || []).slice(0, index),
                   element,
-                  ...(section?.questionData || []).slice(index),
+                  ...(section?.formData || []).slice(index),
                 ],
               }
             : section,
@@ -600,7 +866,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
           section.id === sectionId
             ? {
                 ...section,
-                questionData: section?.questionData?.map((question: any) =>
+                formData: section?.formData?.map((question: any) =>
                   question.type === "grid" && question.gridData
                     ? {
                         ...question,
@@ -632,16 +898,30 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   const updateElement = React.useCallback(
     (value: any, sectionId: string) => {
       setFormData((prevFormData) =>
-        prevFormData?.map((section) =>
-          section.id === sectionId
-            ? {
-                ...section,
-                questionData: section?.questionData?.map((ele: any) =>
-                  ele.id === value.id ? { ...ele, ...value } : ele,
-                ),
+        prevFormData?.map((section) => {
+          if (section.id !== sectionId) return section;
+
+          const isGridColumnReduction =
+            value?.type === "grid" && typeof value.columns === "number";
+
+          return {
+            ...section,
+            formData: section?.formData?.map((ele: any) => {
+              if (ele.id === value.id) {
+                return { ...ele, ...value };
               }
-            : section,
-        ),
+              // If grid columns were changed, eject any child that exceeds the new column bounds
+              if (
+                isGridColumnReduction &&
+                ele.gridId === value.id &&
+                ele.gridPosition?.col > value.columns
+              ) {
+                return { ...ele, gridId: null, gridPosition: null };
+              }
+              return ele;
+            }),
+          };
+        }),
       );
       onLogAction?.("UPDATE_ELEMENT", { sectionId, value });
     },
@@ -652,7 +932,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
    * moveElement — handles all four cross-context drag scenarios:
    *   1. canvas  → canvas  : plain reorder
    *   2. grid    → canvas  : strip gridId / gridPosition, insert at index
-   *   3. canvas  → grid    : set gridId + gridPosition, keep in questionData
+   *   3. canvas  → grid    : set gridId + gridPosition, keep in formData
    *   4. grid    → grid    : update gridId + gridPosition (same or different grid)
    */
   const moveElement = React.useCallback(
@@ -680,15 +960,15 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
         let sourceDraggedIdx = -1;
 
         for (const section of prevFormData) {
-          const idx = section.questionData?.findIndex(
+          const idx = section.formData?.findIndex(
             (el: any) => el.id === draggedId,
           );
           if (idx !== -1) {
-            dragged = section.questionData[idx];
+            dragged = section.formData[idx];
             sourceSectionId = section.id;
             sourceDraggedIdx = idx;
             if (dragged.type === "grid") {
-              draggedChildren = section.questionData.filter(
+              draggedChildren = section.formData.filter(
                 (el: any) => el.gridId === dragged.id,
               );
             }
@@ -706,7 +986,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
         const movedElement = { ...dragged, sectionId };
 
         return prevFormData.map((section) => {
-          let qd: any[] = [...(section.questionData || [])];
+          let qd: any[] = [...(section.formData || [])];
 
           if (section.id !== sourceSectionId && section.id !== sectionId) {
             return section;
@@ -714,8 +994,6 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
 
           // Same section move
           if (sourceSectionId === sectionId && section.id === sectionId) {
-            const draggedIdx = sourceDraggedIdx;
-
             // ── Scenario 3 & 4: drop INTO a grid cell ──────────────────────────
             if (targetGridId !== undefined && targetCol !== undefined) {
               const occupantIdx = qd.findIndex(
@@ -745,7 +1023,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
                 });
               }
 
-              return { ...section, questionData: newQd };
+              return { ...section, formData: newQd };
             }
 
             // ── Scenario 2: eject from grid → canvas at targetIndex ────────────
@@ -757,12 +1035,15 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
               const stripped = { ...movedElement };
               delete stripped.gridId;
               delete stripped.gridPosition;
-              const without = prevFormData.find(
-                (s: any) => s.id === sectionId,
-              )?.questionData?.filter((el: any) => el.gridId !== draggedId) || [];
+              const without =
+                prevFormData
+                  .find((s: any) => s.id === sectionId)
+                  ?.formData?.filter(
+                    (el: any) => el.id !== draggedId,
+                  ) || [];
               const insertAt = Math.min(targetIndex, without.length);
               without.splice(insertAt, 0, stripped);
-              return { ...section, questionData: without };
+              return { ...section, formData: without };
             }
 
             // ── Scenario 1a: canvas → canvas reorder by targetIndex ──────────
@@ -772,19 +1053,40 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
               targetGridId === undefined &&
               !targetId
             ) {
-              qd.splice(draggedIdx, 1);
-              const insertAt = Math.min(targetIndex, qd.length);
-              qd.splice(insertAt, 0, movedElement);
-              return { ...section, questionData: qd };
+              const itemsToMove =
+                dragged.type === "grid"
+                  ? [movedElement, ...draggedChildren]
+                  : [movedElement];
+              const idsToMove = new Set(itemsToMove.map((i) => i.id));
+
+              const itemsBeforeTarget = qd
+                .slice(0, targetIndex)
+                .filter((el) => idsToMove.has(el.id)).length;
+
+              const remaining = qd.filter((el) => !idsToMove.has(el.id));
+              const insertAt = Math.max(
+                0,
+                Math.min(targetIndex - itemsBeforeTarget, remaining.length),
+              );
+
+              remaining.splice(insertAt, 0, ...itemsToMove);
+              return { ...section, formData: remaining };
             }
 
             // ── Scenario 1b: canvas → canvas reorder by targetId ───────────────
             if (targetId) {
-              const toIdx = qd.findIndex((el: any) => el.id === targetId);
-              if (toIdx === -1) return section;
-              qd.splice(draggedIdx, 1);
-              qd.splice(toIdx, 0, movedElement);
-              return { ...section, questionData: qd };
+              const itemsToMove =
+                dragged.type === "grid"
+                  ? [movedElement, ...draggedChildren]
+                  : [movedElement];
+              const idsToMove = new Set(itemsToMove.map((i) => i.id));
+
+              const remaining = qd.filter((el) => !idsToMove.has(el.id));
+              let insertAt = remaining.findIndex((el: any) => el.id === targetId);
+              if (insertAt === -1) insertAt = remaining.length;
+
+              remaining.splice(insertAt, 0, ...itemsToMove);
+              return { ...section, formData: remaining };
             }
 
             return section;
@@ -796,7 +1098,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
             if (draggedChildren.length > 0) {
               qd = qd.filter((el: any) => el.gridId !== dragged.id);
             }
-            return { ...section, questionData: qd };
+            return { ...section, formData: qd };
           }
 
           // Different section move - Insert into target
@@ -828,7 +1130,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
               } else {
                 qd.push(newMovedElement, ...newChildren);
               }
-              return { ...section, questionData: qd };
+              return { ...section, formData: qd };
             }
 
             // ── Scenario 2 & 1a
@@ -842,7 +1144,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
               delete stripped.gridPosition;
               const insertAt = Math.min(targetIndex, qd.length);
               qd.splice(insertAt, 0, stripped, ...newChildren);
-              return { ...section, questionData: qd };
+              return { ...section, formData: qd };
             }
 
             // ── Scenario 1b
@@ -856,7 +1158,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
               } else {
                 qd.push(stripped, ...newChildren);
               }
-              return { ...section, questionData: qd };
+              return { ...section, formData: qd };
             }
 
             // Fallback
@@ -864,7 +1166,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
             delete stripped.gridId;
             delete stripped.gridPosition;
             qd.push(stripped, ...newChildren);
-            return { ...section, questionData: qd };
+            return { ...section, formData: qd };
           }
 
           return section;
@@ -895,6 +1197,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   const value = useMemo(
     () => ({
       deleteMode,
+      mode,
       formData,
       setFormData,
       handleDragStop,
@@ -931,9 +1234,13 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       canRedo,
       copyElement,
       pasteElement,
+      copySection,
+      pasteSection,
+      duplicateSection,
     }),
     [
       deleteMode,
+      mode,
       formData,
       handleDragStop,
       removeElement,
@@ -961,6 +1268,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       canRedo,
       copyElement,
       pasteElement,
+      copySection,
+      pasteSection,
+      duplicateSection,
     ],
   );
 
