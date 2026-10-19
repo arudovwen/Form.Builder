@@ -11,7 +11,8 @@
       "import": "./dist/form-builder.es.js",
       "require": "./dist/form-builder.umd.js"
     },
-    "./style.css": "./dist/form-builder-react.css"
+    "./style.css": "./dist/form-builder-react.css",
+    "./dist/index.css": "./dist/form-builder-react.css"
   },
   
   "types": "./types/index.d.ts",
