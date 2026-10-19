@@ -21,13 +21,15 @@ export default function ConversationalPage({
   isLast,
   isReadOnly,
   submitText = "Submit",
+  preview = false,
 }: any) {
   const { answerData } = (useContext(EditorContext) as any) || {};
 
   if (!element) {
     return (
-      <div className="flex items-center justify-center min-h-[500px] text-gray-500">
-        No questions available.
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-gray-400 py-12">
+        <AppIcon icon="solar:document-linear" iconClass="text-4xl mb-2 text-gray-300" />
+        <p className="text-sm font-medium">No questions available.</p>
       </div>
     );
   }
@@ -62,7 +64,8 @@ export default function ConversationalPage({
                 validationData={getElementOptions(child, options)}
               />
               {options?.errors?.[child.id]?.message && (
-                <div className="mt-1 text-xs text-red-600 min-h-[1rem]">
+                <div className="mt-1 text-xs text-rose-600 font-medium min-h-[1rem] flex items-center gap-1">
+                  <AppIcon icon="solar:danger-triangle-linear" iconClass="text-xs" />
                   {options.errors[child.id].message}
                 </div>
               )}
@@ -79,14 +82,15 @@ export default function ConversationalPage({
     return (
       <div
         key={el.id}
-        className={clsx("group relative grid gap-y-[6px] min-w-0 w-full", el.elementClass)}
+        className={clsx("group relative grid gap-y-2 min-w-0 w-full", el.elementClass)}
       >
         <RenderElement
           element={el}
           validationData={getElementOptions(el, options)}
         />
         {options?.errors?.[el.id]?.message && (
-          <div className="mt-1 text-xs text-red-600 min-h-[1rem]">
+          <div className="mt-1.5 text-xs text-rose-600 font-medium min-h-[1rem] flex items-center gap-1">
+            <AppIcon icon="solar:danger-triangle-linear" iconClass="text-xs" />
             {options.errors[el.id].message}
           </div>
         )}
@@ -95,8 +99,11 @@ export default function ConversationalPage({
   };
 
   return (
-    <div 
-      className="flex flex-col items-center justify-center min-h-[500px] w-full p-4 sm:p-8 outline-none" 
+    <div
+      className={clsx(
+        "flex flex-col items-center justify-center w-full outline-none transition-all",
+        preview ? "min-h-[300px] p-0" : "min-h-[460px] p-4 sm:p-10"
+      )}
       onKeyDown={handleKeyDown}
       tabIndex={0}
     >
@@ -105,20 +112,25 @@ export default function ConversationalPage({
         key={element.id}
         show={true}
         appear={true}
-        enter="transition-all duration-500 ease-out"
-        enterFrom="opacity-0 translate-y-8"
-        enterTo="opacity-100 translate-y-0"
-        leave="transition-all duration-300 ease-in"
-        leaveFrom="opacity-100 translate-y-0"
-        leaveTo="opacity-0 -translate-y-8"
-        className="w-full max-w-2xl"
+        enter="transition-all duration-400 ease-out"
+        enterFrom="opacity-0 translate-y-6 scale-[0.98]"
+        enterTo="opacity-100 translate-y-0 scale-100"
+        leave="transition-all duration-250 ease-in"
+        leaveFrom="opacity-100 translate-y-0 scale-100"
+        leaveTo="opacity-0 -translate-y-6 scale-[0.98]"
+        className={clsx(
+          "w-full bg-white rounded-3xl border border-gray-100 shadow-xl shadow-slate-100/60 transition-all",
+          preview ? "p-5 sm:p-8 max-w-full" : "p-6 sm:p-10 max-w-3xl"
+        )}
       >
+        {/* Question Header & Content */}
         <div className="text-left w-full mb-8">
-           {element.type === "grid" ? renderGridElement(element) : renderStandardElement(element)}
+          {element.type === "grid" ? renderGridElement(element) : renderStandardElement(element)}
         </div>
-        
+
+        {/* Action Controls */}
         {!isReadOnly && (
-          <div className="flex items-center gap-4 mt-8">
+          <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
             <AppButton
               type="button"
               text={
@@ -129,17 +141,28 @@ export default function ConversationalPage({
                   : "OK"
               }
               onClick={onNext}
-              style={{ background: config?.buttonColor || "#333" }}
-              btnClass={`text-gray-700 border-[#98A2B3] !font-medium !py-[10px] px-10 bg-blue-600 text-white rounded-lg ${isLast ? 'submit_btn' : 'continue_btn next_btn text-sm'}`}
+              style={{ background: config?.buttonColor || "#4f46e5" }}
+              btnClass={`!font-semibold !py-2.5 px-8 text-white rounded-xl shadow-xs hover:opacity-90 transition-all ${
+                isLast ? "submit_btn" : "continue_btn next_btn text-sm"
+              }`}
               isDisabled={options?.apiActivityCount > 0 || (isLast && options?.isSubmitting)}
             />
-            {!isLast && <span className="text-xs text-gray-400 font-medium hidden sm:inline-block">press Enter ↵</span>}
-            
+
+            {!isLast && (
+              <span className="text-xs text-gray-400 font-medium hidden sm:inline-flex items-center gap-1">
+                press <kbd className="px-1.5 py-0.5 text-[10px] bg-gray-100 border border-gray-200 rounded font-mono text-gray-600">Enter ↵</kbd>
+              </span>
+            )}
+
             {!isFirst && (
-               <button type="button" onClick={onPrev} className="text-gray-400 hover:text-gray-600 font-semibold  ml-auto flex items-center gap-1 transition-colors">
-                 <AppIcon icon="material-symbols:arrow-upward-rounded" iconClass="text-lg" />
-                 Back
-               </button>
+              <button
+                type="button"
+                onClick={onPrev}
+                className="text-gray-400 hover:text-gray-700 font-medium text-xs ml-auto flex items-center gap-1.5 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-50"
+              >
+                <AppIcon icon="material-symbols:arrow-upward-rounded" iconClass="text-base" />
+                Previous Question
+              </button>
             )}
           </div>
         )}

@@ -1,8 +1,8 @@
 interface TopBarProps {
-    title: string;
-    goBackUrl: () => void;
-    onSubmit?: (e: any) => void;
-    onPublish?: (e: any) => void;
+    title?: string;
+    goBackUrl?: () => void;
+    onSubmit?: (data: any, settings?: any) => void;
+    onPublish?: (data: any, settings?: any) => void;
     previewLoading?: boolean;
     saveLoading?: boolean;
     publishLoading?: boolean;

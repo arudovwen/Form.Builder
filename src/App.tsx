@@ -23,11 +23,91 @@ const pollResultsMap = pollApiResponse.data.submissionsData.reduce(
   {} as Record<string, any>,
 );
 
+const initialSampleForm = [
+  {
+    id: "sec-onboarding-1",
+    title: "Personal & Feedback Details",
+    description: "Please share basic details and tell us about your experience.",
+    disabled: false,
+    isHidden: false,
+    formData: [
+      {
+        id: "field-full-name",
+        sectionId: "sec-onboarding-1",
+        type: "textField",
+        label: "Short Text",
+        icon: "ri:text",
+        inputLabel: "Full Name",
+        inputType: "text",
+        required: true,
+        isRequired: true,
+        placeholder: "e.g. Alex Morgan",
+        description: "Your official name or handle.",
+      },
+      {
+        id: "field-work-email",
+        sectionId: "sec-onboarding-1",
+        type: "email",
+        label: "Email",
+        icon: "fluent:mail-24-regular",
+        inputLabel: "Work Email Address",
+        inputType: "email",
+        required: true,
+        isRequired: true,
+        placeholder: "alex@company.com",
+        description: "We'll send your confirmation details here.",
+      },
+      {
+        id: "field-company-size",
+        sectionId: "sec-onboarding-1",
+        type: "selectField",
+        label: "Dropdown",
+        icon: "ri:arrow-down-s-line",
+        inputLabel: "Company Size",
+        inputType: "select",
+        required: false,
+        placeholder: "Select your company size",
+        options: [
+          { id: "opt-1", label: "1 - 10 employees", value: "1_10" },
+          { id: "opt-2", label: "11 - 50 employees", value: "11_50" },
+          { id: "opt-3", label: "51 - 250 employees", value: "51_250" },
+          { id: "opt-4", label: "250+ employees", value: "enterprise" },
+        ],
+      },
+      {
+        id: "field-product-rating",
+        sectionId: "sec-onboarding-1",
+        type: "rating",
+        label: "Star Rating",
+        icon: "solar:star-line-duotone",
+        inputLabel: "How would you rate your recent experience?",
+        inputType: "rating",
+        required: true,
+        isRequired: true,
+        max: 5,
+        description: "Rate from 1 to 5 stars.",
+      },
+      {
+        id: "field-feedback-comments",
+        sectionId: "sec-onboarding-1",
+        type: "longText",
+        label: "Long Text",
+        icon: "fluent:text-paragraph-24-regular",
+        inputLabel: "What features or improvements would you like to see?",
+        inputType: "textarea",
+        required: false,
+        placeholder: "Share your thoughts, suggestions, or ideas...",
+        description: "Your feedback helps shape our product improvements.",
+      },
+    ],
+  },
+];
+
 function App() {
   const config = {
-    buttonColor: "#6366f1",
-    loaderColor: "#6366f1",
-    elementColor: "#6366f1",
+    buttonColor: "#4f46e5",
+    loaderColor: "#4f46e5",
+    elementColor: "#4f46e5",
     elementBgColor: "#ffffff",
     elementBorderColor: "#e5e7eb",
   };
@@ -40,27 +120,40 @@ function App() {
           element={
             <div className="h-screen">
               <BulderPage
-                onSubmit={function (e: any): void {
-                  devLog("Builder submit:", e);
+                onSubmit={function (data: any, settings: any): void {
+                  devLog("Builder submit data:", data, "settings:", settings);
                 }}
-                onPublish={function (e: any): void {
-                  devLog("Builder publish:", e);
+                onPublish={function (data: any, settings: any): void {
+                  devLog("Builder publish data:", data, "settings:", settings);
                 }}
-                onChange={(updatedFormData) => {
-                  devLog("Form updated!", updatedFormData);
+                onChange={(updatedFormData, settings) => {
+                  devLog("Form updated!", updatedFormData, "settings:", settings);
                 }}
                 onLogAction={(action, value) => {
                   devLog(`[FormBuilder Log] Action: ${action}`, value);
                 }}
-                formData={[]}
+                formData={initialSampleForm}
                 config={config}
-                title="Form Title"
+                title="Customer Onboarding & Product Feedback"
+                description="Help us improve our service by providing feedback on your recent interaction."
+                formSettings={{
+                  title: "Customer Onboarding & Product Feedback",
+                  description:
+                    "Help us improve our service by providing feedback on your recent interaction.",
+                  renderType: "multi",
+                  submitText: "Submit Feedback",
+                  buttonColor: "#4f46e5",
+                  showProgressBar: true,
+                  allowMultipleSubmissions: true,
+                }}
+                onTitleChange={(t) => devLog("Title changed:", t)}
+                onDescriptionChange={(d) => devLog("Description changed:", d)}
+                onFormSettingsChange={(s) => devLog("Form settings changed:", s)}
                 goBackUrl={() => undefined}
                 onAddTemplate={() => alert("Add template clicked!")}
-                onShowVersion={() => alert(" teonShowVersionmplate clicked!")}
+                onShowVersion={() => alert("Version history clicked!")}
                 deleteMode="soft"
-                mode="create"
-                // formType="poll"
+                mode="edit"
               />
             </div>
           }
@@ -72,124 +165,14 @@ function App() {
               onSubmit={function (e: any): void {
                 devLog("Viewer submit:", e);
               }}
-              answerData={[
-    {
-        "id": "8ebb31a6-83cf-4074-ba34-6e65c42f9b46",
-        "value": [
-            "Plac",
-            "placeholder_1"
-        ],
-        "sectionId": "0470cf02-007a-43d1-9d2d-7bccfc9e17af",
-        "type": "multiSelect",
-        "metaData": {}
-    },
-    {
-        "id": "c8d3bddf-4234-424e-b24c-2b0f516bcb10",
-        "value": "",
-        "sectionId": "0470cf02-007a-43d1-9d2d-7bccfc9e17af",
-        "type": "selectField",
-        "metaData": {}
-    }
-]}
-              form_data={[
-                {
-                  title: "",
-                  description: "",
-                  id: "0470cf02-007a-43d1-9d2d-7bccfc9e17af",
-                  formData: [
-                    {
-                      required: false,
-                      description: "",
-                      value: null,
-                      isReadOnly: false,
-                      isDisabled: false,
-                      isRequired: false,
-                      customClass: "",
-                      elementClass: "",
-                      gridPosition: null,
-                      gridId: null,
-                      isHidden: false,
-                      visibilityDependentFields: [],
-                      filterByFieldId: "",
-                      clearOnFilterChange: true,
-                      maxLength: null,
-                      minLength: null,
-                      placeholder: "Type here",
-                      requiredMessage: "Field is required",
-                      minLengthMessage: "",
-                      maxLengthMessage: "",
-                      type: "selectField",
-                      label: "List",
-                      icon: "tabler:select",
-                      inputLabel: "Select Text Label",
-                      inputType: "select",
-                      selectType: "Combobox",
-                      options: [
-                        {
-                          label: "Placeholder 1",
-                          value: "placeholder_1",
-                          id: "63cb8818-583d-4100-bfae-ccb632db70a4",
-                        },
-                      ],
-                      id: "d7de3eab-39af-4a65-9613-44bf351cf279",
-                      sectionId: "0470cf02-007a-43d1-9d2d-7bccfc9e17af",
-                      dateType: "basic",
-                      selectionType: "multiple",
-                      options1: [],
-                      dataColumns: [],
-                    },
-                    {
-                      required: false,
-                      description: "",
-                      value: null,
-                      isReadOnly: false,
-                      isDisabled: false,
-                      isRequired: false,
-                      customClass: "",
-                      elementClass: "",
-                      gridPosition: null,
-                      gridId: null,
-                      isHidden: false,
-                      visibilityDependentFields: [],
-                      filterByFieldId: "",
-                      clearOnFilterChange: true,
-                      maxLength: null,
-                      minLength: null,
-                      placeholder: "Type here",
-                      requiredMessage: "Field is required",
-                      minLengthMessage: "",
-                      maxLengthMessage: "",
-                      type: "multiSelect",
-                      label: "Multi List",
-                      icon: "fluent-mdl2:multi-select",
-                      inputLabel: "Select Text Label",
-                      inputType: "select",
-                      minChecked: 1,
-                      requireAllChecked: false,
-                      options: [
-                        {
-                          label: "Placeholder 1",
-                          value: "placeholder_1",
-                          id: "87cc347f-ee1a-4e97-bc55-e80ed42f44bb",
-                        },
-                      ],
-                      id: "8ebb31a6-83cf-4074-ba34-6e65c42f9b46",
-                      sectionId: "0470cf02-007a-43d1-9d2d-7bccfc9e17af",
-                    },
-                  ],
-                  disabled: false,
-                  isHidden: false,
-                },
-              ]}
+              form_data={initialSampleForm}
+              title="Customer Onboarding & Product Feedback"
               config={config}
               loading={false}
-              renderType={"multi"}
+              renderType="multi"
               onGetValues={(val: any) => {
                 devLog("Viewer getValues:", val);
               }}
-              // showResults={true}
-              // hideInputsOnResults={true}
-              // pollResults={pollResultsMap}
               uploadUrl="https://beta.api.gateway.thetaskforge.co/edms/v1/fileupload/upload-document"
             />
           }

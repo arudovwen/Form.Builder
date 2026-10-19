@@ -12,6 +12,8 @@ interface formData {
     maxLengthMessage?: string;
     minAmountMessage?: string;
     maxAmountMessage?: string;
+    pattern?: string;
+    patternMessage?: string;
     isDisabled?: boolean;
 }
 interface Section {

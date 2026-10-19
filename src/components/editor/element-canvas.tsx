@@ -120,6 +120,12 @@ function ElementCanvas({ elementData, sectionId }: any) {
     setIsDragging,
     addElementInPosition,
     moveElement,
+    selectedElementId,
+    setSelectedElementId,
+    duplicateElement,
+    copyElement,
+    removeElement,
+    openAdvancedModal,
   }: any = useContext(EditorContext);
 
   const [draggedElementId, setDraggedElementId] = useState<string | null>(null);
@@ -296,37 +302,114 @@ function ElementCanvas({ elementData, sectionId }: any) {
   // ── Render a draggable element card ─────────────────────────────────────────
   // insideGrid=true: omit onDragOver/onDrop so the parent cell handles the drop
   const renderDraggableElement = useCallback(
-    (element: any, insideGrid = false) => (
-      <div
-        key={element.id}
-        id={element.id}
-        draggable
-        onDragStart={(e) => handleDragStart(e, element.id)}
-        onDragOver={
-          insideGrid
-            ? undefined
-            : (e: DragEvent<HTMLDivElement>) => {
-                e.preventDefault();
-                e.stopPropagation();
-                e.dataTransfer.dropEffect = "move";
-              }
-        }
-        onDrop={insideGrid ? undefined : handleDrop}
-        onDragEnd={handleDragEnd}
-        className={clsx(
-          "cursor-grab active:cursor-grabbing border p-4 w-full rounded-lg",
-          "transition-all duration-200 ease-in-out",
-          draggedElementId === element.id
-            ? "opacity-40 scale-[0.98] bg-gray-100 border-dashed border-blue-300 shadow-inner"
-            : draggedElementId
-              ? "bg-white border-dashed border-blue-200 shadow-sm"
-              : "bg-white border-gray-200 shadow-sm hover:border-blue-300 hover:shadow-md",
-        )}
-      >
-        {RenderElement(element, sectionId)}
-      </div>
-    ),
-    [draggedElementId, handleDrop, sectionId, handleDragStart, handleDragEnd],
+    (element: any, insideGrid = false) => {
+      const isSelected = selectedElementId === element.id;
+
+      return (
+        <div
+          key={element.id}
+          id={element.id}
+          draggable
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedElementId?.(element.id);
+          }}
+          onDragStart={(e) => handleDragStart(e, element.id)}
+          onDragOver={
+            insideGrid
+              ? undefined
+              : (e: DragEvent<HTMLDivElement>) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.dataTransfer.dropEffect = "move";
+                }
+          }
+          onDrop={insideGrid ? undefined : handleDrop}
+          onDragEnd={handleDragEnd}
+          className={clsx(
+            "relative cursor-grab active:cursor-grabbing border p-5 w-full rounded-xl select-none",
+            "transition-all duration-200 ease-in-out",
+            draggedElementId === element.id
+              ? "opacity-40 scale-[0.98] bg-gray-50 border-dashed border-indigo-400 shadow-inner"
+              : isSelected
+                ? "bg-white border-indigo-500 ring-2 ring-indigo-500/20 shadow-md"
+                : "bg-white border-gray-200/90 shadow-2xs hover:border-gray-300 hover:shadow-xs",
+          )}
+        >
+          {/* Floating Action Pill Toolbar when selected */}
+          {isSelected && (
+            <div className="absolute -top-3.5 right-4 z-30 flex items-center gap-1.5 bg-slate-900 text-white px-2.5 py-1 rounded-full shadow-lg text-[11px] font-medium animate-fadeIn">
+              <span className="text-gray-300 px-1 border-r border-gray-700/90">
+                {element.label || element.type}
+              </span>
+              {element.isRequired && (
+                <span className="text-amber-400 text-[10px] uppercase font-bold pr-1 border-r border-gray-700/90">
+                  Required
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  duplicateElement?.(element.id, sectionId);
+                }}
+                className="p-0.5 text-gray-300 hover:text-white transition-colors"
+                title="Duplicate field"
+              >
+                <AppIcon icon="lucide:copy" iconClass="text-xs" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copyElement?.(element.id, sectionId);
+                }}
+                className="p-0.5 text-gray-300 hover:text-white transition-colors"
+                title="Copy field to clipboard"
+              >
+                <AppIcon icon="lucide:clipboard-copy" iconClass="text-xs" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openAdvancedModal?.(element);
+                }}
+                className="p-0.5 text-gray-300 hover:text-indigo-400 transition-colors"
+                title="Advanced Settings"
+              >
+                <AppIcon icon="solar:settings-bold-duotone" iconClass="text-xs" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeElement?.(element.id, sectionId);
+                }}
+                className="p-0.5 text-gray-300 hover:text-red-400 transition-colors"
+                title="Delete field"
+              >
+                <AppIcon icon="lucide:trash-2" iconClass="text-xs" />
+              </button>
+            </div>
+          )}
+
+          {RenderElement(element, sectionId)}
+        </div>
+      );
+    },
+    [
+      draggedElementId,
+      handleDrop,
+      sectionId,
+      handleDragStart,
+      handleDragEnd,
+      selectedElementId,
+      setSelectedElementId,
+      duplicateElement,
+      copyElement,
+      removeElement,
+    ],
   );
 
   // ── Active elements ─────────────────────────────────────────────────────────
@@ -433,12 +516,17 @@ function ElementCanvas({ elementData, sectionId }: any) {
           const gridChildren = gridChildrenMap[el.id] || [];
           const isBeingDragged = draggedElementId === el.id;
           const otherDragging = !!draggedElementId && !isBeingDragged;
+          const isSelected = selectedElementId === el.id;
 
           return (
             <div key={el.id} className="flex flex-col gap-0">
               <div
                 id={el.id}
                 draggable
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedElementId?.(el.id);
+                }}
                 onDragStart={(e) => handleDragStart(e, el.id)}
                 onDragOver={(e: DragEvent<HTMLDivElement>) => {
                   e.preventDefault();
@@ -448,15 +536,57 @@ function ElementCanvas({ elementData, sectionId }: any) {
                 onDrop={handleDrop}
                 onDragEnd={handleDragEnd}
                 className={clsx(
-                  "w-full p-4 border rounded-lg cursor-grab active:cursor-grabbing",
-                  "transition-all duration-200 ease-in-out",
+                  "relative w-full p-5 border rounded-xl cursor-grab active:cursor-grabbing",
+                  "transition-all duration-200 ease-in-out select-none",
                   isBeingDragged
-                    ? "opacity-40 scale-[0.98] bg-gray-100 border-dashed border-blue-400 shadow-inner"
-                    : otherDragging
-                      ? "bg-white border-dashed border-blue-200"
-                      : "bg-white border-gray-200 shadow-sm hover:border-blue-300 hover:shadow-md",
+                    ? "opacity-40 scale-[0.98] bg-gray-50 border-dashed border-indigo-400 shadow-inner"
+                    : isSelected
+                      ? "bg-white border-indigo-500 ring-2 ring-indigo-500/20 shadow-md"
+                      : otherDragging
+                        ? "bg-white border-dashed border-indigo-200"
+                        : "bg-white border-gray-200/90 shadow-2xs hover:border-gray-300 hover:shadow-xs",
                 )}
               >
+                {isSelected && (
+                  <div className="absolute -top-3.5 right-4 z-30 flex items-center gap-1.5 bg-slate-900 text-white px-2.5 py-1 rounded-full shadow-lg text-[11px] font-medium animate-fadeIn">
+                    <span className="text-gray-300 px-1 border-r border-gray-700/90">
+                      Grid Layout ({el.columns || 2} Cols)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        duplicateElement?.(el.id, sectionId);
+                      }}
+                      className="p-0.5 text-gray-300 hover:text-white transition-colors"
+                      title="Duplicate grid"
+                    >
+                      <AppIcon icon="lucide:copy" iconClass="text-xs" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openAdvancedModal?.(el);
+                      }}
+                      className="p-0.5 text-gray-300 hover:text-indigo-400 transition-colors"
+                      title="Advanced Grid Settings"
+                    >
+                      <AppIcon icon="solar:settings-bold-duotone" iconClass="text-xs" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeElement?.(el.id, sectionId);
+                      }}
+                      className="p-0.5 text-gray-300 hover:text-red-400 transition-colors"
+                      title="Delete grid"
+                    >
+                      <AppIcon icon="lucide:trash-2" iconClass="text-xs" />
+                    </button>
+                  </div>
+                )}
                 <ElementContainer element={el} state="edit">
                   <GridInput
                     element={el}

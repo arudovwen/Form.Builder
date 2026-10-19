@@ -18,8 +18,13 @@ interface ElementContainerProps {
 const ElementContainer = memo(
   ({ state, element, children }: ElementContainerProps) => {
     const [isOpen, setOpen] = useState(false);
-    const { removeElement, duplicateElement, updateElement, copyElement }: any =
-      React.useContext(EditorContext);
+    const {
+      removeElement,
+      duplicateElement,
+      updateElement,
+      copyElement,
+      selectedElementId,
+    }: any = React.useContext(EditorContext);
     const acceptedFileLabels = useMemo(
       () =>
         element?.acceptedFiles?.map((i: { label: any }) => i.label).join(", "),
@@ -39,22 +44,26 @@ const ElementContainer = memo(
             element={element}
           />
         )}
-        <div className="flex items-center justify-between mb-2">
-          <span>
-            {" "}
-            {element.inputLabel && (
-              <label className="text-sm font-medium input_label">
-                {element.inputLabel}{" "}
+        <div className="flex items-center justify-between mb-2.5">
+          <span className="flex items-center gap-1.5 flex-wrap">
+            {element.inputLabel ? (
+              <label className="text-sm font-semibold text-gray-800 tracking-tight flex items-center gap-1">
+                {element.inputLabel}
+                {element.isRequired && (
+                  <span className="text-red-500 font-bold ml-0.5" title="Required field">
+                    *
+                  </span>
+                )}
                 {acceptedFileLabels && (
-                  <span className="text-gray-400 text-xs">
+                  <span className="text-gray-400 text-xs font-normal">
                     ({acceptedFileLabels?.toLowerCase()})
                   </span>
                 )}
               </label>
-            )}
+            ) : null}
           </span>
-          {state === "edit" && (
-            <span className="flex items-center gap-x-3">
+          {state === "edit" && !selectedElementId && (
+            <span className="flex items-center gap-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
               {element.type?.toLowerCase() !== "spacer" && element.type?.toLowerCase() !== "divider" && (
                 <>
                   {element.isDisabled && (
@@ -67,71 +76,25 @@ const ElementContainer = memo(
                       Read Only
                     </span>
                   )}
-                  <label className="flex items-center gap-1 text-xs cursor-pointer text-gray-500 mr-2 hover:text-gray-700 select-none">
-                    <input
-                      type="checkbox"
-                      checked={element.isRequired || false}
-                      onChange={(e) =>
-                        updateElement(
-                          { ...element, isRequired: e.target.checked },
-                          element.sectionId
-                        )
-                      }
-                      className="cursor-pointer"
-                    />
-                    <span className="mt-0.5">Required</span>
-                  </label>
                 </>
               )}
 
-
-              {
-                <button
-                  type="button"
-                  className="text-sm outline-none hover:opacity-80 py-1 text-gray-600"
-                  onClick={() => {
-                    if (typeof duplicateElement === 'function') {
-                      duplicateElement(element?.id, element.sectionId);
-                    }
-                  }}
-                  title="Duplicate"
-                >
-                  <AppIcon icon="solar:copy-outline" iconClass="text-base" />
-                </button>
-              }
-
-              {
-                <button
-                  type="button"
-                  className="text-sm outline-none hover:opacity-80 py-1 text-gray-600"
-                  onClick={() => {
-                    if (typeof copyElement === 'function') {
-                      copyElement(element?.id, element.sectionId);
-                      // Optional: simple toast or visual feedback could go here
-                    }
-                  }}
-                  title="Copy to Clipboard"
-                >
-                  <AppIcon icon="lucide:clipboard-copy" iconClass="text-base" />
-                </button>
-              }
-
               <button
                 type="button"
-                className="text-sm outline-none hover:opacity-80 text-gray-600 py-1"
-                onClick={() => setOpen(true)}
-                title="Edit"
+                className="p-1 text-gray-400 hover:text-gray-700 rounded transition-colors"
+                onClick={() => duplicateElement?.(element?.id, element.sectionId)}
+                title="Duplicate"
               >
-                <AppIcon icon="circum:edit" iconClass="text-base" />
+                <AppIcon icon="lucide:copy" iconClass="text-xs" />
               </button>
 
               <button
                 type="button"
-                className="text-sm outline-none hover:opacity-80 text-gray-600 py-1"
+                className="p-1 text-gray-400 hover:text-red-600 rounded transition-colors"
                 onClick={handleRemove}
                 title="Remove"
               >
-                <AppIcon icon="iconamoon:trash" iconClass="text-base" />
+                <AppIcon icon="lucide:trash-2" iconClass="text-xs" />
               </button>
             </span>
           )}

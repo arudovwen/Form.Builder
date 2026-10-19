@@ -23,6 +23,8 @@ interface formData {
   maxLengthMessage?: string;
   minAmountMessage?: string;
   maxAmountMessage?: string;
+  pattern?: string;
+  patternMessage?: string;
   isDisabled?: boolean;
 }
 
@@ -108,6 +110,8 @@ const addTextValidations = (
     maxLength,
     minLengthMessage,
     maxLengthMessage,
+    pattern,
+    patternMessage,
   }: Partial<formData>,
 ) => {
   let updatedSchema = schema;
@@ -124,6 +128,22 @@ const addTextValidations = (
       maxLength,
       maxLengthMessage || DEFAULT_MESSAGES.maxLength(maxLength),
     );
+  }
+
+  if (pattern && typeof pattern === "string" && pattern.trim() !== "") {
+    try {
+      const regex = new RegExp(pattern);
+      updatedSchema = updatedSchema.test(
+        "custom-pattern",
+        patternMessage || "Invalid format",
+        (val) => {
+          if (!val || String(val).trim() === "") return true;
+          return regex.test(String(val));
+        },
+      );
+    } catch {
+      // Ignore invalid regex
+    }
   }
 
   return updatedSchema;

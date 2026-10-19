@@ -90,7 +90,8 @@ interface FormInputs {
   requireAllChecked?: boolean;
   selectionType?: string;
   minLabel?: string;
-  maxLabel?: string;
+  pattern?: string;
+  patternMessage?: string;
   filterByFieldId?: string;
   clearOnFilterChange?: boolean;
 }
@@ -107,6 +108,8 @@ const schema = yup.object().shape({
   requiredMessage: yup.string().nullable(),
   minLengthMessage: yup.string().nullable(),
   maxLengthMessage: yup.string().nullable(),
+  pattern: yup.string().nullable(),
+  patternMessage: yup.string().nullable(),
   maxLength: yup
     .number()
     .transform((value, originalValue) =>
@@ -222,8 +225,10 @@ const schema = yup.object().shape({
 });
 
 const tabs = [
-  { title: "Configurations", key: "basic" },
-  { title: "Validations", key: "validation" },
+  { title: "Configurations", key: "basic", icon: "solar:tuning-2-bold-duotone" },
+  { title: "Validations", key: "validation", icon: "solar:shield-check-bold-duotone" },
+  { title: "Conditional Logic", key: "logic", icon: "solar:branching-paths-up-bold-duotone" },
+  { title: "Data & Code", key: "advanced", icon: "solar:code-bold-duotone" },
 ];
 
 interface ElementEditorModalProps {
@@ -1158,511 +1163,779 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
     </div>
   );
 
+  const [copiedId, setCopiedId] = useState(false);
+  const handleCopyId = () => {
+    if (element?.id) {
+      navigator.clipboard.writeText(element.id);
+      setCopiedId(true);
+      toast.success("Field ID copied to clipboard!");
+      setTimeout(() => setCopiedId(false), 2000);
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
+  const regexPresets = [
+    { label: "Email", pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$", message: "Must be a valid email address" },
+    { label: "URL", pattern: "^https?:\\/\\/.*$", message: "Must be a valid URL starting with http:// or https://" },
+    { label: "Numbers only", pattern: "^[0-9]+$", message: "Only numeric digits are allowed" },
+    { label: "Alphanumeric", pattern: "^[a-zA-Z0-9]+$", message: "Only letters and numbers are allowed" },
+    { label: "Phone", pattern: "^\\+?[0-9\\s\\-()]{7,20}$", message: "Must be a valid phone number" },
+  ];
+
   const modalContent = (
     <div
-      className="fixed inset-0 bg-gray-800/40 backdrop-blur-sm flex items-center justify-end z-[999] cursor-default"
-      onMouseDown={(e) => e.stopPropagation()}
+      className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-end z-[999] cursor-default animate-in fade-in duration-200"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       onPointerDown={(e) => e.stopPropagation()}
       onDragStart={(e) => {
         e.preventDefault();
         e.stopPropagation();
       }}
     >
-      <div className="w-full lg:w-2/3 xl:w-2/5 bg-white h-screen  shadow-xl relative flex flex-col  items-center">
-        <button
-          className="bg-white h-10 w-10 flex justify-center items-center absolute top-1 -left-12 rounded-lg hover:bg-gray-50"
-          onClick={onClose}
-        >
-          <AppIcon icon="tabler:x" iconClass="text-xl" />
-        </button>
-        {/* Header */}
-        {/* <div className="z-10 flex flex-col items-start w-full gap-4 px-6 pt-4 pb-5 mb-3">
-          <button
-            onClick={onClose}
-            type="button"
-            aria-label="close"
-            className="absolute right-4 top-4 p-2 text-[#98A2B3] hover:bg-gray-50 rounded-lg"
-          >
-            <AppIcon icon="tabler:x" />
-          </button>
-        </div> */}
+      <div className="w-full sm:w-[580px] lg:w-[680px] xl:w-[740px] bg-white h-full shadow-2xl flex flex-col border-l border-gray-200/90 animate-in slide-in-from-right duration-300">
+        {/* Top Header */}
+        <div className="px-6 py-4 border-b border-gray-200/80 bg-white flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0 shadow-xs">
+              <AppIcon
+                icon={element?.icon || "solar:widget-2-bold-duotone"}
+                iconClass="text-xl"
+              />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-gray-900 truncate">
+                  {watch("inputLabel") || element.label || "Element Settings"}
+                </h3>
+                <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-semibold uppercase tracking-wider border border-indigo-100">
+                  {element.type || element.inputType}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                <button
+                  type="button"
+                  onClick={handleCopyId}
+                  className="group flex items-center gap-1 text-[11px] font-mono text-gray-500 hover:text-indigo-600 bg-gray-100 hover:bg-indigo-50 px-2 py-0.5 rounded-md transition-colors border border-gray-200/60"
+                  title="Click to copy field ID"
+                >
+                  <span>ID: {element.id}</span>
+                  <AppIcon
+                    icon={copiedId ? "solar:check-circle-bold" : "lucide:copy"}
+                    iconClass={clsx(
+                      "text-[10px]",
+                      copiedId ? "text-emerald-600" : "text-gray-400 group-hover:text-indigo-600",
+                    )}
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
 
-        {/* Tabs */}
-        <div className="w-full pt-4">
-          <TabsComponent
-            tabs={filteredTabs}
-            setActiveTab={setActiveTab}
-            activeTab={activeTab}
-            className="justify-start !text-left"
-            btnClass=" !text-left"
-          />
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 flex items-center justify-center transition-colors"
+            title="Close (Esc)"
+          >
+            <AppIcon icon="lucide:x" iconClass="text-base" />
+          </button>
+        </div>
+
+        {/* Modern Segmented Navigation Tabs */}
+        <div className="px-6 py-2.5 bg-gray-50/80 border-b border-gray-200/80 shrink-0 overflow-x-auto no-scrollbar">
+          <div className="flex bg-gray-200/70 p-1 rounded-xl text-xs font-semibold gap-1 min-w-max">
+            {filteredTabs.map((tab: any) => {
+              const isTabActive = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  className={clsx(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all select-none cursor-pointer",
+                    isTabActive
+                      ? "bg-white text-indigo-600 font-bold shadow-xs"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-white/50",
+                  )}
+                >
+                  <AppIcon
+                    icon={tab.icon || "solar:settings-linear"}
+                    iconClass={clsx(
+                      "text-sm",
+                      isTabActive ? "text-indigo-600" : "text-gray-400",
+                    )}
+                  />
+                  <span>{tab.title}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Form Content */}
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="w-full flex-1 flex flex-col"
+          className="w-full flex-1 flex flex-col min-h-0"
           autoComplete="off"
         >
-          <div className="flex-1 pb-6">
-            {" "}
-            <div className="config_box max-h-[80vh] overflow-y-auto flex-1">
-              {activeTab === "basic" && (
-                <div className="z-10 flex flex-col w-full gap-5 px-6">
-                  {allowValue.includes(element.inputType) && (
+          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+            {/* ── TAB 1: BASIC CONFIGURATIONS ───────────────────────────────── */}
+            {activeTab === "basic" && (
+              <div className="space-y-5 animate-in fade-in duration-200">
+                {allowValue.includes(element.inputType) && (
+                  <DynamicInput
+                    watch={watch}
+                    label="Value"
+                    name="value"
+                    register={register}
+                    errors={errors}
+                    element={element}
+                  />
+                )}
+
+                {!allowValue.includes(element.inputType) &&
+                  !noAllowValidation.includes(element.inputType) && (
                     <>
                       <DynamicInput
                         watch={watch}
-                        label="Value"
-                        name="value"
+                        label="Field Label"
+                        name="inputLabel"
                         register={register}
                         errors={errors}
                         element={element}
+                        placeholder="e.g. Full Name"
                       />
-                    </>
-                  )}
 
-                  {!allowValue.includes(element.inputType) &&
-                    !noAllowValidation.includes(element.inputType) && (
-                      <>
+                      {element.type.toLowerCase() === "cascadeselect" && (
                         <DynamicInput
                           watch={watch}
-                          label="Label"
-                          name="inputLabel"
+                          label="Child Dropdown Label"
+                          name="childLabel"
                           register={register}
                           errors={errors}
                           element={element}
-                        />{" "}
-                        {element.type.toLowerCase() === "cascadeselect" && (
+                          placeholder="e.g. City / District"
+                        />
+                      )}
+
+                      {element.inputType === "nps" && (
+                        <div className="grid grid-cols-2 gap-3">
                           <DynamicInput
                             watch={watch}
-                            label="Child Label"
-                            name="childLabel"
+                            label="Low Rating Label"
+                            name="minLabel"
                             register={register}
                             errors={errors}
                             element={element}
+                            placeholder="Not at all likely"
                           />
-                        )}
-                        {element.inputType === "nps" && (
-                          <>
-                            <DynamicInput
-                              watch={watch}
-                              label="Low Rating Label (e.g. Not at all likely)"
-                              name="minLabel"
-                              register={register}
-                              errors={errors}
-                              element={element}
-                              placeholder="Not at all likely"
-                            />
-                            <DynamicInput
-                              watch={watch}
-                              label="High Rating Label (e.g. Extremely likely)"
-                              name="maxLabel"
-                              register={register}
-                              errors={errors}
-                              element={element}
-                              placeholder="Extremely likely"
-                            />
-                          </>
-                        )}
-                      </>
-                    )}
-                  {AllowValidationPlaceholder.includes(element.inputType) && (
-                    <DynamicInput
-                      watch={watch}
-                      label="Placeholder"
-                      name="placeholder"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                    />
-                  )}
-                  {AllowValidationPrefix.includes(element.inputType) && (
-                    <DynamicInput
-                      watch={watch}
-                      label="Prefix"
-                      name="prefix"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                    />
-                  )}
-                  {AllowValueSource.includes(element.inputType) && (
-                    <div className="grid gap-y-4">
-                      <CustomSelect
-                        label="Value Source"
-                        options={[
-                          { label: "Manual Input", value: "manual" },
-                          { label: "From Another Field", value: "field" },
-                        ]}
-                        register={register}
-                        name={"valueSource"}
-                        setValue={setValue}
-                        trigger={trigger}
-                        value={watch("valueSource") || "manual"}
-                      />
-                      {watch("valueSource") === "field" && (
-                        <CustomSelect
-                          label="Source Field"
-                          options={mentionData.map((m: any) => ({
-                            label: m.display,
-                            value: m.id,
-                          }))}
-                          register={register}
-                          name={"sourceFieldId"}
-                          setValue={setValue}
-                          trigger={trigger}
-                          value={watch("sourceFieldId")}
-                        />
-                      )}
-                    </div>
-                  )}
-                  {AllowApiOptions.includes(element.inputType) && (
-                    <div className="grid gap-y-4">
-                      <ApiExample />
-                      <DynamicInput
-                        watch={watch}
-                        label="Api Url"
-                        name="url"
-                        register={register}
-                        errors={errors}
-                        element={element}
-                      />
-                      <CustomSelect
-                        label="Api Method"
-                        options={[
-                          {
-                            label: "GET",
-                            value: "GET",
-                          },
-                          {
-                            label: "POST",
-                            value: "POST",
-                          },
-                        ]}
-                        register={register}
-                        name={"method"}
-                        setValue={setValue}
-                        trigger={trigger}
-                        value={watch("method")}
-                      />
-                      <CustomSelect
-                        label="Api Response type"
-                        options={[
-                          {
-                            label: "String",
-                            value: "string",
-                          },
-                          {
-                            label: "Object",
-                            value: "object",
-                          },
-                        ]}
-                        register={register}
-                        name={"responseType"}
-                        setValue={setValue}
-                        trigger={trigger}
-                        value={watch("responseType")}
-                      />
-                    </div>
-                  )}
-                  {AllowTableOptions.includes(element.inputType) && (
-                    <TableInputColumn
-                      onChange={(newValues: any) => {
-                        setValue("denominators", newValues);
-                      }}
-                      value={watch("denominators")}
-                    />
-                  )}
-                  {!allowValue.includes(element.inputType) &&
-                    !noAllowValidation.includes(element.inputType) && (
-                      <DynamicInput
-                        watch={watch}
-                        label="Short Description"
-                        name="description"
-                        register={register}
-                        errors={errors}
-                        element={element}
-                      />
-                    )}
-                  {element.type.toLowerCase() === "date" && (
-                    <>
-                      {/* {watch("dateType") === "custom" && ( */}
-                      <CustomSelect
-                        label="Date Format"
-                        options={dateFormats}
-                        register={register}
-                        name={"dateFormat"}
-                        setValue={setValue}
-                        trigger={trigger}
-                        value={watch("dateFormat")}
-                      />
-                      <DynamicInput
-                        watch={watch}
-                        label="Allow Range"
-                        name="canHaveDateRange"
-                        register={register}
-                        errors={errors}
-                        element={element}
-                        type="checkbox"
-                        value={values.canHaveDateRange}
-                      />
-                      {values?.canHaveDateRange && (
-                        <div className="grid grid-cols-2 gap-4">
-                          <CustomDatePicker
-                            name="minDate"
-                            value={values?.minDate}
-                            onGetValue={setValue}
-                            placeholder="Select min date"
-                          />
-                          <CustomDatePicker
-                            name="maxDate"
-                            value={values?.minDate}
-                            onGetValue={setValue}
-                            placeholder="Select max date"
-                            minDate={values?.minDate}
+                          <DynamicInput
+                            watch={watch}
+                            label="High Rating Label"
+                            name="maxLabel"
+                            register={register}
+                            errors={errors}
+                            element={element}
+                            placeholder="Extremely likely"
                           />
                         </div>
                       )}
-                      <DynamicInput
-                        watch={watch}
-                        label="Allow Year Picker"
-                        name="allowYearPicker"
-                        register={register}
-                        errors={errors}
-                        element={element}
-                        type="checkbox"
-                        value={values.allowYearPicker}
-                      />
                     </>
                   )}
-                  {element.type.toLowerCase() === "time" && (
+
+                {AllowValidationPlaceholder.includes(element.inputType) && (
+                  <DynamicInput
+                    watch={watch}
+                    label="Placeholder Text"
+                    name="placeholder"
+                    register={register}
+                    errors={errors}
+                    element={element}
+                    placeholder="e.g. Enter details..."
+                  />
+                )}
+
+                {!allowValue.includes(element.inputType) &&
+                  !noAllowValidation.includes(element.inputType) && (
                     <DynamicInput
                       watch={watch}
-                      label="24 Hour Format"
-                      name="is24Hour"
+                      label="Helper Text / Subtext"
+                      name="description"
                       register={register}
                       errors={errors}
                       element={element}
-                      type="checkbox"
-                      value={values.is24Hour}
+                      placeholder="Brief guidance for respondent..."
                     />
                   )}
-                  {element.type.toLowerCase() === "country" && (
-                    <DynamicInput
-                      watch={watch}
-                      label="Allow States"
-                      name="showState"
-                      register={register}
-                      errors={errors}
-                      element={element}
-                      type="checkbox"
-                      value={values.showState}
-                    />
-                  )}
-                  {element.type.toLowerCase() === "selectfield" && (
+
+                {AllowValidationPrefix.includes(element.inputType) && (
+                  <DynamicInput
+                    watch={watch}
+                    label="Prefix / Symbol"
+                    name="prefix"
+                    register={register}
+                    errors={errors}
+                    element={element}
+                    placeholder="e.g. $, €, #"
+                  />
+                )}
+
+                {/* Date options */}
+                {element.type.toLowerCase() === "date" && (
+                  <div className="p-4 bg-gray-50/80 rounded-2xl border border-gray-200/80 space-y-4">
                     <CustomSelect
-                      label="Select Type"
-                      options={[
-                        {
-                          label: "List",
-                          value: "list",
-                        },
-                        {
-                          label: "Combobox",
-                          value: "Combobox",
-                        },
-                      ]}
+                      label="Date Format"
+                      options={dateFormats}
                       register={register}
-                      name={"selectType"}
+                      name="dateFormat"
                       setValue={setValue}
                       trigger={trigger}
-                      value={watch("selectType")}
+                      value={watch("dateFormat")}
                     />
-                  )}
-                  {["multiselect", "checkbox"].includes(
-                    element.type.toLowerCase(),
-                  ) && (
-                    <>
-                      {element.type.toLowerCase() === "checkbox" && (
-                        <CustomSelect
-                          label="Selection Mode"
-                          options={[
-                            {
-                              label: "Multi Check (Allow multiple checks)",
-                              value: "multiple",
-                            },
-                            {
-                              label: "Single Check (Allow only one check)",
-                              value: "single",
-                            },
-                          ]}
-                          register={register}
-                          name={"selectionType"}
-                          setValue={setValue}
-                          trigger={trigger}
-                          value={watch("selectionType") || "multiple"}
+
+                    <div className="flex items-center justify-between pt-2">
+                      <span className="text-xs font-semibold text-gray-700">Allow Date Range</span>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={Boolean(values.canHaveDateRange)}
+                        onClick={() => setValue("canHaveDateRange", !values.canHaveDateRange, { shouldDirty: true })}
+                        className={clsx(
+                          "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                          values.canHaveDateRange ? "bg-indigo-600" : "bg-gray-200"
+                        )}
+                      >
+                        <span
+                          className={clsx(
+                            "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
+                            values.canHaveDateRange ? "translate-x-4" : "translate-x-0"
+                          )}
                         />
+                      </button>
+                    </div>
+
+                    {values?.canHaveDateRange && (
+                      <div className="grid grid-cols-2 gap-3">
+                        <CustomDatePicker
+                          name="minDate"
+                          value={values?.minDate}
+                          onGetValue={setValue}
+                          placeholder="Select min date"
+                        />
+                        <CustomDatePicker
+                          name="maxDate"
+                          value={values?.minDate}
+                          onGetValue={setValue}
+                          placeholder="Select max date"
+                          minDate={values?.minDate}
+                        />
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-200/60">
+                      <span className="text-xs font-semibold text-gray-700">Allow Year Picker</span>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={Boolean(values.allowYearPicker)}
+                        onClick={() => setValue("allowYearPicker", !values.allowYearPicker, { shouldDirty: true })}
+                        className={clsx(
+                          "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                          values.allowYearPicker ? "bg-indigo-600" : "bg-gray-200"
+                        )}
+                      >
+                        <span
+                          className={clsx(
+                            "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
+                            values.allowYearPicker ? "translate-x-4" : "translate-x-0"
+                          )}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Time 24-hr */}
+                {element.type.toLowerCase() === "time" && (
+                  <div className="flex items-center justify-between p-3.5 bg-gray-50/80 rounded-xl border border-gray-200/80">
+                    <span className="text-xs font-semibold text-gray-800">24-Hour Format</span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={Boolean(values.is24Hour)}
+                      onClick={() => setValue("is24Hour", !values.is24Hour, { shouldDirty: true })}
+                      className={clsx(
+                        "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                        values.is24Hour ? "bg-indigo-600" : "bg-gray-200"
                       )}
-                      {(watch("selectionType") || element.selectionType) !== "single" && (
-                        <>
-                          <DynamicInput
-                            watch={watch}
-                            label="Minimum Options Checked"
-                            name="minChecked"
-                            register={register}
-                            errors={errors}
-                            element={element}
-                            type="number"
-                          />
-                          <div className="w-[250px]">
-                            <DynamicInput
-                              watch={watch}
-                              label="Require All Checked"
-                              name="requireAllChecked"
-                              register={register}
-                              errors={errors}
-                              element={element}
-                              type="checkbox"
-                              value={values.requireAllChecked}
-                            />
-                          </div>
-                        </>
+                    >
+                      <span
+                        className={clsx(
+                          "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
+                          values.is24Hour ? "translate-x-4" : "translate-x-0"
+                        )}
+                      />
+                    </button>
+                  </div>
+                )}
+
+                {/* Country allow states */}
+                {element.type.toLowerCase() === "country" && (
+                  <div className="flex items-center justify-between p-3.5 bg-gray-50/80 rounded-xl border border-gray-200/80">
+                    <span className="text-xs font-semibold text-gray-800">Include State / Region Selector</span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={Boolean(values.showState)}
+                      onClick={() => setValue("showState", !values.showState, { shouldDirty: true })}
+                      className={clsx(
+                        "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                        values.showState ? "bg-indigo-600" : "bg-gray-200"
                       )}
-                    </>
-                  )}
-                  {element.type.toLowerCase() === "grid" && (
+                    >
+                      <span
+                        className={clsx(
+                          "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
+                          values.showState ? "translate-x-4" : "translate-x-0"
+                        )}
+                      />
+                    </button>
+                  </div>
+                )}
+
+                {/* Select Type */}
+                {element.type.toLowerCase() === "selectfield" && (
+                  <CustomSelect
+                    label="Dropdown Style"
+                    options={[
+                      { label: "Standard Dropdown List", value: "list" },
+                      { label: "Searchable Combobox", value: "Combobox" },
+                    ]}
+                    register={register}
+                    name="selectType"
+                    setValue={setValue}
+                    trigger={trigger}
+                    value={watch("selectType") || "list"}
+                  />
+                )}
+
+                {/* Checkbox Selection Mode */}
+                {element.type.toLowerCase() === "checkbox" && (
+                  <CustomSelect
+                    label="Checkbox Mode"
+                    options={[
+                      { label: "Multiple Checkboxes Allowed", value: "multiple" },
+                      { label: "Single Exclusive Check (Radio-style)", value: "single" },
+                    ]}
+                    register={register}
+                    name="selectionType"
+                    setValue={setValue}
+                    trigger={trigger}
+                    value={watch("selectionType") || "multiple"}
+                  />
+                )}
+
+                {/* Grid columns */}
+                {element.type.toLowerCase() === "grid" && (
+                  <DynamicInput
+                    watch={watch}
+                    label="Number of Columns (1 to 4)"
+                    name="columns"
+                    register={register}
+                    errors={errors}
+                    element={element}
+                    max={4}
+                    min={1}
+                    type="number"
+                  />
+                )}
+
+                {/* File Upload settings */}
+                {element.type.toLowerCase() === "file" && (
+                  <div className="p-4 bg-gray-50/80 rounded-2xl border border-gray-200/80 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-gray-800">Allow Multiple Files</span>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={Boolean(values.isMultiple)}
+                        onClick={() => setValue("isMultiple", !values.isMultiple, { shouldDirty: true })}
+                        className={clsx(
+                          "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                          values.isMultiple ? "bg-indigo-600" : "bg-gray-200"
+                        )}
+                      >
+                        <span
+                          className={clsx(
+                            "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
+                            values.isMultiple ? "translate-x-4" : "translate-x-0"
+                          )}
+                        />
+                      </button>
+                    </div>
+
+                    <MultiSelectInput
+                      element={{
+                        options: FileTypes,
+                        id: "acceptedFiles",
+                        value: values?.acceptedFiles,
+                      }}
+                      validationData={{ register, setValue, trigger, watch }}
+                      placeholder="Choose allowed file types"
+                    />
+
                     <DynamicInput
                       watch={watch}
-                      label="Number of columns (max: 4)"
-                      name="columns"
+                      label="Max File Size (MB)"
+                      name="maxFileSize"
                       register={register}
                       errors={errors}
                       element={element}
-                      max={4}
-                      min={1}
+                      type="number"
+                      placeholder="e.g. 10"
                     />
-                  )}
-                  {element.type.toLowerCase() === "document" && (
-                    <div className="grid gap-y-6">
-                      <div className="grid gap-y-1">
-                        <DynamicInput
-                          watch={watch}
-                          label="Document Options Url"
-                          name="url"
-                          register={register}
-                          errors={errors}
-                          element={element}
-                        />{" "}
-                        <DocumentSignExample />
-                      </div>
-                      <div className="grid gap-y-1">
-                        <DynamicInput
-                          watch={watch}
-                          label="Document Validation Url"
-                          name="validationUrl"
-                          register={register}
-                          errors={errors}
-                          element={element}
-                        />
-                        <ValidateExample />
-                      </div>
-                      <div className="grid gap-y-1">
-                        <DynamicInput
-                          watch={watch}
-                          label="Signature Page Url"
-                          name="signatureLink"
-                          register={register}
-                          errors={errors}
-                          element={element}
-                        />
-                      </div>
-                    </div>
-                  )}
-                  {element.type.toLowerCase() === "datagrid" &&
-                    renderColumnsFields()}
+                  </div>
+                )}
 
-                  {element.type.toLowerCase() === "file" && (
-                    <>
+                {/* Options field manager */}
+                {AllowOptions.includes(element.inputType) && renderOptionsFields()}
+              </div>
+            )}
+
+            {/* ── TAB 2: VALIDATIONS & RULES ─────────────────────────────────── */}
+            {activeTab === "validation" && (
+              <div className="space-y-5 animate-in fade-in duration-200">
+                {/* Required switch */}
+                <div className="p-4 bg-gray-50/80 rounded-2xl border border-gray-200/80 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-gray-900 block">Required Question</span>
+                      <span className="text-[11px] text-gray-400">Respondent must answer this field before submitting</span>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={Boolean(values.isRequired)}
+                      onClick={() => setValue("isRequired", !values.isRequired, { shouldDirty: true })}
+                      className={clsx(
+                        "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                        values.isRequired ? "bg-indigo-600" : "bg-gray-200"
+                      )}
+                    >
+                      <span
+                        className={clsx(
+                          "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
+                          values.isRequired ? "translate-x-4" : "translate-x-0"
+                        )}
+                      />
+                    </button>
+                  </div>
+
+                  {values.isRequired && (
+                    <div className="pt-2 border-t border-gray-200/60">
                       <DynamicInput
                         watch={watch}
-                        label="Allow Multiple Uploads"
-                        name="isMultiple"
+                        label="Custom Required Error Message"
+                        name="requiredMessage"
                         register={register}
                         errors={errors}
                         element={element}
-                        type="checkbox"
-                        value={values.isMultiple}
+                        placeholder="e.g. This question is required"
                       />
-                      <MultiSelectInput
-                        element={{
-                          options: FileTypes,
-                          id: "acceptedFiles",
-                          value: values?.acceptedFiles,
-                        }}
-                        validationData={{ register, setValue, trigger, watch }}
-                        placeholder="Choose file types"
-                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Read Only & Disabled switches */}
+                {!["spacer", "divider", "section", "grid"].includes(element.type?.toLowerCase()) && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3.5 bg-gray-50/80 rounded-xl border border-gray-200/80 flex items-center justify-between">
+                      <div>
+                        <span className="text-xs font-semibold text-gray-800 block">Read Only</span>
+                        <span className="text-[10px] text-gray-400">Viewable, not editable</span>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={Boolean(values.isReadOnly)}
+                        onClick={() => setValue("isReadOnly", !values.isReadOnly, { shouldDirty: true })}
+                        className={clsx(
+                          "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                          values.isReadOnly ? "bg-indigo-600" : "bg-gray-200"
+                        )}
+                      >
+                        <span
+                          className={clsx(
+                            "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
+                            values.isReadOnly ? "translate-x-4" : "translate-x-0"
+                          )}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="p-3.5 bg-gray-50/80 rounded-xl border border-gray-200/80 flex items-center justify-between">
+                      <div>
+                        <span className="text-xs font-semibold text-gray-800 block">Disabled</span>
+                        <span className="text-[10px] text-gray-400">Inactive on form</span>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={Boolean(values.isDisabled)}
+                        onClick={() => setValue("isDisabled", !values.isDisabled, { shouldDirty: true })}
+                        className={clsx(
+                          "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                          values.isDisabled ? "bg-indigo-600" : "bg-gray-200"
+                        )}
+                      >
+                        <span
+                          className={clsx(
+                            "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
+                            values.isDisabled ? "translate-x-4" : "translate-x-0"
+                          )}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Min / Max Length */}
+                {AllowValidationMaxMin.includes(element.inputType) && (
+                  <div className="p-4 bg-gray-50/80 rounded-2xl border border-gray-200/80 space-y-4">
+                    <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Character Length Limits</h4>
+                    <div className="grid grid-cols-2 gap-3">
                       <DynamicInput
                         watch={watch}
-                        label="Max File Size (MB)"
-                        name="maxFileSize"
+                        label="Min Length"
+                        name="minLength"
                         register={register}
                         errors={errors}
                         element={element}
                         type="number"
+                        placeholder="e.g. 3"
                       />
-                    </>
-                  )}
-                  {AllowOptions.includes(element.inputType) &&
-                    renderOptionsFields()}
+                      <DynamicInput
+                        watch={watch}
+                        label="Max Length"
+                        name="maxLength"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="number"
+                        placeholder="e.g. 100"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <DynamicInput
+                        watch={watch}
+                        label="Min Length Message"
+                        name="minLengthMessage"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        placeholder="e.g. Must be at least 3 chars"
+                      />
+                      <DynamicInput
+                        watch={watch}
+                        label="Max Length Message"
+                        name="maxLengthMessage"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        placeholder="e.g. Cannot exceed 100 chars"
+                      />
+                    </div>
+                  </div>
+                )}
 
-                  {!["spacer", "divider", "section", "grid"].includes(
-                    element.type?.toLowerCase(),
-                  ) && (
-                    <div className="flex items-center gap-x-6 mb-4">
-                      <div className="w-[150px]">
-                        <DynamicInput
-                          watch={watch}
-                          label="Disabled"
-                          name="isDisabled"
-                          register={register}
-                          errors={errors}
-                          element={element}
-                          type="checkbox"
-                          value={values.isDisabled}
-                        />
-                      </div>
-                      <div className="w-[150px]">
-                        <DynamicInput
-                          watch={watch}
-                          label="Read Only"
-                          name="isReadOnly"
-                          register={register}
-                          errors={errors}
-                          element={element}
-                          type="checkbox"
-                          value={values.isReadOnly}
-                        />
+                {/* Min / Max Amount */}
+                {AllowValidationAmount.includes(element.inputType) && (
+                  <div className="p-4 bg-gray-50/80 rounded-2xl border border-gray-200/80 space-y-4">
+                    <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Numeric / Amount Limits</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <DynamicInput
+                        watch={watch}
+                        label="Min Amount"
+                        name="minAmount"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="amount"
+                        placeholder="e.g. 10"
+                      />
+                      <DynamicInput
+                        watch={watch}
+                        label="Max Amount"
+                        name="maxAmount"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="amount"
+                        placeholder="e.g. 50000"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <DynamicInput
+                        watch={watch}
+                        label="Min Amount Message"
+                        name="minAmountMessage"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        placeholder="e.g. Minimum amount is 10"
+                      />
+                      <DynamicInput
+                        watch={watch}
+                        label="Max Amount Message"
+                        name="maxAmountMessage"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        placeholder="e.g. Maximum amount is 50,000"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Min Checked for checkbox / multiselect */}
+                {["multiselect", "checkbox"].includes(element.type.toLowerCase()) &&
+                  (watch("selectionType") || element.selectionType) !== "single" && (
+                    <div className="p-4 bg-gray-50/80 rounded-2xl border border-gray-200/80 space-y-3">
+                      <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Checkbox Selection Constraints</h4>
+                      <DynamicInput
+                        watch={watch}
+                        label="Minimum Options Checked"
+                        name="minChecked"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        type="number"
+                        placeholder="e.g. 2"
+                      />
+                      <div className="flex items-center justify-between pt-2 border-t border-gray-200/60">
+                        <div>
+                          <span className="text-xs font-semibold text-gray-800 block">Require All Options Checked</span>
+                          <span className="text-[10px] text-gray-400">All available options must be marked</span>
+                        </div>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={Boolean(values.requireAllChecked)}
+                          onClick={() => setValue("requireAllChecked", !values.requireAllChecked, { shouldDirty: true })}
+                          className={clsx(
+                            "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                            values.requireAllChecked ? "bg-indigo-600" : "bg-gray-200"
+                          )}
+                        >
+                          <span
+                            className={clsx(
+                              "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
+                              values.requireAllChecked ? "translate-x-4" : "translate-x-0"
+                            )}
+                          />
+                        </button>
                       </div>
                     </div>
                   )}
 
-                  {/* VisibilityEditor  */}
-                  <div>
-                    <div className="w-[150px] mb-4">
-                      <DynamicInput
-                        watch={watch}
-                        label="Toggle Visibility"
-                        name="isHidden"
-                        register={register}
-                        errors={errors}
-                        element={element}
-                        type="checkbox"
-                        value={values.isHidden}
+                {/* NEW FEATURE: Custom Regex Pattern Validation */}
+                {["textField", "longText", "email", "url", "numberField"].includes(element.type) && (
+                  <div className="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <AppIcon icon="solar:code-scan-bold-duotone" iconClass="text-indigo-600 text-lg" />
+                        <div>
+                          <h4 className="text-xs font-bold text-gray-900">Custom Regex Pattern</h4>
+                          <p className="text-[11px] text-gray-500">Validate input against a custom regular expression</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      <span className="text-[10px] text-gray-400 self-center mr-1">Presets:</span>
+                      {regexPresets.map((preset) => (
+                        <button
+                          key={preset.label}
+                          type="button"
+                          onClick={() => {
+                            setValue("pattern", preset.pattern, { shouldDirty: true, shouldValidate: true });
+                            setValue("patternMessage", preset.message, { shouldDirty: true, shouldValidate: true });
+                          }}
+                          className="px-2 py-0.5 rounded-md bg-white border border-indigo-200 hover:border-indigo-400 text-indigo-700 text-[10px] font-medium shadow-2xs transition-colors"
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <DynamicInput
+                      watch={watch}
+                      label="Regular Expression Pattern"
+                      name="pattern"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                      placeholder="e.g. ^[0-9]{5}$"
+                    />
+
+                    <DynamicInput
+                      watch={watch}
+                      label="Pattern Failure Error Message"
+                      name="patternMessage"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                      placeholder="e.g. Please enter a valid 5-digit postal code"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── TAB 3: CONDITIONAL LOGIC & RULES ───────────────────────────── */}
+            {activeTab === "logic" && (
+              <div className="space-y-5 animate-in fade-in duration-200">
+                {/* Initial Visibility Switch */}
+                <div className="p-4 bg-gray-50/80 rounded-2xl border border-gray-200/80 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-gray-900 block">Initially Hidden</span>
+                      <span className="text-[11px] text-gray-400">
+                        Hide this field by default until conditional logic criteria are met
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={Boolean(values.isHidden)}
+                      onClick={() => setValue("isHidden", !values.isHidden, { shouldDirty: true })}
+                      className={clsx(
+                        "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                        values.isHidden ? "bg-indigo-600" : "bg-gray-200"
+                      )}
+                    >
+                      <span
+                        className={clsx(
+                          "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
+                          values.isHidden ? "translate-x-4" : "translate-x-0"
+                        )}
                       />
-                    </div>{" "}
-                    {values.isHidden && (
+                    </button>
+                  </div>
+
+                  {values.isHidden && (
+                    <div className="pt-3 border-t border-gray-200/70">
                       <VisibilityEditor
                         register={register}
                         setValue={setValue}
@@ -1670,207 +1943,258 @@ const ElementEditorModal: React.FC<ElementEditorModalProps> = ({
                         watch={watch}
                         id={element?.id}
                       />
-                    )}
-                  </div>
-                  {element.type.toLowerCase() === "calculatedfield" && (
-                    <div className="grid gap-y-2 mb-4">
-                      <label className="block text-sm font-medium text-[#344054] font-onest">
-                        Formula
-                      </label>
-                      <FormulaMentionInput
-                        value={watch("formula") || ""}
-                        onChange={(val) =>
-                          setValue("formula", val, {
-                            shouldValidate: true,
-                            shouldDirty: true,
-                          })
-                        }
-                        fields={mentionData}
-                        placeholder="Build your formula..."
-                      />
-                    </div>
-                  )}
-
-                  {element.type.toLowerCase() === "polling" && (
-                    <div className="grid gap-y-4 mb-4 mt-2">
-                      <DynamicInput
-                        watch={watch}
-                        label="Fetch results from external API"
-                        name="fetchExternalResults"
-                        register={register}
-                        errors={errors}
-                        element={element}
-                        type="checkbox"
-                        value={values.fetchExternalResults}
-                      />
-                      {values.fetchExternalResults && (
-                        <DynamicInput
-                          watch={watch}
-                          label="External API URL (returns options results)"
-                          name="externalApiUrl"
-                          register={register}
-                          errors={errors}
-                          element={element}
-                          placeholder="https://api.example.com/poll/results"
-                        />
-                      )}
                     </div>
                   )}
                 </div>
-              )}
 
-              {!noAllowValidation.includes(element.type.toLowerCase()) &&
-                activeTab === "validation" && (
-                  <div className="z-10 flex flex-col w-full gap-5 px-6">
-                    <div className="flex items-center gap-x-6">
-                      <div className="w-[150px]">
-                        <DynamicInput
-                          watch={watch}
-                          label="Required"
-                          name="isRequired"
-                          register={register}
-                          errors={errors}
-                          element={element}
-                          type="checkbox"
-                          value={values.isRequired}
-                        />
-                      </div>{" "}
-                      <div className="flex-1">
-                        <DynamicInput
-                          watch={watch}
-                          label="Error message text"
-                          name="requiredMessage"
-                          register={register}
-                          errors={errors}
-                          element={element}
-                        />
-                      </div>
-                    </div>
-                    {AllowValidationMaxMin.includes(element.inputType) && (
-                      <>
-                        <div className="flex items-center gap-x-6">
-                          <div className="w-[150px]">
-                            <DynamicInput
-                              watch={watch}
-                              label="Min Length"
-                              name="minLength"
-                              register={register}
-                              errors={errors}
-                              element={element}
-                              type="number"
-                            />
-                          </div>{" "}
-                          <div className="flex-1">
-                            <DynamicInput
-                              watch={watch}
-                              label="Error message text"
-                              name="minLengthMessage"
-                              register={register}
-                              errors={errors}
-                              element={element}
-                            />
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-x-6">
-                          <div className="w-[150px]">
-                            <DynamicInput
-                              watch={watch}
-                              label="Max Length"
-                              name="maxLength"
-                              register={register}
-                              errors={errors}
-                              element={element}
-                              type="number"
-                            />
-                          </div>{" "}
-                          <div className="flex-1">
-                            <DynamicInput
-                              watch={watch}
-                              label="Error message text"
-                              name="maxLengthMessage"
-                              register={register}
-                              errors={errors}
-                              element={element}
-                            />
-                          </div>
-                        </div>
-                      </>
-                    )}
-                    {AllowValidationAmount.includes(element.inputType) && (
-                      <>
-                        <div className="flex items-center gap-x-6">
-                          <div className="w-[150px]">
-                            <DynamicInput
-                              watch={watch}
-                              label="Min Amount"
-                              name="minAmount"
-                              register={register}
-                              errors={errors}
-                              element={element}
-                              type="amount"
-                            />
-                          </div>{" "}
-                          <div className="flex-1">
-                            <DynamicInput
-                              watch={watch}
-                              label="Error message text"
-                              name="minAmountMessage"
-                              register={register}
-                              errors={errors}
-                              element={element}
-                            />
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-x-6">
-                          <div className="w-[150px]">
-                            <DynamicInput
-                              watch={watch}
-                              label="Max Amount"
-                              name="maxAmount"
-                              register={register}
-                              errors={errors}
-                              element={element}
-                              type="amount"
-                            />
-                          </div>{" "}
-                          <div className="flex-1">
-                            <DynamicInput
-                              watch={watch}
-                              label="Error message text"
-                              name="maxAmountMessage"
-                              register={register}
-                              errors={errors}
-                              element={element}
-                            />
-                          </div>
-                        </div>
-                      </>
+                {/* Calculated formula */}
+                {element.type.toLowerCase() === "calculatedfield" && (
+                  <div className="p-4 bg-white rounded-2xl border border-gray-200/80 space-y-3 shadow-xs">
+                    <label className="block text-xs font-bold text-gray-900 uppercase tracking-wider">
+                      Calculation Formula
+                    </label>
+                    <p className="text-xs text-gray-400">
+                      Type <strong>@</strong> to mention other numeric fields in your calculation (e.g. <code>@Price * @Quantity</code>).
+                    </p>
+                    <FormulaMentionInput
+                      value={watch("formula") || ""}
+                      onChange={(val) =>
+                        setValue("formula", val, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        })
+                      }
+                      fields={mentionData}
+                      placeholder="e.g. @Question1 + @Question2"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── TAB 4: DATA & CODE ─────────────────────────────────────────── */}
+            {activeTab === "advanced" && (
+              <div className="space-y-5 animate-in fade-in duration-200">
+                {/* Field ID */}
+                <div className="p-4 bg-gray-50/80 rounded-2xl border border-gray-200/80 space-y-2">
+                  <label className="block text-xs font-bold text-gray-900">Unique Field Identifier (ID)</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={element.id || ""}
+                      className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-mono text-gray-600 select-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCopyId}
+                      className="px-3 py-2 text-xs font-semibold text-gray-700 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg shadow-2xs transition-colors flex items-center gap-1.5"
+                    >
+                      <AppIcon icon="lucide:copy" iconClass="text-xs" />
+                      <span>{copiedId ? "Copied" : "Copy"}</span>
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-gray-400">
+                    Used for conditional logic, calculations, API submissions, and custom webhook payloads.
+                  </p>
+                </div>
+
+                {/* Custom CSS Class */}
+                <DynamicInput
+                  watch={watch}
+                  label="Custom CSS Class Name"
+                  name="customClass"
+                  register={register}
+                  errors={errors}
+                  element={element}
+                  placeholder="e.g. my-custom-field w-full md:w-1/2"
+                />
+
+                {/* Value Source */}
+                {AllowValueSource.includes(element.inputType) && (
+                  <div className="p-4 bg-gray-50/80 rounded-2xl border border-gray-200/80 space-y-3">
+                    <CustomSelect
+                      label="Value Source"
+                      options={[
+                        { label: "Manual Input", value: "manual" },
+                        { label: "Populate from Another Field", value: "field" },
+                      ]}
+                      register={register}
+                      name="valueSource"
+                      setValue={setValue}
+                      trigger={trigger}
+                      value={watch("valueSource") || "manual"}
+                    />
+                    {watch("valueSource") === "field" && (
+                      <CustomSelect
+                        label="Source Field"
+                        options={mentionData.map((m: any) => ({
+                          label: m.display,
+                          value: m.id,
+                        }))}
+                        register={register}
+                        name="sourceFieldId"
+                        setValue={setValue}
+                        trigger={trigger}
+                        value={watch("sourceFieldId")}
+                      />
                     )}
                   </div>
                 )}
-            </div>
+
+                {/* API Integration for Dynamic Values */}
+                {AllowApiOptions.includes(element.inputType) && (
+                  <div className="p-4 bg-gray-50/80 rounded-2xl border border-gray-200/80 space-y-3">
+                    <ApiExample />
+                    <DynamicInput
+                      watch={watch}
+                      label="API Endpoint URL"
+                      name="url"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                      placeholder="https://api.example.com/options"
+                    />
+                    <div className="grid grid-cols-2 gap-3">
+                      <CustomSelect
+                        label="HTTP Method"
+                        options={[
+                          { label: "GET", value: "GET" },
+                          { label: "POST", value: "POST" },
+                        ]}
+                        register={register}
+                        name="method"
+                        setValue={setValue}
+                        trigger={trigger}
+                        value={watch("method") || "GET"}
+                      />
+                      <CustomSelect
+                        label="Response Format"
+                        options={[
+                          { label: "String Array", value: "string" },
+                          { label: "Object Key/Value", value: "object" },
+                        ]}
+                        register={register}
+                        name="responseType"
+                        setValue={setValue}
+                        trigger={trigger}
+                        value={watch("responseType") || "object"}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* DataGrid columns */}
+                {element.type.toLowerCase() === "datagrid" && renderColumnsFields()}
+
+                {/* Table denominators */}
+                {AllowTableOptions.includes(element.inputType) && (
+                  <TableInputColumn
+                    onChange={(newValues: any) => {
+                      setValue("denominators", newValues);
+                    }}
+                    value={watch("denominators")}
+                  />
+                )}
+
+                {/* Polling External Results */}
+                {element.type.toLowerCase() === "polling" && (
+                  <div className="p-4 bg-gray-50/80 rounded-2xl border border-gray-200/80 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-gray-800">Fetch Results from External API</span>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={Boolean(values.fetchExternalResults)}
+                        onClick={() => setValue("fetchExternalResults", !values.fetchExternalResults, { shouldDirty: true })}
+                        className={clsx(
+                          "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                          values.fetchExternalResults ? "bg-indigo-600" : "bg-gray-200"
+                        )}
+                      >
+                        <span
+                          className={clsx(
+                            "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
+                            values.fetchExternalResults ? "translate-x-4" : "translate-x-0"
+                          )}
+                        />
+                      </button>
+                    </div>
+
+                    {values.fetchExternalResults && (
+                      <DynamicInput
+                        watch={watch}
+                        label="External Poll API URL"
+                        name="externalApiUrl"
+                        register={register}
+                        errors={errors}
+                        element={element}
+                        placeholder="https://api.example.com/poll/results"
+                      />
+                    )}
+                  </div>
+                )}
+
+                {/* Document Signing Links */}
+                {element.type.toLowerCase() === "document" && (
+                  <div className="p-4 bg-gray-50/80 rounded-2xl border border-gray-200/80 space-y-3">
+                    <DynamicInput
+                      watch={watch}
+                      label="Document Options URL"
+                      name="url"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                    />
+                    <DynamicInput
+                      watch={watch}
+                      label="Document Validation URL"
+                      name="validationUrl"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                    />
+                    <DynamicInput
+                      watch={watch}
+                      label="Signature Page URL"
+                      name="signatureLink"
+                      register={register}
+                      errors={errors}
+                      element={element}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-          {/* Actions */}
-          <div className="sticky flex w-full gap-3 px-6 pt-8 pb-10 border-t">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2.5 bg-white border border-[#D0D5DD] rounded-lg shadow-xs font-semibold text-[#344054] font-onest editor_option__cancel"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={!isValid || isSubmitting}
-              style={{ background: config?.buttonColor || "#333" }}
-              className={`flex-1 px-4 py-2.5 ${
-                !isValid || isSubmitting ? "bg-[#F2F4F7]" : "bg-[#2563EB]"
-              } ${
-                !isValid || isSubmitting ? "text-[#98A2B3]" : "text-white"
-              } rounded-lg shadow-xs font-semibold font-onest disabled:opacity-80 editor_option__save`}
-            >
-              {isSubmitting ? "Saving..." : "Save"}
-            </button>
+
+          {/* Sticky Actions Footer */}
+          <div className="sticky bottom-0 bg-white/95 backdrop-blur-md px-6 py-4 border-t border-gray-200/80 flex items-center justify-between gap-3 shrink-0">
+            <span className="text-[11px] text-gray-400 font-medium hidden sm:inline">
+              Press <kbd className="px-1.5 py-0.5 text-[10px] bg-gray-100 border border-gray-200 rounded font-mono text-gray-600">Esc</kbd> to close
+            </span>
+            <div className="flex items-center gap-2.5 ml-auto w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 shadow-xs transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={!isValid || isSubmitting}
+                style={{ background: config?.buttonColor || "#4f46e5" }}
+                className="flex-1 sm:flex-initial px-5 py-2 rounded-xl text-xs font-semibold text-white shadow-sm hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                {isSubmitting ? (
+                  <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <AppIcon icon="solar:check-circle-bold" iconClass="text-sm" />
+                )}
+                <span>Save Changes</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>

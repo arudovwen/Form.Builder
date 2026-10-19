@@ -31,10 +31,10 @@ const SectionItem = ({
   setIsDragging,
   isDragging,
   onReorderSection,
+  addElement,
 }: any) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const prevLength = useRef(section?.formData?.length);
-
   const wasDragging = useRef(isDragging);
 
   useEffect(() => {
@@ -59,6 +59,8 @@ const SectionItem = ({
     wasDragging.current = isDragging;
   }, [isDragging]);
 
+  const isSelected = selectedSection === section.id;
+
   return (
     <div
       ref={scrollRef}
@@ -76,17 +78,14 @@ const SectionItem = ({
           if (onReorderSection) onReorderSection(draggedId, section.id);
         }
       }}
-      className={`bg-white group cursor-pointer rounded-lg  shadow-[rgba(149,157,165,0.2)_0px_2px_2px] transition-colors duration-200`}
+      className={`bg-white group rounded-2xl border transition-all duration-200 shadow-xs mb-4 overflow-hidden ${
+        isSelected
+          ? "border-indigo-300 ring-2 ring-indigo-500/10 shadow-sm"
+          : "border-gray-200/90 hover:border-gray-300"
+      }`}
     >
-      <div
-        className={` border border-gray-200 rounded-lg  px-4 transition-colors duration-200
-          ${
-            selectedSection === section.id
-              ? " border-blue-200 bg-gray-100"
-              : "bg-white"
-          } ${activeSections.includes(index) ? "min-h-[300px] pb-6 " : ""}`}
-      >
-        <div className="flex items-center justify-between">
+      <div className="p-5 sm:p-6">
+        <div className="flex items-center justify-between pb-2 border-b border-gray-100">
           <div
             draggable
             onDragStart={(e) => {
@@ -96,61 +95,64 @@ const SectionItem = ({
             }}
             onDragEnd={() => setIsDragging(false)}
             onClick={() => setSelectedSection(section.id)}
-            className="flex-1 h-full py-4 cursor-grab active:cursor-grabbing flex items-center gap-2"
+            className="flex-1 cursor-grab active:cursor-grabbing flex items-center gap-2 select-none"
             title="Drag to reorder section"
           >
             <AppIcon
               icon="material-symbols:drag-indicator"
               iconClass="text-gray-400 text-lg"
             />
-            <h2 className="font-medium">{section.title || "Section title"}</h2>
+            <h2 className="font-semibold text-gray-900 text-sm tracking-tight">
+              {section.title || `Section ${index + 1}`}
+            </h2>
           </div>
 
-          <div className="flex items-center gap-x-2">
+          <div className="flex items-center gap-x-1.5">
             <button
               type="button"
-              className="p-1 text-xs border rounded-lg hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
-              title="Copy section to clipboard"
+              className="p-1.5 text-xs rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+              title="Copy section"
               onClick={(e) => {
                 e.stopPropagation();
                 copySection?.(section.id);
               }}
             >
-              <AppIcon icon="fluent:copy-20-regular" />
+              <AppIcon icon="fluent:copy-20-regular" iconClass="text-sm" />
             </button>
             <button
               type="button"
-              className="p-1 text-xs border rounded-lg hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
+              className="p-1.5 text-xs rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
               title="Duplicate section"
               onClick={(e) => {
                 e.stopPropagation();
                 duplicateSection?.(section.id);
               }}
             >
-              <AppIcon icon="lucide:copy-plus" />
+              <AppIcon icon="lucide:copy-plus" iconClass="text-sm" />
             </button>
             <button
               type="button"
-              className="p-1 text-xs border rounded-lg hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
-              title="Edit section"
+              className="p-1.5 text-xs rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+              title="Edit section details"
               onClick={() => handleSectionEdit(section)}
             >
-              <AppIcon icon="fluent:edit-28-regular" />
+              <AppIcon icon="fluent:edit-28-regular" iconClass="text-sm" />
             </button>
             {formDataLength > 1 && (
               <button
                 type="button"
-                className="p-1 text-xs border rounded-lg hover:bg-red-50 text-gray-600 hover:text-red-600 transition-colors"
+                className="p-1.5 text-xs rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
                 title="Delete section"
                 onClick={() => removeSection(section.id)}
               >
-                <AppIcon icon="lets-icons:trash-duotone-line" />
+                <AppIcon icon="lets-icons:trash-duotone-line" iconClass="text-sm" />
               </button>
             )}
             <button
               type="button"
-              className="p-1 text-xs rounded-lg"
+              className="p-1.5 text-xs rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
               onClick={() => toggleSection(index)}
+              title={activeSections.includes(index) ? "Collapse section" : "Expand section"}
             >
               <AppIcon
                 icon={
@@ -158,14 +160,18 @@ const SectionItem = ({
                     ? "fa6-solid:chevron-up"
                     : "fa6-solid:chevron-down"
                 }
-                iconClass="text-base"
+                iconClass="text-xs"
               />
             </button>
           </div>
         </div>
+
         {section?.description && activeSections.includes(index) && (
-          <p className="mt-2 text-sm text-gray-600">{section?.description}</p>
+          <p className="mt-2 text-xs text-gray-500 leading-relaxed">
+            {section?.description}
+          </p>
         )}
+
         {activeSections.includes(index) && (
           <div
             className="h-full mt-4 transition-all duration-200"
@@ -174,14 +180,38 @@ const SectionItem = ({
             onDragEnd={() => setIsDragging(false)}
             onClick={() => setSelectedSection(section.id)}
           >
-            <hr className="group-last:hidden" />
-            <div className="h-full mt-4 gap-y-6 ">
-              {
-                <ElementCanvas
-                  elementData={section?.formData}
-                  sectionId={section?.id}
-                />
-              }
+            <div className="h-full gap-y-4 flex flex-col">
+              <ElementCanvas
+                elementData={section?.formData}
+                sectionId={section?.id}
+              />
+
+              {/* Quick Add Question Dashed Button */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedSection(section.id);
+                  const newQuestion = {
+                    type: "textField",
+                    label: "Short Text",
+                    icon: "ri:text",
+                    inputLabel: "New Question",
+                    inputType: "text",
+                    required: false,
+                    placeholder: "Type your answer here...",
+                    id: uuidv4(),
+                    sectionId: section.id,
+                  };
+                  addElement?.(newQuestion, section.id);
+                }}
+                className="w-full mt-2 py-3 border-2 border-dashed border-gray-200 hover:border-indigo-400 hover:bg-indigo-50/20 text-gray-500 hover:text-indigo-600 rounded-xl flex items-center justify-center gap-2 text-xs font-semibold transition-all cursor-pointer group"
+              >
+                <div className="w-5 h-5 rounded-full bg-gray-100 group-hover:bg-indigo-100 group-hover:text-indigo-600 flex items-center justify-center transition-colors">
+                  <AppIcon icon="lucide:plus" iconClass="text-xs" />
+                </div>
+                <span>Add Question</span>
+              </button>
             </div>
           </div>
         )}
@@ -202,10 +232,9 @@ const FormBuilder = ({
   const [isTemplateModalOpen, setTemplateModalOpen] = useState(false);
   const [hasSectionInClipboard, setHasSectionInClipboard] = useState(false);
   const tempSection = useRef(null);
-  const containerRef = useRef<HTMLDivElement>(null); // Ref for the container
+  const containerRef = useRef<HTMLDivElement>(null);
   const {
     removeSection,
-    // addElement,
     addSection,
     formData,
     setIsDragging,
@@ -219,11 +248,14 @@ const FormBuilder = ({
     copySection,
     pasteSection,
     duplicateSection,
+    deviceView = "desktop",
+    formTitle,
+    formDescription,
+    addElement,
   }: any = useContext(EditorContext);
 
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
-      // Prevent pasting if the user is typing in an input/textarea
       const target = e.target as HTMLElement;
       if (
         target.tagName === "INPUT" ||
@@ -237,7 +269,6 @@ const FormBuilder = ({
       if (clipboardText.includes("FORM_BUILDER_SECTION_CLIPBOARD")) {
         pasteSection(undefined, clipboardText);
       } else if (selectedSection) {
-        // Pass clipboard text directly to bypass async permission prompts
         pasteElement(selectedSection, undefined, clipboardText);
       }
     };
@@ -289,11 +320,12 @@ const FormBuilder = ({
   const prevFormDataLength = useRef(formData?.length || 0);
 
   useEffect(() => {
-    setSelectedSection(formData[0]?.id || null);
-  }, []);
+    if (formData && formData.length > 0 && !selectedSection) {
+      setSelectedSection(formData[0]?.id || null);
+    }
+  }, [formData, selectedSection, setSelectedSection]);
 
   useEffect(() => {
-    // Scroll to bottom when a new section is added
     if (formData?.length > prevFormDataLength.current) {
       if (containerRef.current) {
         requestAnimationFrame(() => {
@@ -366,8 +398,6 @@ const FormBuilder = ({
           return newQ;
         });
 
-        // Let's make sure the grid children have the correct new gridId if they are part of a grid.
-        // It's a bit complex, but for simple templates, this is a good start.
         if (newQuestions) {
           const idMap = new Map();
           sec.formData.forEach((q: any, i: number) => {
@@ -403,9 +433,18 @@ const FormBuilder = ({
     }
   };
 
-  const config = getItem("config");
+  const config = getItem("config") || {};
+
+  // Responsive Artboard container width
+  const artboardMaxWidthClass =
+    deviceView === "mobile"
+      ? "max-w-[400px]"
+      : deviceView === "tablet"
+        ? "max-w-[620px]"
+        : "max-w-[780px]";
+
   return (
-    <div className="relative flex flex-col h-full pb-5 mx-auto gap-x-4 ">
+    <div className="relative flex flex-col h-full pb-10 w-full overflow-y-auto no-scrollbar">
       {isOpen && (
         <SectionEditorModal
           isOpen={isOpen}
@@ -413,11 +452,30 @@ const FormBuilder = ({
           section={tempSection.current}
         />
       )}
+
+      {/* Artboard Container with smooth width transition */}
       <div
         id="section-container"
-        ref={containerRef} // Attach the ref to the container
-        className="relative flex flex-col flex-1 w-full gap-y-3 container overflow-y-auto"
+        ref={containerRef}
+        className={`mx-auto w-full transition-all duration-300 ${artboardMaxWidthClass}`}
       >
+        {/* Top Form Header Sheet */}
+        <div className="bg-white rounded-2xl border border-gray-200/90 shadow-sm p-6 sm:p-8 mb-5 relative overflow-hidden select-none">
+          <div className="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 absolute top-0 left-0" />
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight leading-snug">
+                {formTitle || "Customer Onboarding & Product Feedback"}
+              </h1>
+              <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+                {formDescription ||
+                  "Help us improve our service by providing feedback on your recent interaction."}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Sections List */}
         {formData
           ?.filter((section: any) => !section?.isFieldDeleted && !section?.isDeleted)
           ?.map(
@@ -451,30 +509,36 @@ const FormBuilder = ({
                 setIsDragging={setIsDragging}
                 isDragging={isDragging}
                 onReorderSection={handleReorderSection}
+                addElement={addElement}
               />
             ),
           )}
-        <div className="flex justify-center gap-x-4 flex-wrap gap-y-2">
+
+        {/* Canvas Bottom Action Bar */}
+        <div className="flex justify-center items-center gap-3 flex-wrap mt-4">
           <button
             type="button"
             onClick={() => addSection()}
-            style={{ color: config?.buttonColor || "#333" }}
-            className="text-sm font-medium hover:underline"
+            style={{ color: config?.buttonColor || "#4f46e5" }}
+            className="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-gray-200 hover:border-indigo-400 hover:bg-indigo-50/20 shadow-xs flex items-center gap-1.5 transition-all"
           >
-            + Add section
+            <AppIcon icon="lucide:plus" iconClass="text-xs" />
+            Add Section
           </button>
+
           {hasSectionInClipboard && (
             <button
               type="button"
               onClick={() => pasteSection()}
-              style={{ color: config?.buttonColor || "#333" }}
-              className="text-sm font-medium hover:underline flex items-center gap-1"
+              style={{ color: config?.buttonColor || "#4f46e5" }}
+              className="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-gray-200 hover:border-indigo-400 hover:bg-indigo-50/20 shadow-xs flex items-center gap-1.5 transition-all"
               title="Paste section from clipboard"
             >
-              <AppIcon icon="lucide:clipboard-paste" iconClass="text-sm" />
-              Paste section
+              <AppIcon icon="lucide:clipboard-paste" iconClass="text-xs" />
+              Paste Section
             </button>
           )}
+
           {onAddTemplate || allTemplates?.length ? (
             <button
               type="button"
@@ -485,14 +549,15 @@ const FormBuilder = ({
                   onAddTemplate();
                 }
               }}
-              style={{ color: config?.buttonColor || "#333" }}
-              className="text-sm font-medium"
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 shadow-xs flex items-center gap-1.5 transition-all"
             >
-              + Add existing template
+              <AppIcon icon="solar:document-add-linear" iconClass="text-xs" />
+              Templates
             </button>
           ) : null}
         </div>
       </div>
+
       {isTemplateModalOpen && (
         <TemplateSelectorModal
           isOpen={isTemplateModalOpen}

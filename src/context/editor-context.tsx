@@ -11,12 +11,30 @@ import { toast } from "sonner";
 export type DeleteMode = "remove" | "isFieldDeleted" | "isDeleted" | "soft" | "hard";
 export type BuilderMode = "create" | "edit";
 
+export interface FormSettings {
+  title?: string;
+  description?: string;
+  renderType?: "single" | "multi" | "conversational";
+  submitText?: string;
+  buttonColor?: string;
+  showProgressBar?: boolean;
+  allowMultipleSubmissions?: boolean;
+  sendHiddenSectionsAsEmpty?: boolean;
+  [key: string]: any;
+}
+
 interface EditorProviderProps {
   children: React.ReactNode;
-  onChange?: (data: any) => void;
+  onChange?: (data: any, settings?: FormSettings) => void;
   onLogAction?: (action: string, value: any) => void;
   deleteMode?: DeleteMode;
   mode?: BuilderMode;
+  initialTitle?: string;
+  initialDescription?: string;
+  initialFormSettings?: FormSettings;
+  onTitleChange?: (title: string) => void;
+  onDescriptionChange?: (description: string) => void;
+  onFormSettingsChange?: (settings: FormSettings) => void;
 }
 
 const EditorContext = createContext<
@@ -55,25 +73,37 @@ const EditorContext = createContext<
       duplicateSection: (sectionId: string) => void;
       apiActivityCount: number;
       setApiActivityCount: React.Dispatch<React.SetStateAction<number>>;
-      /**
-       * Universal element move:
-       *  - canvas  → canvas  (reorder by index)
-       *  - grid    → canvas  (eject; targetIndex = insertion point)
-       *  - canvas  → grid    (inject into col; targetGridId + targetCol required)
-       *  - grid    → grid    (transfer between cells)
-       */
       moveElement: (opts: {
         draggedId: string;
         sectionId: string;
-        targetIndex?: number; // canvas drop position
-        targetId?: string; // canvas target element id (for reorder)
-        targetGridId?: string; // grid we're dropping INTO
-        targetCol?: number; // column inside that grid (1-based)
+        targetIndex?: number;
+        targetId?: string;
+        targetGridId?: string;
+        targetCol?: number;
       }) => void;
+      selectedElementId?: string | null;
+      setSelectedElementId?: React.Dispatch<React.SetStateAction<string | null>>;
+      deviceView?: "desktop" | "tablet" | "mobile";
+      setDeviceView?: React.Dispatch<React.SetStateAction<"desktop" | "tablet" | "mobile">>;
+      formSettings: FormSettings;
+      setFormSettings: React.Dispatch<React.SetStateAction<FormSettings>>;
+      updateFormSettings: (settings: Partial<FormSettings>) => void;
+      formTitle: string;
+      setFormTitle: (title: string) => void;
+      formDescription: string;
+      setFormDescription: (desc: string) => void;
+      selectedSection?: string | null;
+      setSelectedSection?: React.Dispatch<React.SetStateAction<string | null>>;
+      activeSections?: Array<string | number>;
+      setActiveSections?: React.Dispatch<React.SetStateAction<Array<string | number>>>;
+      duplicateElement?: (elementId: string, sectionId: string) => void;
       undo: () => void;
       redo: () => void;
       canUndo: boolean;
       canRedo: boolean;
+      modalElement?: any;
+      setModalElement?: React.Dispatch<React.SetStateAction<any>>;
+      openAdvancedModal?: (element: any) => void;
     }
   | undefined
 >(undefined);
@@ -97,6 +127,12 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   onLogAction,
   deleteMode = "remove",
   mode = "edit",
+  initialTitle,
+  initialDescription,
+  initialFormSettings,
+  onTitleChange,
+  onDescriptionChange,
+  onFormSettingsChange,
 }) => {
   const [showPreview, setShowPreview] = useState(false);
   const [answerData, setAnswerData] = useState({});
@@ -119,11 +155,87 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
     }
   });
 
+  const [formSettings, setFormSettings] = useState<FormSettings>(() => ({
+    title:
+      initialTitle ||
+      initialFormSettings?.title ||
+      "Customer Onboarding & Product Feedback",
+    description:
+      initialDescription ||
+      initialFormSettings?.description ||
+      "Help us improve our service by providing feedback on your recent interaction.",
+    renderType: initialFormSettings?.renderType || "multi",
+    submitText: initialFormSettings?.submitText || "Submit",
+    buttonColor: initialFormSettings?.buttonColor || "#4f46e5",
+    showProgressBar: initialFormSettings?.showProgressBar ?? true,
+    allowMultipleSubmissions: initialFormSettings?.allowMultipleSubmissions ?? true,
+    sendHiddenSectionsAsEmpty: initialFormSettings?.sendHiddenSectionsAsEmpty ?? false,
+    ...(initialFormSettings || {}),
+  }));
+
+  // Sync when initialTitle / initialDescription / initialFormSettings props change from parent
+  useEffect(() => {
+    if (initialTitle !== undefined || initialDescription !== undefined || initialFormSettings !== undefined) {
+      setFormSettings((prev) => {
+        const next: FormSettings = {
+          ...prev,
+          ...(initialFormSettings || {}),
+          ...(initialTitle !== undefined ? { title: initialTitle } : {}),
+          ...(initialDescription !== undefined ? { description: initialDescription } : {}),
+        };
+        return JSON.stringify(prev) === JSON.stringify(next) ? prev : next;
+      });
+    }
+  }, [initialTitle, initialDescription, initialFormSettings]);
+
+  const [modalElement, setModalElement] = useState<any>(null);
+  const openAdvancedModal = React.useCallback((el: any) => {
+    setModalElement(el);
+  }, []);
+
+  const updateFormSettings = React.useCallback(
+    (newSettings: Partial<FormSettings>) => {
+      setFormSettings((prev) => {
+        const updated: FormSettings = { ...prev, ...newSettings };
+        if (newSettings.title !== undefined && newSettings.title !== prev.title) {
+          onTitleChange?.(newSettings.title);
+        }
+        if (
+          newSettings.description !== undefined &&
+          newSettings.description !== prev.description
+        ) {
+          onDescriptionChange?.(newSettings.description);
+        }
+        onFormSettingsChange?.(updated);
+        onLogAction?.("UPDATE_FORM_SETTINGS", updated);
+        return updated;
+      });
+    },
+    [onTitleChange, onDescriptionChange, onFormSettingsChange, onLogAction],
+  );
+
+  const setFormTitle = React.useCallback(
+    (title: string) => {
+      updateFormSettings({ title });
+    },
+    [updateFormSettings],
+  );
+
+  const setFormDescription = React.useCallback(
+    (description: string) => {
+      updateFormSettings({ description });
+    },
+    [updateFormSettings],
+  );
+
+  const formTitle = formSettings.title || "";
+  const formDescription = formSettings.description || "";
+
   useEffect(() => {
     if (onChange) {
-      onChange(formDataState);
+      onChange(formDataState, formSettings);
     }
-  }, [formDataState, onChange]);
+  }, [formDataState, formSettings, onChange]);
 
   useEffect(() => {
     try {
@@ -205,6 +317,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   const canRedo = future.length > 0;
   const [isDragging, setIsDragging] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  const [deviceView, setDeviceView] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [activeSections, setActiveSections] = useState<Array<string | number>>([
     0,
   ]);
@@ -315,9 +429,12 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
           };
         }),
       );
+      if (selectedElementId === elementId) {
+        setSelectedElementId(null);
+      }
       onLogAction?.("REMOVE_ELEMENT", { sectionId, elementId });
     },
-    [formData, deleteMode, setFormData, onLogAction],
+    [formData, deleteMode, setFormData, onLogAction, selectedElementId],
   );
   const duplicateElement = React.useCallback(
     (elementId: string, sectionId: string) => {
@@ -835,6 +952,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
             : section,
         ),
       );
+      setSelectedElementId(element.id);
       onLogAction?.("ADD_ELEMENT", { sectionId, element });
     },
     [setFormData, onLogAction],
@@ -855,6 +973,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
             : section,
         ),
       );
+      setSelectedElementId(element.id);
       onLogAction?.("ADD_ELEMENT_IN_POSITION", { sectionId, element, index });
     },
     [setFormData, onLogAction],
@@ -1215,6 +1334,17 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       setIsDragging,
       selectedSection,
       setSelectedSection,
+      selectedElementId,
+      setSelectedElementId,
+      deviceView,
+      setDeviceView,
+      formSettings,
+      setFormSettings,
+      updateFormSettings,
+      formTitle,
+      setFormTitle,
+      formDescription,
+      setFormDescription,
       activeSections,
       setActiveSections,
       updateGridElement,
@@ -1237,6 +1367,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       copySection,
       pasteSection,
       duplicateSection,
+      modalElement,
+      setModalElement,
+      openAdvancedModal,
     }),
     [
       deleteMode,
@@ -1254,6 +1387,14 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       updateSection,
       isDragging,
       selectedSection,
+      selectedElementId,
+      deviceView,
+      formSettings,
+      updateFormSettings,
+      formTitle,
+      setFormTitle,
+      formDescription,
+      setFormDescription,
       activeSections,
       updateGridElement,
       answerData,
@@ -1271,6 +1412,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       copySection,
       pasteSection,
       duplicateSection,
+      modalElement,
+      openAdvancedModal,
     ],
   );
 

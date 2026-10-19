@@ -279,6 +279,8 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     }
   }, [answerData, reset]);
 
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
   // ✅ Submit handler
   const onSubmit = useCallback(
     (data: Record<string, any>) => {
@@ -332,9 +334,10 @@ const FormRenderer: React.FC<FormRendererProps> = ({
       if (Object.keys(errors).length > 0) {
         return;
       }
+      setIsSubmitted(true);
       onSubmitData?.(updatedData);
     },
-    [errors, form_data, getValues, onSubmitData, sendHiddenSectionsAsEmpty],
+    [errors, form_data, getValues, onSubmitData, sendHiddenSectionsAsEmpty, preview],
   );
 
   // ✅ Navigation handlers
@@ -421,14 +424,66 @@ const FormRenderer: React.FC<FormRendererProps> = ({
     ],
   );
 
+  if (isSubmitted && !preview) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[480px] w-full p-8 text-center animate-in fade-in zoom-in-95 duration-500 bg-white rounded-3xl border border-gray-100 shadow-xl shadow-slate-100">
+        <div className="w-16 h-16 rounded-3xl bg-emerald-50 border-2 border-emerald-100 flex items-center justify-center text-emerald-600 mb-6 shadow-sm shadow-emerald-100">
+          <AppIcon icon="solar:check-circle-bold-duotone" iconClass="text-3xl" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          Submission Successful!
+        </h2>
+        <p className="text-sm text-gray-500 max-w-md mb-8 leading-relaxed">
+          Thank you for taking the time to complete this form. Your responses have been securely recorded.
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            setIsSubmitted(false);
+            reset({});
+            setCurrent(0);
+            setCurrentConvIndex(0);
+          }}
+          className="px-6 py-2.5 rounded-xl text-xs font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 shadow-xs transition-all flex items-center gap-2"
+        >
+          <AppIcon icon="solar:restart-linear" iconClass="text-sm" />
+          Submit another response
+        </button>
+      </div>
+    );
+  }
+
   return (
     <FormProvider {...methods}>
       <Toaster position="top-right" richColors closeButton />
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="container h-full mx-auto"
+        className="w-full h-full mx-auto"
       >
-        <div className="relative flex flex-col w-full min-w-0 py-4 gap-y-12">
+        <div className="relative flex flex-col w-full min-w-0 py-2">
+          {/* Multi-step progress bar */}
+          {renderType === "multi" && totalSections > 1 && (
+            <div className="mb-6 px-1">
+              <div className="flex items-center justify-between text-xs font-semibold text-gray-500 mb-2">
+                <span className="uppercase tracking-wider text-[11px] text-indigo-600 font-bold">
+                  Step {current + 1} of {totalSections}
+                </span>
+                <span>
+                  {Math.round(((current + 1) / totalSections) * 100)}% Complete
+                </span>
+              </div>
+              <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500 ease-out"
+                  style={{
+                    width: `${((current + 1) / totalSections) * 100}%`,
+                    background: config?.buttonColor || "#4f46e5",
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
           <div
             className="multi_section__box min-w-0"
             key={
@@ -440,14 +495,14 @@ const FormRenderer: React.FC<FormRendererProps> = ({
             {renderType === "multi" &&
               (filteredFormData?.[current]?.title ||
                 filteredFormData?.[current]?.description) && (
-                <div className="py-4 mb-4 border-b border-gray-100 multi_section__title">
+                <div className="py-4 mb-6 border-b border-gray-100 multi_section__title">
                   {filteredFormData[current]?.title && (
-                    <h2 className="text-lg font-semibold mb-[6px]">
+                    <h2 className="text-xl font-bold text-gray-900 mb-1">
                       {filteredFormData[current]?.title}
                     </h2>
                   )}
                   {filteredFormData[current]?.description && (
-                    <p className="text-sm">
+                    <p className="text-xs text-gray-500 leading-relaxed">
                       {filteredFormData[current]?.description}
                     </p>
                   )}
@@ -470,6 +525,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({
                 isLast={currentConvIndex === visibleQuestions.length - 1}
                 isReadOnly={isReadOnly}
                 submitText={submitText}
+                preview={preview}
               />
             ) : (
               <SinglePage

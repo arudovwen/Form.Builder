@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
-import { DeleteMode } from "@/context/editor-context";
+import { DeleteMode, FormSettings } from "@/context/editor-context";
 export interface RenderProps {
-    onSubmit?: (e: any) => void;
+    onSubmit?: (data: any, settings?: FormSettings) => void;
     answerData?: any;
     isReadOnly?: boolean;
     form_data?: any;
@@ -25,5 +25,8 @@ export interface RenderProps {
     preview?: boolean;
     deleteMode?: DeleteMode;
     submitText?: string;
+    title?: string;
+    description?: string;
+    formSettings?: FormSettings;
 }
-export default function Viewer({ answerData, form_data, ignoreValidation, onSubmit, isReadOnly, loading, config, renderType, children, hideFooter, onGetValues, uploadUrl, pollResults, showResults, hideInputsOnResults, sendHiddenSectionsAsEmpty, preview, deleteMode, submitText, }: RenderProps): import("react/jsx-runtime").JSX.Element;
+export default function Viewer({ answerData, form_data, ignoreValidation, onSubmit, isReadOnly, loading, config, renderType, children, hideFooter, onGetValues, uploadUrl, pollResults, showResults, hideInputsOnResults, sendHiddenSectionsAsEmpty, preview, deleteMode, submitText, title, description, formSettings: externalFormSettings, }: RenderProps): import("react/jsx-runtime").JSX.Element;

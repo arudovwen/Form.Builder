@@ -5,6 +5,7 @@ import { RenderElement } from "./elements-render";
 import { getElementOptions } from "./utils";
 import EditorContext from "@/context/editor-context";
 import { evaluateVisibility } from "./validation";
+import AppIcon from "../ui/AppIcon";
 
 export default function MultiPage({ form_data, options, current }: any) {
   const { answerData } = (useContext(EditorContext) as any) || {};
@@ -13,10 +14,12 @@ export default function MultiPage({ form_data, options, current }: any) {
     <div className="multi_section__content min-w-0">
       {form_data?.map((section: any, index: number) => {
         const isCurrent = index === current;
+        if (!isCurrent) return null;
+
         return (
           <div
             key={section.id || index}
-            className={clsx("grid gap-y-3", isCurrent ? "block" : "hidden")}
+            className="grid gap-y-6 animate-in fade-in duration-300"
           >
             {section?.formData?.map((element: any) => {
               if (element.type === "grid") {
@@ -35,7 +38,7 @@ export default function MultiPage({ form_data, options, current }: any) {
                 if (!visibleChildren || visibleChildren.length === 0) return null;
 
                 return (
-                  <div key={element.id} className="min-w-0 w-full">
+                  <div key={element.id} className="min-w-0 w-full bg-white rounded-2xl border border-gray-200/80 p-5 shadow-xs">
                     <GridInput
                       element={element}
                       customClass="p-0 min-h-[60px] border-none"
@@ -51,7 +54,8 @@ export default function MultiPage({ form_data, options, current }: any) {
                             validationData={getElementOptions(child, options)}
                           />
                           {options?.errors?.[child.id]?.message && (
-                            <div className="mt-1 text-xs text-red-600 min-h-[1rem]">
+                            <div className="mt-1 text-xs text-rose-600 font-medium min-h-[1rem] flex items-center gap-1">
+                              <AppIcon icon="solar:danger-triangle-linear" iconClass="text-xs" />
                               {options.errors[child.id].message}
                             </div>
                           )}
@@ -79,7 +83,7 @@ export default function MultiPage({ form_data, options, current }: any) {
                   <div
                     key={element.id}
                     className={clsx(
-                      "group relative grid gap-y-[6px] min-w-0",
+                      "group relative grid gap-y-2 min-w-0 bg-white rounded-2xl border border-gray-200/80 p-5 shadow-xs hover:border-gray-300 transition-colors",
                       element.elementClass
                     )}
                   >
@@ -88,7 +92,8 @@ export default function MultiPage({ form_data, options, current }: any) {
                       validationData={getElementOptions(element, options)}
                     />
                     {options?.errors?.[element.id]?.message && (
-                      <div className="mt-1 text-xs text-red-600 min-h-[1rem]">
+                      <div className="mt-1 text-xs text-rose-600 font-medium min-h-[1rem] flex items-center gap-1">
+                        <AppIcon icon="solar:danger-triangle-linear" iconClass="text-xs" />
                         {options.errors[element.id].message}
                       </div>
                     )}
